@@ -104,7 +104,7 @@
      <image filename="sbackground.bmp" x="0" y="0"/>
      <table x="220" y="20" w="360" h="550" contents="FILESINDIRECTORY"/>
      <button x="320" y="562" normal="addselected.bmp" pressed="addselected_p.bmp" action="ADDSELECTED"/>
-     <button x="420" y="562" normal="addselected.bmp" pressed="addselected_p.bmp" action="ADDALL"/>
+     <button x="420" y="562" normal="addall.bmp" pressed="addall.bmp" action="ADDALL"/>
 
      <table x="600" y="250" w="300" h="300" contents="FILESINSUBGROUP"/>
      <button x="680" y="553" normal="removeselected.bmp" pressed="removeselected_p.bmp" action="DELETESELECTED"/>
