@@ -16,7 +16,7 @@ playlist.o: playlist.c ../config.h /usr/include/stdio.h \
  /usr/include/string.h /usr/include/bits/string.h \
  /usr/include/bits/string2.h /usr/include/stdlib.h \
  /usr/include/malloc.h player.h input_plugin.h songdb.h configfile.h \
- llist.h playlist.h debug.h
+ llist.h playlist.h osa.h input.h debug.h
 playlist.c :
 ../config.h :
 /usr/include/stdio.h :
@@ -57,4 +57,6 @@ songdb.h :
 configfile.h :
 llist.h :
 playlist.h :
+osa.h :
+input.h :
 debug.h :

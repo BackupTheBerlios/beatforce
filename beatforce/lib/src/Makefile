@@ -98,7 +98,7 @@ LIBRARIES =  $(noinst_LIBRARIES)
 DEFS = -DHAVE_CONFIG_H -I. -I$(srcdir) -I../..
 CPPFLAGS = 
 LDFLAGS = 
-LIBS = -lfftw3 -lSDL_image 
+LIBS = -lfftw3 -lSDL_image  -lmad -L/usr/local/lib
 libSDLTk_a_DEPENDENCIES = 
 libSDLTk_a_OBJECTS =  SDL_Stack.$(OBJEXT) SDL_Widget.$(OBJEXT) \
 SDL_WidTool.$(OBJEXT) SDL_Table.$(OBJEXT) SDL_Tab.$(OBJEXT) \
@@ -107,7 +107,7 @@ SDL_Edit.$(OBJEXT) SDL_Panel.$(OBJEXT) SDL_VolumeBar.$(OBJEXT) \
 SDL_ProgressBar.$(OBJEXT) SDL_Font.$(OBJEXT) SDL_FontFNT.$(OBJEXT) \
 SDL_FontBDF.$(OBJEXT)
 AR = ar
-CFLAGS = -g -O2
+CFLAGS = -g -O2 -I/usr/local/include -DHAVE_MP3
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)

@@ -7,9 +7,6 @@
 /* Define if you have the <dlfcn.h> header file.  */
 #define HAVE_DLFCN_H 1
 
-/* Define if you have the <sys/asoundlib.h> header file.  */
-/* #undef HAVE_SYS_ASOUNDLIB_H */
-
 /* Define if you have the SDL_image library (-lSDL_image).  */
 #define HAVE_LIBSDL_IMAGE 1
 

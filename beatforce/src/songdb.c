@@ -69,7 +69,7 @@ int parsesubgroup(xmlDocPtr doc, xmlNodePtr cur)
     xmlChar *key;
     long time;
     struct SongDBEntry *e;
-    SongDBSubgroup *sg;
+
 
     key = xmlGetProp(cur, "name");
     if(key)
@@ -86,10 +86,8 @@ int parsesubgroup(xmlDocPtr doc, xmlNodePtr cur)
             if(key)
             {
                 time= atol(key);
-                printf("Got time %ld\n",time);
                 SONGDB_SetActiveSubgroup(subcount);
                 e=SONGDB_GetEntryID(SONGDB_GetNoOfEntries()-1);
-                printf("file %s\n",e->filename);
                 if(e)
                     e->time=time;
             }
@@ -582,7 +580,6 @@ void SONGDB_FindEntry(char *search_string)
         int match = 0; 
         e = Playlist;
       
-        printf("filename %s\n",e->filename);
         if (nw == 0   ||        /* No words yet */
             (nw == 1 && words[0][0] == '\0') || /* empty word */
             (nw == 1 && strlen(words[0]) == 1 && /* only one character */

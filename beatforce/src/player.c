@@ -346,7 +346,6 @@ void player_set_song (int player_nr, int no)
     ent =  PLAYLIST_GetNoOfEntries(player_nr);
     if (ent == 0)
     {
-        printf ("playlist has no entries.\n");
         p->songdb_id     = SONGDB_ID_UNKNOWN;
         p->playlist_id     = 0;
         player_load (player_nr);
@@ -486,7 +485,7 @@ int PLAYER_GetTitle(int player_nr,char *label)
     struct SongDBEntry *e;
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
 
-    e=SONGDB_GetEntryID(p->songdb_id);
+    e=p->e;
     
     if(e && e->title)
     {
@@ -501,8 +500,7 @@ int PLAYER_SetTitle(int player_nr,char *title)
     struct SongDBEntry *e;
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
 
-    e = SONGDB_GetEntryID(p->songdb_id);
-    
+    e=p->e;
     if(e)
     {
         if(e->title)
@@ -520,7 +518,7 @@ int PLAYER_GetFilename(int player_nr,char *filename)
     struct SongDBEntry *e;
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
 
-    e = SONGDB_GetEntryID(p->songdb_id);
+    e=p->e;
     
     if(e && e->filename)
     {
@@ -535,8 +533,7 @@ long PLAYER_GetTimeTotal(int player_nr)
     struct SongDBEntry *e;
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
 
-    e=SONGDB_GetEntryID(p->songdb_id);
-
+    e=p->e;
     if(e)
         return e->time;
     else
@@ -559,7 +556,7 @@ long PLAYER_GetTimeLeft(int player_nr)
     struct SongDBEntry *e;
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
 
-    e=SONGDB_GetEntryID(p->songdb_id);
+    e=p->e;
     if(e)
     {
         t = e->time - INPUT_GetTime(p->current_plugin);
@@ -579,7 +576,7 @@ int PLAYER_GetBitrate(int player_nr)
     struct SongDBEntry *e;
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
 
-    e=SONGDB_GetEntryID(p->songdb_id);    
+    e=p->e;
 
     if(e && e->AddInfo)
     {
@@ -595,7 +592,7 @@ int PLAYER_GetSamplerate(int player_nr)
     struct SongDBEntry *e;
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
 
-    e=SONGDB_GetEntryID(p->songdb_id);
+    e=p->e;
 
     if(e && e->AddInfo)
     {

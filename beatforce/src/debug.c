@@ -57,33 +57,34 @@ void traceprintf(char *fmt,...)
         switch (*fmt) 
         {
         case '%':
-            *fmt++;
-            switch(*fmt++)
+            if(*fmt++)
             {
-            case 's':  
-                /* string */
-                s=va_arg(ap, char *);
-                if(s != NULL)
+                switch(*fmt++)
                 {
-                    tempbuf[i++]='<';     /* will be set between < and > */
-                    while(*s)
-                        tempbuf[i++]=*s++;
-                    tempbuf[i++]='>';
+                case 's':  
+                    /* string */
+                    s=va_arg(ap, char *);
+                    if(s != NULL)
+                    {
+                        tempbuf[i++]='<';     /* will be set between < and > */
+                        while(*s)
+                            tempbuf[i++]=*s++;
+                        tempbuf[i++]='>';
+                    }
+                    break;
+                case 'd':                       /* int */
+                    d = va_arg(ap, int);
+                    sprintf(getal,"%d",d);
+                    while(getal[j])
+                        tempbuf[i++]=getal[j++];
+                    j=0;
+                    break;
                 }
                 break;
-            case 'd':                       /* int */
-                d = va_arg(ap, int);
-                sprintf(getal,"%d",d);
-                while(getal[j])
-                    tempbuf[i++]=getal[j++];
-                j=0;
+            default:
+                tempbuf[i++]=*fmt++;
                 break;
             }
-            break;
-        default:
-            tempbuf[i++]=*fmt++;
-            break;
-            
         }
     }
     va_start(ap, fmt);

@@ -87,7 +87,7 @@ libdir = /usr/share/beatforce/plugins/input
 libbeatforcemp3mad_la_LDFLAGS = -module -avoid-version
 
 libbeatforcemp3mad_la_SOURCES = mp3.c mp3.h osa.c osa.h debug.c debug.h llist.c llist.h 
-INCLUDES = -I../../../src -I$(top_builddir)/src 
+INCLUDES = -I../../../src -I$(top_builddir)/src $(MADDIR)
 LIBS = -lmad -lid3tag 
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../../../config.h
@@ -100,7 +100,7 @@ CPPFLAGS =
 LDFLAGS = 
 libbeatforcemp3mad_la_LIBADD = 
 libbeatforcemp3mad_la_OBJECTS =  mp3.lo osa.lo debug.lo llist.lo
-CFLAGS = -g -O2
+CFLAGS = -g -O2 -I/usr/local/include -DHAVE_MP3
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)

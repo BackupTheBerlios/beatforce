@@ -30,7 +30,33 @@ AC_CHECK_LIB(fftw3,fftw_execute)
 
 # Checks for header files
 AC_CHECK_HEADERS(SDL.h)
-AC_CHECK_HEADERS(sys/asoundlib.h)
+# AC_CHECK_HEADERS(sys/asoundlib.h)
+
+dnl Check for mad
+
+AC_MSG_CHECKING(for libmad files)
+dir=""
+maddir=""
+for i in $dir /usr /usr/local
+do
+  if test -f $i/lib/libmad.a && test -f $i/include/mad.h;
+  then
+    AC_MSG_RESULT(mad libs: $i)
+    maddir=$i
+    break
+  fi
+done
+
+if test x$maddir = x
+then
+ enable_mp3=no
+ AC_MSG_WARN(Mad libs not found... disabling mp3 support)
+else
+ MADDIR=${maddir}
+  LIBS="$LIBS -lmad -L$MADDIR/lib"
+ CFLAGS="$CFLAGS -I$MADDIR/include -DHAVE_MP3"
+fi
+
 
 #set correct directory
 DATADIR=share

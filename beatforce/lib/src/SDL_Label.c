@@ -69,10 +69,7 @@ void SDL_LabelDraw(void *label,SDL_Surface *dest)
     char string[255];
     SDL_Rect DrawPosititon;
 
-    int Length=0;
-
     memset(string ,0,255);
-
 
     SDL_FontSetColor(Label->Font,Label->fgcolor);
     

@@ -30,6 +30,8 @@
 #include "player.h"
 #include "songdb.h"
 #include "playlist.h"
+#include "osa.h"
+#include "input.h"
 
 #define MODULE_ID PLAYLIST
 #include "debug.h"
