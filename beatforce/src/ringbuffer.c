@@ -34,7 +34,8 @@
 
 #include "ringbuffer.h"
 
-#include "err.h"
+#define MODULE_ID RINGBUFFER
+#include "debug.h"
 
 
 #define mutex_unlock( m )   (m=0)
@@ -53,27 +54,32 @@ rb_init (struct OutRingBuffer **rb, int size)
   struct OutRingBuffer *ring;
 
   if(rb==NULL || size <= 1024)
-      return ERROR_INVALID_ARG;
-
+  {
+      return 0;
+  }
 
   rb_mutex = 0;
 
   ring = malloc (sizeof (struct OutRingBuffer));
   if(ring == NULL)
-      return ERROR_NO_MEMORY;
+  {
+      ERROR("Not enough memory");
+      return 0;
+  }
   memset (ring, 0, sizeof (struct OutRingBuffer));
 
   ring->vrb_buf = vrb_new (size, NULL);
   if(ring->vrb_buf == NULL)
-      return ERROR_NO_MEMORY;
-
+  {
+      ERROR("Not enough memory");
+      return 0;
+  }
   ring->size = size;
-  ring->magic = RINGBUFFER_MAGIC;
   *rb = ring;
 
-  rb_magic_check (ring, ERROR_UNKNOWN);
 
-  return 0;
+
+  return 1;
 }
 
 
@@ -93,7 +99,7 @@ rb_write (struct OutRingBuffer *rb, unsigned char * buf, int len)
   }
 #endif
 
-  rb_magic_check (rb, ERROR_INVALID_ARG);
+
 
   mutex_lock (rb_mutex);
   nwritten =  vrb_put (rb->vrb_buf, (char *) buf, (size_t) len);
@@ -107,7 +113,7 @@ rb_free (struct OutRingBuffer *rb)
 {
   int free = 0;
 
-  rb_magic_check (rb, ERROR_INVALID_ARG);
+
 
   mutex_lock (rb_mutex);
   free = (int) vrb_space_len (rb->vrb_buf);
@@ -121,7 +127,7 @@ rb_read (struct OutRingBuffer *rb, unsigned char * buf, int max)
 {
   int nread = 0;
 
-  rb_magic_check (rb, ERROR_INVALID_ARG);
+
 
   mutex_lock (rb_mutex);
   nread = (int) vrb_get (rb->vrb_buf, (char *) buf, (size_t) max);
@@ -134,7 +140,7 @@ rb_read (struct OutRingBuffer *rb, unsigned char * buf, int max)
 int
 rb_data_size (struct OutRingBuffer *rb)
 {
-  rb_magic_check (rb, ERROR_INVALID_ARG);
+
   return (vrb_capacity (rb->vrb_buf) - vrb_space_len (rb->vrb_buf));
 }
 
@@ -142,7 +148,7 @@ int
 rb_clear (struct OutRingBuffer *rb)
 {
 
-  rb_magic_check (rb, ERROR_INVALID_ARG);
+
 
   /* ugly */
 /*  memset (rb->vrb_buf->upper_ptr, 0, rb->vrb_buf->buf_size);

@@ -36,7 +36,7 @@ int INPUT_GetTag(BFList *input_list,char *filename, struct SongDBEntry *e);
 int input_get_add_info (int, char *, struct SongAddInfo *);
 
 int INPUT_LoadFile (int player_nr,struct SongDBEntry *e);
-int input_close_file (InputPluginData *);
+int INPUT_CloseFile (InputPluginData *);
 
 int INPUT_Play (InputPluginData *);
 int INPUT_Pause (InputPluginData *);

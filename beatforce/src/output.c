@@ -41,35 +41,32 @@
 #include "debug.h"
 
 
-int
-output_dev_init (AudioConfig * cfg)
+int OUTPUT_DevInit(AudioConfig * cfg)
 {
+    TRACE("OUTPUT_DevInit");
+
     /* Nothing for now */
     if(cfg == NULL)
-        return ERROR_INVALID_ARG;
-    return 0;
+        return 0;
+    return 1;
 }
 
 int
-output_plugin_init (struct OutGroup *grp, AudioConfig * cfg, int i)
+OUTPUT_PluginInit(struct OutGroup *grp, AudioConfig * cfg, int i)
 {
     BFList *list, *next;
 
     if(grp == NULL || cfg == NULL)
     {
-        return ERROR_INVALID_ARG;
+        return 0;
     }
 
     list = PLUGIN_GetList (PLUGIN_TYPE_OUTPUT);
     if(list == NULL)
     {
-        return ERROR_NO_FILE_LOADED;
+        return 0;
     }
 
-    if(grp->magic != AUDIO_OUTPUT_MAGIC)
-    {
-        return ERROR_INVALID_ARG;
-    }
     grp->dev = malloc (sizeof (OutputDevice));
     memset (grp->dev, 0, sizeof (OutputDevice));
 
@@ -80,19 +77,17 @@ output_plugin_init (struct OutGroup *grp, AudioConfig * cfg, int i)
         {
             if (strcmp (OPLUGIN (next)->shortname, cfg->output_id[i]) == 0)
             {
-                int err;
-
                 grp->dev->op = OPLUGIN (next);
                 grp->dev->device = cfg->device_id[i];
                 grp->dev->shortname = cfg->output_id[i];
-                err = grp->dev->op->init (&grp->dev->priv);
-                if (err != 0)
+                if(!grp->dev->op->init (&grp->dev->priv))
                 {
-                    ERROR("outputplugininit: Failed to initalize output plugin for group %d: %d\n",i, -err);
+                    ERROR("outputplugininit: Failed to initalize output plugin for group %d: %d\n",i,i);
                     grp->dev->op = NULL;
                     grp->dev->priv = NULL;
+                    return 0;
                 }
-                return err;
+                return 1;
             }
             next = next->next;
         }
@@ -100,19 +95,21 @@ output_plugin_init (struct OutGroup *grp, AudioConfig * cfg, int i)
     }
     grp->dev->shortname = "none";
     grp->dev->device = "";
-    return ERROR_NO_OUTPUT_SELECTED;
+    return 0;
 }
 
 
 int
-Output_PluginOpen (struct OutGroup *grp, AudioConfig * cfg, int i, int ch,
+OUTPUT_PluginOpen (struct OutGroup *grp, AudioConfig * cfg, int i, int ch,
                     long rate, int fmt)
 {
     int err;
 
     if(grp == NULL || cfg == NULL)
-        return ERROR_INVALID_ARG;
-
+    {
+        ERROR("Invalid arguments");
+        return 0;
+    }
     if (grp->dev->shortname
         && (strcmp (grp->dev->shortname, "none") == 0))
     {
@@ -120,7 +117,10 @@ Output_PluginOpen (struct OutGroup *grp, AudioConfig * cfg, int i, int ch,
     }
 
     if(grp->dev->op == NULL)
-        return ERROR_INVALID_ARG;
+    {
+        ERROR("Invalid arguments");
+        return 0;
+    }
 
     err =
         grp->dev->op->open (grp->dev->priv, cfg->device_id[i],
@@ -131,7 +131,7 @@ Output_PluginOpen (struct OutGroup *grp, AudioConfig * cfg, int i, int ch,
         ERROR("Unable to open output for group %d: error %d\n", i, -err);
     }
 
-    return err;
+    return 1;
 }
 
 
@@ -140,8 +140,10 @@ int OUTPUT_PluginClose(struct OutGroup *grp)
     int err;
 
     if(grp == NULL)
-        return ERROR_INVALID_ARG;
-
+    {
+        ERROR("Invalid arguments");
+        return 0;
+    }
     if (grp->dev->device && (strcmp(grp->dev->shortname, "none") == 0))
     {
         return 0;
@@ -152,7 +154,7 @@ int OUTPUT_PluginClose(struct OutGroup *grp)
     {
         printf("Unable to close output: error 0x%x\n", -err);
     }
-    return err;
+    return 1;
 
 }
 
@@ -162,7 +164,10 @@ int OUTPUT_PluginWrite (struct OutGroup *grp, void *buffer, int size)
 //    char* buffe=(char*)buffer;
 
     if(grp == NULL)
-        return ERROR_INVALID_ARG;
+    {
+        ERROR("Invalid arguments");
+        return 0;
+    }
 
     if (grp->dev->device && (strcmp (grp->dev->shortname, "none") == 0))
     {
@@ -183,12 +188,12 @@ int OUTPUT_PluginWrite (struct OutGroup *grp, void *buffer, int size)
 }
 
 int
-output_plugin_pause (struct OutGroup *grp, int pause)
+OUTPUT_PluginPause (struct OutGroup *grp, int pause)
 {
     int err;
 
-    if(grp == NULL)
-        return ERROR_INVALID_ARG;
+    if(grp == NULL || grp->dev == NULL)
+        return 0;
 
     if (grp->dev->device && (strcmp (grp->dev->shortname, "none") == 0))
     {
@@ -202,7 +207,7 @@ output_plugin_pause (struct OutGroup *grp, int pause)
                    ((pause == 1) ? ("pause") : ("unpause")), -err);
     }
 
-    return err;
+    return 1;
 
 }
 
@@ -211,9 +216,9 @@ int OUTPUT_PluginGetVolume (struct OutGroup *grp)
     int err=1;
     float volume;
 
-    TRACE("OUTPUT_PluginGetVolume enter");
-    if(grp == NULL)
-        return ERROR_INVALID_ARG;
+    TRACE("OUTPUT_PluginGetVolume");
+    if(grp == NULL || grp->dev == NULL)
+        return 0;
 
     if (grp->dev->device && (strcmp (grp->dev->shortname, "none") == 0))
     {
@@ -222,7 +227,7 @@ int OUTPUT_PluginGetVolume (struct OutGroup *grp)
     }
 
     if (grp->dev->op->get_volume == NULL)
-        return ERROR_NOT_SUPPORTED;
+        return 0;
 
     if( grp->dev->op->get_volume (grp->dev->priv, &volume) <= 0)
     {
@@ -230,7 +235,7 @@ int OUTPUT_PluginGetVolume (struct OutGroup *grp)
     }
     grp->mainvolume=(int)volume;
     TRACE("OUTPUT_PluginGetVolume leave");
-    return err;
+    return 1;
 }
 
 int
@@ -239,7 +244,10 @@ OUTPUT_PluginSetVolume (struct OutGroup *grp)
     int err;
 
     if(grp == NULL)
-        return ERROR_INVALID_ARG;
+    {
+        ERROR("Invalid arguments");
+        return 0;
+    }
     
     if (grp->dev->device && (strcmp (grp->dev->shortname, "none") == 0))
     {
@@ -248,8 +256,8 @@ OUTPUT_PluginSetVolume (struct OutGroup *grp)
 
     if (grp->dev->op->set_volume == NULL)
     {
-        DEBUG("SetVolume not supported by outputplugin");
-        return ERROR_NOT_SUPPORTED;
+        ERROR("SetVolume not supported by outputplugin");
+        return 0;
     }
 
     err = grp->dev->op->set_volume (grp->dev->priv, grp->mainvolume);
@@ -261,12 +269,15 @@ OUTPUT_PluginSetVolume (struct OutGroup *grp)
 }
 
 int
-output_plugin_cleanup(struct OutGroup *grp)
+OUTPUT_PluginCleanup(struct OutGroup *grp)
 {
     int err;
 
     if(grp == NULL || grp->dev == NULL)
-        return ERROR_INVALID_ARG;
+    {
+        ERROR("Invalid arguments");
+        return 0;
+    }
     
     if (grp->dev->device && (strcmp (grp->dev->shortname, "none") == 0))
     {
@@ -275,8 +286,8 @@ output_plugin_cleanup(struct OutGroup *grp)
 
     if (grp->dev->op->cleanup == NULL)
     {
-        printf("Not supported\n");
-        return ERROR_NOT_SUPPORTED;
+        ERROR("Not supported");
+        return 0;
     }
 
     err = grp->dev->op->cleanup(grp->dev->priv);

@@ -146,7 +146,10 @@ int input_get_add_info (char *filename, struct SongAddInfo *info)
     
     l = INPUT_WhoseFile (PLUGIN_GetList(PLUGIN_TYPE_INPUT), filename);
     if (l == NULL)
-        return ERROR_NOT_SUPPORTED;
+    {
+        ERROR("Not supported");
+        return 0;
+    }
     
     return l->ip->get_add_info (l->priv, filename, info);
 }
@@ -183,14 +186,12 @@ int INPUT_LoadFile (int player_nr,struct SongDBEntry *e)
         printf("Unable to play such a low bitrate\n");
     }
     PLAYER_GetData(player_nr)->current_plugin = l;
-    if(PLAYER_GetData(player_nr)->songdb_id == SONGDB_ID_UNKNOWN)
-        PLAYER_GetData(player_nr)->songdb_id = e->id;
     
     return l->ip->load_file (l->priv, e->filename);
 }
 
 int
-input_close_file (InputPluginData *current_plugin)
+INPUT_CloseFile(InputPluginData *current_plugin)
 {
     if (current_plugin == NULL)
         return 0;
@@ -227,7 +228,8 @@ long INPUT_GetTime(InputPluginData *current_plugin)
     long time;
     if (current_plugin == NULL)
     {
-        return ERROR_NO_FILE_LOADED;
+        ERROR("No file loaded");
+        return 0;
     }
     time=current_plugin->ip->get_time (current_plugin->priv);
     if(time < 0)

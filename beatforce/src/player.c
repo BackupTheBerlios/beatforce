@@ -73,7 +73,6 @@ int PLAYER_Init(int player_nr, PlayerConfig * cfg)
     player = malloc (PLAYER_PRIVATE_LEN);
     memset (player, 0, PLAYER_PRIVATE_LEN);
 
-    player->songdb_id     = SONGDB_ID_UNKNOWN;
     player->ch_id = player_nr;
     player->State = PLAYER_IDLE;
     player->e     = NULL;
@@ -148,7 +147,7 @@ int PLAYER_Play(int player_nr)
         return 0;
     }
 
-    if(p->songdb_id != SONGDB_ID_UNKNOWN)
+    if(p->e != NULL )
     {
         if(INPUT_Play (p->current_plugin))
         {
@@ -218,7 +217,7 @@ int PLAYER_SetSong (int player_nr, int no)
 {
     struct PlEntry *pe;
     struct PlayerPrivate *p;
-    int ent, err = 0;
+    int ent;
 
     TRACE("PLAYER_SetSong enter %d,%d",player_nr,no);
     p = PLAYER_GetData(player_nr);
@@ -228,10 +227,8 @@ int PLAYER_SetSong (int player_nr, int no)
     ent =  PLAYLIST_GetNoOfEntries(player_nr);
     if (ent == 0)
     {
-        p->songdb_id       = SONGDB_ID_UNKNOWN;
         p->playlist_id     = 0;
-        player_load (player_nr);
-        return 1;
+        return player_load (player_nr);
     }
 
     if (ent < no)
@@ -249,28 +246,25 @@ int PLAYER_SetSong (int player_nr, int no)
     
    
     INPUT_GetTag(p->ip_plugins,pe->e->filename,pe->e);
-    p->songdb_id = pe->e->id;
     p->e         = pe->e;
-    err = player_load (player_nr);
-    if (err)
+    if(!player_load (player_nr))
     {
+        p->e = NULL;
         printf ("player_set_song: error loading song ID %ld. Retrying...\n",
                 pe->e->id);
-        err = player_load (player_nr);	/* 2nd try */
-    }
-
-    if (err)
-    {
-        printf ("player_set_song: error loading song ID %ld.", pe->e->id);
-
-        if (PLAYLIST_GetNoOfEntries (player_nr) > 1)
+        if(!player_load (player_nr))
         {
-            PLAYER_SetSong (player_nr, no + 1);
-            printf ("trying next!\n");
-        }
-        else
-            printf ("no more songs\n");
+            printf ("player_set_song: error loading song ID %ld.", pe->e->id);
 
+            if (PLAYLIST_GetNoOfEntries (player_nr) > 1)
+            {
+                PLAYER_SetSong (player_nr, no + 1);
+                printf ("trying next!\n");
+            }
+            else
+                printf ("no more songs\n");
+
+        }
     }
     TRACE("PLAYER_SetSong <- %d",player_nr);
     return 1;
@@ -279,7 +273,6 @@ int PLAYER_SetSong (int player_nr, int no)
 /* loads a song set by playing_id */
 int player_load (int player_nr)
 {
-    int err = 0;
     int cerr = 0;
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
 
@@ -287,43 +280,39 @@ int player_load (int player_nr)
     if(p==NULL)
         return 0;
     
-    if (p->playlist_id == 0 && p->songdb_id == SONGDB_ID_UNKNOWN)
+    if (p->playlist_id == 0 && p->e == NULL)
     {
         return 0;
     }
 
-    if (! (cerr = input_close_file (p->current_plugin)) )
+    if (! (cerr = INPUT_CloseFile(p->current_plugin)) )
     {
         p->State = PLAYER_PAUSE;
         if(p->e)
         {
-            err =  INPUT_LoadFile (player_nr, p->e);
+            if(!INPUT_LoadFile (player_nr, p->e))
+            {
+                ERROR("File not loaded %s",p->e->filename);
+                return 0;
+            }
         }
         else
         {
             ERROR("No such entry");
-        }
-        if (err)
-        {
-            fprintf (stderr, "Error 0x%x(%d) loading song id %ld: %s\n", err, err,
-                     p->songdb_id, p->e->filename);
-            return -1;
+            return 0;
         }
     }
     else
     {
-        if (cerr == ERROR_NOT_OPEN || cerr == ERROR_NO_FILE_LOADED || cerr == ERROR_EOF)
-        {
-            return 0;
-        }
+                
 
         fprintf (stderr,
                  "Error stopping and closing currently playing song: 0x%x!\n",
                  -cerr);
-        return -2;
+        return 0;
     }
     TRACE("player_load leave");
-    return 0;
+    return 1;
 
 }
 int PLAYER_GetState(int player_nr)
@@ -473,8 +462,7 @@ int PLAYER_GetSamplerate(int player_nr)
 
 int PLAYER_SetSpeed(int player_nr,double speed)
 {
-    AUDIOOUTPUT_SetSpeed(player_nr,(float)speed);
-    return 1;
+    return AUDIOOUTPUT_SetSpeed(player_nr,(float)speed);
 }
 
 

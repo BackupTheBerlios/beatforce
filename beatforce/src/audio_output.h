@@ -23,18 +23,6 @@
 #ifndef __AUDIO_OUTPUT_H__
 #define __AUDIO_OUTPUT_H__
 
-#define AUDIO_OUTPUT_MAGIC	0x614F7554      /* 'aOuT' */
-
-/*
- * size of complete output datapath
- * OUTPUT_SIZE_32 is NOT WORKING yet !!
- */
-// #define OUTPUT_SIZE_32
-
-
-
-#define output_magic_check(var,err)  {if(!(var)) return err;}
-
 #include "types.h"
 #ifdef OUTPUT_SIZE_32
 typedef signed int output_word;
@@ -68,8 +56,7 @@ typedef signed short output_word;
 
 /* sub-groups in mask */
 #define GROUP_MASTER	2
-#define GROUP_A 	4
-#define GROUP_B 	8
+#define GROUP_MONITOR   4
 
 /* channels */
 #define CHANNEL_Player0 	0
@@ -83,8 +70,6 @@ typedef signed short output_word;
 
 struct OutChannel
 {
-    long magic;
-
     output_word *buffer;
 
     output_word *buffer2;
@@ -162,12 +147,12 @@ int AUDIOOUTPUT_SetSpeed(int channel, float speed);
 /* Interface for plugins */
 int AUDIOOUTPUT_Close (int);
 int output_read (int, unsigned char *, int);
-int output_write (int, void*, int);
+int AUDIOOUTPUT_Write(int, void*, int);
 int output_write_blocking (int, void*, int);
 long AUDIOOUTPUT_BufferFree(int c);
 int AUDIOOUTPUT_Pause (int c, int pause);
 int output_set_time (int, long);
-long output_get_time (int);
+long AUDIOOUTPUT_GetTime(int channel);
 
 
 /* interface to mixer */

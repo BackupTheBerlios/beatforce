@@ -103,8 +103,9 @@ void playlisteventhandler(SDL_Table *table,SDL_Event *event)
     else
     {
         if(event->button.button == 1)//play now left mosuebutton down
+        {
             PLAYER_SetSong(player,table->CurrentRow);
-        
+        }
     }
 }
 

@@ -44,7 +44,6 @@ typedef int PlayerState;
 struct PlayerPrivate
 {
     int playlist_id;             /* no of song playing ( in playlist ) 0, if not in playlist */
-    unsigned long songdb_id;     /* id of song playing  SONGDB_ID_UNKNOWN, if no entry */
     
     struct SongDBEntry *e;
     ePlayerState State;           /* State of the player */

@@ -2,7 +2,7 @@
    BeatForce
    input.h	-  output plugins, ...
    
-   Copyright (c) 2001, Patrick Prasse (patrick.prasse@gmx.net)
+   Copyright (c) 2003, John Beuving (john.beuving@home.nl)
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public Licensse as published by
@@ -25,17 +25,16 @@
 
 #include "audio_output.h"
 
-int output_dev_init (AudioConfig *);
+int OUTPUT_DevInit (AudioConfig *);
 
-int output_plugin_init (struct OutGroup *, AudioConfig *, int);
-
-int Output_PluginOpen (struct OutGroup *, AudioConfig *, int, int, long, int);
-int output_plugin_close (struct OutGroup *);
+int OUTPUT_PluginInit(struct OutGroup *, AudioConfig *, int);
+int OUTPUT_PluginOpen (struct OutGroup *, AudioConfig *, int, int, long, int);
+int OUTPUT_PluginClose (struct OutGroup *);
 int OUTPUT_PluginWrite (struct OutGroup *, void *, int);
-int output_plugin_pause (struct OutGroup *, int);
+int OUTPUT_PluginPause (struct OutGroup *, int);
 int OUTPUT_PluginGetVolume (struct OutGroup *);
 int OUTPUT_PluginSetVolume (struct OutGroup *);
-
-int output_plugin_cleanup(struct OutGroup *grp);
+int OUTPUT_PluginCleanup(struct OutGroup *grp);
 
 #endif
+

@@ -74,7 +74,7 @@ oss_init (Private ** private)
 
     *private = (Private *) p;
 
-    return 0;
+    return 1;
 }
 
 int

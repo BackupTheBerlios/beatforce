@@ -103,24 +103,6 @@ int MIXER_SetCallback(void *callback)
     return 1;
 }
 
-int
-mixer_GroupA (int ch, int on)
-{
-    return output_set_group (ch, GROUP_A, on);
-}
-
-int
-mixer_GroupB (int ch, int on)
-{
-    return output_set_group (ch, GROUP_B, on);
-}
-
-int
-mixer_Master (int ch, int on)
-{
-    return output_set_group (ch, GROUP_MASTER, on);
-}
-
 int MIXER_Mute (int ch, int mute)
 {
     return AUDIOOUTPUT_Mute (ch, mute);
@@ -129,9 +111,11 @@ int MIXER_Mute (int ch, int mute)
 int MIXER_MuteGroup (int group, int mute)
 {
     if (group > 2 || group < 0)
-        return ERROR_UNKNOWN_CHANNEL;
-
-    return 0;
+    {
+        ERROR("Unknown channel");
+        return 0;
+    }
+    return 1;
 }
 
 int mixer_dB (int ch, float dB)

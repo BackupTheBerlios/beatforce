@@ -127,7 +127,10 @@ mp3_init (Private ** p, int ch_id)
     TRACE("mp3_init enter: %d", ch_id);
 
     if(p == NULL)
-        return ERROR_INVALID_ARG;
+    {
+        ERROR("Invalid argument");
+        return 0;
+    }
 
 
     if( !str_mpeg1_l1 )
@@ -142,7 +145,12 @@ mp3_init (Private ** p, int ch_id)
 
     mp3_priv = malloc (sizeof (mp3Private));
     if (mp3_priv == NULL)
-	return ERROR_NO_MEMORY;
+    {
+        ERROR("Not enough memory");
+	return 0;
+    }
+
+    
     memset (mp3_priv, 0, sizeof (mp3Private));
 
     mp3_priv->input_buffer  = malloc (MP3_INPUT_BUFFER_SIZE);
@@ -151,7 +159,8 @@ mp3_init (Private ** p, int ch_id)
     {
 	free (mp3_priv->input_buffer);
 	free (mp3_priv->output_buffer);
-	return ERROR_NO_MEMORY;
+        ERROR("Not enough memory");
+	return 0;
     }
     memset (mp3_priv->input_buffer, 0, MP3_INPUT_BUFFER_SIZE);
     memset (mp3_priv->output_buffer, 0, MP3_OUTPUT_BUFFER_SIZE);
@@ -162,7 +171,10 @@ mp3_init (Private ** p, int ch_id)
     cfg = malloc (sizeof (struct config));
     
     if (cfg == NULL)
-	return ERROR_NO_MEMORY;
+    {
+        ERROR("Not enough memory");
+	return 0;
+    }
     memset (cfg, 0, sizeof (struct config));
     cfg->lengthcalc = 0;
 
@@ -175,7 +187,7 @@ mp3_init (Private ** p, int ch_id)
     *p = (Private *) mp3_priv;
 
     TRACE("mp3_init leave");
-    return 0;
+    return 1;
 }
 
 int mp3_configure(Private *p,struct SongDBEntry *e)
@@ -529,19 +541,25 @@ mp3_load_file (Private * h, char *filename)
     mp3Private *private = (mp3Private *) h;
     struct mad_header header;
     int length=private->length;
-
+    
+    TRACE("mp3_load_file");
 
     if (h == NULL || filename == NULL || private->magic != MP3MAD_MAGIC)
-        return ERROR_INVALID_ARG;
+    {
+        ERROR("Invalid argument");
+        return 0;
+    }
   
     if (private->fd && private->going)
     {
-	return ERROR_ALREADY_OPEN;
+        ERROR("File already open");
+        return 0;
     }
 
     if (mp3_is_our_file (h, filename) != TRUE)
     {
-	return ERROR_UNKNOWN_FILE;
+        ERROR("unknown file");
+	return 0;
     }
 
     private->frame  = malloc (sizeof (struct mad_frame));
@@ -549,7 +567,8 @@ mp3_load_file (Private * h, char *filename)
     private->synth  = malloc (sizeof (struct mad_synth));
     if (!private->frame || !private->stream || !private->synth)
     {
-	return ERROR_NO_MEMORY;
+        ERROR("Not enough memory");
+	return 0;
     }
 
     memset (private->stream, 0, sizeof (struct mad_stream));
@@ -572,7 +591,8 @@ mp3_load_file (Private * h, char *filename)
     {
 	fclose (private->fd);
 	private->fd = NULL;
-	return ERROR_FILE_FORMAT_ERROR;
+        ERROR("Wrong file format");
+        return 0;
     }
 
     fseek(private->fd,0,SEEK_END);
@@ -590,7 +610,6 @@ mp3_load_file (Private * h, char *filename)
   
     private->length  = length;
     private->bitrate = 0;
-    private->going   = 1;
     private->seek    = -1;
     private->eof     = 0;
 
@@ -604,12 +623,14 @@ mp3_load_file (Private * h, char *filename)
 	private->audio_error = TRUE;
 	fclose (private->fd);
 	private->fd = NULL;
-	return ERROR_OUTPUT_ERROR;
+        ERROR("Audio open");
+	return 0;
     }
 
+    private->going    = 1;
     private->decode_thread=OSA_CreateThread(mp3_play_loop, (void *)private);
     private->position = 0;
-    return 0;
+    return 1;
 }
 
 int
@@ -618,7 +639,10 @@ mp3_close_file (Private * h)
     mp3Private *private = (mp3Private *) h;
 
     if( h == NULL || private->magic != MP3MAD_MAGIC)
-        return ERROR_INVALID_ARG;
+    {
+        ERROR("Invalid arguments");
+        return 0;
+    }
   
 
     if (private->going && private->fd != NULL)
@@ -638,10 +662,10 @@ mp3_close_file (Private * h)
 	free (private->stream);
 	free (private->frame);
 
-	return 0;
+	return 1;
     }
 
-    return ERROR_NOT_OPEN;
+    return 0;
 }
 
 

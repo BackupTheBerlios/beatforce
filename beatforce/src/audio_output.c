@@ -91,7 +91,7 @@ ADD_TO_OUTPUT_BUFFER (output_word * _buf, float _ch)
 
 int AUDIOOUTPUT_Init (AudioConfig * audio_cfg)
 {
-    int i, err;
+    int i;
 
     TRACE("AUDIO_OUTPUT_Init %d",OUTPUT_N_CHANNELS);
     audiocfg = audio_cfg;
@@ -100,18 +100,18 @@ int AUDIOOUTPUT_Init (AudioConfig * audio_cfg)
     {
         ch[i] = malloc (OUT_CHANNEL_SIZE);
         if(ch[i] == NULL)
-            return ERROR_NO_MEMORY;
+            return 0;
         memset (ch[i], 0, OUT_CHANNEL_SIZE);
 
         ch[i]->buffer = malloc (OUTPUT_BUFFER_SIZE (audiocfg) * 2);
         if(ch[i]->buffer == NULL)
-            return ERROR_NO_MEMORY;
+            return 0;
         memset (ch[i]->buffer, 0, OUTPUT_BUFFER_SIZE (audiocfg) * 2);
 
 #if 0
         ch[i]->buffer2 = malloc (OUTPUT_BUFFER_SIZE (audiocfg));
         if(ch[i]->buffer2 == NULL)
-            return ERROR_NO_MEMORY;
+            return 0;
         memset (ch[i]->buffer2, 0, OUTPUT_BUFFER_SIZE (audiocfg));
 #endif
 
@@ -120,13 +120,11 @@ int AUDIOOUTPUT_Init (AudioConfig * audio_cfg)
         ch[i]->last_beat = NULL;//g_timer_new ();
 
         ch[i]->bpm_prescale = 7000;
-        ch[i]->magic = AUDIO_OUTPUT_MAGIC;
-
         ch[i]->speed = 1.0; /* Normal playback speed */
     }
 
 /* Init output */
-    if ((err = output_dev_init (audiocfg)))
+    if (!OUTPUT_DevInit (audiocfg))
     {
         printf ("Error initalizing Audio Output!\n");
     }
@@ -135,20 +133,14 @@ int AUDIOOUTPUT_Init (AudioConfig * audio_cfg)
     {
         group[i] = malloc (sizeof (struct OutGroup));
         memset (group[i], 0, sizeof (struct OutGroup));
-        group[i]->magic = AUDIO_OUTPUT_MAGIC;
         group[i]->out_buffer = malloc (OUTPUT_BUFFER_SIZE (audiocfg));
 
-        err = output_plugin_init (group[i], audiocfg, i);
-        if (err == ERROR_NO_OUTPUT_SELECTED)
-        {
-            continue;
-        }
-        else if (err)
+        if(!OUTPUT_PluginInit (group[i], audiocfg, i))
         {
             char str[255];
 
             sprintf(str,"output_init: error initializing output device of group %d!\n(error 0x%x)\n",
-                    i, -err);
+                    i,i);
             printf(str);
 
             if (i == 0)               /* dialog only when group is MASTER(0) */
@@ -159,17 +151,16 @@ int AUDIOOUTPUT_Init (AudioConfig * audio_cfg)
         }
         else
         {
-            err = Output_PluginOpen (group[i], audiocfg, i, 2, 44100, FMT_S16_NE);
-            if (err)
+            
+            if (!OUTPUT_PluginOpen (group[i], audiocfg, i, 2, 44100, FMT_S16_NE))
             {
                 char str[255];
                 sprintf (str,"Could not open output device of Group %d!\n"
                          "Edit your Preferences and restart BeatForce\n"
                          "Maybe you entered a wrong or not existing output device. Valid devices are for example:\n"
                          "ALSA: \"hw:0,0\", \"default\"  OSS: \"/dev/dsp\"\n"
-                         "(error 0x%x)", i, -err);
+                         "(error 0x%x)", i, i);
                 printf(str);
-                exit(1);
                 return 0;
 
             }
@@ -184,7 +175,7 @@ int AUDIOOUTPUT_Init (AudioConfig * audio_cfg)
     fftw_out = malloc (sizeof (fftw_complex) * (audiocfg->FragmentSize + 3));
 
     if(fftw_in == NULL || fftw_out == NULL)
-        return ERROR_NO_MEMORY;
+        return 0;
 
     fftplan_out =
         fftw_plan_dft_1d(audiocfg->FragmentSize,
@@ -213,7 +204,7 @@ int AUDIOOUTPUT_Cleanup (void)
     
     for (i = 0; i <= 2; i++)
     {
-        output_plugin_cleanup(group[i]);
+        OUTPUT_PluginCleanup(group[i]);
     }
     return 0;
 }
@@ -224,14 +215,14 @@ int AUDIOOUTPUT_Open(int c, AFormat fmt, int rate, int nch, int *max_bytes)
 {
 
     if (c >= OUTPUT_N_CHANNELS || c < 0)
-        return ERROR_UNKNOWN_CHANNEL;
+        return 0;
     if(ch[c] == NULL)
-        return ERROR_INVALID_ARG;
-    output_magic_check (ch[c], ERROR_INVALID_ARG);
+        return 0;
+
     if (ch[c]->open)
     {
         fprintf (stderr,"output_open: someone tries to open channel already open!\n");
-        return ERROR_ALREADY_OPEN;
+        return 0;
     }
 
     if (max_bytes != NULL)
@@ -265,13 +256,13 @@ int AUDIOOUTPUT_Close(int c)
 {
 
     if (c >= OUTPUT_N_CHANNELS || c < 0)
-        return ERROR_UNKNOWN_CHANNEL;
+        return 0;
     if(ch[c] == NULL)
-        return ERROR_INVALID_ARG;
+        return 0;
 
-    output_magic_check (ch[c], ERROR_INVALID_ARG);
+
     if (!ch[c]->open)
-        return ERROR_NOT_OPEN;
+        return 0;
     ch[c]->paused = 1;
     ch[c]->open = 0;
     ch[c]->aformat = FMT_UNKNOWN;
@@ -288,7 +279,6 @@ int AUDIOOUTPUT_Close(int c)
 #if 1
     /* empty ring buffer */
     rb_clear (ch[c]->rb);
-//                                                                                                                              rb_read (ch[c]->rb, (char *) ch[c]->buffer, OUTPUT_RING_SIZE (audiocfg));
     memset (ch[c]->buffer, 0, OUTPUT_BUFFER_SIZE (audiocfg));
 #endif
 
@@ -312,12 +302,12 @@ output_read (int channel, unsigned char * buf, int len)
     memset(buf,0,len);
 
     if (channel >= OUTPUT_N_CHANNELS || channel < 0)
-        return ERROR_UNKNOWN_CHANNEL;
+        return 0;
 
     if(ch[channel] == NULL)
-        return ERROR_INVALID_ARG;
+        return 0;
 
-    output_magic_check (ch[channel], ERROR_INVALID_ARG);
+
 
 
     //read n_to_read bytes from the ring buffer into our tempbuf
@@ -350,31 +340,34 @@ output_read (int channel, unsigned char * buf, int len)
 }
 
 
-int output_write (int c, void* buf, int len)
+int AUDIOOUTPUT_Write (int c, void* buf, int len)
 {
     int written;
     int newlen;
 
 //    TRACE("OUTPUT_WRITE");
     if (c >= OUTPUT_N_CHANNELS || c < 0)
-        return ERROR_UNKNOWN_CHANNEL;
+        return 0;
     if (ch[c] == NULL)
-        return ERROR_INVALID_ARG;
+        return 0;
 
-    output_magic_check (ch[c], ERROR_INVALID_ARG);
+
     if (ch[c]->buffer2_size < len * 2)
     {
         ch[c]->buffer2 = realloc (ch[c]->buffer2, len * 2);
         if (ch[c]->buffer2 == NULL)
         {
             ch[c]->buffer2_size = 0;
-            return ERROR_NO_MEMORY;
+            return 0;
         }
         ch[c]->buffer2_size = len * 2;
     }
 
+    /* Convert to the internal format */
     newlen =
         convert_buffer (ch[c]->aformat, ch[c]->n_ch, buf, ch[c]->buffer2, len);
+
+    /* Write to the ringbuffer */
     written = rb_write (ch[c]->rb, (unsigned char *) ch[c]->buffer2, newlen);
     return written;
 }
@@ -384,11 +377,11 @@ long AUDIOOUTPUT_BufferFree(int c)
     long free = -1;
 
     if (c >= OUTPUT_N_CHANNELS || c < 0)
-        return ERROR_UNKNOWN_CHANNEL;
+        return 0;
     if(ch[c] == NULL)
-        return ERROR_INVALID_ARG;
+        return 0;
 
-    output_magic_check (ch[c], ERROR_INVALID_ARG);
+
 
     free = rb_free (ch[c]->rb);
 
@@ -399,24 +392,24 @@ long AUDIOOUTPUT_BufferFree(int c)
 int AUDIOOUTPUT_Pause (int c, int pause)
 {
     if (c >= OUTPUT_N_CHANNELS || c < 0)
-        return ERROR_UNKNOWN_CHANNEL;
+        return 0;
 
     if(ch[c] == NULL)
-        return ERROR_INVALID_ARG;
+        return 0;
   
-    output_magic_check (ch[c], ERROR_INVALID_ARG);
+
     ch[c]->paused = (int) (pause != 0);
-    return 0;
+    return 1;
 }
 
 int AUDIOOUTPUT_SetSpeed(int channel, float speed)
 {
     if (channel >= OUTPUT_N_CHANNELS || channel < 0)
-        return ERROR_UNKNOWN_CHANNEL;
+        return 0;
     if(ch[channel] == NULL)
-        return ERROR_INVALID_ARG;
+        return 0;
   
-    output_magic_check (ch[channel], ERROR_INVALID_ARG);
+
     
     ch[channel]->speed = speed;
 
@@ -424,16 +417,16 @@ int AUDIOOUTPUT_SetSpeed(int channel, float speed)
 }
 
 long
-output_get_time (int c)
+AUDIOOUTPUT_GetTime(int c)
 {
     double time;
     if (c >= OUTPUT_N_CHANNELS || c < 0)
-        return ERROR_UNKNOWN_CHANNEL;
+        return 0;
 
     if(ch[c] == NULL)
-        return ERROR_INVALID_ARG;
+        return 0;
     
-    output_magic_check (ch[c], ERROR_INVALID_ARG);
+
 
     time = ((double) ch[c]->bytes_written) / (2 * ch[c]->rate * ch[c]->n_ch);
     time = (int) (time * 1000);
@@ -459,12 +452,12 @@ int AUDIOOUTPUT_GetVolumeLevel(int channel,int *left,int *right)
 int AUDIOOUTPUT_SetVolume(int c, float db)
 {
     if (c >= OUTPUT_N_CHANNELS || c < 0)
-        return ERROR_UNKNOWN_CHANNEL;
+        return 0;
     
     if(ch[c] == NULL)
-        return ERROR_INVALID_ARG;
+        return 0;
     
-    output_magic_check (ch[c], ERROR_INVALID_ARG);
+
     ch[c]->fader_dB = db;
     return 0;
 }
@@ -487,72 +480,24 @@ int AUDIOOUTPUT_GetMainVolume(int *value)
 int AUDIOOUTPUT_GetChannelVolume(int c, float *db)
 {
     if (c >= OUTPUT_N_CHANNELS || c < 0)
-        return ERROR_UNKNOWN_CHANNEL;
+        return 0;
     if(ch[c] == NULL)
-        return ERROR_INVALID_ARG;
-    output_magic_check (ch[c], ERROR_INVALID_ARG);
+        return 0;
+
 
     *db = ch[c]->fader_dB;
-    return 0;
-}
-
-int
-output_set_group (int c, int group, int on)
-{
-    int mask;
-    if (c >= OUTPUT_N_CHANNELS || c < 0)
-        return ERROR_UNKNOWN_CHANNEL;
-    if(ch[c] == NULL)
-        return ERROR_INVALID_ARG;
-    output_magic_check (ch[c], ERROR_INVALID_ARG);
-
-    mask = ch[c]->mask;
-    if (on)
-        mask = mask | group;
-    else
-        mask = mask & (~group);
-
-    ch[c]->mask = mask;
     return 0;
 }
 
 int AUDIOOUTPUT_Mute (int c, int mute)
 {
     if (c >= OUTPUT_N_CHANNELS || c < 0)
-        return ERROR_UNKNOWN_CHANNEL;
+        return 0;
     if(ch[c] == NULL)
-        return ERROR_INVALID_ARG;
-    output_magic_check (ch[c], ERROR_INVALID_ARG);
+        return 0;
+
     ch[c]->mute = (int) (mute != 0);
     return 0;
-}
-
-int
-output_set_beatcount (int c, int on)
-{
-    if (c >= OUTPUT_N_CHANNELS || c < 0)
-        return ERROR_UNKNOWN_CHANNEL;
-
-    if(ch[c]==NULL)
-        return ERROR_INVALID_ARG;
-
-    output_magic_check (ch[c], ERROR_INVALID_ARG);
-
-    ch[c]->detect_beat = (int) (on != 0);
-    return 0;
-}
-
-double
-output_get_bpm (int c)
-{
-    if (c >= OUTPUT_N_CHANNELS || c < 0)
-        return ERROR_UNKNOWN_CHANNEL;
-
-    if(ch[c] == NULL)
-        return ERROR_INVALID_ARG;
-
-    output_magic_check (ch[c], ERROR_INVALID_ARG);
-    return ch[c]->bpm;
 }
 
 
@@ -587,6 +532,10 @@ static void AUDIOOUTPUT_CalculateVolume(struct OutChannel *ch)
     ch->volumeright = 20 * log(r);
 }
 
+/* 
+ * Combines the signals of channel 0 and channel 1
+ * according to mixer value
+ */
 static void AUDIOOUTPUT_Crossfade()
 {
     int sample;
@@ -716,7 +665,8 @@ static int AUDIOOUTPUT_Loop(void *arg)
             if (ch[channel]->fader_dB > -31)
             {
 
-                AUDIOOUTPUT_CalculateVolume(ch[channel]);
+                if (channel == 0 || channel == 1)
+                    AUDIOOUTPUT_CalculateVolume(ch[channel]);
                                 
                 /* attenuate or amplify by db */
                 for (sample = 0; sample < OUTPUT_BUFFER_SIZE_SAMPLES (audiocfg); sample++)
@@ -748,15 +698,11 @@ static int AUDIOOUTPUT_Loop(void *arg)
                         ADD_TO_OUTPUT_BUFFER (&group[0]->out_buffer[sample], tmp);
                     }
                     
-                    if (ch[i]->mask & GROUP_A)
+                    if (ch[i]->mask & GROUP_MONITOR)
                     {
                         ADD_TO_OUTPUT_BUFFER (&group[1]->out_buffer[sample], tmp);
                     }
                     
-                    if (ch[i]->mask & GROUP_B)
-                    {
-                        ADD_TO_OUTPUT_BUFFER (&group[2]->out_buffer[sample], tmp);
-                    }
                     
                 } /* for( 0 to SAMPLES ) */
                 
@@ -994,7 +940,7 @@ convert_buffer (AFormat afmt, int nch,
 
     int i;
     if (nch > 2 || nch < 1)
-        return ERROR_WRONG_CH_NUMBER;
+        return 0;
 
 //    printf( "convert_buffer( %d, %d, ., ., %d )\n", afmt, nch, length );
     if (afmt == FMT_S8)

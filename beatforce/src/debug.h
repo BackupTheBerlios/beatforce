@@ -35,10 +35,11 @@
 #define PLAYLIST     10
 #define PLAYLIST_UI  11
 #define PLUGIN       12
-#define SONGDB       13
-#define SONGDB_UI    14
-#define THEME        15
-#define WNDMGR       16
+#define RINGBUFFER   13
+#define SONGDB       14
+#define SONGDB_UI    15
+#define THEME        16
+#define WNDMGR       17
 
 #define name(x) x
 #define module( x ) ( #x )
@@ -133,6 +134,12 @@ void printid(char *id,int line,char *message);
 #define TRACE TRACE_OFF
 #define DEBUG DEBUG_OFF
 #endif
+
+#if MODULE_ID == RINGBUFFER
+#define TRACE TRACE_OFF
+#define DEBUG DEBUG_OFF
+#endif
+
 
 #if MODULE_ID == SONGDB
 #define TRACE TRACE_OFF
