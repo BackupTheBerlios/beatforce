@@ -57,6 +57,7 @@ char *str_mpeg25_l3=NULL;
 
 #define OGG_INPUT_BUFFER_SIZE	(40000*2)
 #define OGG_OUTPUT_BUFFER_SIZE	((575+1152)*4*2)
+#define VORBIS_READ_BUFFER_SIZE 4096
 
 InputPlugin ogg_ip = {
     NULL, 						/* handle, BeatForce fills it */
@@ -140,27 +141,34 @@ ogg_init (Private ** p, int ch_id)
     if (NULL == ogg_priv)
     {
         ERROR("Not enough memory");
-       return 0;
+	return 0;
     }
 
     
     memset (ogg_priv, 0, sizeof (oggPrivate));
 
     ogg_priv->input_buffer  = malloc (OGG_INPUT_BUFFER_SIZE);
-     ogg_priv->output_buffer = malloc (OGG_OUTPUT_BUFFER_SIZE);
-     if (!ogg_priv->input_buffer || !ogg_priv->output_buffer)
-     {
-         ERROR("Not enough memory");
+    ogg_priv->output_buffer = malloc (OGG_OUTPUT_BUFFER_SIZE);
+    if (!ogg_priv->input_buffer || !ogg_priv->output_buffer)
+    {
+        ERROR("Not enough memory");
 	return (ogg_cleanup((oggPrivate *) ogg_priv));
-     }
-     memset (ogg_priv->input_buffer, 0, OGG_INPUT_BUFFER_SIZE);
+    }
+    memset (ogg_priv->input_buffer, 0, OGG_INPUT_BUFFER_SIZE);
     memset (ogg_priv->output_buffer, 0, OGG_OUTPUT_BUFFER_SIZE);
 
     ogg_priv->output_size = OGG_OUTPUT_BUFFER_SIZE;
     ogg_priv->input_size = OGG_INPUT_BUFFER_SIZE;
 
+    ogg_priv->vorbis_buffer = malloc (VORBIS_READ_BUFFER_SIZE);
+    if (ogg_priv->vorbis_buffer == NULL)
+    {
+        ERROR("Not enough memory");
+	return (ogg_cleanup((oggPrivate *) ogg_priv));
+    }
+    memset (ogg_priv->vorbis_buffer, 0, VORBIS_READ_BUFFER_SIZE);
+
     cfg = malloc (sizeof (struct config));
-    
     if (cfg == NULL)
     {
         ERROR("Not enough memory");
@@ -197,10 +205,12 @@ ogg_cleanup (Private * p)
 	    free (ogg_priv->input_buffer);
         if (NULL != ogg_priv->output_buffer)
 	    free (ogg_priv->output_buffer);
-    free (ogg_priv);
+        if (NULL != ogg_priv->vorbis_buffer)
+	    free (ogg_priv->vorbis_buffer);
+         free (ogg_priv);
     }	
     if (NULL != cfg)
-    free (cfg);
+        free (cfg);
 
     return 0;
 }
@@ -372,6 +382,7 @@ ogg_close_file (Private * h)
     oggPrivate *private = (oggPrivate *) h;
 
     TRACE("ogg_close_file");
+fprintf(stderr, "Closing File??... ");
     if( h == NULL)
     {
         ERROR("Invalid arguments");
@@ -382,6 +393,7 @@ ogg_close_file (Private * h)
     if (private->going && private->fd != NULL)
     {
         DEBUG("Stopping thread");
+fprintf(stderr, "Closed!\n");
 	private->going = 0;
         OSA_RemoveThread(private->decode_thread);
 	private->ogg_if.output_close (private->ch_id);
@@ -400,54 +412,57 @@ ogg_play_loop (void *param)
     oggPrivate *private = param;
     unsigned int input_length = 0, output_length = 0;
     int resolution = 16;
-    char *pcmout;
     int current_section;
     
     int avgbitrate, bitrate, last_bitrate = 0, seek_skip = 0, last_error = 0;
 
-    pcmout=malloc(2352*75);
     if(param == NULL || private->input_buffer == NULL)
         return (void *) 0;
   
     if(private->output_buffer == NULL)
         return (void *) 0;
 
-#define OGGBUG 4096
-    while(private->going)
+    while(!private->eof && private->going)
     {
-        while(!private->eof && private->going)
+        long ret=ov_read(&private->vf,
+                        private->vorbis_buffer,
+                        VORBIS_READ_BUFFER_SIZE,
+                        0, 2, 1, &current_section);
+        double time=ov_time_tell(&private->vf);
+        time=time*100;
+        if (ret == 0)   /* EOF */
         {
-            long ret=ov_read(&private->vf,pcmout,OGGBUG,0,2,1,&current_section);
-            double time=ov_time_tell(&private->vf);
-            time=time*100;
-            if (ret == 0) 
+            private->eof = 1;
+            private->going = 0;
+            break;
+        } 
+        else if (ret < 0) 
+        {
+            /* error in the stream.  Not a problem, just reporting it in
+               case we (the app) cares.  In this case, we don't. */
+        } 
+        else 
+        {
+            while(private->ogg_if.output_buffer_free (private->ch_id) < (ret))
             {
-                /* EOF */
-                private->eof=1;
-                private->going=0;
-            } 
-            else if (ret < 0) 
-            {
-                /* error in the stream.  Not a problem, just reporting it in
-                   case we (the app) cares.  In this case, we don't. */
-            } 
-            else 
-            {
-                while(private->ogg_if.output_buffer_free (private->ch_id) < (ret))
-                {
-                    SDL_Delay(10);
-                }
-                
-                /* we don't bother dealing with sample rate changes, etc, but
-                   you'll have to*/
-                private->ogg_if.output_write (private->ch_id, pcmout,ret);
-                private->position=(long)(time);
-                private->position*=10;
+                if (!private->going)
+                    break; 
+                SDL_Delay(10);
             }
+            
+                /* we don't bother dealing with sample rate changes, etc, but
+                you'll have to*/
+            private->ogg_if.output_write (private->ch_id,
+                                    private->vorbis_buffer,ret);
+            private->position=(long)(time);
+            private->position*=10;
         }
     }
- 
- 
+    if (private->ogg_if.input_eof(private->ch_id))
+    {
+        private->ogg_if.input_eof (private->ch_id);
+        SDL_Delay(30);
+    }
     return 0;
 }
 

@@ -95,6 +95,7 @@ typedef struct
 
     char *input_buffer;
     int input_size;
+    char *vorbis_buffer;
 
     char *output_buffer;
     int output_size;
