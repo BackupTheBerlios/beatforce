@@ -31,6 +31,7 @@
 #include "llist.h"
 #include "theme.h"
 #include "songdb.h"
+#include "clock.h"
 
 #define MODULE_ID FILEWINDOW
 #include "debug.h"
@@ -42,7 +43,7 @@ void *TableFilesInDirectory;
 void *TableDirectories;
 void *wLabel1;
 void *wLabel2;
-
+void *timewidget;
 
 BFList *dirs;
 BFList *songs;
@@ -57,6 +58,7 @@ char directory[255];
 SDL_Surface *Window_CreateFileWindow();
 int FILEWINDOW_EventHandler(SDL_Event event);
 void FILEWINDOW_GetFilesInDirectory(int row,int column,char *string);
+static int FILEWINDOW_NotifyHandler(Window *Win);
 
 /* Local callback functions */
 void FileWindow_DirSelectClicked(void *data);
@@ -77,7 +79,7 @@ static void FILEWINDOW_GetFilesInSubgroup(int row,int column,char *string);
 
 static void FILEWINDOW_GetSelectedSubgroup(struct SongDBSubgroup **sel_sg);
 
-Window gFILEWINDOW={ FILEWINDOW_EventHandler };
+Window gFILEWINDOW={ FILEWINDOW_EventHandler , FILEWINDOW_NotifyHandler };
 
 
 
@@ -104,6 +106,11 @@ void FILEWINDOW_Open()
     }
     SDL_WidgetPropertiesOf(TableSubgroup,ROWS, SONGDB_GetSubgroupCount());
     WNDMGR_Open(&gFILEWINDOW);
+}
+static int FILEWINDOW_NotifyHandler(Window *Win)
+{
+    CLOCK_Redraw(timewidget);
+    return 1;
 }
 
 static void FILEWINDOW_RenameSubgroupFinished()
@@ -587,7 +594,7 @@ SDL_Surface *Window_CreateFileWindow()
 
     while(Table)
     {
-        switch(Table->contents)
+        switch(Table->ContentType)
         {
 
         case CONTENTS_SUBGROUPS:
@@ -645,6 +652,8 @@ SDL_Surface *Window_CreateFileWindow()
         Table=Table->next;
     }
 
+    timewidget=CLOCK_Create(fw->Clock);
+    
     sprintf(directory,"/");
     files=OSA_FindFiles(directory,".mp3",0);
 

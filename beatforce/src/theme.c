@@ -39,6 +39,12 @@
 #define MODULE_ID THEME
 #include "debug.h"
 
+
+/* Help function */
+static int StorePropertyAsString(xmlNodePtr cur,char *property,char **string);
+static int StorePropertyAsShort(xmlNodePtr cur,char *property,short *value);
+static void RebuildFilename(char **string);
+
 /* Widget Parser */
 ThemeImage  *XML_ParseImage(ThemeImage *image,xmlDocPtr doc, xmlNodePtr cur);
 ThemeFont   *XML_ParseFont(xmlDocPtr doc, xmlNodePtr cur);
@@ -124,7 +130,7 @@ int THEME_Init()
     while(dir)
     {
         char path[255];
-        sprintf(path,"%s/skin.xml",dir->data);
+        sprintf(path,"%s/skin.xml",(char*)dir->data);
         doc = xmlParseFile(path);
         if (doc)
             break;
@@ -211,14 +217,12 @@ int THEME_Init()
         }
         active=current;
     }
-
-    
-return 1;
+    return 1;
 }
 
 ThemeConfig *THEME_GetActive()
 {
-return active;
+    return active;
 }
 
 int StorePropertyAsInt(xmlNodePtr cur,char *property,int *value)
@@ -234,7 +238,7 @@ int StorePropertyAsInt(xmlNodePtr cur,char *property,int *value)
     return 0;
 }
 
-int StorePropertyAsShort(xmlNodePtr cur,char *property,short *value)
+static int StorePropertyAsShort(xmlNodePtr cur,char *property,short *value)
 {
     int retval;
     xmlChar *key;
@@ -250,7 +254,7 @@ int StorePropertyAsShort(xmlNodePtr cur,char *property,short *value)
     return 0;
 }
 
-int StorePropertyAsString(xmlNodePtr cur,char *property,char **string)
+static int StorePropertyAsString(xmlNodePtr cur,char *property,char **string)
 {
     xmlChar *key;
     key = xmlGetProp(cur, property);
@@ -263,7 +267,7 @@ int StorePropertyAsString(xmlNodePtr cur,char *property,char **string)
     return 0;
 }
 
-void RebuildFilename(char **string)
+static void RebuildFilename(char **string)
 {
     char filename[255];
 
@@ -291,6 +295,10 @@ ThemeFileWindow *XML_ParseFilewindow(xmlDocPtr doc, xmlNodePtr cur)
 
         while (cur != NULL) 
         {
+            if ((!xmlStrcmp(cur->name, (const xmlChar *)"clock"))) 
+            {
+                filewindow->Clock=XML_ParseClock(doc,cur);
+            }
             if ((!xmlStrcmp(cur->name, (const xmlChar *)"image"))) 
             {
                 filewindow->Image=XML_ParseImage(filewindow->Image,doc,cur);
@@ -941,13 +949,13 @@ ThemeTable *XML_ParseTable(ThemeTable *table,xmlDocPtr doc, xmlNodePtr cur)
         if(contents)
         {
             if(!strcmp(contents,"SUBGROUPS"))
-                table->contents=CONTENTS_SUBGROUPS;
+                table->ContentType=CONTENTS_SUBGROUPS;
             if(!strcmp(contents,"FILESINDIRECTORY"))
-                table->contents=CONTENTS_FILESINDIRECTORY;
+                table->ContentType=CONTENTS_FILESINDIRECTORY;
             if(!strcmp(contents,"FILESINSUBGROUP"))
-                table->contents=CONTENTS_FILESINSUBGROUP;
+                table->ContentType=CONTENTS_FILESINSUBGROUP;
             if(!strcmp(contents,"DIRECTORIES"))
-                table->contents=CONTENTS_DIRECTORIES;
+                table->ContentType=CONTENTS_DIRECTORIES;
             free(contents);
         }
     }
@@ -973,13 +981,13 @@ ThemeTable *XML_ParseTable(ThemeTable *table,xmlDocPtr doc, xmlNodePtr cur)
         if(contents)
         {
             if(!strcmp(contents,"SUBGROUPS"))
-                last->next->contents=CONTENTS_SUBGROUPS;
+                last->next->ContentType=CONTENTS_SUBGROUPS;
             if(!strcmp(contents,"FILESINDIRECTORY"))
-                last->next->contents=CONTENTS_FILESINDIRECTORY;
+                last->next->ContentType=CONTENTS_FILESINDIRECTORY;
             if(!strcmp(contents,"FILESINSUBGROUP"))
-                last->next->contents=CONTENTS_FILESINSUBGROUP;
+                last->next->ContentType=CONTENTS_FILESINSUBGROUP;
             if(!strcmp(contents,"DIRECTORIES"))
-                last->next->contents=CONTENTS_DIRECTORIES;
+                last->next->ContentType=CONTENTS_DIRECTORIES;
             free(contents);
         }
     }

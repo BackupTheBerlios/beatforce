@@ -98,11 +98,6 @@ int mixer_finalize ()
     return 0;
 }
 
-int MIXER_SetCallback(void *callback)
-{
-    return 1;
-}
-
 int MIXER_Mute (int ch, int mute)
 {
     return AUDIOOUTPUT_Mute (ch, mute);

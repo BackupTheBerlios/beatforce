@@ -53,7 +53,7 @@ int PLAYLIST_Init (int player_nr)
     no_of_entries=0;
     playlist[0]=NULL;
     playlist[1]=NULL;
-    return 0;
+    return 1;
 }
 
 int PLAYLIST_GetNoOfEntries(int player_nr)

@@ -158,7 +158,10 @@ typedef struct ThemeTable
     SDL_Rect Rect;
     int Rows;
     int Columns;
-    int contents;
+    int ContentType;
+    char *ScrollbarButton; /* Filename of the scrollbarbutton */
+    char *ScrollbarLine;   /* Filename of the scrollbarline   */
+    
     struct ThemeColumn *Column;
     struct ThemeTable *next;
 }ThemeTable;
@@ -238,6 +241,7 @@ typedef struct ThemeSearchWindow
 
 typedef struct ThemeFileWindow
 {
+    ThemeClock  *Clock;    
     ThemeTable  *Table;
     ThemeImage  *Image;
     ThemeText   *Text;

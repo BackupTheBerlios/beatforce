@@ -284,7 +284,7 @@ int player_load (int player_nr)
         ERROR("Invalid parameters");
         return 0;
     }
-
+    
     if(p->current_plugin == NULL ||INPUT_CloseFile(p->current_plugin))
     {
         p->State = PLAYER_PAUSE;

@@ -22,7 +22,7 @@
 
 #include "theme.h"
 
-void PLAYLISTUI_CreateWindow(ThemePlaylist *pl);
-void PLAYLISTUI_Redraw();
+void* PLAYLISTUI_CreateWindow(ThemePlaylist *pl);
+void PLAYLISTUI_Redraw(void *w);
 
 #endif /* __PLAYLIST_UI_H__ */

@@ -33,14 +33,46 @@
 
 #define PLAYER1 0
 
-int previous;
+//int previous;
 
 #define MODULE_ID PLAYLIST_UI
 #include "debug.h"
 
-void *waitlist;
 
-void playliststring(long row,int column,char *dest)
+static void PLAYLISTUI_GetEntry(long row,int column,char *dest);
+static void PLAYLISTUI_EntryClicked(SDL_Table *table,SDL_Event *event);
+
+void* PLAYLISTUI_CreateWindow(ThemePlaylist *pl)
+{
+    void *pui = NULL;
+
+    if(pl == NULL)
+        return pui;
+
+    if(pl)
+    {
+        pui=SDL_WidgetCreateR(SDL_TABLE,pl->Table->Rect);
+        SDL_WidgetProperties(SET_VISIBLE_ROWS,    16);
+        SDL_WidgetProperties(SET_VISIBLE_COLUMNS, 1);
+//        SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
+        SDL_WidgetProperties(SET_BG_COLOR,TRANSPARANT);
+        SDL_WidgetProperties(SET_FG_COLOR,WHITE);
+        SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
+        SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION, PLAYLISTUI_GetEntry);
+        SDL_WidgetProperties(SET_IMAGE,IMG_Load(THEME_DIR"/beatforce/tablescrollbar.bmp"));
+        SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,PLAYLISTUI_EntryClicked,NULL);
+    }
+    return pui;
+}
+
+
+
+void PLAYLISTUI_Redraw(void *widget)
+{
+    SDL_WidgetPropertiesOf(widget,ROWS,PLAYLIST_GetNoOfEntries(PLAYER1));
+}
+
+static void PLAYLISTUI_GetEntry(long row,int column,char *dest)
 {
     struct PlEntry *pe;
     struct SongDBEntry *e;
@@ -74,7 +106,7 @@ void playliststring(long row,int column,char *dest)
     }
 }
 
-void playlisteventhandler(SDL_Table *table,SDL_Event *event)
+static void PLAYLISTUI_EntryClicked(SDL_Table *table,SDL_Event *event)
 {
     int player=0;// is playing ?
     struct PlEntry *pl;
@@ -110,29 +142,4 @@ void playlisteventhandler(SDL_Table *table,SDL_Event *event)
 }
 
 
-void PLAYLISTUI_CreateWindow(ThemePlaylist *pl)
-{
-    if(pl == NULL)
-        return;
 
-    if(pl)
-    {
-        waitlist=SDL_WidgetCreateR(SDL_TABLE,pl->Table->Rect);
-        SDL_WidgetProperties(SET_VISIBLE_ROWS,    16);
-        SDL_WidgetProperties(SET_VISIBLE_COLUMNS, 1);
-//        SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
-        SDL_WidgetProperties(SET_BG_COLOR,TRANSPARANT);
-        SDL_WidgetProperties(SET_FG_COLOR,WHITE);
-        SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
-        SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION, playliststring);
-        SDL_WidgetProperties(SET_IMAGE,IMG_Load(THEME_DIR"/beatforce/tablescrollbar.bmp"));
-        SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,playlisteventhandler,NULL);
-    }
-}
-
-
-
-void PLAYLISTUI_Redraw()
-{
-    SDL_WidgetPropertiesOf(waitlist,ROWS,PLAYLIST_GetNoOfEntries(PLAYER1));
-}

@@ -22,6 +22,7 @@
 #include <SDL/SDL.h>
 #include <SDL_Widget.h>
 #include <SDL_Table.h>
+#include <malloc.h>
 
 #include "songdb_ui.h"
 #include "player_ui.h"
@@ -39,7 +40,7 @@
 #include "theme.h"
 #include "clock.h"
 
-
+#include "main_window.h"
 #include "wndmgr.h"
 #include "search_window.h"
 
@@ -49,10 +50,7 @@ static int MAINWINDOW_NotifyHandler(Window *Win);
 static SDL_Surface *MAINWINDOW_CreateWindow();
 static int MAINWINDOW_KeyHandler(unsigned int key);
 
-SDL_Surface *MainWindow;
-void *timewidget;
-
-Window MAINWINDOW={ MAINWINDOW_EventHandler , MAINWINDOW_NotifyHandler , NULL };
+Window MAINWINDOW={ MAINWINDOW_EventHandler , MAINWINDOW_NotifyHandler , NULL, NULL };
 
 #define BF_CONTROL         0xf000
 #define BF_QUIT            SDLK_ESCAPE
@@ -64,22 +62,24 @@ Window MAINWINDOW={ MAINWINDOW_EventHandler , MAINWINDOW_NotifyHandler , NULL };
 
 void MAINWINDOW_Init()
 {
-    MainWindow = NULL;
+
 }
 
 
 void MAINWINDOW_Open()
 {
-    if(MainWindow == NULL)
+    if(MAINWINDOW.Surface == NULL)
     {
-        MainWindow=MAINWINDOW_CreateWindow();
+        MainwindowWidgets *widgets;
+        widgets=malloc(sizeof(MainwindowWidgets));
+        MAINWINDOW.Surface=MAINWINDOW_CreateWindow(widgets);
+        MAINWINDOW.TransferData=widgets;
     }
-    SDL_WidgetUseSurface(MainWindow);
-    MAINWINDOW.TransferData=timewidget;
+    SDL_WidgetUseSurface(MAINWINDOW.Surface);
     WNDMGR_Open(&MAINWINDOW);
 }
 
-static SDL_Surface *MAINWINDOW_CreateWindow()
+static SDL_Surface *MAINWINDOW_CreateWindow(MainwindowWidgets *w)
 {
     SDL_Surface       *MainWindow;
     ThemeConfig       *tc = THEME_GetActive();
@@ -112,14 +112,13 @@ static SDL_Surface *MAINWINDOW_CreateWindow()
         Image=Image->next;
     }
 
-    timewidget=CLOCK_Create(mw->Clock);
-
+    w->Clock=CLOCK_Create(mw->Clock);
 
     SONGDBUI_CreateWindow(mw->Songdb);
-    PLAYLISTUI_CreateWindow(mw->Playlist);
+    w->Playlist=PLAYLISTUI_CreateWindow(mw->Playlist);
     PLAYERUI_CreateWindow(0,mw->Player[0]);
     PLAYERUI_CreateWindow(1,mw->Player[1]);
-    MIXERUI_CreateWindow(mw->Mixer);
+    w->Mixer=MIXERUI_CreateWindow(mw->Mixer);
     
     return MainWindow;
 }
@@ -221,11 +220,12 @@ int MAINWINDOW_KeyHandler(unsigned int key)
 
 static int MAINWINDOW_NotifyHandler(Window *Win)
 {
-    CLOCK_Redraw(Win->TransferData);
-    MIXERUI_Redraw();
+    MainwindowWidgets *w=(MainwindowWidgets*)Win->TransferData;
+    CLOCK_Redraw(w->Clock);
+    MIXERUI_Redraw(w->Mixer);
     PLAYERUI_Redraw();
     SONGDBUI_Redraw();
-    PLAYLISTUI_Redraw();
+    PLAYLISTUI_Redraw(w->Playlist);
 
     return 1;
 }

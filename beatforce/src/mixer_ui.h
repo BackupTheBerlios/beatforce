@@ -20,8 +20,17 @@
 #ifndef __MIXER_UI_H__
 #define __MIXER_UI_H__
 
-void MIXERUI_CreateWindow(ThemeMixer *tm);
-void MIXERUI_Redraw();
+#include "theme.h" 
+
+typedef struct MixerWidgets
+{
+    void *Fader;
+    void *MainVolumeIndicator;
+    void *MainVolume;
+}MixerWidgets;
+
+void *MIXERUI_CreateWindow(ThemeMixer *tm);
+int   MIXERUI_Redraw(void *w);
 
 /* for main window */
 int MIXERUI_DecreaseMainVolume();
