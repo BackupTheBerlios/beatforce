@@ -21,12 +21,14 @@
 #ifndef __MAIN_WINDOW_H__
 #define __MAIN_WINDOW_H__
 
+#include "SDLTk.h"
+
 typedef struct MainwindowWidgets
 {
-    void *Clock;
-    void *Playlist;
-    void *Mixer;
-    void *Songdb;
+    SDL_Widget *Clock;
+    SDL_Widget *Playlist;
+    SDL_Widget *Mixer;
+    SDL_Widget *Songdb;
 }MainwindowWidgets;
 
 

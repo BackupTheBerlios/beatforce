@@ -23,9 +23,7 @@
 #include <string.h>
 
 #include <SDL/SDL.h>
-#include <SDL_Window.h>
-#include <SDL_Font.h>
-#include <SDL_Table.h>
+#include <SDLTk.h>
 
 #include "songdb_ui.h"
 #include "player_ui.h"
@@ -43,14 +41,14 @@
 
 
 
-void *editwidget;
-void *tablewidget;
+SDL_Widget *editwidget;
+SDL_Widget *tablewidget;
 
 static SDL_Surface *SEARCHWINDOW_Create();
 static void SEARCHWINDOW_Search(void *data); /* This function is called when any key is pressed */
 void searchwindow_PlayClicked(void *data);
 void searchwindow_Play(void *data);
-void songdb_searchstring(long row,int column,char *dest);
+void songdb_searchstring(long row,char *dest);
 int SEARCHWINDOW_EventHandler(SDL_Event event);
 
 SDL_Window SEARCHWINDOW={ SEARCHWINDOW_EventHandler , NULL, NULL,NULL};
@@ -94,14 +92,26 @@ static SDL_Surface *SEARCHWINDOW_Create()
     }
 
     tablewidget=SDL_WidgetCreate(SDL_TABLE,12,50,1000,540);
-    SDL_WidgetPropertiesOf(tablewidget,SET_VISIBLE_ROWS,    36);
     SDL_WidgetPropertiesOf(tablewidget,SET_VISIBLE_COLUMNS, 1);
     SDL_WidgetPropertiesOf(tablewidget,SET_BG_COLOR,0x93c0d5);
-//    SDL_WidgetProperties(ROWS,SONGDB_GetNoOfEntries());
     SDL_WidgetPropertiesOf(tablewidget,SET_FONT,THEME_Font("normal"));
-    SDL_WidgetPropertiesOf(tablewidget,SET_DATA_RETREIVAL_FUNCTION,songdb_searchstring);
     SDL_WidgetPropertiesOf(tablewidget,SET_CALLBACK,SDL_CLICKED,searchwindow_PlayClicked,NULL);
     SDL_WidgetPropertiesOf(tablewidget,SET_IMAGE,IMG_Load(THEME_DIR"/beatforce/tablescrollbar.jpg"));
+
+    {
+        char *string[1];
+        int i;
+
+        string[0]=malloc(255);
+        
+        for(i=0;i<SONGDB_GetNoOfSearchResults();i++)
+        {
+            songdb_searchstring(i,string[0]);
+            SDL_TableAddRow(tablewidget,string);
+        }
+        free(string[0]);
+
+    }
 
     editwidget=SDL_WidgetCreate(SDL_EDIT,312,20,400,25);
     SDL_WidgetPropertiesOf(editwidget,SET_FONT,THEME_Font("normal"));
@@ -124,7 +134,6 @@ int SEARCHWINDOW_EventHandler(SDL_Event event)
         case SDLK_ESCAPE:
             SDL_WidgetPropertiesOf(editwidget,SET_CAPTION,"");
             SONGDB_FindEntry("");
-            //SDL_WidgetPropertiesOf(tablewidget,ROWS,SONGDB_GetNoOfSearchResults());
             SDL_WindowClose();
 
             break;
@@ -243,7 +252,7 @@ void searchwindow_Play(void *data)
     }
 }
 
-void songdb_searchstring(long row,int column,char *dest)
+void songdb_searchstring(long row,char *dest)
 {
     struct SongDBEntry *e;
 
@@ -261,18 +270,13 @@ void songdb_searchstring(long row,int column,char *dest)
     dest[0]='\0';
     if(e)
     {
-        switch(column)
+        if(e->artist && e->title)
         {
-        case 0:
-            if(e->artist && e->title)
-            {
-                sprintf(dest,"%s - %s",e->artist,e->title);
-            }
-            else
-            {
-                sprintf(dest,"%s",strrchr(e->filename,'/')+1);
-            }
-            break;
+            sprintf(dest,"%s - %s",e->artist,e->title);
+        }
+        else
+        {
+            sprintf(dest,"%s",strrchr(e->filename,'/')+1);
         }
     }
 }

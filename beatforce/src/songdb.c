@@ -263,6 +263,12 @@ int SONGDB_AddFileToSubgroup(struct SongDBSubgroup *sg,char *filename)
         struct SongDBEntry *e;
         struct SongDBEntry *Playlist;
         
+        if(PLAYER_GetData(0) ==  NULL)
+        {
+            ERROR("No player registred yet");
+            return 0;
+        }
+        
         if (INPUT_WhoseFile (PLAYER_GetData(0)->ip_plugins, filename) != NULL)
         {
             e = SONGDB_AllocEntry ();

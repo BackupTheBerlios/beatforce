@@ -142,6 +142,7 @@ int MIXERUI_Redraw(void *w)
     int volume;
     double value=0.0;
     int state;
+
     MixerWidgets *mw=(MixerWidgets*)w;
 
     AUDIOOUTPUT_GetMainVolume(&volume);    

@@ -62,12 +62,9 @@ int main(int argc, char *argv[])
     
     AUDIOOUTPUT_Init ();
     EFFECT_Init();
-    
     MIXER_Init  ();
-    PLAYER_Init (0);
-    PLAYER_Init (1);
     SAMPLER_Init();
-    SONGDB_Init ();
+
 
 
 //    OSACDROM_Init();

@@ -25,9 +25,9 @@
 #define MODULE_ID CLOCK
 #include "debug.h"
 
-void *CLOCK_Create(ThemeClock *Clock)
+SDL_Widget *CLOCK_Create(ThemeClock *Clock)
 {
-    void *widget=NULL;
+    SDL_Widget *widget=NULL;
     
     TRACE("CLOCK_Create");
     
@@ -42,7 +42,7 @@ void *CLOCK_Create(ThemeClock *Clock)
 }
 
 
-void CLOCK_Redraw(void *clock)
+void CLOCK_Redraw(SDL_Widget *clock)
 {
     char time[6];
     int min=0,hour=0;

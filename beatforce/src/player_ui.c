@@ -90,7 +90,6 @@ static void PLAYERUI_HidePlayer(void *data)
             SDL_WidgetPropertiesOf(l->data,SET_VISIBLE,0);        
             l=l->next;
         }
-        SDL_WidgetForceRedraw(NULL);
     }
     else
     {
@@ -128,7 +127,10 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
 
     if(pt == NULL)
         return;
-    
+
+    /* Initialize the player functionality */
+    PLAYER_Init(nr);
+
     Image     = pt->Image;
     Button    = pt->Button;
     Text      = pt->Text;

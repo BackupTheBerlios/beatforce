@@ -48,11 +48,12 @@
 
 int control_state;
 static int MAINWINDOW_EventHandler(SDL_Event event);
-static int MAINWINDOW_NotifyHandler(SDL_Window *Win);
 static SDL_Surface *MAINWINDOW_CreateWindow();
 static int MAINWINDOW_KeyHandler(unsigned int key);
+static int MAINWINDOW_RedrawTimeout();
 
-SDL_Window MAINWINDOW={ MAINWINDOW_EventHandler , MAINWINDOW_NotifyHandler , NULL, NULL };
+SDL_Window MAINWINDOW={ MAINWINDOW_EventHandler , NULL , NULL, NULL };
+MainwindowWidgets *widgets;
 
 #define BF_CONTROL         0xf000
 #define BF_QUIT            SDLK_ESCAPE
@@ -66,7 +67,7 @@ void MAINWINDOW_Open()
 {
     if(MAINWINDOW.Surface == NULL)
     {
-        MainwindowWidgets *widgets;
+        
         widgets=malloc(sizeof(MainwindowWidgets));
         MAINWINDOW.Surface=MAINWINDOW_CreateWindow(widgets);
         MAINWINDOW.TransferData=widgets;
@@ -111,16 +112,19 @@ static SDL_Surface *MAINWINDOW_CreateWindow(MainwindowWidgets *w)
         Image=Image->next;
     }
 
+
     w->Clock=CLOCK_Create(mw->Clock);
 
-    w->Songdb=SONGDBUI_CreateWindow(mw->Songdb);
-//    w->Playlist=PLAYLISTUI_CreateWindow(mw->Playlist);
+    w->Playlist=PLAYLISTUI_CreateWindow(mw->Playlist);
     PLAYERUI_CreateWindow(0,mw->Player[0]);
     PLAYERUI_CreateWindow(1,mw->Player[1]);
-    w->Mixer=MIXERUI_CreateWindow(mw->Mixer);
-    
+
+    w->Mixer = MIXERUI_CreateWindow(mw->Mixer);
+
+    w->Songdb = SONGDBUI_CreateWindow(mw->Songdb);    
 //    SDL_WidgetCreate(SDL_BUTTON,450,100,20,20);
 //    SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,configopen,NULL);
+    OSA_StartTimer(60,MAINWINDOW_RedrawTimeout,NULL);
 
     return MainWindow;
 }
@@ -222,7 +226,6 @@ int MAINWINDOW_KeyHandler(unsigned int key)
                     Handled=1;
                 }
             }
-
         }
         break;
 
@@ -231,16 +234,16 @@ int MAINWINDOW_KeyHandler(unsigned int key)
     return Handled;
 }
 
-static int MAINWINDOW_NotifyHandler(SDL_Window *Win)
+static int MAINWINDOW_RedrawTimeout()
 {
-    MainwindowWidgets *w=(MainwindowWidgets*)Win->TransferData;
-    CLOCK_Redraw(w->Clock);
-    MIXERUI_Redraw(w->Mixer);
-    PLAYERUI_Redraw();
-    SONGDBUI_Redraw(w->Songdb);
-    PLAYLISTUI_Redraw(w->Playlist);
 
-    return 1;
+    CLOCK_Redraw(widgets->Clock);
+    MIXERUI_Redraw(widgets->Mixer);
+    PLAYERUI_Redraw();
+    SONGDBUI_Redraw(widgets->Songdb);
+    PLAYLISTUI_Redraw(widgets->Playlist);
+
+    return 60;
 }
 
 

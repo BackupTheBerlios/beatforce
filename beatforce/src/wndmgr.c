@@ -62,7 +62,7 @@ void WNDMGR_Init()
     }
     else
     {
-        flags |= SDL_SWSURFACE;
+        flags |= SDL_HWSURFACE;
         flags |= SDL_DOUBLEBUF;
     }
 

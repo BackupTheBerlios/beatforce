@@ -98,7 +98,6 @@ void FILEWINDOW_Open()
     {
         gFILEWINDOW.Surface=Window_CreateFileWindow();
     }
-//    SDL_WidgetPropertiesOf(TableSubgroup,ROWS, SONGDB_GetSubgroupCount());
     SDL_WindowOpen(&gFILEWINDOW);
 }
 static int FILEWINDOW_NotifyHandler(SDL_Window *Win)

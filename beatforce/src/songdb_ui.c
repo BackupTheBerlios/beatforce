@@ -60,7 +60,10 @@ void eventhandler(SDL_Table *table)
 
     /* Get the current playlist entry */
     e = SONGDB_GetEntryID(table->CurrentRow);
-    PLAYLIST_AddEntry(0,e);
+    printf("%s\n",e->filename);
+    PLAYER_Load(0,e);
+//    PLAYLIST_AddEntry(0,e);
+    PLAYER_Play(0);
 }
 
 void testplay(SDL_Table *table)
@@ -90,6 +93,7 @@ void *SONGDBUI_CreateWindow(ThemeSongdb *ts)
     Button=ts->Button;
     Widgets=sw;
 
+    SONGDB_Init ();
     if(ts)
     {
         /* Create the large table (songdb)*/
@@ -113,6 +117,7 @@ void *SONGDBUI_CreateWindow(ThemeSongdb *ts)
             for(c=0;c<3;c++)
                 titles[c]=malloc(255);
 
+            printf("%d\n",SONGDB_GetNoOfEntries());
             for(r=0;r< SONGDB_GetNoOfEntries();r++)
             {
                 for(c=0;c<3;c++)

@@ -20,9 +20,10 @@
 #ifndef __CLOCK_H__
 #define __CLOCK_H__
 
-#include "theme.h"
 
-void *CLOCK_Create();
-void CLOCK_Redraw(void *clock);
+#include "SDLTk.h" 
+
+SDL_Widget *CLOCK_Create();
+void CLOCK_Redraw(SDL_Widget *clock);
 
 #endif /* __CLOCK_H__ */
