@@ -47,10 +47,12 @@
 SDL_Surface *screen;
 SDL_Surface *MainWindow;
 
-
- 
 SDL_Font *LargeBoldFont;
 SDL_Font *DigitsFont;
+
+/* Local prototypes */
+int mainui_Redraw(void *data);
+
 
 void MAINUI_CloseWindow(SDL_Surface *surface)
 {
@@ -93,12 +95,6 @@ void MAINUI_CreateWindow()
 }
 
 
-int timerredraw(void *data)
-{
-    SDL_DrawAllWidgets(screen);
-    return 50;
-}
-
 int MAINUI_Main(void * data)
 {
     int quit = 0;
@@ -106,7 +102,7 @@ int MAINUI_Main(void * data)
     int timer;
     int retval=0;
 
-    timer=OSA_StartTimer(50,timerredraw,NULL);
+    timer=OSA_StartTimer(50,mainui_Redraw,NULL);
 
     while(!quit)
     {
@@ -124,11 +120,8 @@ int MAINUI_Main(void * data)
                 case SDLK_ESCAPE:
                     if(SDL_WidgetGetActiveSurface() == MainWindow)
                         quit=1;
-                    else //if(Window_SearchWindowActive())
-                    {
+                    else
                         SDL_WidgetUseSurface(MainWindow);
-                    }
-
                     break;
                 
                 default:
@@ -147,7 +140,7 @@ int MAINUI_Main(void * data)
             else
                 retval=0;
         }   
-        SDL_Delay(25);
+        SDL_Delay(25); /* To reduce CPU load */
     }
 
     OSA_RemoveTimer(timer);
@@ -157,6 +150,12 @@ int MAINUI_Main(void * data)
 
 
 
+int mainui_Redraw(void *data)
+{
+//    mainui_NotifyRedraw();
+    SDL_DrawAllWidgets(screen);
+    return 50; //redraw every 50ms 
+}
 
 
 
