@@ -8,6 +8,7 @@ Import('env')
 
 env.Append(CCFLAGS = '-I/usr/include/qt/') 
 env.Append(CCFLAGS = '-I/usr/share/qt/include/') 
+env.Append(CCFLAGS = '-I/usr/lib/qt3/include/') 
 env.StaticLibrary("ui",['ui.cc'],LIBS= ['qt'])
 
 
