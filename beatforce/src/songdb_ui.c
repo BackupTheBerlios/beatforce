@@ -63,22 +63,10 @@ void *tabwidget;
 void eventhandler(SDL_Table *table)
 {
     struct SongDBEntry * e;
-    int player=0;// is playing ?
 
     /* Get the current playlist entry */
     e = SONGDB_GetEntry(table->CurrentRow);
-    if(PLAYER_IsPlaying(0))
-        player=1;
-
-    if(PLAYER_IsPlaying(1))
-    {
-        if(player!=1)
-            player=0;
-    }
-    PLAYLIST_SetEntry(player,e);
-    player_set_song(player,0);  // when set_entry is excecuted we only have 1 item thus 0
-//    UI_PlayerSetArtistTitle(player);
-    
+    PLAYLIST_SetEntry(0,e);
 }
 
 void SONGDBUI_CreateWindow(ThemeSongdb *ts)

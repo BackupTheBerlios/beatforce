@@ -127,10 +127,14 @@ int PLAYLIST_Remove(int player_nr,long songdb_id)
             if(pe)
                 pe->next=newlist->next;
             else
-                newlist=NULL;
-            playlist_FreeEntry(newlist);
+            {
+                if(newlist->next)
+                    newlist=newlist->next;
+                else
+                    newlist=NULL;
+            }
+//            playlist_FreeEntry(newlist);
             no_of_entries--;
-            printf("No Of entries %ld\n",no_of_entries);
             break;
         }
         pe=newlist;

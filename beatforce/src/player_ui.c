@@ -282,16 +282,27 @@ void playerui_UpdateTime(int player)
         struct SongDBEntry * e;
         if(!MIXER_FadeInProgress())
         {
-            long id;
-            PLAYER_GetPlayingID(player,&id);
-            id++;
-            e=SONGDB_GetEntry(id);
-            PLAYLIST_SetEntry(!player,e);
-            player_set_song(!player,0);  /* when set_entry is excecuted we only have 1 item thus 0 */
-            MIXER_DoFade(1,0);
-            totaltime = 0;
-            timeleft  = 0;
-            time      = 0;
+            if(PLAYLIST_GetSong(player,0))
+            {
+                player_set_song(!player,0);
+                MIXER_DoFade(1,0);
+                totaltime = 0;
+                timeleft  = 0;
+                time      = 0;
+            }
+            else
+            {
+                long id;
+                PLAYER_GetPlayingID(player,&id);
+                id++;
+                e=SONGDB_GetEntry(id);
+                PLAYLIST_SetEntry(!player,e);
+                player_set_song(!player,0);  /* when set_entry is excecuted we only have 1 item thus 0 */
+                MIXER_DoFade(1,0);
+                totaltime = 0;
+                timeleft  = 0;
+                time      = 0;
+            }
             
         }
     }
