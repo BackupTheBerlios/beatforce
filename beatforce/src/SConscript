@@ -86,7 +86,7 @@ elif env['ui'] == 'qt':
                         'plugin.c',
                         'configfile.c'
                 ],
-                        LIBS=['m','SDL','fftw3','xml2','ui','qt'],
+                        LIBS=['m','SDL','fftw3','xml2','ui','qt-mt'],
                         LIBPATH=['/usr/lib/qt3/lib/','ui/qt/'])      
 
 
