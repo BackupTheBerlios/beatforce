@@ -24,26 +24,6 @@
 
 
 BFList*
-LLIST_Combine(BFList *list1,BFList *list2)
-{
-    BFList *temp;
-
-    if(list1)
-    {
-        temp=list1;
-        
-        while(temp->next)
-            temp=temp->next;
-        
-        
-        temp->next=list2;
-        return list1;
-    }
-    else
-        return list2;
-}
-
-BFList*
 LLIST_Prepend (BFList   *list,
 		 void* data)
 {

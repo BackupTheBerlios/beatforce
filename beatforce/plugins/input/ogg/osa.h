@@ -17,23 +17,36 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-#ifndef __BFLIST_H__
-#define __BFLIST_H__
+#include "llist.h"
 
-typedef struct BFList
-{
-    void *data;        
-    void *next;
-    void *prev;
-}BFList;
+//init
+void OSA_Init();
 
-BFList* LLIST_Combine(BFList *list1,BFList *list2);
+// path settings
+char *OSA_GetConfigDir();
+char *OSA_GetSharedLibExtension();
 
-BFList* LLIST_Prepend (BFList *list,void* data);
-BFList* LLIST_Append  (BFList *list,void* data);
-BFList* LLIST_Remove  (BFList *list,void* data);
+// directory functions
+BFList *OSA_FindFiles(char *dir,char *extension,int recursive);
+BFList *OSA_FindDirectories(char *dir);
 
-BFList* LLIST_Last    (BFList *list);
+// shared library functions
+void   *OSA_LoadLibrary(char *filename);
+void   *OSA_GetFunctionAddress(void *h,char *function);
+void    OSA_CloseLibrary(void *h);
 
-int LLIST_NoOfEntries(BFList *list);
-#endif
+
+// timer functions
+unsigned int OSA_StartTimer(unsigned int interval,void *function,void *data);
+void         OSA_RemoveTimer(unsigned int timer);
+
+//thread functions
+int OSA_CreateThread(int (*fn)(void *), void *data);
+void OSA_RemoveThread(int thread);
+
+
+//File functions (string)
+char *OSA_SearchFilename(char *filepath);
+
+//time function
+int OSA_GetTime(int *hours,int *minutes);

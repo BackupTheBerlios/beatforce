@@ -39,7 +39,7 @@ int SAMPLER_Init()
     SamplerPlugins[1] = INPUT_Init (3, PLUGIN_GetList(PLUGIN_TYPE_INPUT));
     sample=malloc(sizeof(struct SongDBEntry));
     memset(sample,0,sizeof(struct SongDBEntry));
-    sample->filename=strdup("/home/beuving/test.mp3");
+    sample->filename=strdup("/home/beuving/test.ogg");
     return 1;
 }
 

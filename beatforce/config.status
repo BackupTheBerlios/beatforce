@@ -36,6 +36,7 @@ plugins/Makefile
 plugins/input/Makefile
 plugins/input/mp3-mad/Makefile
 plugins/input/cdda/Makefile
+plugins/input/ogg/Makefile
 plugins/output/Makefile
 plugins/output/oss/Makefile
 plugins/output/raw/Makefile
@@ -155,6 +156,7 @@ plugins/Makefile
 plugins/input/Makefile
 plugins/input/mp3-mad/Makefile
 plugins/input/cdda/Makefile
+plugins/input/ogg/Makefile
 plugins/output/Makefile
 plugins/output/oss/Makefile
 plugins/output/raw/Makefile

@@ -27,7 +27,6 @@ typedef struct BFList
     void *prev;
 }BFList;
 
-BFList* LLIST_Combine(BFList *list1,BFList *list2);
 
 BFList* LLIST_Prepend (BFList *list,void* data);
 BFList* LLIST_Append  (BFList *list,void* data);

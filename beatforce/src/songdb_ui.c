@@ -197,7 +197,7 @@ void SONGDBUI_Play(int player_nr)
 static int SONGDBUI_GetHighlightedTab(void *tabwidget)
 {
     SDL_Tab *t;
-    t=(SDL_Tab *)tabwidget;
+    t=(SDL_Tab *)Widgets->Tabs;
     if(t && t->hl)
     {
         return t->hl->index;

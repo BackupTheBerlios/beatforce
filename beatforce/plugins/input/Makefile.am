@@ -1,2 +1,2 @@
 
-SUBDIRS = mp3-mad cdda
+SUBDIRS = mp3-mad cdda ogg

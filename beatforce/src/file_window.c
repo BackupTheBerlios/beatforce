@@ -49,6 +49,8 @@ BFList *dirs;
 BFList *songs;
 BFList *localsongs;
 BFList *files;
+BFList *files2;
+
 BFList *subgroupsongs;
 int change;
 
@@ -440,7 +442,10 @@ static void FILEWINDOW_DirectoryClicked(void *data)
         sprintf(directory,"%s%s",newdir,str);
     }
     files=OSA_FindFiles(directory,".mp3",0);
+    files2=OSA_FindFiles(directory,".ogg",0);
     
+    files=LLIST_Combine(files,files2);
+
     SDL_WidgetPropertiesOf(t,ROWS,nw2);
 
     /* Correct the rowcount for the files in directory table (for scrollbar) */

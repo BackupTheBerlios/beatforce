@@ -852,7 +852,6 @@ mp3_play_loop (void *param)
                            && !(private->seek != -1 && private->length >= 0)
                            && mp3_if.output_buffer_free (private->ch_id) < bytes)
                         SDL_Delay(10);
-                    //beatforce_usleep (10);
 
                     if (!private->going
                         || (private->seek != -1 && private->length >= 0))
@@ -860,7 +859,7 @@ mp3_play_loop (void *param)
 
                     mad_timer_add (&timer, duration);
                     private->position = mad_timer_count (timer, MAD_UNITS_MILLISECONDS);
-
+                    
                     mp3_if.output_write (private->ch_id, output_ptr, bytes);
 
                     output_ptr += bytes;

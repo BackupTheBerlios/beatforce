@@ -81,7 +81,7 @@ STRIP = strip
 THEME_DIR = /usr/share/beatforce/themes
 VERSION = 0.0.1
 
-SUBDIRS = mp3-mad cdda
+SUBDIRS = mp3-mad cdda ogg
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../../config.h
 CONFIG_CLEAN_FILES = 
