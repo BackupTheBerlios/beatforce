@@ -137,25 +137,23 @@ ogg_init (Private ** p, int ch_id)
 
 
     ogg_priv = malloc (sizeof (oggPrivate));
-    if (ogg_priv == NULL)
+    if (NULL == ogg_priv)
     {
         ERROR("Not enough memory");
-	return 0;
+       return 0;
     }
 
     
     memset (ogg_priv, 0, sizeof (oggPrivate));
 
     ogg_priv->input_buffer  = malloc (OGG_INPUT_BUFFER_SIZE);
-    ogg_priv->output_buffer = malloc (OGG_OUTPUT_BUFFER_SIZE);
-    if (!ogg_priv->input_buffer || !ogg_priv->output_buffer)
-    {
-	free (ogg_priv->input_buffer);
-	free (ogg_priv->output_buffer);
-        ERROR("Not enough memory");
-	return 0;
-    }
-    memset (ogg_priv->input_buffer, 0, OGG_INPUT_BUFFER_SIZE);
+     ogg_priv->output_buffer = malloc (OGG_OUTPUT_BUFFER_SIZE);
+     if (!ogg_priv->input_buffer || !ogg_priv->output_buffer)
+     {
+         ERROR("Not enough memory");
+	return (ogg_cleanup((oggPrivate *) ogg_priv));
+     }
+     memset (ogg_priv->input_buffer, 0, OGG_INPUT_BUFFER_SIZE);
     memset (ogg_priv->output_buffer, 0, OGG_OUTPUT_BUFFER_SIZE);
 
     ogg_priv->output_size = OGG_OUTPUT_BUFFER_SIZE;
@@ -166,7 +164,7 @@ ogg_init (Private ** p, int ch_id)
     if (cfg == NULL)
     {
         ERROR("Not enough memory");
-	return 0;
+	return (ogg_cleanup((oggPrivate *) ogg_priv));
     }
     memset (cfg, 0, sizeof (struct config));
     cfg->lengthcalc = 0;
@@ -193,10 +191,15 @@ ogg_cleanup (Private * p)
 {
     oggPrivate *ogg_priv = (oggPrivate *) p;
 
-    if(p == NULL)
-        return 0;
-
+    if (NULL != ogg_priv)
+    {
+        if (NULL != ogg_priv->input_buffer)
+	    free (ogg_priv->input_buffer);
+        if (NULL != ogg_priv->output_buffer)
+	    free (ogg_priv->output_buffer);
     free (ogg_priv);
+    }	
+    if (NULL != cfg)
     free (cfg);
 
     return 0;
@@ -232,7 +235,7 @@ ogg_get_tag (Private * h, char *path, struct SongDBEntry *e)
 
     {
         vobf=malloc(sizeof(OggVorbis_File));
-        fp=fopen("/home/beuving/test.ogg","rb");
+        fp=fopen(path,"rb");
         if(fp == NULL)
             return 0;
         
