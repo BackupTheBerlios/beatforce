@@ -116,23 +116,28 @@ void PLAYLIST_SetEntry(int player_nr, struct SongDBEntry *e)
 int PLAYLIST_Remove(int player_nr,long songdb_id)
 {
     struct PlEntry *newlist = playlist[0];
-    struct PlEntry *pe = newlist;
+    struct PlEntry *pe = NULL;
+
     printf("PLAYLIST_Remove songsb %ld\n",songdb_id);
 
     while(newlist)
     {
         if(newlist->e && newlist->e->id == songdb_id)
         {
-            printf("Found playlist entry\n");
-//            no_of_entries--;
+            if(pe)
+                pe->next=newlist->next;
+            else
+                newlist=NULL;
+            playlist_FreeEntry(newlist);
+            no_of_entries--;
+            printf("No Of entries %ld\n",no_of_entries);
             break;
         }
-
         pe=newlist;
         newlist=newlist->next;
     }
-    playlist[0]=newlist;
 
+    playlist[0]=newlist;
     return 1;
 }
 

@@ -257,11 +257,15 @@ player_track_rf (int player_nr, int rev_forw)
 int PLAYER_Play(int player_nr)
 {
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
-    if(p == NULL)
-        return 0;
 
+    if(p == NULL)
+    {
+        ERROR("No player data available");
+        return 0;
+    }
     if(p->State == PLAYER_PLAY)
     {
+        ERROR("Wrong play state");
         return 0;
     }
 
@@ -274,11 +278,13 @@ int PLAYER_Play(int player_nr)
         }
         else
         {
+            ERROR("Invalid data for decoder");
             return 0; /* Invalid data for decoder */
         }
     }
     else
     {
+        ERROR("No song loaded");
         return 0; /* No song loaded */
     }
     return 1;

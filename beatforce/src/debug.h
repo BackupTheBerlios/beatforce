@@ -30,11 +30,12 @@
 #define OSA          5
 #define OUTPUT       6
 #define PLAYER       7
-#define PLAYLIST     8
-#define PLUGIN       9
-#define SONGDB       10
-#define SONGDB_UI    11
-#define THEME        12
+#define PLAYER_UI    8
+#define PLAYLIST     9
+#define PLUGIN       10
+#define SONGDB       11
+#define SONGDB_UI    12
+#define THEME        13
 
 #define name(x) x
 #define module( x ) ( #x )
@@ -57,6 +58,10 @@ void printid(char *id,int line,char *message);
 #define TRACE_OFF noprint
 #define DEBUG_OFF noprint
 
+#if MODULE_ID == AUDIO_OUTPUT
+#define TRACE TRACE_ON
+#define DEBUG DEBUG_ON
+#endif
 
 #if MODULE_ID == INPUT
 #undef TRACE
@@ -92,6 +97,11 @@ void printid(char *id,int line,char *message);
 #if MODULE_ID == PLAYER
 #undef TRACE
 #undef DEBUG
+#define TRACE TRACE_ON
+#define DEBUG DEBUG_ON
+#endif
+
+#if MODULE_ID == PLAYER_UI
 #define TRACE TRACE_ON
 #define DEBUG DEBUG_ON
 #endif

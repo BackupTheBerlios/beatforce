@@ -94,6 +94,7 @@ int AUDIOOUTPUT_Init (AudioConfig * audio_cfg)
 {
     int i, err;
 
+    TRACE("AUDIO_OUTPUT_Init %d",OUTPUT_N_CHANNELS);
     audiocfg = audio_cfg;
 
     for (i = 0; i < OUTPUT_N_CHANNELS; i++)
@@ -170,6 +171,7 @@ int AUDIOOUTPUT_Init (AudioConfig * audio_cfg)
                          "ALSA: \"hw:0,0\", \"default\"  OSS: \"/dev/dsp\"\n"
                          "(error 0x%x)", i, -err);
                 printf(str);
+                exit(1);
                 return 0;
 
             }
@@ -199,24 +201,12 @@ int AUDIOOUTPUT_Init (AudioConfig * audio_cfg)
 
 
 /* Init output thread */
-{
-/*        pthread_attr_t *attr;
-          attr = malloc (sizeof (pthread_attr_t));
-          if(attr == NULL)
-          return ERROR_NO_MEMORY;
-          pthread_attr_init (attr);
-          pthread_attr_setschedpolicy (attr, SCHED_RR);
-        
-          i = pthread_create (&output_thread, attr, output_loop, NULL);*/
-
     output_thread_stop = 0;
     n_open = 0;
     output_thread=i=OSA_CreateThread(output_loop,NULL);
-}
+   
 
-    
-
-return 0;
+    return 0;
 }
 
 
@@ -441,6 +431,7 @@ int AUDIOOUTPUT_Pause (int c, int pause)
 {
     if (c >= OUTPUT_N_CHANNELS || c < 0)
         return ERROR_UNKNOWN_CHANNEL;
+
     if(ch[c] == NULL)
         return ERROR_INVALID_ARG;
   
@@ -632,7 +623,6 @@ output_loop (void *arg)
         {
             int n_read=0;
 
-            
             /* if channel closed or paused, we don't read anything */
             if (!ch[channel]->open || ch[channel]->paused)
             {

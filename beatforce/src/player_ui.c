@@ -36,6 +36,8 @@
 #include "SDL_Widget.h"
 #include "SDL_ProgressBar.h"
 
+#define MODULE_ID PLAYER_UI
+#include "debug.h"
 
 PlayerDisplay UI_Players[2];
 
@@ -285,7 +287,7 @@ void playerui_UpdateTime(int player)
             id++;
             e=SONGDB_GetEntry(id);
             PLAYLIST_SetEntry(!player,e);
-            player_set_song(!player,0);  // when set_entry is excecuted we only have 1 item thus 0
+            player_set_song(!player,0);  /* when set_entry is excecuted we only have 1 item thus 0 */
             MIXER_DoFade(1,0);
             totaltime = 0;
             timeleft  = 0;
@@ -331,12 +333,13 @@ void playerui_UpdateFileInfo(int player)
 void playerui_PlayButton(void *data)
 {
     PlayerDisplay *current=(PlayerDisplay*)data;
-    
+
+    TRACE("playerui_PlayButton %d",current->PlayerNr);    
+
     if(PLAYER_IsPlaying(current->PlayerNr))
         PLAYER_Pause (current->PlayerNr);
     else
         PLAYER_Play  (current->PlayerNr);
-    
 }
 
 /* Event handler for the progress bar SDL_CLICKED*/
