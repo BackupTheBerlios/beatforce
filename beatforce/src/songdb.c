@@ -664,6 +664,9 @@ static int SONGDB_SaveXMLDatabase()
     char filename[255];
     char time[255];
 
+    if(MainGroup == NULL)
+        return 0;
+
     dir=OSA_GetConfigDir();
     sprintf(filename,"%s/music.xml",dir);
 
@@ -675,6 +678,8 @@ static int SONGDB_SaveXMLDatabase()
     root_node = xmlNewNode(NULL, BAD_CAST "songdb");
     xmlDocSetRootElement(doc, root_node);
 
+
+        
     /* 
      * xmlNewChild() creates a new node, which is "attached" as child node
      * of root_node node. 

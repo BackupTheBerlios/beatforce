@@ -62,7 +62,33 @@ elif env['ui'] == 'gtk':
                         LIBS=['m','SDL','fftw3','SDL_image','xml2','ui','gtk','gdk'],
                         LIBPATH=['/usr/lib/gtk/','ui/gtk/'])      
 elif env['ui'] == 'qt':
-        print "src/Don't forget to copy `qt' to the archive!"
+        print "Using 'qt' as main user interface!"
+        env.SConscript(['ui/qt/SConscript'])    
+        env.Append(CCFLAGS = '-Isrc/ui/qt/')
+        env.Append(CCFLAGS = '-Isrc')
+        env.Append(CCFLAGS = '-I/usr/include/libxml2')
+        env.Program('beatforce',
+                [
+                        'playlist.c',
+                        'songdb.c',
+                        'main.c',
+                        'effect.c',
+                        'player.c',
+                        'mixer.c',
+                        'debug.c',
+                        'osa.c',
+                        'audio_output.c',
+                        'llist.c',
+                        'ringbuffer.c',
+                        'sampler.c',
+                        'input.c',
+                        'output.c',
+                        'plugin.c',
+                        'configfile.c'
+                ],
+                        LIBS=['m','SDL','fftw3','SDL_image','xml2','ui'],
+                        LIBPATH=['/usr/lib/gtk/','ui/qt/'])      
+
 
 
 
