@@ -220,21 +220,21 @@ int drawbdfchar(SDL_Surface *screen,struct BDF_Char *ch,int x, int y,Uint32 colo
         for (endline = bits + ch->wbytes, xx = x; bits < endline; xx += 8, bits++) 
         {
             if ((*bits) & 0x80) 
-                DrawPixel(screen, xx    , y, color);
+                fastPixelColorNolockNoclip(screen, xx    , y, color);
             if ((*bits) & 0x40) 
-                DrawPixel(screen, xx + 1, y, color);
+                fastPixelColorNolockNoclip(screen, xx + 1, y, color);
             if ((*bits) & 0x20) 
-                DrawPixel(screen, xx + 2, y, color);
+                fastPixelColorNolockNoclip(screen, xx + 2, y, color);
             if ((*bits) & 0x10) 
-                DrawPixel(screen, xx + 3, y, color);
+                fastPixelColorNolockNoclip(screen, xx + 3, y, color);
             if ((*bits) & 0x08) 
-                DrawPixel(screen, xx + 4, y, color);
+                fastPixelColorNolockNoclip(screen, xx + 4, y, color);
             if ((*bits) & 0x04) 
-                DrawPixel(screen, xx + 5, y, color);
+                fastPixelColorNolockNoclip(screen, xx + 5, y, color);
             if ((*bits) & 0x02) 
-                DrawPixel(screen, xx + 6, y, color);
+                fastPixelColorNolockNoclip(screen, xx + 6, y, color);
             if ((*bits) & 0x01) 
-                DrawPixel(screen, xx + 7, y, color);
+                fastPixelColorNolockNoclip(screen, xx + 7, y, color);
         }
     }
     return (ch->bbx_xo  + ch->bbx_x) + 1;

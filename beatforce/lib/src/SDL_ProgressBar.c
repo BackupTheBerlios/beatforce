@@ -77,10 +77,6 @@ SDL_Widget* SDL_ProgressBarCreate(SDL_Rect* rect)
     progressbar->OnClicked     = NULL;
     progressbar->OnClickedData = NULL;
 
-    /* Force initial redraw */
-    progressbar->Redraw  = 1;
-    progressbar->Visible = 1;
-
     return (SDL_Widget*)progressbar;
 }
 
@@ -91,27 +87,20 @@ void SDL_ProgressBarDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
     int highlight=0;
     int Maxline=0;
     
-    if(ProgressBar->Visible == 0)
-        return;
-
     if(ProgressBar->Orientation == VERTICAL)
         Maxline = widget->Rect.h;
     else if(ProgressBar->Orientation == HORIZONTAL)
         Maxline = widget->Rect.w;
 
-    if(ProgressBar->Redraw)
-    {
-        SDL_FillRect(dest,&widget->Rect,BLACK);
+    SDL_FillRect(dest,&widget->Rect,BLACK);
 
-        for( line=0; line < Maxline ; line+=2)
-        {
-            highlight= (line < ProgressBar->CurrentLine);
-            if(highlight)
-                ProgressBar_DrawStripe(dest,ProgressBar,line,ProgressBar->color2);
-            else
-                ProgressBar_DrawStripe(dest,ProgressBar,line,ProgressBar->color1);
-        }
-        ProgressBar->Redraw = 0;
+    for( line=0; line < Maxline ; line+=2)
+    {
+        highlight= (line < ProgressBar->CurrentLine);
+        if(highlight)
+            ProgressBar_DrawStripe(dest,ProgressBar,line,ProgressBar->color2);
+        else
+            ProgressBar_DrawStripe(dest,ProgressBar,line,ProgressBar->color1);
     }
 }
 
@@ -142,7 +131,7 @@ int  SDL_ProgressBarProperties(SDL_Widget *widget,int feature,va_list list)
             ProgressBar->CurrentLine  = (val * widget->Rect.w) 
                 / (ProgressBar->MaxValue - ProgressBar->MinValue); 
         }
-        ProgressBar->Redraw       = 1;
+        SDL_WidgetRedrawEvent(widget);
         break;
     case SET_CALLBACK:
     {
@@ -174,12 +163,6 @@ int  SDL_ProgressBarProperties(SDL_Widget *widget,int feature,va_list list)
         }
         break;
     }
-    case SET_VISIBLE:
-        ProgressBar->Visible=va_arg(list,int);
-        break;
-    case FORCE_REDRAW:
-        ProgressBar->Redraw=1;
-        break;
     default:
         break;          
     
@@ -290,7 +273,6 @@ static void ProgressBar_CurrentValue(SDL_ProgressBar * ProgressBar)
     ProgressBar->CurrentValue  = (ProgressBar->MaxValue - ProgressBar->MinValue)*ProgressBar->CurrentLine;
     ProgressBar->CurrentValue /= BarRange;
     ProgressBar->CurrentValue += ProgressBar->MinValue;
-    ProgressBar->Redraw=1;
 }
 
 

@@ -21,8 +21,16 @@
 
 #include <stdio.h>
 #include <malloc.h>
+#include <SDL/SDL.h>
+#include <SDL/SDL_thread.h>
 #include "SDL_Window.h"
 #include "SDL_Widget.h"
+
+typedef struct RectList
+{
+    SDL_Rect *Rect;
+    struct RecList *Next;
+}RectList;
 
 typedef struct WindowList
 {
@@ -45,15 +53,16 @@ SDL_Screen *ScreenList;         /* List of surfaces/screens */
 SDL_Screen *CreateOnStack;      /* This is the screen where the create functions
                                    add widgets to */
 SDL_Screen *ActiveScreen;
+RectList  *DrawQueue;
 
 int SDL_WindowInit(SDL_Surface *s)
 {
     previous_surface = NULL;
     CurrentFocus     = NULL;
-    ScreenList      = NULL;
+    ScreenList       = NULL;
     CreateOnStack    = NULL;
     ActiveScreen     = NULL;
-
+    DrawQueue        = NULL;
     /* Initialize global variables */
     CurWindow       = NULL;
     WindowManager   = NULL;
@@ -99,6 +108,7 @@ SDL_ActiveSurface(SDL_Surface *surface)
         if(surfaces->Surface == surface)
         {
             ActiveScreen=surfaces;
+            SDL_WidgetRedraw(0,NULL);
             return 1;
         }
         surfaces=surfaces->next;
@@ -129,6 +139,55 @@ SDL_Surface *SDL_GetPreviousStack()
     return previous_surface;
 
 }
+/*
+ * A function to calculate the intersection of two rectangles:
+ * return true if the rectangles intersect, false otherwise
+ */
+static 
+int SDL_IntersectRect(const SDL_Rect *A, const SDL_Rect *B,SDL_Rect *intersection)
+{
+    int Amin, Amax, Bmin, Bmax;
+    
+    /* Horizontal intersection */
+    Amin = A->x;
+    Amax = Amin + A->w;
+    Bmin = B->x;
+    Bmax = Bmin + B->w;
+    if(Bmin > Amin)
+        Amin = Bmin;
+    intersection->x = Amin;
+    if(Bmax < Amax)
+        Amax = Bmax;
+    intersection->w = Amax - Amin > 0 ? Amax - Amin : 0;
+
+    /* Vertical intersection */
+    Amin = A->y;
+    Amax = Amin + A->h;
+    Bmin = B->y;
+    Bmax = Bmin + B->h;
+    if(Bmin > Amin)
+        Amin = Bmin;
+    intersection->y = Amin;
+    if(Bmax < Amax)
+        Amax = Bmax;
+    intersection->h = Amax - Amin > 0 ? Amax - Amin : 0;
+    
+    return (intersection->w && intersection->h);
+}
+
+static 
+int SDL_RectInside(const SDL_Rect *A, const SDL_Rect *B)
+{
+    if(A->x >= B->x)
+        if(A->y >= B->y)
+            if(A->y <= B->y + B->h)
+                if(A->x <= B->x + B->w)
+                    if(A->x + A->w <= B->x + B->w)
+                        if(A->y + A->h <= B->y + B->h)
+                            return 1;
+    return 0;
+}
+
 
 void SDL_StoreWidget(SDL_Widget *widget)
 {
@@ -144,13 +203,13 @@ void SDL_StoreWidget(SDL_Widget *widget)
         /* Set the focus to the new widget if edit widget */
         if(widget->Focusable && SDL_StackGetFocus() == NULL)
             SDL_StackSetFocus(widget);
-        
     }
     else
     {
         SDL_WidgetList *temp;
         temp=CreateOnStack->WidgetList;
         
+
         while(temp->Next)
             temp=temp->Next;
 
@@ -256,6 +315,7 @@ void SDL_WindowOpen(SDL_Window *window)
     }
     CurWindow=window;
     SDL_WidgetUseSurface(CurWindow->Surface);
+    
 }
 
 unsigned int SDL_WidgetRedraw(unsigned int interval,void *data)
@@ -276,18 +336,19 @@ unsigned int SDL_WidgetRedraw(unsigned int interval,void *data)
 
 }
 
+
+
 int SDLTK_Main()
 {
     SDL_Event test_event;
-    SDL_TimerID timer;
+    SDL_Event e;
     int handled;
 
-    timer=SDL_AddTimer(1,SDL_WidgetRedraw,NULL);
     SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY,SDL_DEFAULT_REPEAT_INTERVAL);
 
     while(CurWindow)
     {
-        while(SDL_PollEvent(&test_event)) 
+        while(SDL_WaitEvent(&test_event)) 
         {
             handled=0;
             switch(test_event.type) 
@@ -295,13 +356,21 @@ int SDLTK_Main()
             case SDL_QUIT:
                 CurWindow=NULL;
                 break;
-//            case SDL_VIDEOEXPOSE:
-//                SDL_WidgetRedraw(10,NULL);
+            case SDL_USEREVENT:
+                {SDL_Widget *w;
+                w=test_event.user.data1;
+                SDL_WidgetDraw(w,&w->Rect);}
                 break;
             default:
                 break;
             }
      
+            if(CurWindow == NULL)
+                break;
+
+            /* Remove all mouse motion events from the queue */
+            while(SDL_PeepEvents(&e, 1, SDL_GETEVENT, SDL_MOUSEMOTIONMASK) > 0);
+
             /* If the widgets don't handle the event pass
                the event to the event handler of the window */
             if(SDL_WidgetEvent(&test_event) == 0)
@@ -311,10 +380,62 @@ int SDLTK_Main()
                     handled=CurWindow->EventHandler(test_event);
                 }
             }
-        
         }   
-        SDL_Delay(25); /* To reduce CPU load */
     }
-    SDL_RemoveTimer(timer);
     return 1;
+}
+
+void SDL_WidgetDraw(SDL_Widget *widget,SDL_Rect *Rect)
+{
+    SDL_WidgetList *temp;
+    T_Widget_Draw draw; /* Draw function prototype */
+    SDL_Rect intersection;
+
+    temp=ActiveScreen->WidgetList;
+
+    if(widget->Type == 3)
+    {
+        printf("SDL_WidgetDraw %d\n",widget->Type);
+        printf("Rect %d %d %d %d\n",Rect->x,Rect->y,Rect->w,Rect->h);
+    }
+    while(temp)
+    {
+        if(temp->Widget->Type == SDL_PANEL && 
+           SDL_IntersectRect(Rect,&temp->Widget->Rect,&intersection))
+        {
+            if(widget->Type == 3)
+            {
+                printf("Orig %d %d %d %d\n",temp->Widget->Rect.x,temp->Widget->Rect.y,temp->Widget->Rect.w,
+                       temp->Widget->Rect.h);
+                printf("Panel Rect %d %d %d %d\n\n",intersection.x,intersection.y,intersection.w,
+                       intersection.h);
+            }
+            draw=WidgetTable[temp->Widget->Type]->draw;
+            draw(temp->Widget,screen,&intersection);
+            
+        }
+        else if(SDL_RectInside(Rect,&temp->Widget->Rect))
+        {
+            if(widget->Type == 3)
+            {
+                printf("Orig1 %d %d %d %d\n",temp->Widget->Rect.x,temp->Widget->Rect.y,temp->Widget->Rect.w,
+                       temp->Widget->Rect.h);
+            }
+            draw=WidgetTable[temp->Widget->Type]->draw;
+            draw(temp->Widget,screen,Rect);
+        }
+        else if(SDL_RectInside(&temp->Widget->Rect,Rect))
+        {
+            if(widget->Type == 3)
+            {
+                printf("Orig2 %d %d %d %d\n",temp->Widget->Rect.x,temp->Widget->Rect.y,temp->Widget->Rect.w,
+                       temp->Widget->Rect.h);
+            }
+            draw=WidgetTable[temp->Widget->Type]->draw;
+            draw(temp->Widget,screen,Rect);
+        }
+        temp=temp->Next;
+    }
+    SDL_UpdateRect(screen,Rect->x,Rect->y,Rect->w,Rect->h);
+    
 }

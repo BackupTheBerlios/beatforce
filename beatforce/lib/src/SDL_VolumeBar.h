@@ -32,9 +32,6 @@ typedef struct SDL_VolumeBar
     Uint32  color3;
     Uint32  color4;
     
-    int Redraw;
-    int Visible;
-
     int MinValue;
     int MaxValue;
     int CriticalValue;

@@ -35,11 +35,8 @@ typedef struct SDL_Label
     int increase;
 
     int Pattern;
-    int Redraw;
 
     char    *Caption;
-    SDL_Surface *Background;
-
 }SDL_Label;
 
 

@@ -20,6 +20,7 @@
 #include <SDL/SDL.h>
 #include "SDL_Widget.h"
 
+#if 0
 SDL_Surface* SDL_WidgetGetBackground(SDL_Surface *dest,SDL_Rect *srcrect)
 {
     Uint32 rmask, gmask, bmask, amask;
@@ -55,6 +56,7 @@ SDL_Surface* SDL_WidgetGetBackground(SDL_Surface *dest,SDL_Rect *srcrect)
     return surface;
 
 }
+#endif
 
 int SDL_WidgetIsInside(SDL_Widget *widget,int x, int y)
 {

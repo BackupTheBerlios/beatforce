@@ -98,15 +98,11 @@ typedef struct SDL_Table
     void *ClickedData;
     void (*OnReturn) ();
 
-    //functions to retreive data
-    char *(*Table_GetString)  (long row,int column,char* dest);
-
-    SDL_Surface *Background;
-
     SDL_Widget *edit;
 
     char *editcaption;
 
+    int ButtonHeight;
 
     /* Scrollbar */
     void* Scrollbar;

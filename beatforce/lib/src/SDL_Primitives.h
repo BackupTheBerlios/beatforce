@@ -7,8 +7,8 @@
  
 */
 
-#ifndef _SDL_gfxPrimitives_h
-#define _SDL_gfxPrimitives_h
+#ifndef _SDL_Primitives_h
+#define _SDL_Primitives_h
 
 #include <math.h>
 #ifndef M_PI
@@ -61,19 +61,19 @@ extern "C" {
 
 /* Rectangle */
 
-    DLLINTERFACE int rectangleColor(SDL_Surface * dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint32 color);
+    int rectangleColor(SDL_Surface * dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint32 color);
     DLLINTERFACE int rectangleRGBA(SDL_Surface * dst, Sint16 x1, Sint16 y1,
 				   Sint16 x2, Sint16 y2, Uint8 r, Uint8 g, Uint8 b, Uint8 a);
 
 /* Filled rectangle (Box) */
 
-    DLLINTERFACE int boxColor(SDL_Surface * dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint32 color);
+    int boxColor(SDL_Surface * dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint32 color);
     DLLINTERFACE int boxRGBA(SDL_Surface * dst, Sint16 x1, Sint16 y1, Sint16 x2,
 			     Sint16 y2, Uint8 r, Uint8 g, Uint8 b, Uint8 a);
 
 /* Line */
 
-    DLLINTERFACE int lineColor(SDL_Surface * dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint32 color);
+    int lineColor(SDL_Surface * dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint32 color);
     DLLINTERFACE int lineRGBA(SDL_Surface * dst, Sint16 x1, Sint16 y1,
 			      Sint16 x2, Sint16 y2, Uint8 r, Uint8 g, Uint8 b, Uint8 a);
 
@@ -179,4 +179,4 @@ extern "C" {
 };
 #endif
 
-#endif				/* _SDL_gfxPrimitives_h */
+#endif				/* _SDL_Primitives_h */

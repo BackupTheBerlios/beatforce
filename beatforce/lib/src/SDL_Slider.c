@@ -79,7 +79,6 @@ SDL_Widget* SDL_SliderCreate(SDL_Rect* rect)
     // initialize eventhandler
     slider->OnSliderChanged      = NULL;
     slider->OnSliderChangedData  = NULL;
-    slider->Visible = 1;
 
     return (SDL_Widget*)slider;
 }
@@ -92,9 +91,6 @@ void SDL_SliderDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
     SDL_Rect   button;
     int x_offset=0;
     int y_offset=0;
-
-    if(Slider->Visible == 0)
-        return;
 
     if(Slider->SliderButton == NULL)
         return;
@@ -223,10 +219,6 @@ int SDL_SliderProperties(SDL_Widget *widget,int feature,va_list list)
         }
         break;
     }
-    case SET_VISIBLE:
-        Slider->Visible = va_arg(list,int);
-        break;
-
     default:
         break;
 
@@ -340,6 +332,7 @@ int SDL_SliderEventHandler(SDL_Widget *widget,SDL_Event *event)
         if(Slider->OnSliderChanged != NULL)
             Slider->OnSliderChanged(Slider->OnSliderChangedData);
         Slider->changed=0;
+        SDL_WidgetDraw(widget,&widget->Rect);
     }
     return 0;
 }

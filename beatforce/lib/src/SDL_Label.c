@@ -62,8 +62,7 @@ SDL_Widget* SDL_LabelCreate(SDL_Rect* rect)
     Label->increase = 1;
 
     Label->Pattern    = LABEL_BOUNCE;
-    Label->Redraw     = 1;
-    Label->Background = NULL;
+
 
     Label->Visible    = 1;
     return (SDL_Widget*)Label;
@@ -82,16 +81,7 @@ void SDL_LabelDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
 
     SDL_FontSetColor(Label->Font,Label->fgcolor);
     
-    if(Label->bgcolor == TRANSPARANT)
-    {
-        if(Label->Background == NULL)
-        {
-            Label->Background = SDL_WidgetGetBackground(dest,&widget->Rect);
-        }
-        if(SDL_BlitSurface(Label->Background,NULL,dest,&widget->Rect)<0)
-            fprintf(stderr, "BlitSurface error: %s\n", SDL_GetError());
-    }
-    else
+    if(Label->bgcolor != TRANSPARANT)
     {
         SDL_FillRect(dest,&widget->Rect,Label->bgcolor);
     }
@@ -119,6 +109,7 @@ int SDL_LabelProperties(SDL_Widget *widget,int feature,va_list list)
             free(Label->Caption);
         
         Label->Caption=(char*)strdup(va_arg(list,char*));
+        SDL_WidgetRedrawEvent(widget);
         break;
     case SET_FG_COLOR:
         Label->fgcolor=va_arg(list,Uint32);
@@ -199,3 +190,4 @@ static void Label_CalculatePattern(SDL_Label *Label,SDL_Rect *Rect)
     
 
 }
+

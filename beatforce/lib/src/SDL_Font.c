@@ -76,15 +76,13 @@ void SDL_FontDrawStringRect(SDL_Surface *dest,SDL_Font *font,
     int i;
     int size;
     int xoffset=0;
+    int height;
     SDL_Rect pos;
     
-    if(font == NULL )
-    {
-        return;
-    }
-    if(string == NULL)
+    if(font == NULL || string == NULL)
         return;
 
+    height=SDL_FontGetHeight(font);
     size=strlen(string);
     
     for(i=0;i<size;i++)
@@ -93,7 +91,7 @@ void SDL_FontDrawStringRect(SDL_Surface *dest,SDL_Font *font,
             return;
 
         pos.x=xoffset+rect->x;
-        pos.y=rect->y;
+        pos.y=rect->y + ((rect->h - height)/2);
         pos.w=rect->w;
         pos.h=rect->h;
         xoffset+=SDL_FontDrawChar(dest,font,string[i],&pos,NULL);
@@ -232,77 +230,6 @@ int SDL_FontSetColor(SDL_Font *font,unsigned int color)
     return 1;
 }                         
 
-void DrawPixel(SDL_Surface *screen, int x, int y,unsigned int color2)
-{
-
-    Uint32 color=SDL_MapRGB(screen->format,(color2&0xff0000)>>16,(color2&0x00ff00)>>8,(color2&0x0000ff));
-//    Uint32 color=SDL_MapRGB(screen->format,253,253,253);
-    if(y > screen->h)
-        return;
-    if(x > screen->w)
-        return;
-
-
-    if ( SDL_MUSTLOCK(screen) ) 
-    {
-        if ( SDL_LockSurface(screen) < 0 ) 
-        {
-            return;
-        }
-    }
-
-    switch (screen->format->BytesPerPixel) 
-    {
-    
-
-    case 1: { /* Assuming 8-bpp */
-        Uint8 *bufp;
-
-        bufp = (Uint8 *)screen->pixels + y*screen->pitch + x;
-        *bufp = color;
-    }
-    break;
-
-    case 2: { /* Probably 15-bpp or 16-bpp */
-        Uint16 *bufp;
-
-        bufp = (Uint16 *)screen->pixels + y*screen->pitch/2 + x;
-        *bufp = color;
-    }
-    break;
-
-    case 3: { /* Slow 24-bpp mode, usually not used */
-        Uint8 *bufp;
-
-        bufp = (Uint8 *)screen->pixels + y*screen->pitch + x * 3;
-        if(SDL_BYTEORDER == SDL_LIL_ENDIAN) {
-            bufp[0] = color;
-            bufp[1] = color >> 8;
-            bufp[2] = color >> 16;
-        } else {
-            bufp[2] = color;
-            bufp[1] = color >> 8;
-            bufp[0] = color >> 16;
-        }
-    }
-    break;
-
-    case 4: { /* Probably 32-bpp */
-        Uint32 *bufp;
-
-        bufp = (Uint32 *)screen->pixels + y*screen->pitch/4 + x;
-        *bufp = color;
-    }
-    break;
-    }
-
-    if ( SDL_MUSTLOCK(screen) ) 
-    {
-        SDL_UnlockSurface(screen);
-    }
-
-
-}
 
 int SDL_FontGetHeight(SDL_Font *font)
 {

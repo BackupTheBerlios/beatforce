@@ -49,12 +49,9 @@ SDL_Widget* SDL_PanelCreate(SDL_Rect* rect)
     widget->Rect.h    = rect->h;
     widget->Focusable = 0;
     
-
-
     panel->color  = 0xfffff7;
     panel->Image  = NULL;
 
-    panel->Visible = 1;
     return (SDL_Widget*)panel;
 }
 
@@ -62,9 +59,6 @@ void SDL_PanelDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
 {
     SDL_Panel *Panel=(SDL_Panel*)widget;
     SDL_Rect src;
-
-    if(Panel->Visible == 0)
-        return;
 
     src.x=0;
     src.y=0;
@@ -81,8 +75,18 @@ void SDL_PanelDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
     
     if(Panel->Image)
     {
-        if(SDL_BlitSurface(Panel->Image,&src,dest,&widget->Rect)<0)
-            ;
+        if(Area)
+        {
+            src.x = Area->x - widget->Rect.x;
+            src.y = Area->y - widget->Rect.y;
+            src.w = Area->w;
+            src.h = Area->h;
+
+            SDL_BlitSurface(Panel->Image,&src,dest,Area);
+        }
+        else
+            SDL_BlitSurface(Panel->Image,&src,dest,&widget->Rect);            
+           
     }
     else
     {
@@ -108,10 +112,6 @@ int SDL_PanelProperties(SDL_Widget *widget,int feature,va_list list)
     case SET_BG_COLOR:
         Panel->color=va_arg(list,Uint32);
         break;
-    case SET_VISIBLE:
-        Panel->Visible=va_arg(list,int);
-        break;
-
     default:
         break;
     }

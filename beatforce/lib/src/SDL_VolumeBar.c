@@ -67,9 +67,7 @@ SDL_Widget* SDL_VolumeBarCreate(SDL_Rect* rect)
     /* Used for drawing */
     volumebar->CriticalLine  = (volumebar->CriticalValue * widget->Rect.h) / volumebar->MaxValue;
     volumebar->CurrentLine   = 0;
-    
-    volumebar->Redraw  = 1;
-    volumebar->Visible = 1;
+
 
     return (SDL_Widget*)volumebar;
 }
@@ -80,37 +78,30 @@ void SDL_VolumeBarDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
     int line;
     int highlight=0;
     
-    if(VolumeBar->Visible == 0)
-        return;
 
-    if(VolumeBar->Redraw)
+    SDL_FillRect(dest,&widget->Rect,0x000000);
+
+    for( line=0; line < widget->Rect.h ; line++)
     {
-        SDL_FillRect(dest,&widget->Rect,0x000000);
+        highlight= (line < VolumeBar->CurrentLine);
 
-        for( line=0; line < widget->Rect.h ; line++)
+        if(line % 2  != 0)
         {
-            highlight= (line < VolumeBar->CurrentLine);
-
-            if(line % 2  != 0)
+            if(line > VolumeBar->CriticalLine)
             {
-                if(line > VolumeBar->CriticalLine)
-                {
-                    if(highlight)
-                        VolumeBar_DrawStripe(dest,VolumeBar,line,VolumeBar->color2);
-                    else
-                        VolumeBar_DrawStripe(dest,VolumeBar,line,VolumeBar->color1);
-                    
-                }
+                if(highlight)
+                    VolumeBar_DrawStripe(dest,VolumeBar,line,VolumeBar->color2);
                 else
-                {
-                    if(highlight)
-                        VolumeBar_DrawStripe(dest,VolumeBar,line,VolumeBar->color4);
-                    else
-                        VolumeBar_DrawStripe(dest,VolumeBar,line,VolumeBar->color3);
-                }
+                    VolumeBar_DrawStripe(dest,VolumeBar,line,VolumeBar->color1);
+            }
+            else
+            {
+                if(highlight)
+                    VolumeBar_DrawStripe(dest,VolumeBar,line,VolumeBar->color4);
+                else
+                    VolumeBar_DrawStripe(dest,VolumeBar,line,VolumeBar->color3);
             }
         }
-        VolumeBar->Redraw = 0;
     }
 }
 
@@ -129,13 +120,6 @@ int SDL_VolumeBarProperties(SDL_Widget *widget,int feature,va_list list)
         val=va_arg(list,double);
         VolumeBar->CurrentValue = val; 
         VolumeBar->CurrentLine  = (val * widget->Rect.h) / (VolumeBar->MaxValue - VolumeBar->MinValue); 
-        VolumeBar->Redraw       = 1;
-        break;
-    case SET_VISIBLE:
-        VolumeBar->Visible=va_arg(list,int);
-        break;
-    case FORCE_REDRAW:
-        VolumeBar->Redraw=1;
         break;
     default:
         break;

@@ -71,7 +71,6 @@ typedef enum E_Widget_Properties
     SET_BUTTON_IMAGE,
     SET_NORMAL_STEP_SIZE,
     
-    FORCE_REDRAW,
     GET_CUR_VALUE,       // float *
 
     TAB_ADD,             ////cchar * with caption  tab specific can only be started with loaded font
@@ -202,6 +201,8 @@ int SDL_WidgetSetFocus(SDL_Widget *widget);
 
 int SDL_WidgetNeedsRedraw();
 int SDL_WidgetClose(void *widget);
+
+
 
 #endif //__SDL_WIDGET_H
 

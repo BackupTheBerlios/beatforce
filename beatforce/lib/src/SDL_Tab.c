@@ -126,7 +126,7 @@ void SDL_TabDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
     Tab_DrawTabWithCaption(dest,Tab,Tab->hl,1);
     if(Tab->edit)
     {
-        SDL_WidgetPropertiesOf((SDL_Widget*)Tab->edit,FORCE_REDRAW,1);
+//        SDL_WidgetPropertiesOf((SDL_Widget*)Tab->edit,FORCE_REDRAW,1);
     }
 }
 
@@ -366,12 +366,12 @@ static int Tab_DrawSlope(SDL_Surface *dest,SDL_Tab *tab,SDL_TabList * tl, int hi
          
 
             if(j >= start && j < end)
-                DrawPixel(dest,rect.x + j,rect.y + i,color);
+                fastPixelColorNolockNoclip(dest,rect.x + j,rect.y + i,color);
             if(j == start && left)
-                DrawPixel(dest,rect.x + j,rect.y + i,0xfffefe);
+                fastPixelColorNolockNoclip(dest,rect.x + j,rect.y + i,0xfffefe);
 
             if(j == end && left == 0)
-                DrawPixel(dest,rect.x + j,rect.y + i,0x000101);
+                fastPixelColorNolockNoclip(dest,rect.x + j,rect.y + i,0x000101);
         }
         if( (i % omde) == 0)
         {

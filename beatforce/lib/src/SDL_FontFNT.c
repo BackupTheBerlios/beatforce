@@ -131,7 +131,7 @@ int FONT_FNT_DrawChar(SDL_Surface *dest,SDL_Font *font,
                     else
                     {
                         if((pos->y + pos->h) > y1+yoffset)
-                            DrawPixel(dest,newx+xoffset,y1+yoffset,font->color);
+                            fastPixelColorNolockNoclip(dest,newx+xoffset,y1+yoffset,font->color);
                     }
                 }
                 bit=bit<<1;

@@ -27,7 +27,6 @@ typedef struct SDL_Panel
     SDL_Widget Widget;
     SDL_Surface *Image;
 
-    int Visible;
 
     Uint32  color;
 

@@ -60,7 +60,6 @@ typedef struct SDL_Slider
     void (*OnSliderChanged)(void*);
     void (*OnSliderChangedData)(void*);
 
-    int Visible;
 }SDL_Slider;
 
 

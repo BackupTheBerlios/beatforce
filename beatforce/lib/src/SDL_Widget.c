@@ -70,7 +70,6 @@ SDL_Surface *SDL_WidgetNewSurface(int width,int height,int bpp)
 
 int SDL_WidgetUseSurface(SDL_Surface *surface)
 {
-    SDL_WidgetForceRedraw(surface);
     SDL_ActiveSurface(surface);
     return 1;
 }
@@ -365,31 +364,14 @@ int SDL_WidgetLoseFocus()
     return 1;
 }
 
-int SDL_WidgetForceRedraw(SDL_Surface *surface)
+void SDL_WidgetRedrawEvent(SDL_Widget *widget)
 {
-    T_Widget_Properties properties;
-    SDL_WidgetList* current_widget;
-    SDL_Widget *widget=NULL;
-
-    current_widget=SDL_StackGetStack(surface);
+    SDL_Event event;
     
-    if(current_widget == NULL)
-        return 0;
-    
-    while(current_widget)
-    {
-        widget=(SDL_Widget*)current_widget->Widget;
-        properties=WidgetTable[widget->Type]->properties;
-        if(properties)
-        {
-            properties(widget,FORCE_REDRAW,NULL);
-        }
-        current_widget=current_widget->Next;
-    }
-    return 1;
+    event.type = SDL_USEREVENT;
+    event.user.code = 0;
+    event.user.data1 = widget;
+    event.user.data2 = 0;
+    SDL_PushEvent(&event);
 }
-
-
-
-
 

@@ -39,6 +39,7 @@ typedef struct SDL_WidgetList
 {
     SDL_Widget *Widget;
     struct SDL_WidgetList *Parent;
+    struct SDL_WidgetList *Child;
     struct SDL_WidgetList *Next;
 }SDL_WidgetList;
 
@@ -71,5 +72,7 @@ SDL_Widget *SDL_StackGetFocus();
 
 void SDL_WindowOpen(SDL_Window *window);
 void SDL_WindowClose();
+
+void SDL_WidgetDraw(SDL_Widget *widget,SDL_Rect *Rect);
 
 #endif /* __SDL_WINDOW_H__ */
