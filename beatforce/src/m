@@ -1,0 +1,10 @@
+cd ../lib/src
+touch ~/cvs/bf/lib/src/SDL_Stack.h
+make 
+
+echo
+echo
+echo
+cd ../../src
+touch ~/cvs/bf/src/main.c
+make

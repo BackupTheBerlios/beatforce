@@ -1,0 +1,32 @@
+# Process this file with autoconf to produce a configure script.
+AC_INIT(FULL-PACKAGE-NAME, VERSION, BUG-REPORT-ADDRESS)
+AC_CONFIG_SRCDIR([mp3.c])
+AC_CONFIG_HEADER([config.h])
+
+# Checks for programs.
+AC_PROG_AWK
+AC_PROG_CC
+AC_PROG_INSTALL
+AC_PROG_LN_S
+AC_PROG_RANLIB
+
+# Checks for libraries.
+# FIXME: Replace `main' with a function in `-lid3tag':
+AC_CHECK_LIB([id3tag], [main])
+# FIXME: Replace `main' with a function in `-lmad':
+AC_CHECK_LIB([mad], [main])
+
+# Checks for header files.
+AC_HEADER_DIRENT
+AC_HEADER_STDC
+AC_CHECK_HEADERS([fcntl.h stdlib.h string.h])
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+
+# Checks for library functions.
+AC_FUNC_MALLOC
+AC_CHECK_FUNCS([memmove memset strdup strerror strrchr])
+
+AC_CONFIG_FILES([Makefile])
+AC_OUTPUT

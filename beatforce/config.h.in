@@ -1,0 +1,29 @@
+/* config.h.in.  Generated automatically from configure.in by autoheader 2.13.  */
+
+/* Define if you have the <SDL.h> header file.  */
+#undef HAVE_SDL_H
+
+/* Define if you have the <dlfcn.h> header file.  */
+#undef HAVE_DLFCN_H
+
+/* Define if you have the <sys/asoundlib.h> header file.  */
+#undef HAVE_SYS_ASOUNDLIB_H
+
+/* Define if you have the SDL_image library (-lSDL_image).  */
+#undef HAVE_LIBSDL_IMAGE
+
+/* Define if you have the fftw3 library (-lfftw3).  */
+#undef HAVE_LIBFFTW3
+
+/* Name of package */
+#undef PACKAGE
+
+/* Version number of package */
+#undef VERSION
+
+/* Plugin dir */
+#undef PLUGIN_DIR
+
+/* Theme dir */
+#undef THEME_DIR
+
