@@ -25,34 +25,6 @@
 
 #define FRAG_SIZE 512
 
-# define GWL_MAD_LEGEND_COLOR	GWL_USERDATA
-# define GWL_MAD_JSPIE_MS	(0 * 4)
-# define GWL_MAD_JSPIE_MS_I (1 * 4)
-# define GWL_MAD_JSPIE_I	(2 * 4)
-
-# define GWL_MAD_JSPIE_FRAMES	GWL_USERDATA
-
-# define PCM_CHUNK		576
-
-struct xing
-{
-    int flags;
-    unsigned long frames;
-    unsigned long bytes;
-    unsigned char toc[100];
-    long scale;
-};
-
-enum
-{
-    XING_FRAMES = 0x0001,
-    XING_BYTES = 0x0002,
-    XING_TOC = 0x0004,
-    XING_SCALE = 0x0008
-};
-
-# define XING_MAGIC (('X' << 24) | ('i' << 16) | ('n' << 8) | 'g')
-
 
 enum channel
 {
@@ -70,7 +42,6 @@ struct stats
     unsigned long frames;
     unsigned long vbr_rate;
     unsigned long clipped;
-    mad_fixed_t clipping;
     unsigned long sync_errors;
     unsigned long crc_errors;
     unsigned long other_errors;
@@ -105,7 +76,6 @@ typedef struct
 
     int track;
     enum channel channel; 		/* channel selection */
-    mad_fixed_t attenuation;		/* attenuation factor */
 
     struct stats stats;			/* statistics */
 
@@ -117,13 +87,9 @@ typedef struct
     int max_bytes;
 
     int decode_thread;
-    //pthread_t decode_thread;
 
     int audio_error;
 
-    struct mad_stream *stream;
-    struct mad_frame *frame;
-    struct mad_synth *synth;
 
     char *input_buffer;
     int input_size;
@@ -166,16 +132,6 @@ int cdda_seek (Private *, long);
 
 long cdda_get_time (Private *);
 
-static __inline signed long
-linear_dither (unsigned int, mad_fixed_t,
-               mad_fixed_t *, unsigned long *, mad_fixed_t *);
-static unsigned int pack_pcm (unsigned char *, unsigned int,
-                              mad_fixed_t const *, mad_fixed_t const *,
-                              int, unsigned long *, mad_fixed_t *);
 
-static int vbr_update (struct stats *, unsigned long);
-
-static int parse_xing (struct xing *, struct mad_bitptr, unsigned int);
-int scan_header (FILE *, struct mad_header *, struct xing *);
 
 #endif

@@ -61,39 +61,39 @@ void printid(char *id,int line,char *message);
 #define DEBUG_OFF noprint
 
 #if MODULE_ID == AUDIO_OUTPUT
-#define TRACE TRACE_ON
-#define DEBUG DEBUG_ON
+#define TRACE TRACE_OFF
+#define DEBUG DEBUG_OFF
 #endif
 
 #if MODULE_ID == FILEWINDOW
-#define TRACE TRACE_ON
+#define TRACE TRACE_OFF
 #define DEBUG DEBUG_OFF
 #endif
 
 #if MODULE_ID == INPUT
 #undef TRACE
 #undef DEBUG
-#define TRACE TRACE_ON
+#define TRACE TRACE_OFF
 #define DEBUG DEBUG_OFF
 #endif
 
 #if MODULE_ID == WNDMGR
 #undef TRACE
 #undef DEBUG
-#define TRACE TRACE_ON
-#define DEBUG DEBUG_ON
+#define TRACE TRACE_OFF
+#define DEBUG DEBUG_OFF
 #endif
 
 #if MODULE_ID == MP3
 #undef TRACE
 #undef DEBUG
-#define TRACE TRACE_ON
-#define DEBUG DEBUG_ON
+#define TRACE TRACE_OFF
+#define DEBUG DEBUG_OFF
 #endif
 
 #if MODULE_ID == OSA
 #define TRACE TRACE_OFF
-#define DEBUG DEBUG_ON
+#define DEBUG DEBUG_OFF
 #endif
 
 #if MODULE_ID == OUTPUT
@@ -104,23 +104,23 @@ void printid(char *id,int line,char *message);
 #if MODULE_ID == PLAYER
 #undef TRACE
 #undef DEBUG
-#define TRACE TRACE_ON
-#define DEBUG DEBUG_ON
+#define TRACE TRACE_OFF
+#define DEBUG DEBUG_OFF
 #endif
 
 #if MODULE_ID == PLAYER_UI
-#define TRACE TRACE_ON
-#define DEBUG DEBUG_ON
+#define TRACE TRACE_OFF
+#define DEBUG DEBUG_OFF
 #endif
 
 #if MODULE_ID == PLAYLIST
-#define TRACE TRACE_ON
-#define DEBUG DEBUG_ON
+#define TRACE TRACE_OFF
+#define DEBUG DEBUG_OFF
 #endif
 
 #if MODULE_ID == PLAYLIST_UI
-#define TRACE TRACE_ON
-#define DEBUG DEBUG_ON
+#define TRACE TRACE_OFF
+#define DEBUG DEBUG_OFF
 #endif
 
 #if MODULE_ID == PLUGIN
@@ -129,18 +129,18 @@ void printid(char *id,int line,char *message);
 #endif
 
 #if MODULE_ID == SONGDB
-#define TRACE TRACE_ON
-#define DEBUG DEBUG_ON
+#define TRACE TRACE_OFF
+#define DEBUG DEBUG_OFF
 #endif
 
 #if MODULE_ID == SONGDB_UI
-#define TRACE TRACE_ON
-#define DEBUG DEBUG_ON
+#define TRACE TRACE_OFF
+#define DEBUG DEBUG_OFF
 #endif
 
 #if MODULE_ID == THEME
-#define TRACE TRACE_ON
-#define DEBUG DEBUG_ON
+#define TRACE TRACE_OFF
+#define DEBUG DEBUG_OFF
 #endif
 
 #endif //MODULE_ID

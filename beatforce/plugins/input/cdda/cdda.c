@@ -35,9 +35,6 @@
 
 #include <math.h>
 
-#include <mad.h>
-#include <id3tag.h>
-
 #include "types.h"
 #include "input_plugin.h"
 #include "err.h"
@@ -92,7 +89,7 @@ char *str_mpeg25_l3=NULL;
 
 void readtoc();
 
-InputPlugin mp3_ip = {
+InputPlugin cdda_ip = {
     NULL, 						/* handle, BeatForce fills it */
     NULL, 						/* filename, BeatForce filled */
     "cdda input plugin ",	/* Description */
@@ -142,7 +139,7 @@ get_input_info (InputInterface *api)
     cdda_if.output_pause       = api->output_pause;
     cdda_if.output_write       = api->output_write;
 
-    return &mp3_ip;
+    return &cdda_ip;
 }
 
 
@@ -234,7 +231,6 @@ cdda_is_our_file (Private * h, char *filename)
         return FALSE;
 
     ext = strrchr (filename, '.');
-    printf("cdda_is_ourfile %s %s\n",filename,ext);
     if (ext)
 	if (!strcmp (ext, ".cdda"))
 	{
@@ -271,7 +267,7 @@ cdda_get_tag (Private * h, char *path, struct SongDBEntry *e)
     readtoc(drive);
     dw = (unsigned long) (ourtoc[i+1].dwStartSector - ourtoc[i].dwStartSector /* + 150 - 150 */);
 
-    printf("Song startsector %ld - %ld\n",ourtoc[i+1].dwStartSector,ourtoc[i].dwStartSector);
+
     mins         =         dw / ( 60*75 );
     secnds       =       ( dw % ( 60*75 )) / 75;
     centi_secnds = ( 4 * ( dw %      75 ) + 1 ) / 3;
@@ -299,14 +295,14 @@ cdda_load_file (Private * h, char *filename)
     char *drive;
     char *set;
 
-    printf("CDDA_LOAD_FILE %s\n",filename);
+
     
     if (h == NULL || filename == NULL)
         return ERROR_INVALID_ARG;
   
     if (cdda_is_our_file (h, filename) != TRUE)
     {
-        printf("This is not our file cdda\n");
+
 	return ERROR_UNKNOWN_FILE;
     }
     
@@ -317,19 +313,18 @@ cdda_load_file (Private * h, char *filename)
     set+=8;
     *set=0;
     set-=2;
-    printf("Drive to open %s\n",drive);
+
 
     private->track = atoi(set);
-    printf("Track to open %d\n",private->track);
+
     private->fd    = open(drive,O_RDONLY);
     if (private->fd < 0) 
     {
-        fprintf(stderr, "while opening %s :", drive);
-        perror("ioctl cdrom device open error: ");
+
     }
     else
     {
-        printf("Filedescriport %d\n",private->fd);
+
         private->going   = 1;
         private->rate    = 44100;
         private->channels= 2;
@@ -342,7 +337,7 @@ cdda_load_file (Private * h, char *filename)
         {
             fclose (private->fd);
             private->fd = -1;
-            printf("Can not open audio\n");
+
             return ERROR_OUTPUT_ERROR;
         }
         private->decode_thread=OSA_CreateThread(cdda_play_loop, (void *)private);
@@ -392,28 +387,50 @@ cdda_play_loop (void *param)
    
     while (private->going)
     {
-        if(private->going)
+
+        if (private->seek != -1 && private->length >= 0)
         {
-            arg.addr.lba = lba;
-            arg.addr_format = CDROM_LBA;
-            arg.nframes = 5;
-            arg.buf = (unsigned char *) &buffer[0];
+            int new_position;
+            long pos;
 
-            if(filedes >= 0)
+            if (private->seek < 0)
+                new_position = (double) private->length * -private->seek / 1000;
+            else
+                new_position = private->seek;
+
+            private->position = new_position;
+            private->seek = -1;
+                    
+            lba = ourtoc[private->track-1].dwStartSector;
+            lba += private->position/67;
+                    
+        }
+
+        arg.addr.lba = lba;
+        arg.addr_format = CDROM_LBA;
+        arg.nframes = 5;
+        arg.buf = (unsigned char *) &buffer[0];
+
+        if(filedes >= 0)
+        {
+            if(ioctl(private->fd, CDROMREADAUDIO, &arg) < 0)
             {
-                if(ioctl(private->fd, CDROMREADAUDIO, &arg) < 0)
-                {
-                    printf("Error\n");
-                }
-                while(cdda_if.output_buffer_free (private->ch_id) < (2352*5) && private->going)
-                    SDL_Delay(5);
 
-                {
-                    cdda_if.output_write (private->ch_id, buffer,2352*5);
-                    lba+=5;
-                    private->position+=67;
-                }
             }
+
+            while(cdda_if.output_buffer_free (private->ch_id) < (2352*5) && private->going)
+                SDL_Delay(5);
+
+            {
+                cdda_if.output_write (private->ch_id, buffer,2352*5);
+                lba+=5;
+                private->position+=67;
+            }
+        }
+        if(lba > ourtoc[private->track].dwStartSector)
+        {
+            cdda_if.input_eof (private->ch_id);
+            break;
         }
        
     }
@@ -469,283 +486,16 @@ cdda_get_time (Private * h)
         return ERROR_INVALID_ARG;
   
     if (private->eof)
-	return ERROR_EOF;
+        return ERROR_EOF;
     if (!private->going)
-	return ERROR_NO_FILE_LOADED;
+        return ERROR_NO_FILE_LOADED;
     
     return private->position;
 }
 
 
-static __inline signed long
-linear_dither (unsigned int bits, mad_fixed_t sample,
-               mad_fixed_t * error, unsigned long *clipped,
-               mad_fixed_t * clipping)
-{
-    mad_fixed_t quantized, check;
-
-    /* dither */
-    sample += *error;
-
-    /* clip */
-    quantized = sample;
-    check = (sample >> MAD_F_FRACBITS) + 1;
-    if (check & ~1)
-    {
-	if (sample >= MAD_F_ONE)
-	{
-            quantized = MAD_F_ONE - 1;
-            ++*clipped;
-            if (sample - quantized > *clipping &&
-                mad_f_abs (*error) < (MAD_F_ONE >> (MAD_F_FRACBITS + 1 - bits)))
-		*clipping = sample - quantized;
-	}
-	else if (sample < -MAD_F_ONE)
-	{
-            quantized = -MAD_F_ONE;
-            ++*clipped;
-            if (quantized - sample > *clipping &&
-                mad_f_abs (*error) < (MAD_F_ONE >> (MAD_F_FRACBITS + 1 - bits)))
-		*clipping = quantized - sample;
-	}
-    }
-
-    /* quantize */
-    quantized &= ~((1L << (MAD_F_FRACBITS + 1 - bits)) - 1);
-
-    /* error */
-    *error = sample - quantized;
-
-    /* scale */
-    return quantized >> (MAD_F_FRACBITS + 1 - bits);
-}
 
 
-static unsigned int
-pack_pcm (unsigned char *data, unsigned int nsamples,
-          mad_fixed_t const *left, mad_fixed_t const *right,
-          int resolution, unsigned long *clipped, mad_fixed_t * clipping)
-{
-    static mad_fixed_t left_err, right_err;
-    unsigned char const *start;
-    register signed long sample0, sample1;
-    int effective, bytes;
-
-    start = data;
-    effective = (resolution > 24) ? 24 : resolution;
-    bytes = resolution / 8;
-
-    if (right)
-    {							/* stereo */
-	while (nsamples--)
-	{
-            sample0 = linear_dither (effective, *left++, &left_err,
-                                     clipped, clipping);
-            sample1 = linear_dither (effective, *right++, &right_err,
-                                     clipped, clipping);
-
-            switch (resolution)
-            {
-            case 8:
-		data[0] = sample0 + 0x80;
-		data[1] = sample1 + 0x80;
-		break;
-
-            case 32:
-		sample0 <<= 8;
-		sample1 <<= 8;
-		data[3] = sample0 >> 24;
-		data[bytes + 3] = sample1 >> 24;
-            case 24:
-		data[2] = sample0 >> 16;
-		data[bytes + 2] = sample1 >> 16;
-            case 16:
-		data[1] = sample0 >> 8;
-		data[bytes + 1] = sample1 >> 8;
-		data[0] = sample0 >> 0;
-		data[bytes + 0] = sample1 >> 0;
-            }
-
-            data += bytes * 2;
-	}
-    }
-    else
-    {							/* mono */
-	while (nsamples--)
-	{
-            sample0 = linear_dither (effective, *left++, &left_err,
-                                     clipped, clipping);
-
-            switch (resolution)
-            {
-            case 8:
-		data[0] = sample0 + 0x80;
-		break;
-
-            case 32:
-		sample0 <<= 8;
-		data[3] = sample0 >> 24;
-            case 24:
-		data[2] = sample0 >> 16;
-            case 16:
-		data[1] = sample0 >> 8;
-		data[0] = sample0 >> 0;
-            }
-            data += bytes;
-	}
-    }
-
-    return data - start;
-}
-
-static int
-vbr_update (struct stats *stats, unsigned long bitrate)
-{
-    bitrate /= 1000;
-    stats->vbr_rate += bitrate;
-
-    stats->vbr += (stats->bitrate && stats->bitrate != bitrate) ? 128 : -1;
-    if (stats->vbr < 0)
-	stats->vbr = 0;
-    else if (stats->vbr > 512)
-	stats->vbr = 512;
-
-    stats->bitrate = bitrate;
-
-    return stats->vbr ?
-	((stats->vbr_rate * 2) / stats->frames + 1) / 2 : stats->bitrate;
-}
-
-static int
-parse_xing (struct xing *xing, struct mad_bitptr ptr, unsigned int bitlen)
-{
-    if (bitlen < 64 || mad_bit_read (&ptr, 32) != XING_MAGIC)
-	goto fail;
-
-    xing->flags = mad_bit_read (&ptr, 32);
-    bitlen -= 64;
-
-    if (xing->flags & XING_FRAMES)
-    {
-	if (bitlen < 32)
-            goto fail;
-
-	xing->frames = mad_bit_read (&ptr, 32);
-	bitlen -= 32;
-    }
-
-    if (xing->flags & XING_BYTES)
-    {
-	if (bitlen < 32)
-            goto fail;
-
-	xing->bytes = mad_bit_read (&ptr, 32);
-	bitlen -= 32;
-    }
-
-    if (xing->flags & XING_TOC)
-    {
-	int i;
-
-	if (bitlen < 800)
-            goto fail;
-
-	for (i = 0; i < 100; ++i)
-            xing->toc[i] = mad_bit_read (&ptr, 8);
-
-	bitlen -= 800;
-    }
-
-    if (xing->flags & XING_SCALE)
-    {
-	if (bitlen < 32)
-            goto fail;
-
-	xing->scale = mad_bit_read (&ptr, 32);
-	bitlen -= 32;
-    }
-
-    return 0;
-
- fail:
-    xing->flags = 0;
-    return -1;
-}
-
-int
-scan_header (FILE * fd, struct mad_header *header, struct xing *xing)
-{
-    struct mad_stream stream;
-    struct mad_frame frame;
-    unsigned char buffer[8192];
-    unsigned int buflen = 0;
-    int count = 0, result = 0;
-
-    mad_stream_init (&stream);
-    mad_frame_init (&frame);
-
-    while (1)
-    {
-	if (buflen < 8192)
-	{
-            int bytes;
-
-            bytes = fread (buffer + buflen, 1, 8192 - buflen, fd);
-
-            if (bytes <= 0)
-            {
-		if (bytes == -1)
-		{
-                    result = -1;
-		}
-		break;
-            }
-
-            buflen += bytes;
-	}
-
-	mad_stream_buffer (&stream, buffer, buflen);
-
-	while (1)
-	{
-            if (mad_frame_decode (&frame, &stream) == -1)
-            {
-		if (!MAD_RECOVERABLE (stream.error))
-		{
-//                    printf ("decoding error!\n");
-                    break;
-		}
-
-//				  if (do_error (&stream, 0, input, 0, 0))
-		continue;
-            }
-
-            if (count++ ||
-                (xing
-                 && parse_xing (xing, stream.anc_ptr, stream.anc_bitlen) == -1))
-		break;
-	}
-
-	if (count || stream.error != MAD_ERROR_BUFLEN)
-            break;
-
-	memmove (buffer, stream.next_frame,
-                 buflen = &buffer[buflen] - stream.next_frame);
-    }
-
-    if (count)
-    {
-	if (header)
-            *header = frame.header;
-    }
-    else
-	result = -1;
-
-    mad_frame_finish (&frame);
-    mad_stream_finish (&stream);
-
-    return result;
-}
 
 
 
@@ -759,32 +509,29 @@ void readtoc(char *dev)
 
     if (fd < 0) 
     {
-        fprintf(stderr, "while opening %s :", dev);
-        perror("ioctl cdrom device open error: ");
+
     }
 
     ioctl( fd, CDROMREADTOCHDR, &hdr );
 
     for ( i = 0; i < hdr.cdth_trk1; i++ ) 
     {
-	entry[i].cdte_track = 1+i;
-	entry[i].cdte_format = CDROM_LBA;
-	err = ioctl(fd, CDROMREADTOCENTRY, &entry[i] );
-	if ( err != 0 ) 
+        entry[i].cdte_track = 1+i;
+        entry[i].cdte_format = CDROM_LBA;
+        err = ioctl(fd, CDROMREADTOCENTRY, &entry[i] );
+        if ( err != 0 ) 
         {
-	    /* error handling */
-	    fprintf( stderr, "can't get TocEntry #%d (error %d).\n", i+1, err );
-	    exit( -1 );
-	}
+            /* error handling */
+
+        }
     }
     entry[i].cdte_track = CDROM_LEADOUT;
     entry[i].cdte_format = CDROM_LBA;
     err = ioctl( fd, CDROMREADTOCENTRY, &entry[i] );
     if ( err != 0 ) 
     {
-	/* error handling */
-	fprintf( stderr, "can't get TocEntry LEADOUT (error %d).\n", err );
-	exit( -1 );
+        /* error handling */
+
     }
     tracks = hdr.cdth_trk1+1;
     for (i = 0; i < tracks; i++) 
@@ -794,7 +541,6 @@ void readtoc(char *dev)
         toc[i].dwStartSector = entry[i].cdte_addr.lba;
     }
     ourtoc=toc;
-    printf("Number of tracks %d\n",tracks);
     ourtracks=tracks-1;
 
 }

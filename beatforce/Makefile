@@ -79,7 +79,7 @@ SDL_CONFIG = /usr/bin/sdl-config
 SDL_LIBS = -L/usr/lib -lSDL -lpthread
 STRIP = strip
 THEME_DIR = /usr/share/beatforce/themes
-VERSION = 0.1.0
+VERSION = 0.0.1
 
 SUBDIRS = lib plugins src themes
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4

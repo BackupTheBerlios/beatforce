@@ -90,10 +90,8 @@ int OSACDROM_Init()
     int i;
     
     /* Find out how many CD-ROM drives are connected to the system */
-    printf("Drives available: %d\n", SDL_CDNumDrives());
     for ( i=0; i<SDL_CDNumDrives(); ++i ) 
     {
-        printf("Drive %d:  \"%s\"\n", i, SDL_CDName(i));
         OSACDROM_TestDrive(SDL_CDName(i));
     
 
@@ -111,18 +109,15 @@ int OSACDROM_TestDrive(char *dev)
     TOC toc[90];
     int id;
     
-    printf("testing %s\n",dev);
 
     if (stat(dev, &statstruct)) 
     {
-        fprintf(stderr, "cannot stat cd (%s)\n", dev);
         return 0;
     }
 
     if(!S_ISCHR(statstruct.st_mode) &&
        !S_ISBLK(statstruct.st_mode))
     {
-        printf("not a device\n");
         return 0;
     }
 
@@ -134,7 +129,6 @@ int OSACDROM_TestDrive(char *dev)
             fprintf(stderr, " is not a char device\n");
             exit(1);
         }
-        printf("SCSI device\n");
         break;
     case SCSI_CDROM_MAJOR:      /* scsi cd */
     default:
@@ -143,7 +137,6 @@ int OSACDROM_TestDrive(char *dev)
             fprintf(stderr, "%s is not a block device\n",SDL_CDName(i));
             return 0;
         }
-        printf("Cooked ioctl\n");
         break;
     }
     fd = open(dev,O_RDONLY);
@@ -165,7 +158,8 @@ int OSACDROM_TestDrive(char *dev)
         if ( err != 0 ) 
         {
             /* error handling */
-            fprintf( stderr, "can't get TocEntry #%d (error %d).\n", j+1, err );
+//            fprintf( stderr, "can't get TocEntry #%d (error %d).\n", j+1, err );
+            return 0;
         }
     }
     entry[j].cdte_track = CDROM_LEADOUT;
@@ -174,7 +168,7 @@ int OSACDROM_TestDrive(char *dev)
     if ( err != 0 ) 
     {
         /* error handling */
-        fprintf( stderr, "can't get TocEntry LEADOUT (error %d).\n", err );
+//        fprintf( stderr, "can't get TocEntry LEADOUT (error %d).\n", err );
         return 0;
     }
     tracks = hdr.cdth_trk1+1;
@@ -185,13 +179,11 @@ int OSACDROM_TestDrive(char *dev)
         toc[j].dwStartSector = entry[j].cdte_addr.lba;
     }
     g_toc=toc;
-    printf("Number of tracks %d\n",tracks);
     cdtracks=tracks-1;
     
     id=OSACDROM_CalcCDDBId();
-    printf("SONGDB ID %x %d\n",id,id);
     
-    DisplayToc();
+//    DisplayToc();
     
     if(tracks > 0)
     {
@@ -204,46 +196,11 @@ int OSACDROM_TestDrive(char *dev)
 
         for(i=1;i<=tracks;i++)
         {
-            printf("Adding tracknames %s\n",dev);
             sprintf(trackname,"%s/track%02d.cdda",dev,i);
             SONGDB_AddFileToSubgroup(sg,trackname);
         }
 
     }
-#if 0
-    {
-        int s  = GetStartSector(1);
-        int se = GetEndSector(1)+1;
-        FILE *pcm;
-        unsigned int *buffertje;
-        
-        buffertje=malloc(sizeof(unsigned int)*2352*75);
-        pcm=fopen("calc.pcm","ab");
-        
-        while(s<se)
-        {
-            printf("s %d\n",s);
-            printf("se %d\n",se);
-            arg.addr.lba = s;
-            arg.addr_format = CDROM_LBA;
-            arg.nframes = 74;
-            arg.buf = (unsigned char *) &buffertje[0];
-            if(ioctl(fd, CDROMREADAUDIO, &arg) < 0)
-            {
-                perror("ioctl\n");
-            }
-            else
-            {
-                printf("Writing stream\n");
-                fwrite(buffertje,1,2352*74,pcm);
-            }
-            s+=74;
-        }
-       
-    }
-#endif
-
-
 }
 
 void DisplayToc ( )

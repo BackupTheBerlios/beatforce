@@ -81,6 +81,7 @@ int PLAYER_Init(int player_nr, PlayerConfig * cfg)
     PLAYER_StorePlayerData(player_nr,player);
 
     player->ip_plugins=INPUT_Init (player_nr, PLUGIN_GetList(PLUGIN_TYPE_INPUT));
+    
     PLAYLIST_Init (player_nr);
   
     return 0;
@@ -300,7 +301,6 @@ int player_load (int player_nr)
     
     if (p->playlist_id == 0 && p->songdb_id == SONGDB_ID_UNKNOWN)
     {
-        printf ("no song to play\n");
         return 0;
     }
 
@@ -310,7 +310,6 @@ int player_load (int player_nr)
         e   =  SONGDB_GetEntryID (p->songdb_id);
         if(e)
         {
-            printf("LoadFile %s\n",e->filename);
             err =  INPUT_LoadFile (player_nr, p->e);
         }
         else
@@ -326,7 +325,6 @@ int player_load (int player_nr)
     {
         if (cerr == ERROR_NOT_OPEN || cerr == ERROR_NO_FILE_LOADED || cerr == ERROR_EOF)
         {
-            printf("No file opened\n");
             return 0;
         }
 

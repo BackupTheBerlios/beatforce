@@ -363,8 +363,6 @@ int output_write (int c, void* buf, int len)
     output_magic_check (ch[c], ERROR_INVALID_ARG);
     if (ch[c]->buffer2_size < len * 2)
     {
-        printf( "audioutput_write: buffer-realloc from %d to %d!\n", ch[c]->buffer2_size, len*2 );
-
         ch[c]->buffer2 = realloc (ch[c]->buffer2, len * 2);
         if (ch[c]->buffer2 == NULL)
         {

@@ -64,9 +64,11 @@ BFList *INPUT_Init (int player_nr, BFList * plugin_list)
         ipd = malloc (INPUT_PLUGIN_DATA_LEN);
         if (ipd == NULL)
             return NULL;
+
         memset (ipd, 0, INPUT_PLUGIN_DATA_LEN);
         
         ipd->ip = (InputPlugin *) next->data;
+
         ipd->ip->init (&ipd->priv, player_nr);
 
         ip_plugins = LLIST_Append(ip_plugins, (void*) ipd);
@@ -86,7 +88,7 @@ INPUT_WhoseFile(BFList *input_plugins, char *filename)
     InputPluginData *ipd;
     BFList *next;
 
-    TRACE("INPUT_WhoseFile %s",filename);
+//    TRACE("INPUT_WhoseFile %s",filename);
     if (filename == NULL)
     {
         return NULL;
@@ -104,7 +106,7 @@ INPUT_WhoseFile(BFList *input_plugins, char *filename)
         ipd = (InputPluginData *) next->data;
         if(ipd->ip->is_our_file)
         {
-            printf("desc %s\n",ipd->ip->description);
+            //          printf("Is our file %s\n",ipd->ip->filename);
             if (ipd->ip->is_our_file(ipd->priv, filename) == TRUE)
             {
                 return next->data;
@@ -118,7 +120,7 @@ INPUT_WhoseFile(BFList *input_plugins, char *filename)
         next = next->next;
     }
 
-    ERROR("Unknown File format: %s\n", filename);
+//    ERROR("Unknown File format: %s\n", filename);
 
     return NULL;
 }

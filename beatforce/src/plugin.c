@@ -92,6 +92,7 @@ PLUGIN_AddPlugin(char * filename, int type, BFList ** plugins)
     void *(*gpi) (InputInterface*);
     void *(*gpo) (void);
 
+    TRACE("PLUGIN_AddPlugin %s",filename);
     if ((h = OSA_LoadLibrary(filename)) != NULL)
     {
         if ((gpi = OSA_GetFunctionAddress(h, "get_input_info")) != NULL && type == PLUGIN_TYPE_INPUT)
