@@ -85,6 +85,7 @@ typedef struct SongDBGroup
 {
     char *Name;
     int Changed;
+    int SubgroupCount;
     struct SongDBSubgroup *Active;
     struct SongDBSubgroup *Subgroup;
     struct SongDBGroup *next;
@@ -119,15 +120,17 @@ void SONGDB_FindEntry(char *search_string);
 
 /* Group related functions */
 int SONGDB_GroupChanged();
+SongDBGroup *SONGDB_GetActiveGroup();
 int SONGDB_SetActiveSubgroup(int which);
 
+
 /* Subgroup modifiers */
-int SONGDB_AddSubgroup(char *title);
+int SONGDB_AddSubgroup(struct SongDBGroup *group,char *title);
 int SONGDB_RemoveSubgroup(int which);
 int SONGDB_RenameSubgroup(int which, char *title);
 struct SongDBSubgroup *SONGDB_GetSubgroup(int which);
 int SONGDB_SubgroupCount();
-int SONGDB_AddFileTo(int which,char *filename);
+int SONGDB_AddFileToSubgroup(int which,char *filename);
 int SONGDB_SetActiveSubgroup(int which);
 struct SongDBSubgroup *SONGDB_GetActiveSubgroup();
 #endif

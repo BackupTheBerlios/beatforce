@@ -53,7 +53,7 @@ int change;
 
 char directory[255];
 
-extern SongDBGroup *MainGroup;
+
 
 /* Local function prototypes */
 SDL_Surface *Window_CreateFileWindow();
@@ -134,8 +134,8 @@ static void FILEWINDOW_RenameSubgroup(void *data)
 
 static void FILEWINDOW_AddSubgroup(void *data)
 {
-    SONGDB_AddSubgroup("<new>");
-    SDL_WidgetPropertiesOf(TableSubgroup,ROWS, SONGDB_SubgroupCount());
+    SONGDB_AddSubgroup(SONGDB_GetActiveGroup(),"<new>");
+    SDL_WidgetPropertiesOf(TableSubgroup,ROWS, 100);
 }
 
 static void FILEWINDOW_RemoveSubgroup(void *data)
@@ -148,7 +148,7 @@ static void FILEWINDOW_RemoveSubgroup(void *data)
         SONGDB_RemoveSubgroup(row->index);
         SDL_WidgetPropertiesOf(TableSubgroup,CLEAR_SELECTED,0);
     }
-    SDL_WidgetPropertiesOf(TableSubgroup,ROWS, SONGDB_SubgroupCount());
+    SDL_WidgetPropertiesOf(TableSubgroup,ROWS,100);
 }
 
 static void FILEWINDOW_AddSelected(void *data)
@@ -172,7 +172,7 @@ static void FILEWINDOW_AddSelected(void *data)
                 SDL_WidgetPropertiesOf(TableSubgroup,GET_SELECTED,&lSubgroup);
                 if(lSubgroup)
                 {
-                    SONGDB_AddFileTo(lSubgroup->index,string);
+                    SONGDB_AddFileToSubgroup(lSubgroup->index,string);
 ////                    return;
                 }
 //                else
@@ -201,7 +201,7 @@ static void FILEWINDOW_AddAll(void *data)
         l=files;
         while(l)
         {   
-            SONGDB_AddFileTo(lSubgroup->index,(char*)l->data);
+            SONGDB_AddFileToSubgroup(lSubgroup->index,(char*)l->data);
             l=l->next;
         }
     }
@@ -422,9 +422,9 @@ void FILEWINDOW_GetFilesInSubgroup(int row,int column,char *string)
     {
         if(list && list->Playlist )
         {
-            if(list->Playlist[row])
+            if(list->Playlist)
             {
-                sprintf(string,"%s",list->Playlist[row]->filename);
+                sprintf(string,"%s",list->Playlist->filename);
             }
         }
     }
@@ -526,7 +526,7 @@ SDL_Surface *Window_CreateFileWindow()
             SDL_WidgetProperties(SET_VISIBLE_COLUMNS, 1);
             SDL_WidgetProperties(SET_VISIBLE_ROWS, 19);
             SDL_WidgetProperties(COLUMN_WIDTH,1,Table->Rect.w);
-            SDL_WidgetProperties(ROWS, SONGDB_SubgroupCount());
+            SDL_WidgetProperties(ROWS, 30);
             SDL_WidgetProperties(SET_SELECTABLE,1);
             SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
             SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
