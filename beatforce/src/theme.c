@@ -119,7 +119,10 @@ int THEME_Init()
 
     dir=OSA_FindDirectories(THEME_DIR);
     if(dir == NULL)
+    {
+        ERROR("Couldn't list directories in %s",THEME_DIR);
         return 0;
+    }
 
     NoOfThemes=LLIST_NoOfEntries(dir);
         

@@ -72,7 +72,10 @@ BFList *OSA_FindDirectories(char *dir)
     TRACE("OSA_FindDirectories enter %s",dir);
 
     if(dir == NULL)
+    {
+        ERROR("Unable to execute");
         return NULL;
+    }
 
 
     d=opendir(dir);
@@ -82,6 +85,10 @@ BFList *OSA_FindDirectories(char *dir)
         return NULL;
     }
     dent=readdir(d);
+    if(dent == NULL)
+    {
+        ERROR("readdir");
+    }
     while(dent)
     {
         if(dent->d_type == DT_DIR)
@@ -97,7 +104,8 @@ BFList *OSA_FindDirectories(char *dir)
             {
                 sprintf(dirname,"%s%s",dir,dent->d_name);
             }
-            dirs=LLIST_Append(dirs,dirname);
+            if(strlen(dirname))
+                dirs=LLIST_Append(dirs,dirname);
         }
         dent=readdir(d);
     }
