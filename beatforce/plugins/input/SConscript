@@ -1,0 +1,7 @@
+
+
+Import('env')
+
+env.SConscript(['cdda/SConscript'])
+#env.SConscript(['mp3mad/SConscript'])
+#env.SConscript(['ogg/SConscript'])

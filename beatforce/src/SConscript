@@ -2,7 +2,7 @@
 
 Import('env');
 
-if env['UI'] == 'sdltk':
+if env['ui'] == 'sdltk':
         print "Using 'sdltk' as main user interface!"
         env.SConscript(['../lib/src/SConscript'])
         env.SConscript(['ui/sdltk/SConscript'])        
@@ -34,7 +34,7 @@ if env['UI'] == 'sdltk':
                 ],
                         LIBS=['m','SDL','fftw3','SDL_image','xml2','ui','sdltk'],
                         LIBPATH=['/usr/lib/gtk/','../lib/src/','ui/sdltk'])      
-elif env['UI'] == 'gtk':
+elif env['ui'] == 'gtk':
         print "Using 'gtk' as main user interface!"
         env.SConscript(['ui/gtk/SConscript'])    
         env.Append(CCFLAGS = '-Isrc/ui/gtk/')
@@ -62,9 +62,9 @@ elif env['UI'] == 'gtk':
                         'plugin.c',
                         'configfile.c'
                 ],
-                        LIBS=['m','SDL','fftw3','SDL_image','xml2','ui'],
+                        LIBS=['m','SDL','fftw3','SDL_image','xml2','ui','gtk','gdk'],
                         LIBPATH=['/usr/lib/gtk/','ui/gtk/'])      
-elif env['UI'] == 'qt':
+elif env['ui'] == 'qt':
         print "src/Don't forget to copy `qt' to the archive!"
 
 

@@ -1,0 +1,8 @@
+
+
+Import('env')
+
+
+env.SharedLibrary('cdda',['cdda.c'])
+env.InstallAs( target = '/usr/share/beatforce/libcdda.so',
+               source = 'libcdda.so')

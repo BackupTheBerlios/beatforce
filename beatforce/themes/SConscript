@@ -1,0 +1,7 @@
+
+
+Import('env')
+
+env.Alias(target = "install", source=env.Install(dir="/usr/share/beatforce/themes/beatforce/", 
+                        source="beatforce/t.bmp"))
+env.Install(dir = '/usr/share/beatforce',source = ['SConscript']);

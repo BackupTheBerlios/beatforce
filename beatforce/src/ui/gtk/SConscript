@@ -1,0 +1,13 @@
+
+
+
+
+
+
+
+
+Import('env')
+
+env.Library("ui",['ui.c',
+                  'main_window.c',
+                  'player_ui.c'])
