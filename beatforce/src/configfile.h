@@ -58,8 +58,7 @@ int bf_cfg_write_default_file (ConfigFile * cfg);
 
 int bf_cfg_read_string (ConfigFile * cfg, char * section, char * key,
 			     char ** value);
-int bf_cfg_read_int (ConfigFile * cfg, char * section, char * key,
-			  int * value);
+int CONFIGFILE_ReadInt(ConfigFile * cfg, char * section, char * key,int * value);
 int bf_cfg_read_boolean (ConfigFile * cfg, char * section, char * key,
 			      int * value);
 int bf_cfg_read_float (ConfigFile * cfg, char * section, char * key,

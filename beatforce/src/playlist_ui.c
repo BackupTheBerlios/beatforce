@@ -39,6 +39,7 @@ void playliststring(long row,int column,char *dest)
     struct PlEntry *pe;
     struct SongDBEntry *e;
 
+
     dest[0]='\0';
 
     if(SONGDB_GetNoOfEntries()<row)
@@ -58,16 +59,6 @@ void playliststring(long row,int column,char *dest)
         switch(column)
         {
         case 0:
-            if(e->id)
-            {
-                sprintf(dest,"%ld",(e->id)+1);
-            }
-            else
-            {
-                sprintf(dest,"%ld",row+1);
-            }
-            break;
-        case 1:
             if(e->artist && e->title)
             {
                 sprintf(dest,"%s - %s",e->artist,e->title);
@@ -77,30 +68,40 @@ void playliststring(long row,int column,char *dest)
                 sprintf(dest,"%s",strrchr(e->filename,'/')+1);
             }
             break;
-        case 2:
-            if(e->time)
-            {
-                sprintf(dest,"%02d:%02d",(int)e->time/60000,
-                        (int)((e->time%60000)/1000));
-            }
-            break;
         }
     }
 }
 
 void playlisteventhandler(SDL_Table *table)
 {
-    player_set_song(0,table->CurrentRow);
+    int player=0;// is playing ?
+
+    if(PLAYER_IsPlaying(0))
+        player=1;
+
+    if(PLAYER_IsPlaying(1))
+    {
+        if(player!=1)
+            player=0;
+        else
+            player=-1;
+    }
+
+    if(player == -1)
+        printf("Can't set song to one of the players\n");
+    else
+        player_set_song(player,table->CurrentRow);
+
 }
+
 
 void PLAYLISTUI_CreateWindow()
 {
-    return;
-    SDL_WidgetCreate(SDL_TABLE,10,150,380,140);
-
-    SDL_WidgetProperties(SET_VISIBLE_ROWS,    10);
-    SDL_WidgetProperties(SET_VISIBLE_COLUMNS, 1);
+    SDL_WidgetCreate(SDL_TABLE,540,340,400,240);
     
+    SDL_WidgetProperties(SET_VISIBLE_ROWS,    16);
+    SDL_WidgetProperties(SET_VISIBLE_COLUMNS, 1);
+    SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
     SDL_WidgetProperties(SET_FONT,LargeBoldFont);
     SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION, playliststring);
     SDL_WidgetEventCallback(playlisteventhandler,SDL_CLICKED);

@@ -79,10 +79,13 @@ struct SongDBEntry
 #define SONGDB_ID_UNKNOWN	0xffffff00	/* id not specified in songdb_search */
 
 int SONGDB_Init (SongDBConfig * our_cfg);
-int SONGDB_AddFilename(char *filename);
+int SONGDB_AddFile(char *filename);
+int SONGDB_AddToSubset(struct SongDBEntry *e);
+int SONGDB_AddToSongdb(struct SongDBEntry *e);
 int SONGDB_SetActiveList(int db);
 void SONGDB_FreeActiveList();
 struct SongDBEntry *SONGDB_GetEntry(long id);
+struct SongDBEntry *SONGDB_GetEntryID(unsigned long id);
 struct SongDBEntry *SONGDB_GetSearchEntry(long id);
 long SONGDB_GetNoOfEntries (void);
 long SONGDB_GetNoOfSearchResults(void);

@@ -49,10 +49,9 @@ struct PlayerPrivate
 
     long playing_unique;
     
-    int play;
+    int play;        
     
-    ePlayerState State;
-    
+    ePlayerState State;           /* State of the player */
     
     float pitch;                  /* current pitch */
     int pitch_on;                 /* 1, if pitch on */
@@ -65,10 +64,6 @@ struct PlayerPrivate
 
     BFList *ip_plugins;            /* linked list of input plugins */
     InputPluginData *current_plugin;        /* pointer to current plugin in list */
-
-    void *eventcallback;
-    
-    struct PlEntry *playlist;
 
     int ch_id;
 

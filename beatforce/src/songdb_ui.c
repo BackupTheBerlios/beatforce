@@ -65,7 +65,9 @@ void eventhandler(SDL_Table *table)
     int player=0;// is playing ?
 
     /* Get the current playlist entry */
+
     e = SONGDB_GetEntry(table->CurrentRow);
+    
     if(PLAYER_IsPlaying(0))
         player=1;
 
@@ -75,16 +77,13 @@ void eventhandler(SDL_Table *table)
             player=0;
     }
     PLAYLIST_SetEntry(player,e);
-    player_set_song(player,0);  // when set_entry is excecuted we only have 1 item thus 0
-//    UI_PlayerSetArtistTitle(player);
-    
 }
 
 void SONGDBUI_CreateWindow()
 {
     
     /* Create the large table (songdb)*/
-    table=SDL_WidgetCreate(SDL_TABLE,30,340,950,240);
+    table=SDL_WidgetCreate(SDL_TABLE,30,340,500,240);
     SDL_WidgetProperties(SET_VISIBLE_ROWS,    20);
     SDL_WidgetProperties(SET_VISIBLE_COLUMNS, 3);
     SDL_WidgetProperties(COLUMN_WIDTH, 1, 30  );
@@ -114,7 +113,7 @@ void SONGDBUI_CreateWindow()
                 mp3  = OSA_FindFiles(songdbcfg->TabString[i],".mp3",1); //recursive search
                 while(mp3)
                 {
-                    SONGDB_AddFilename((char*)mp3->data);
+                    SONGDB_AddFile((char*)mp3->data);
                     mp3=mp3->next;
                 }
             }

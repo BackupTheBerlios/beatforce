@@ -30,9 +30,11 @@
 #define OSA          5
 #define OUTPUT       6
 #define PLAYER       7
-#define PLUGIN       8
-#define SONGDB_UI    9
-#define THEME        10
+#define PLAYLIST     8
+#define PLUGIN       9
+#define SONGDB       10
+#define SONGDB_UI    11
+#define THEME        12
 
 #define name(x) x
 #define module( x ) ( #x )
@@ -66,8 +68,8 @@ void printid(char *id,int line,char *message);
 #if MODULE_ID == WNDMGR
 #undef TRACE
 #undef DEBUG
-#define TRACE TRACE_OFF
-#define DEBUG DEBUG_OFF
+#define TRACE TRACE_ON
+#define DEBUG DEBUG_ON
 #endif
 
 #if MODULE_ID == MP3
@@ -94,14 +96,22 @@ void printid(char *id,int line,char *message);
 #define DEBUG DEBUG_ON
 #endif
 
+#if MODULE_ID == PLAYLIST
+#define TRACE TRACE_ON
+#define DEBUG DEBUG_ON
+#endif
+
 #if MODULE_ID == PLUGIN
 #define TRACE TRACE_OFF
 #define DEBUG DEBUG_OFF
 #endif
 
+#if MODULE_ID == SONGDB
+#define TRACE TRACE_ON
+#define DEBUG DEBUG_ON
+#endif
+
 #if MODULE_ID == SONGDB_UI
-#undef TRACE
-#undef DEBUG
 #define TRACE TRACE_ON
 #define DEBUG DEBUG_ON
 #endif

@@ -293,7 +293,7 @@ void FileWindow_DirSelectClicked(void *data)
     
     while(mp3)
     {
-        SONGDB_AddFilename((char*)mp3->data);
+        SONGDB_AddFile((char*)mp3->data);
         free(mp3->data);
         mp3=mp3->next;
     }

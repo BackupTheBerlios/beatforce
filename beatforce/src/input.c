@@ -147,6 +147,8 @@ int INPUT_LoadFile (int player_nr,struct SongDBEntry *e)
 {
     InputPluginData *l;
     
+    TRACE("INPUT_LoadFile %d %s",player_nr,e->filename);
+
     l = input_whose_file (PLAYER_GetData(player_nr)->ip_plugins, e->filename);
     if (l == NULL)
     {

@@ -153,7 +153,7 @@ player_timeout (unsigned int interval,void *data)
 
     if (p != NULL && p->current_plugin)
     {
-        struct SongDBEntry *e = SONGDB_GetEntry (p->playing_id);
+        struct SongDBEntry *e = SONGDB_GetEntryID(p->playing_id);
         songtime = INPUT_GetTime (p->current_plugin);
         if (songtime >= 0 || songtime == ERROR_EOF)
         {
@@ -325,12 +325,12 @@ void player_set_song (int player_nr, int no)
     struct PlayerPrivate *p;
     int ent, err = 0;
 
-    TRACE("PLAYER_SetSong -> %d",player_nr);
+    TRACE("PLAYER_SetSong -> %d,%d",player_nr,no);
     p = PLAYER_GetData(player_nr);
     if(p==NULL)
         return;
 
-    ent =  PLAYLIST_GetNoOfEntries (player_nr);
+    ent =  PLAYLIST_GetNoOfEntries(player_nr);
     if (ent == 0)
     {
         printf ("playlist has no entries.\n");
@@ -351,6 +351,7 @@ void player_set_song (int player_nr, int no)
     pe = PLAYLIST_GetSong (player_nr, no);
     if(pe == NULL)
     {
+        ERROR("Nothing loaded");
         return;
     }
     p->playing_no     = no;
@@ -414,7 +415,7 @@ player_load (int player_nr)
     if (! (cerr = input_close_file (p->current_plugin)) )
     {
         p->play = 0;
-        e   =  SONGDB_GetEntry (p->playing_id);
+        e   =  SONGDB_GetEntryID (p->playing_id);
         if(e)
             err =  INPUT_LoadFile (player_nr, e);
         else
@@ -448,16 +449,13 @@ int PLAYER_GetArtist(int player_nr,char *label)
 {
     struct SongDBEntry *e;
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
-    
-    if(p->playlist)
+
+    e=SONGDB_GetEntryID(p->playing_id);
+
+    if(e && e->artist)
     {
-        e   =  p->playlist->e;
-        if(e && e->artist)
-        {
-            sprintf(label,"%s",e->artist);
-            return 1;
-        }
-        return 0;
+        sprintf(label,"%s",e->artist);
+        return 1;
     }
     return 0;
 }
@@ -466,16 +464,13 @@ int PLAYER_GetTitle(int player_nr,char *label)
 {
     struct SongDBEntry *e;
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
+
+    e=SONGDB_GetEntryID(p->playing_id);
     
-    if(p->playlist)
+    if(e && e->title)
     {
-        e   =  p->playlist->e;
-        if(e && e->title)
-        {
-            sprintf(label,"%s",e->title);
-            return 1;
-        }
-        return 0;
+        sprintf(label,"%s",e->title);
+        return 1;
     }
     return 0;
 }
@@ -485,16 +480,13 @@ int PLAYER_GetFilename(int player_nr,char *filename)
 {
     struct SongDBEntry *e;
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
+
+    e=SONGDB_GetEntryID(p->playing_id);
     
-    if(p->playlist)
+    if(e && e->filename)
     {
-        e   =  p->playlist->e;
-        if(e && e->filename)
-        {
-            sprintf(filename,"%s",e->filename);
-            return 1;
-        }
-        return 0;
+        sprintf(filename,"%s",e->filename);
+        return 1;
     }
     return 0;
 }
@@ -504,16 +496,12 @@ long PLAYER_GetTimeTotal(int player_nr)
     struct SongDBEntry *e;
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
 
-    if(p->playlist)
-    {
-        e   =  p->playlist->e;
+    e=SONGDB_GetEntryID(p->playing_id);
 
-        if(e)
-            return e->time;
-        else
-            return 0;
-    }
-    return 0;
+    if(e)
+        return e->time;
+    else
+        return 0;
 }
 
 long PLAYER_GetTimePlayed(int player_nr)
@@ -532,14 +520,10 @@ long PLAYER_GetTimeLeft(int player_nr)
     struct SongDBEntry *e;
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
 
-    if(p->playlist)
+    e=SONGDB_GetEntryID(p->playing_id);
+    if(e)
     {
-        e   =  p->playlist->e;
-
-        if(e)
-        {
-            t = e->time - INPUT_GetTime(p->current_plugin);
-        }
+        t = e->time - INPUT_GetTime(p->current_plugin);
     }
     return t;
 }
@@ -555,16 +539,14 @@ int PLAYER_GetBitrate(int player_nr)
 {
     struct SongDBEntry *e;
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
-    
-    if(p->playlist)
+
+    e=SONGDB_GetEntryID(p->playing_id);    
+
+    if(e && e->AddInfo)
     {
-        e   =  p->playlist->e;
-        
-        if(e && e->AddInfo)
-        {
-            return e->AddInfo->bitrate;
-        }
+        return e->AddInfo->bitrate;
     }
+    
     return 0;
 }
 
@@ -574,20 +556,19 @@ int PLAYER_GetSamplerate(int player_nr)
     struct SongDBEntry *e;
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
 
-    if(p->playlist)
-    {
-        e   =  p->playlist->e;
+    e=SONGDB_GetEntryID(p->playing_id);
 
-        if(e && e->AddInfo)
-        {
-            return e->AddInfo->SampleRate;
-        }
+    if(e && e->AddInfo)
+    {
+        return e->AddInfo->SampleRate;
     }
     return t;
 }
 
 int PLAYER_SetSpeed(double speed)
 {
-
     return 0;
 }
+
+
+

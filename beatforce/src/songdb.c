@@ -36,10 +36,17 @@
 #include "input.h"
 #include "playlist.h"
 
+#define MODULE_ID SONGDB
+#include "debug.h"
+
 #define NUMBER_OF 8
 
 /* master index */
-struct SongDBEntry **songdb[NUMBER_OF];
+
+struct SongDBEntry **songdb; /* songdb containts all entries */
+
+struct SongDBEntry **subset[NUMBER_OF]; /* subset contains a part of songdb */
+unsigned long songcount;
 long n_id[NUMBER_OF];
 int active;
 
@@ -47,6 +54,7 @@ int active;
 struct SongDBEntry **search_results;
 long n_search_results;
 long n_index;
+long unid;
 
 SongDBConfig *songdbcfg;
 
@@ -57,15 +65,19 @@ int songdb_JumpToFileMatch(char* song, char * keys[], int nw);
 
 int SONGDB_Init (SongDBConfig * our_cfg)
 {
-    songdb[0] = NULL;
-    songdb[1] = NULL;
-    n_id[0]   = 0;
-    n_id[1]   = 0;
+    int i;
+
+    for(i=0;i<NUMBER_OF;i++)
+    {
+        subset[i] = NULL;
+        n_id[i]   = 0;
+    }
+    songcount=0;
     active = 0;
     search_results = NULL;
     n_search_results = 0;
     n_index = 0;
-
+    unid=0;
     songdbcfg = our_cfg;
 
     return 0;
@@ -90,8 +102,8 @@ void SONGDB_FreeActiveList()
     int i=0;
     for(i=0; i < n_id[active]; i++)
     {
-        songdb_FreeEntry(songdb[active][i]);
-        songdb[active][i]=NULL;
+        songdb_FreeEntry(subset[active][i]);
+        subset[active][i]=NULL;
     }
     n_id[active]=0;
 
@@ -130,15 +142,27 @@ struct SongDBEntry *SONGDB_GetSearchEntry(long id)
 struct SongDBEntry *SONGDB_GetEntry(long id)
 {
     struct SongDBEntry *e = NULL;
+    
+    TRACE("SONGDB_GetEntry %d",id);
 
     if (id >= n_id[active] || id == SONGDB_ID_UNKNOWN)
     {
+        ERROR("Returning NULL %d %d",id,n_id[active]);
         return NULL;
     }
-    e = songdb[active][id];
-    if (e != NULL && e->id == id)
+    e = subset[active][id];
+    if (e != NULL)
+    {
         return e;
+    }
     return NULL;
+}
+
+struct SongDBEntry *SONGDB_GetEntryID(unsigned long id)
+{
+    if(id >= unid || id == SONGDB_ID_UNKNOWN)
+        return NULL;
+    return songdb[id];
 }
 
 
@@ -148,14 +172,14 @@ int SONGDB_SetActiveList(int db)
     return 1;
 }
 
-int SONGDB_AddFilename(char *filename)
+int SONGDB_AddFile(char *filename)
 {
     struct SongDBEntry *e;
 
-    e = songdb_AllocEntry ();
-
+    TRACE("SONGDB_AddFile");
+    e = songdb_AllocEntry();
+    e->id = unid++;
     e->filename = strdup (filename);
-    e->id       = n_id[active];
 
     if (input_whose_file (PLAYER_GetData(0)->ip_plugins, filename) != NULL)
     {
@@ -166,18 +190,40 @@ int SONGDB_AddFilename(char *filename)
         //    if (e->time < 10)	
         //  return -1;
 
-        /* Add the created entry to the active database */
-        n_id[active]++;
-        songdb[active] = realloc (songdb[active], n_id[active] * DBENTRY_PTR_LEN);
-        if(songdb[active]==NULL)
-        {
-            printf("Realloc failed\n");
-        }
-        e->id = n_id[active] - 1;
-        songdb[active][e->id] = e;
+        /* Add the created entry to the active subset database */
+        SONGDB_AddToSubset(e);
+        /* Add the entry also to the entire db */
+        SONGDB_AddToSongdb(e);
         
     }
     return 0;
+}
+
+int SONGDB_AddToSubset(struct SongDBEntry *e)
+{
+    n_id[active]++;
+    subset[active] = realloc (subset[active], n_id[active] * DBENTRY_PTR_LEN);
+    if(subset[active]==NULL)
+    {
+        printf("Realloc failed\n");
+        return 0;
+    }
+    subset[active][n_id[active]-1] = e;
+    return 1;
+
+}
+
+int SONGDB_AddToSongdb(struct SongDBEntry *e)
+{
+    songcount++;
+    songdb = realloc(songdb,songcount * DBENTRY_PTR_LEN);
+    if(songdb == NULL)
+    {
+        printf("Realloc failed\n");
+        return 0;
+    }
+    songdb[songcount-1] = e;
+    return 1;
 }
 
 
@@ -190,7 +236,7 @@ songdb_do_list_add (struct SongDBEntry **entries, long id)
     struct SongDBEntry *e;
 
     if (entries == NULL)
-        entries = songdb[0];
+        entries = subset[0];
 
     empty = strdup ("");
 
@@ -287,7 +333,7 @@ void SONGDB_FindEntry(char *search_string)
     for(entry=0; entry < n_id[active]; entry++)
     {
         int match = 0; 
-        e = songdb[active][entry];
+        e = subset[active][entry];
         
         if (nw == 0   ||        /* No words yet */
             (nw == 1 && words[0][0] == '\0') || /* empty word */

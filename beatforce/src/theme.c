@@ -40,7 +40,9 @@ int THEME_Init()
     char themepath[255];
     int fullscreen;
 
+#if 0
     TRACE("THEME_Init enter %s",THEME_DIR);
+
 
     dir=OSA_FindDirectories(THEME_DIR);
 
@@ -57,12 +59,12 @@ int THEME_Init()
         if(themecfg)
         {
             NoOfThemes++;
-            bf_cfg_read_int(themecfg,"Screen","Fullscreen", &fullscreen);
+            CONFIGFILE_ReadInt(themecfg,"Screen","Fullscreen", &fullscreen);
         }
         lt=lt->next;
     }
 
     DEBUG("Number of themes %d",NoOfThemes);
-    
+#endif
     return 1;
 }

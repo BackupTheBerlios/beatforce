@@ -20,7 +20,7 @@ songdb.o: songdb.c /usr/include/string.h /usr/include/features.h \
  /usr/include/asm/errno.h /usr/include/asm-generic/errno.h \
  /usr/include/asm-generic/errno-base.h /usr/include/ctype.h \
  configfile.h llist.h songdb.h player.h input_plugin.h input.h \
- playlist.h
+ playlist.h debug.h
 songdb.c :
 /usr/include/string.h :
 /usr/include/features.h :
@@ -71,3 +71,4 @@ player.h :
 input_plugin.h :
 input.h :
 playlist.h :
+debug.h :

@@ -29,7 +29,8 @@
 #include "output.h"
 #include "mixer.h"
 #include "osa.h"
-//#include "main_window.h"
+#include "main_window.h"
+#include "theme.h"
 
 // user interface include
 #include "wndmgr.h"
@@ -45,9 +46,8 @@ int
 main(int argc, char *argv[])
 {
     OSA_Init();
-
-    THEME_Init();
     WNDMGR_Init(); 
+    THEME_Init();
 
     //beatforce
     cfgfile = bf_cfg_open_default_file ();
@@ -72,6 +72,7 @@ main(int argc, char *argv[])
     MIXER_Init  ();
     PLAYER_Init (0, playercfg0);
     PLAYER_Init (1, playercfg1);
+
 
     MAINWINDOW_Open();
 

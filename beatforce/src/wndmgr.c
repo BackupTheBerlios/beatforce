@@ -66,9 +66,10 @@ void WNDMGR_CloseWindow()
 
 void WNDMGR_Init()
 {
-    TRACE("UI_Init enter");
+    TRACE("WNDMGR_Init enter");
 
-    if ( SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_TIMER) < 0 ) 
+    CurWindow=NULL;
+    if(SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_TIMER) < 0 ) 
     {
         ERROR("Unable to init SDL: %s\n", SDL_GetError());
         exit(1);
@@ -112,8 +113,7 @@ int WNDMGR_Main(void * data)
     WNDMGR_Running = 1;
     gEventsAllowed = 1;
 
-
-
+    
     timer=OSA_StartTimer(50,wndmgr_Redraw,NULL);
 
     while(WNDMGR_Running)

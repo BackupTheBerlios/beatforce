@@ -59,21 +59,21 @@ bf_cfg_read_AudioConfig (ConfigFile * cfgfile)
     memset (cfg, 0, sizeof (AudioConfig));
 
 /* Input */
-    if (!bf_cfg_read_int(cfgfile, sect, "RingBufferSize", &cfg->RingBufferSize))
+    if (!CONFIGFILE_ReadInt(cfgfile, sect, "RingBufferSize", &cfg->RingBufferSize))
         cfg->RingBufferSize = 5;
-    if (!bf_cfg_read_int (cfgfile, sect, "FragmentSize", &cfg->FragmentSize))
+    if (!CONFIGFILE_ReadInt (cfgfile, sect, "FragmentSize", &cfg->FragmentSize))
         cfg->FragmentSize = 832;
 
 
 /* Output */
-    if (!bf_cfg_read_int (cfgfile, sect, "LowWatermark", &cfg->LowWatermark))
+    if (!CONFIGFILE_ReadInt (cfgfile, sect, "LowWatermark", &cfg->LowWatermark))
         cfg->LowWatermark = 3;
 
-    if (!bf_cfg_read_int (cfgfile, sect, "HighWatermark", &cfg->HighWatermark))
+    if (!CONFIGFILE_ReadInt (cfgfile, sect, "HighWatermark", &cfg->HighWatermark))
         cfg->HighWatermark = 10;
 
 /* FFTW */
-    if (!bf_cfg_read_int (cfgfile, sect, "FFTW_Policy", &cfg->FFTW_Policy))
+    if (!CONFIGFILE_ReadInt (cfgfile, sect, "FFTW_Policy", &cfg->FFTW_Policy))
         cfg->FFTW_Policy = 0;	/* estimate */
 
     if (!bf_cfg_read_boolean
@@ -139,7 +139,7 @@ bf_cfg_read_SongDBConfig (ConfigFile * cfgfile)
     memset (cfg, 0, sizeof (SongDBConfig));
     
    
-    if(!bf_cfg_read_int(cfgfile, sect, "Tabs", &cfg->Tabs))
+    if(!CONFIGFILE_ReadInt(cfgfile, sect, "Tabs", &cfg->Tabs))
     {
         cfg->Tabs = 1;
     }
@@ -189,19 +189,19 @@ bf_cfg_read_PositionConfig (ConfigFile * cfgfile, char *sect,
 			    PositionConfig * pos)
 {
 
-    if (!bf_cfg_read_int (cfgfile, sect, "PositionX", &pos->x))
+    if (!CONFIGFILE_ReadInt (cfgfile, sect, "PositionX", &pos->x))
         pos->x = -1;
 
-    if (!bf_cfg_read_int (cfgfile, sect, "PositionY", &pos->y))
+    if (!CONFIGFILE_ReadInt (cfgfile, sect, "PositionY", &pos->y))
         pos->y = -1;
 
-    if (!bf_cfg_read_int (cfgfile, sect, "Width", &pos->width))
+    if (!CONFIGFILE_ReadInt (cfgfile, sect, "Width", &pos->width))
         pos->width = -1;
 
-    if (!bf_cfg_read_int (cfgfile, sect, "Height", &pos->height))
+    if (!CONFIGFILE_ReadInt (cfgfile, sect, "Height", &pos->height))
         pos->height = -1;
 
-    if (!bf_cfg_read_int (cfgfile, sect, "Show", &pos->show))
+    if (!CONFIGFILE_ReadInt (cfgfile, sect, "Show", &pos->show))
         pos->show = 0;
 
     return pos;
@@ -570,8 +570,7 @@ bf_cfg_read_string (ConfigFile * cfg, char * section, char * key,
     return TRUE;
 }
 
-int
-bf_cfg_read_int (ConfigFile * cfg, char * section, char * key, int *value)
+int CONFIGFILE_ReadInt(ConfigFile * cfg, char * section, char * key, int *value)
 {
     char *str;
 

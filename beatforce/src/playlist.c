@@ -33,21 +33,32 @@
 #include "songdb.h"
 #include "playlist.h"
 
+#define MODULE_ID PLAYLIST
+#include "debug.h"
+
+struct PlEntry *playlist[2];
+
 /*local protypes*/
 struct PlEntry *playlist_AllocEntry(struct SongDBEntry *e);
 void playlist_FreeEntry (struct PlEntry *pe);
+
 long no_of_entries;
 long curr_unique;
 
 int PLAYLIST_Init (int player_nr)
 {
+    TRACE("PLAYLIST_Init");
     curr_unique = 0;
     no_of_entries=0;
+    playlist[0]=NULL;
+    playlist[1]=NULL;
+
     return 0;
 }
 
 int PLAYLIST_GetNoOfEntries(int player_nr)
 {
+//    TRACE("PLAYLIST_GetNoOfEntries");
     return no_of_entries;
 }
 
@@ -56,8 +67,8 @@ struct PlEntry *PLAYLIST_GetSong (int player_nr, int no)
 {
     struct PlEntry *pe;
     int index=0;
-
-    pe= PLAYER_GetData(player_nr)->playlist;
+   
+    pe = playlist[0];
     
     if(pe == NULL)
         return NULL;
@@ -76,52 +87,24 @@ struct PlEntry *PLAYLIST_GetSong (int player_nr, int no)
 void PLAYLIST_SetEntry(int player_nr, struct SongDBEntry *e)
 {
     struct PlEntry *pe;
-    struct PlEntry *newlist = PLAYER_GetData(player_nr)->playlist;
+    struct PlEntry *newlist = playlist[0];
+
+    TRACE("PLAYLIST_SetEntry %d",player_nr);
 
 #define STR( x )  ((x == NULL) ? ("") : (x))
 
     if (e == NULL)
     {
-        printf ("ERROR: entry == NULL\n");
+        ERROR("entry == NULL");
         return;
     }
-    pe = playlist_AllocEntry (e);
+    pe = playlist_AllocEntry(e);
 
-    no_of_entries=1;
-    if(newlist==NULL)
-    {
-        PLAYER_GetData(player_nr)->playlist=pe;
-    }
-    else
-    {
-        free(PLAYER_GetData(player_nr)->playlist);
-        PLAYER_GetData(player_nr)->playlist=pe;
-    }
-
-}
-
-void PLAYLIST_DoAdd(int player_nr, int row, struct SongDBEntry *e)
-{
-    struct PlEntry *pe;
-    struct PlEntry *newlist = PLAYER_GetData(player_nr)->playlist;
-
-#define STR( x )  ((x == NULL) ? ("") : (x))
-
-    if (e == NULL)
-    {
-        printf ("ERROR: entry == NULL\n");
-        return;
-    }
-    else
-    {
-        printf("Adding %s to player %d\n",e->artist,player_nr);
-        
-    }
-    pe = playlist_AllocEntry (e);
     no_of_entries++;
+
     if(newlist==NULL)
     {
-        PLAYER_GetData(player_nr)->playlist=pe;
+        playlist[0]=pe;
     }
     else
     {
@@ -129,9 +112,9 @@ void PLAYLIST_DoAdd(int player_nr, int row, struct SongDBEntry *e)
         {
             newlist=newlist->next;
         }
-        printf("Add to the end %p\n",pe);
         newlist->next=pe;
     }
+
 }
 
 struct PlEntry *
@@ -148,11 +131,7 @@ playlist_AllocEntry(struct SongDBEntry *e)
   memset (pe, 0, PL_ENTRY_LEN);
   
   curr_unique++;
-  pe->e = e;//(struct SongDBEntry*)malloc(sizeof(struct SongDBEntry));
-//  if(e->filename)
-//  {
-//      pe->e->filename=(char*)malloc(sizeof(struct 
-//  }
+  pe->e = e;
   
   pe->next = NULL;
   pe->unique = curr_unique;
