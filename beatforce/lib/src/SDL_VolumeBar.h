@@ -50,5 +50,5 @@ typedef struct SDL_VolumeBar
 void* SDL_VolumeBarCreate(SDL_Rect *rect);
 void  SDL_VolumeBarDraw(void *label,SDL_Surface *dest);
 void  SDL_VolumeBarEventHandler(void * label,SDL_Event *event);
-void  SDL_VolumeBarProperties(void *label,int feature,va_list list);
+int   SDL_VolumeBarProperties(void *label,int feature,va_list list);
 

@@ -18,10 +18,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif
-
 #include <stdio.h>
 #include <string.h>
 
@@ -35,20 +32,18 @@
 #define MODULE_ID PLUGIN
 #include "debug.h"
 
-
 static BFList *input_list;
 static BFList *output_list;
 
-
 /* Local prototypes */
-void plugin_ScanPlugins (char *dirname, int type, BFList ** plugins);
-void plugin_AddPlugin(char * filename, int type, BFList ** plugins);
+static void PLUGIN_ScanPlugins (char *dirname, int type, BFList ** plugins);
+static void PLUGIN_AddPlugin(char * filename, int type, BFList ** plugins);
 
 int PLUGIN_Init(int type)
 {
     char dirname[255];
     BFList **list;
-
+    
     TRACE("PLUGIN_Init enter %d",type);
 
     switch (type)
@@ -69,7 +64,7 @@ int PLUGIN_Init(int type)
         return -1;
     }
 
-    plugin_ScanPlugins (dirname, type, list);
+    PLUGIN_ScanPlugins (dirname, type, list);
 
     return 0;
 }
@@ -90,7 +85,8 @@ BFList *PLUGIN_GetList (int type)
     return NULL;
 }
 
-void plugin_AddPlugin(char * filename, int type, BFList ** plugins)
+static void 
+PLUGIN_AddPlugin(char * filename, int type, BFList ** plugins)
 {
     void *h;
     void *(*gpi) (InputInterface*);
@@ -138,8 +134,8 @@ void plugin_AddPlugin(char * filename, int type, BFList ** plugins)
 }
 
 
-void
-plugin_ScanPlugins (char *dirname, int type, BFList ** plugins)
+static void
+PLUGIN_ScanPlugins (char *dirname, int type, BFList ** plugins)
 {
     BFList *files  = NULL;
     void *data;
@@ -150,7 +146,7 @@ plugin_ScanPlugins (char *dirname, int type, BFList ** plugins)
     
     while(files)
     {
-        plugin_AddPlugin (files->data, type, plugins);
+        PLUGIN_AddPlugin (files->data, type, plugins);
         data=files->data;
         files=LLIST_Remove(files,data);
         free(data);

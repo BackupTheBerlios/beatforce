@@ -167,7 +167,7 @@ int MIXERUI_DecreaseMainVolume()
 {
     MIXER_DecreaseMainVolume();
     MIXERUI_Redraw();
-
+    return 1;
 }
 
 
@@ -175,4 +175,5 @@ int MIXERUI_IncreaseMainVolume()
 {
     MIXER_IncreaseMainVolume();
     MIXERUI_Redraw();
+    return 1;
 }

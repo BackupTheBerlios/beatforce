@@ -119,7 +119,6 @@ typedef void*             (*T_Widget_Create)       (SDL_Rect*);
 typedef void              (*T_Widget_Draw)         (void*,SDL_Surface *);
 typedef int               (*T_Widget_Properties)   (void*,int,va_list ap);
 typedef void              (*T_Widget_EventHandler) (void*,SDL_Event*);
-typedef void              (*T_Widget_SetCallback)  (void*,void *function,E_Widget_Event event);
 typedef void              (*T_Widget_Close)        (void*);
 
 /**
@@ -132,7 +131,6 @@ struct S_Widget_FunctionList
     T_Widget_Draw           draw;            /* Draw function of the widget                */
     T_Widget_Properties     properties;      /* Change properties of the widget            */
     T_Widget_EventHandler   eventhandler;    /* Handles basic SDL events of a widget       */
-    T_Widget_SetCallback    setcallback;     /* Sets a callback for widget specific events */
     T_Widget_Close          close;            /* Handles the cleanup of alloced memory      */
 };
 

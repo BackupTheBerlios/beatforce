@@ -55,5 +55,4 @@ void* SDL_ButtonCreate(SDL_Rect *rect);
 void  SDL_ButtonDraw(void *button,SDL_Surface *dest);
 int   SDL_ButtonProperties(void *button,int feature,va_list list);
 void  SDL_ButtonEventHandler(void *button,SDL_Event *event);
-void  SDL_ButtonSetCallback(void* button,void *function,E_Widget_Event event);
 void  SDL_ButtonClose(void *button);

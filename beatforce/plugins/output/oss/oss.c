@@ -20,10 +20,7 @@
 
  */
 
-#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/ioctl.h>
@@ -217,9 +214,18 @@ oss_write (Private * P, void *data, int count)
     return fwrite (data, 1, count, p->oss_fd);
 }
 
-int oss_get_volume(Private * P, float volume)
+int oss_get_volume(Private * P, float *volume)
 {
+    int vol;
+    oss_private *p = (oss_private *) P;
 
+    ioctl(fileno(p->mixer_fd), MIXER_READ(SOUND_MIXER_PCM), &vol);
+
+    vol = (vol & 0xff);
+        
+    *volume=(float)vol;
+
+    return 1;
 }
 
 int oss_set_volume(Private * P, float volume)
@@ -240,14 +246,14 @@ int oss_set_volume(Private * P, float volume)
 
 
     ioctl(fileno(p->mixer_fd), MIXER_READ(SOUND_MIXER_OGAIN), &vol);
-        
+#if 0        
     vol = (100 << 8) | 100;
     err = ioctl (fileno(p->mixer_fd), MIXER_WRITE(SOUND_MIXER_OGAIN), &vol);
     if(err < 0 )
     {
 	printf ("OSS: error setting volume for ogain %d: %s\n", vol, strerror(err));
     }
-
+#endif
     vol =(int)(volume);
     vol = ( ((vol&0xff) <<8) | (vol & 0xff));
     err = ioctl (fileno(p->mixer_fd), MIXER_WRITE(SOUND_MIXER_PCM), &vol);

@@ -87,7 +87,7 @@ void SDL_PanelDraw(void *panel,SDL_Surface *dest)
     
 }
 
-void  SDL_PanelProperties(void *panel,int feature,va_list list)
+int SDL_PanelProperties(void *panel,int feature,va_list list)
 {
     SDL_Panel *Panel=(SDL_Panel*)panel;
 
@@ -110,6 +110,7 @@ void  SDL_PanelProperties(void *panel,int feature,va_list list)
         Panel->redraw=1;
         break;
     }
+    return 1;
 }
 
 void SDL_PanelEventHandler(void *panel,SDL_Event *event)

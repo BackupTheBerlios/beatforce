@@ -48,13 +48,10 @@ struct PlayerPrivate *playerdata[3];
 int player_load (int);
 
 
-//prototypes
-unsigned int player_timeout (unsigned int interval,void *data);
-void player_set_songfield (int, char *, char *);
 
-void player_PlayPauses (int player_nr, int play);
 
-void player_SetData(int player_nr, struct PlayerPrivate *p)
+
+static void PLAYER_StorePlayerData(int player_nr, struct PlayerPrivate *p)
 {
     if(player_nr > 2 || player_nr < 0)
         printf("Wrong player_nr\n");
@@ -80,7 +77,7 @@ int PLAYER_Init(int player_nr, PlayerConfig * cfg)
     player->ch_id = player_nr;
     player->State = PLAYER_IDLE;
     
-    player_SetData(player_nr,player);
+    PLAYER_StorePlayerData(player_nr,player);
 
     player->ip_plugins=INPUT_Init (player_nr, PLUGIN_GetList(PLUGIN_TYPE_INPUT));
     PLAYLIST_Init (player_nr);
@@ -95,7 +92,6 @@ int PLAYER_Exit(int player_nr)
         return -1;
 
     PLAYER_Pause(player_nr);
-    OSA_RemoveTimer(p->timeout);
     return 0;
 }
 

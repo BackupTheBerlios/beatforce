@@ -114,7 +114,7 @@ void SDL_LabelDraw(void *label,SDL_Surface *dest)
     }
 }
 
-void  SDL_LabelProperties(void *label,int feature,va_list list)
+int SDL_LabelProperties(void *label,int feature,va_list list)
 {
     SDL_Label *Label=(SDL_Label*)label;
 
@@ -139,6 +139,7 @@ void  SDL_LabelProperties(void *label,int feature,va_list list)
         break;
 
     }
+    return 1;
 }
 
 void SDL_LabelEventHandler(void *label,SDL_Event *event)

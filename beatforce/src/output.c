@@ -20,10 +20,7 @@
 
  */
 
-#ifdef HAVE_CONFIG_H
-#  include <config.h>
-#endif
-
+#include <config.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
@@ -211,7 +208,8 @@ output_plugin_pause (struct OutGroup *grp, int pause)
 
 int OUTPUT_PluginGetVolume (struct OutGroup *grp)
 {
-    int err;
+    int err=1;
+    float volume;
 
     TRACE("OUTPUT_PluginGetVolume enter");
     if(grp == NULL)
@@ -226,17 +224,17 @@ int OUTPUT_PluginGetVolume (struct OutGroup *grp)
     if (grp->dev->op->get_volume == NULL)
         return ERROR_NOT_SUPPORTED;
 
-    err = grp->dev->op->get_volume (grp->dev->priv, &grp->fader_percent);
-    if (err)
+    if( grp->dev->op->get_volume (grp->dev->priv, &volume) <= 0)
     {
         printf("Unable to get volume: error 0x%x\n", -err);
     }
+    grp->mainvolume=(int)volume;
     TRACE("OUTPUT_PluginGetVolume leave");
     return err;
 }
 
 int
-output_plugin_set_volume (struct OutGroup *grp)
+OUTPUT_PluginSetVolume (struct OutGroup *grp)
 {
     int err;
 

@@ -160,11 +160,11 @@ int AUDIOOUTPUT_Open (int, AFormat, int, int, int *);
 int AUDIOOUTPUT_SetSpeed(int channel, float speed);
 
 /* Interface for plugins */
-int output_close (int);
+int AUDIOOUTPUT_Close (int);
 int output_read (int, unsigned char *, int);
 int output_write (int, void*, int);
 int output_write_blocking (int, void*, int);
-long output_buffer_free (int);
+long AUDIOOUTPUT_BufferFree(int c);
 int AUDIOOUTPUT_Pause (int c, int pause);
 int output_set_time (int, long);
 long output_get_time (int);

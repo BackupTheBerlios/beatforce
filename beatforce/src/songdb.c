@@ -32,6 +32,8 @@
 #include "configfile.h"
 #include "songdb.h"
 #include "player.h"
+#include "osa.h"
+
 //temp
 #include "input.h"
 #include "playlist.h"
@@ -88,6 +90,8 @@ int ReadXML()
     xmlDocPtr doc = NULL;       /* document pointer */
     xmlNodePtr cur = NULL;
     xmlChar *key;
+    char filename[255];
+    char *dir;
 
     count=0;
 
@@ -98,9 +102,12 @@ int ReadXML()
     /*
      * build an XML tree from a the file;
      */
-    doc = xmlParseFile("music.xml");
+    dir=OSA_GetConfigDir();
+    sprintf(filename,"%s/music.xml",dir);
+    doc = xmlParseFile(filename);
     if (doc == NULL) 
         return 0;
+    
     
     cur = xmlDocGetRootElement(doc);
     if (cur == NULL) 
@@ -166,6 +173,11 @@ int SONGDB_Exit()
     xmlNodePtr root_node = NULL;
     xmlNodePtr maingroup = NULL, subgroup = NULL, file = NULL;
     struct SongDBEntry *Playlist;
+    char *dir;
+    char filename[255];
+
+    dir=OSA_GetConfigDir();
+    sprintf(filename,"%s/music.xml",dir);
 
     LIBXML_TEST_VERSION;
     /* 
@@ -201,7 +213,7 @@ int SONGDB_Exit()
     /* 
      * Dumping document to stdio or file
      */
-    xmlSaveFormatFileEnc("music.xml", doc, "UTF-8", 1);
+    xmlSaveFormatFileEnc(filename, doc, "UTF-8", 1);
 
     /*free the document */
     xmlFreeDoc(doc);

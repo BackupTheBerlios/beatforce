@@ -56,12 +56,10 @@ struct PlayerPrivate
 
     int auto_remove;              /* auto remove played songs */
 
-    BFList *ip_plugins;            /* linked list of input plugins */
+    BFList *ip_plugins;            /* linked list of initialised input plugins */
     InputPluginData *current_plugin;        /* pointer to current plugin in list */
 
     int ch_id;
-
-    unsigned int timeout;                /* timeout for various things */
     
     int eof;
 

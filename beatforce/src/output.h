@@ -33,8 +33,8 @@ int Output_PluginOpen (struct OutGroup *, AudioConfig *, int, int, long, int);
 int output_plugin_close (struct OutGroup *);
 int OUTPUT_PluginWrite (struct OutGroup *, void *, int);
 int output_plugin_pause (struct OutGroup *, int);
-int output_plugin_get_volume (struct OutGroup *);
-int output_plugin_set_volume (struct OutGroup *);
+int OUTPUT_PluginGetVolume (struct OutGroup *);
+int OUTPUT_PluginSetVolume (struct OutGroup *);
 
 int output_plugin_cleanup(struct OutGroup *grp);
 
