@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
     SAMPLER_Init();
     SONGDB_Init (songdbcfg);
 
-    
+
     OSACDROM_Init();
 
     MAINWINDOW_Open();

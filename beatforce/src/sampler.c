@@ -58,6 +58,7 @@ InputInterface sampler_if =
 int SAMPLER_Init()
 {
     int i;
+    return 0;
     samples[0].filename=strdup("/home/beuving/test.mp3");
     samples[1].filename=strdup("/home/beuving/test.ogg");
 

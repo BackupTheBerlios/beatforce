@@ -140,21 +140,21 @@ PLUGIN_AddPlugin(char * filename, int type, BFList ** plugins)
             {
                 unsigned long i;
                 const LADSPA_Descriptor *dc;
-                
+                dc=NULL;
                 for(i=0;;i++)
                 {
                     dc=dis(i);
                     if(dc==NULL)
                         break;
                     printf("Effect: %s\n",dc->Label);
-
+                    
                 }
 
-//                *plugins = LLIST_Append (*plugins, (void*) h);
+                *plugins = LLIST_Append (*plugins, (void*) h);
+                OSA_CloseLibrary(h);
             }
             break;
         default:
-            OSA_CloseLibrary(h);
             break;
         }
     }
@@ -175,7 +175,7 @@ PLUGIN_ScanPlugins (char *dirname, int type, BFList ** plugins)
     TRACE("Plugin_ScanPlugins %s",dirname);
 
     files=OSA_FindFiles(dirname,(char*)OSA_GetSharedLibExtension(),1);
-    
+  
     while(files)
     {
         PLUGIN_AddPlugin (files->data, type, plugins);
