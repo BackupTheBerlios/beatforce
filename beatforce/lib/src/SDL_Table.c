@@ -369,7 +369,7 @@ static void SDL_TableAttachScrollbar(SDL_Table *Table)
 static void SDL_TableDrawRow(SDL_Surface *dest,SDL_Table *Table,int row)
 {
     SDL_Rect RowDims;
-//    SDL_Rect la;
+    SDL_Rect la;
     int column;
     char string[255];
     
@@ -410,16 +410,17 @@ static void SDL_TableDrawRow(SDL_Surface *dest,SDL_Table *Table,int row)
         {
             Table->Table_GetString(row + Table->FirstVisibleRow,column,(char*)&string);
            
-//            la.x = RowDims.x + 1;
-//            la.y = RowDims.y + 1;
-//            la.w = Table->ColumnWidths[column] - 2;
-//            la.h = RowDims.h - 2;
+            la.x = RowDims.x;
+            la.y = RowDims.y;
+            la.w = Table->ColumnWidths[column];
+            la.h = RowDims.h;
 
-            //SDL_FillRect(dest,&la,SDL_MapRGB(dest->format,155,155,155));
+//            SDL_FillRect(dest,&la,SDL_MapRGB(dest->format,155,155,155));
 
             if(strlen(string))
             {
-                SDL_FontDrawStringRect(dest,Table->font,string,&RowDims);
+                SDL_FontDrawStringRect(dest,Table->font,string,&la);
+//                SDL_FontDrawStringRect(dest,Table->font,string,&RowDims);
             }
             RowDims.x +=Table->ColumnWidths[column];
         }
