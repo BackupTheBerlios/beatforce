@@ -85,8 +85,9 @@ main(int argc, char *argv[])
     
    
     MAINWINDOW_Open();
+
     /*beatforce UI*/
-    WNDMGR_Main(NULL);
+    WNDMGR_Main();
 
 
     AUDIOOUTPUT_Cleanup();

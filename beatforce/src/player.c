@@ -295,6 +295,8 @@ int PLAYER_Pause(int player_nr)
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
     if(p == NULL)
         return 0;
+    TRACE("PLAYER_Pause %d",player_nr);
+
 
     if(p->State == PLAYER_PAUSE)
     {
@@ -315,6 +317,7 @@ int PLAYER_IsPlaying (int player_nr)
     if(p==NULL)
         return 0;
 
+    TRACE("PLAYER_IsPlaying %d %d",player_nr,p->State);
     if(p->State == PLAYER_PLAY)
         return TRUE;
     else

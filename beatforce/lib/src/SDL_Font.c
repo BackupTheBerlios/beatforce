@@ -88,6 +88,7 @@ void SDL_FontDrawStringRect(SDL_Surface *dest,SDL_Font *font,
     {
         if(SDL_FontGetCharWidth(font,string[i]) + xoffset > rect->w)
             return;
+
         pos.x=xoffset+rect->x;
         pos.y=rect->y;
         pos.w=rect->w;

@@ -26,12 +26,9 @@
 #include <SDL/SDL.h>
 #include <SDL_Widget.h>
 
+#include "main_window.h"
 #include "wndmgr.h"
 #include "osa.h"
-
-#include "main_window.h"
-#include "file_window.h"
-#include "search_window.h"
 #include "theme.h"
 
 #define MODULE_ID WNDMGR
@@ -100,7 +97,7 @@ void WNDMGR_Open(Window *window)
 }
 
 
-int WNDMGR_Main(void * data)
+int WNDMGR_Main()
 {
     SDL_Event test_event;
     int timer;

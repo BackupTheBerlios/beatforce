@@ -92,6 +92,7 @@ void SDL_LabelDraw(void *label,SDL_Surface *dest)
 
         if(Label->Caption)
             counter=strlen(Label->Caption);
+
         strncpy(string,Label->Caption,counter);
 
         while(StringWidth > Label->rect.w && counter) 

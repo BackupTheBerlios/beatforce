@@ -171,7 +171,7 @@ mp3_init (Private ** p, int ch_id)
 
     //to be done
     mp3_priv->going     =1 ;
-//    mp3_priv->decode_thread=OSA_CreateThread(mp3_play_loop, (void *)mp3_priv);
+    mp3_priv->decode_thread=OSA_CreateThread(mp3_play_loop, (void *)mp3_priv);
     *p = (Private *) mp3_priv;
 
     TRACE("mp3_init leave");
@@ -871,10 +871,10 @@ mp3_play (Private * h)
     mp3Private *private = (mp3Private *) h;
 
     if( h == NULL || private->magic != MP3MAD_MAGIC)
-        return ERROR_INVALID_ARG;
+        return 0;
    
     mp3_if.output_pause (private->ch_id, 0);
-    return 0;
+    return 1;
 }
 
 int
@@ -885,7 +885,7 @@ mp3_pause (Private * h)
         return ERROR_INVALID_ARG;
   
     mp3_if.output_pause (private->ch_id, 1);
-    return 0;
+    return 1;
 }
 
 int

@@ -125,7 +125,10 @@ int FONT_FNT_DrawChar(SDL_Surface *dest,SDL_Font *font,
                     if(clip && (((newx+xoffset) < clip->x) || ((newx+xoffset+1) > (clip->x +clip->w))))
                         ;
                     else
-                        DrawPixel(dest,newx+xoffset,y1+yoffset,font->color);
+                    {
+                        if((pos->y + pos->h) > y1+yoffset)
+                            DrawPixel(dest,newx+xoffset,y1+yoffset,font->color);
+                    }
                 }
                 bit=bit<<1;
             }

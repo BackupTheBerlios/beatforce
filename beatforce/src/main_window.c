@@ -33,6 +33,7 @@
 #include "osa.h"
 #include "player.h"
 #include "songdb.h"
+#include "playlist.h"
 
 #include "theme.h"
 
@@ -183,6 +184,11 @@ int mainwindow_HandleKeys(unsigned int key)
         break;
 
     case BF_NEXTSONG:
+        if(PLAYLIST_GetSong(0,0))
+        {
+            player_set_song(0,0);
+            MIXER_DoFade(1,0);
+        }
         break;
 
     }
