@@ -54,12 +54,14 @@ void traceprintf(char *fmt,...)
     va_start(ap, fmt);
     while (*fmt)
     {
-        switch (*fmt++) 
+        switch (*fmt) 
         {
         case '%':
+            *fmt++;
             switch(*fmt++)
             {
-            case 's':                       /* string */
+            case 's':  
+                /* string */
                 s=va_arg(ap, char *);
                 if(s != NULL)
                 {
