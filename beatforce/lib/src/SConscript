@@ -1,0 +1,6 @@
+
+
+Import('env')
+env.StaticLibrary('sdltk',['SDL_Button.c','SDL_Panel.c','SDL_Widget.c','SDL_Tree.c','SDL_Scrollbar.c','SDL_VolumeBar.c','SDL_Font.c','SDL_FontBDF.c','SDL_FontFNT.c','SDL_Menu.c','SDL_Tooltip.c','SDL_Table.c','SDL_Signal.c','SDL_ToggleButton.c','SDL_Label.c','SDL_Tab.c','SDL_WidTool.c','SDL_Edit.c','SDL_Slider.c','SDL_Window.c','SDL_DefFont.c','SDL_Primitives.c','SDL_ProgressBar.c'])
+
+

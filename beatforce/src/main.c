@@ -30,10 +30,6 @@
 #include "mixer.h"
 #include "osa.h"
 #include "osa_cdrom.h"
-#include "theme.h"
-#include "main_window.h"
-#include "search_window.h"
-#include "file_window.h"
 #include "sampler.h"
 #include "effect.h"
 #include "ui.h"
@@ -48,7 +44,7 @@ int main(int argc, char *argv[])
     
     FILEWINDOW_Init();
 
-    UI_Init();
+    UI_Init(argc,argv);
 
     /* Create lists of all available plugins */
     PLUGIN_Init (PLUGIN_TYPE_INPUT);
@@ -59,8 +55,6 @@ int main(int argc, char *argv[])
     EFFECT_Init();
     MIXER_Init  ();
     SAMPLER_Init();
-
-
 
 //    OSACDROM_Init();
 

@@ -26,8 +26,6 @@
 #define RINGBUFFER_MAGIC  0x72627546    /* 'rbuF' */
 
 
-#include <SDL/SDL.h>
-
 #define rb_magic_check(var,err)  {if(var->magic!=RINGBUFFER_MAGIC) return err;}
 
 
@@ -39,10 +37,6 @@ struct OutRingBuffer
     char *buffer;
     int wr_pointer;
     int rd_pointer;
-    SDL_cond *c;
-    SDL_mutex *m;
-    SDL_sem *s;
-
     long magic;
     int size;
 };

@@ -2,6 +2,8 @@
    BeatForce
    theme.c  - theme manager
 
+   Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
+
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public Licensse as published by
    the Free Software Foundation; either version 2 of the License, or
@@ -25,6 +27,7 @@
 #include <sys/stat.h>
 
 #include <SDL/SDL.h>
+
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
 
@@ -33,6 +36,7 @@
 #include "osa.h"
 #include "configfile.h"
 
+#include "SDL_Font.h"
 
 
 #define MODULE_ID THEME
@@ -1247,3 +1251,9 @@ SDL_Font *THEME_Font(char *fontid)
     return NULL;
 
 }
+
+
+
+
+
+

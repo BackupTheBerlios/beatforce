@@ -22,7 +22,6 @@
 
 */
 
-#include <config.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
@@ -43,6 +42,7 @@
 #include "osa.h"
 #include "mixer.h"
 #include "effect.h"
+#include "config.h"
 
 #define MODULE_ID AUDIO_OUTPUT
 #include "debug.h"
@@ -615,7 +615,7 @@ static int AUDIOOUTPUT_Loop(void *arg)
     while (!output_thread_stop)
     {
         while(runningcount == 0)
-            SDL_Delay(50);
+            OSA_Sleep(50);
 
         for (i = 0; i < 3; i++)
         {

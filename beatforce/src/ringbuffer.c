@@ -30,8 +30,6 @@
 #include <stdio.h>
 #include <errno.h>
 
-#include <vrb.h>
-
 #include "ringbuffer.h"
 
 #define MODULE_ID RINGBUFFER

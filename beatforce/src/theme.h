@@ -20,10 +20,9 @@
 #ifndef __THEME_H__
 #define __THEME_H__
 
-#include <SDL/SDL.h>
-#include <SDL_Font.h>
-
+#include "SDL_Font.h"
 int THEME_Init();
+
 SDL_Font *THEME_Font(char *fontid);
 
 enum

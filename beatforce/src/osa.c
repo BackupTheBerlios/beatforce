@@ -295,3 +295,13 @@ int OSA_GetTime(int *hours,int *minutes)
 
 
 }
+
+
+void OSA_Sleep(int us)
+{
+    struct timeval tv;
+
+    tv.tv_sec  = 0;
+    tv.tv_usec = us;
+    select(1,NULL,NULL,NULL,&tv);
+}

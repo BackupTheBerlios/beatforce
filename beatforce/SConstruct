@@ -1,2 +1,30 @@
 
-SConscript(['src/SConscript'])
+
+
+opts = Options('custum.py');
+
+opts.Add(EnumOption('UI', 'Set user interface', 'sdltk',
+                    allowed_values=('sdltk', 'gtk', 'qt')))
+
+env=Environment(options = opts)
+
+Help(opts.GenerateHelpText(env))
+Export('env');
+
+if env['UI'] == 'sdltk':
+        print "Don't forget to copy `sdltk' to the archive!"
+elif env['UI'] == 'gtk':
+        print "Don't forget to copy `gtk' to the archive!"
+elif env['UI'] == 'qt':
+        print "Don't forget to copy `qt' to the archive!"
+
+Help("""
+      Type: 'scons program' to build the production program,
+            'scons debug' to build the debug version.
+      """)
+
+env.SConscript(['src/SConscript'])      
+
+   
+
+

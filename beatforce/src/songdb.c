@@ -19,6 +19,11 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 */
+/* xml input/output */
+
+#include <libxml/tree.h>
+#include <libxml/parser.h>
+
 #include <string.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -37,9 +42,7 @@
 #include "input.h"
 #include "playlist.h"
 
-/* xml input/output */
-#include <libxml/tree.h>
-#include <libxml/parser.h>
+
 
 #define MODULE_ID SONGDB
 #include "debug.h"

@@ -19,8 +19,6 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <config.h>
-
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -32,6 +30,7 @@
 #include "playlist.h"
 #include "osa.h"
 #include "input.h"
+#include  "config.h"
 
 #define MODULE_ID PLAYLIST
 #include "debug.h"

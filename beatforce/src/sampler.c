@@ -111,7 +111,7 @@ int play(void *data)
     while(teller < d->size && d->playing)
     {
         while(AUDIOOUTPUT_BufferFree(d->channel) < 10000)
-            SDL_Delay(10);
+            OSA_Sleep(10);
             written=AUDIOOUTPUT_Write(d->channel,d->buffer+teller,10000);
            
         teller+=written;

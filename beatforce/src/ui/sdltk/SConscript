@@ -1,0 +1,16 @@
+
+Import('env')
+
+env.Append(CCFLAGS = '-Ilib/src')
+env.Library("ui",[
+                'clock.c',
+                'ui.c',
+                'file_window.c',
+                'main_window.c',
+                'mixer_ui.c',
+                'config_window.c',
+                'player_ui.c',
+                'playlist_ui.c',
+                'songdb_ui.c',
+                'search_window.c',
+                'wndmgr.c'])

@@ -1,0 +1,80 @@
+
+
+Import('env');
+
+if env['UI'] == 'sdltk':
+        print "Using 'sdltk' as main user interface!"
+        env.SConscript(['../lib/src/SConscript'])
+        env.SConscript(['ui/sdltk/SConscript'])        
+        env.Append(CCFLAGS = '-Isrc/ui/gtk/')
+        env.Append(CCFLAGS = '-Isrc')
+        env.Append(CCFLAGS = '-I/usr/include/libxml2')
+        env.Append(CCFLAGS = '-I/usr/include/gtk-1.2')
+        env.Append(CCFLAGS = '-I/usr/include/glib-1.2')
+        env.Append(CCFLAGS = '-I/usr/lib/glib/include')
+        env.Program('beatforce',
+                [
+                        'playlist.c',
+                        'songdb.c',
+                        'main.c',
+                        'effect.c',
+                        'player.c',
+                        'mixer.c',
+                        'debug.c',
+                        'osa.c',
+                        'audio_output.c',
+                        'llist.c',
+                        'ringbuffer.c',
+                        'sampler.c',
+                        'input.c',
+                        'output.c',
+                        'plugin.c',
+                        'theme.c',
+                        'configfile.c'
+                ],
+                        LIBS=['m','SDL','fftw3','SDL_image','xml2','ui','sdltk'],
+                        LIBPATH=['/usr/lib/gtk/','../lib/src/','ui/sdltk'])      
+elif env['UI'] == 'gtk':
+        print "Using 'gtk' as main user interface!"
+        env.SConscript(['ui/gtk/SConscript'])    
+        env.Append(CCFLAGS = '-Isrc/ui/gtk/')
+        env.Append(CCFLAGS = '-Isrc')
+        env.Append(CCFLAGS = '-I/usr/include/libxml2')
+        env.Append(CCFLAGS = '-I/usr/include/gtk-1.2')
+        env.Append(CCFLAGS = '-I/usr/include/glib-1.2')
+        env.Append(CCFLAGS = '-I/usr/lib/glib/include')
+        env.Program('beatforce',
+                [
+                        'playlist.c',
+                        'songdb.c',
+                        'main.c',
+                        'effect.c',
+                        'player.c',
+                        'mixer.c',
+                        'debug.c',
+                        'osa.c',
+                        'audio_output.c',
+                        'llist.c',
+                        'ringbuffer.c',
+                        'sampler.c',
+                        'input.c',
+                        'output.c',
+                        'plugin.c',
+                        'configfile.c'
+                ],
+                        LIBS=['m','SDL','fftw3','SDL_image','xml2','ui'],
+                        LIBPATH=['/usr/lib/gtk/','ui/gtk/'])      
+elif env['UI'] == 'qt':
+        print "src/Don't forget to copy `qt' to the archive!"
+
+
+#env_gtk = 
+
+
+
+#Library(lib_target,['ui/sdltk/ui.c','ui/sdltk/mixer_ui.c','ui/sdltk/player_ui.c','ui/sdltk/main_window.c','ui/sdltk/clock.c','ui/sdltk/songdb_ui.c','ui/sdltk/playlist_ui.c','ui/sdltk/wndmgr.c','ui/sdltk/config_window.c','ui/sdltk/file_window.c','ui/sdltk/search_window.c'])
+
+
+
+
+
