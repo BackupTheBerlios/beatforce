@@ -18,14 +18,12 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-
+#include <stdlib.h>
 #include <SDL/SDL_image.h>
 
 #include "SDL_Slider.h"
 #include "SDL_Widget.h"
-
 #include "SDL_WidTool.h" //for SDL_WidgetGetBackground
-#include <stdlib.h>
 
 static void SDL_SliderStep(SDL_Slider *slider,int direction,int step);
 static void SDL_SliderPixeloffset(SDL_Slider *Slider);
@@ -165,7 +163,10 @@ void SDL_SliderProperties(void *slider,int feature,va_list list)
         Slider->NormalStepSize = val;
         break;
     case SET_LINE_IMAGE:
-        Slider->line=IMG_Load("res/sliderline.jpg");
+        if(Slider->line == NULL)
+        {
+            Slider->line=IMG_Load("res/sliderline.jpg");
+        }
         break;
     case SET_BUTTON_IMAGE:
         if(Slider->SliderButton == NULL)
@@ -257,12 +258,20 @@ void SDL_SliderEventHandler(void * slider,SDL_Event *event)
                         Slider->state=SLIDER_DRAG;
                     }
                 }
+                if(event->button.button == 4)
+                {
+                    SDL_SliderStep(Slider,RIGHT,NORMAL_STEP);
+                }
+                if(event->button.button == 5)
+                {
+                    SDL_SliderStep(Slider,LEFT,NORMAL_STEP);
+                }
             }
             else
             {
                 motion=event->motion.y;
                 
-                if(event->button.button == 1)
+                if(event->button.button == SDL_BUTTON_LEFT)
                 {
                     /* if the button click is below the button */
                     if(motion > (Slider->rect.y + Slider->pixeloffset + Slider->SliderButton->h))
@@ -277,6 +286,14 @@ void SDL_SliderEventHandler(void * slider,SDL_Event *event)
                     {
                         SDL_SliderStep(Slider,UP,NORMAL_STEP);
                     }
+                }
+                if(event->button.button == 4)
+                {
+                    SDL_SliderStep(Slider,UP,NORMAL_STEP);
+                }
+                if(event->button.button == 5)
+                {
+                    SDL_SliderStep(Slider,DOWN,NORMAL_STEP);
                 }
             }
         }
