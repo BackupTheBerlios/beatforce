@@ -281,7 +281,22 @@ void playerui_UpdateTime(int player)
     {
         sprintf(string,"--:--.--");
     }
-    SDL_WidgetPropertiesOf(UI_Players[player].TimeElapsed,SET_CAPTION,string);
+
+    SDL_WidgetPropertiesOf(UI_Players[player].SongProgress,GET_STATE,&state);
+    if(state == PROGRESSBAR_DRAG)
+    {
+        double curvalue;
+        int curval;
+        SDL_WidgetPropertiesOf(UI_Players[player].SongProgress,GET_CUR_VALUE,&curvalue);
+        curval=(int)curvalue*10;
+        msec = ((curval % 60000) % 1000)/10;
+        sec  = (curval % 60000) / 1000;
+        min  =  curval / 60000;
+        sprintf(string,"%02d:%02d.%02d",min,sec,msec);
+        SDL_WidgetPropertiesOf(UI_Players[player].TimeElapsed,SET_CAPTION,string);
+    }
+    else
+        SDL_WidgetPropertiesOf(UI_Players[player].TimeElapsed,SET_CAPTION,string);
 
 
     /* Time remaining */
@@ -297,13 +312,13 @@ void playerui_UpdateTime(int player)
         sprintf(string,"--:--.--");
     }
     
-    SDL_WidgetPropertiesOf(UI_Players[player].SongProgress,GET_STATE,&state);
     if(state == PROGRESSBAR_DRAG)
     {
         double curvalue;
         int curval;
         SDL_WidgetPropertiesOf(UI_Players[player].SongProgress,GET_CUR_VALUE,&curvalue);
         curval=(int)curvalue*10;
+        curval=totaltime-curval;
         msec = ((curval % 60000) % 1000)/10;
         sec  = (curval % 60000) / 1000;
         min  =  curval / 60000;
