@@ -27,8 +27,7 @@
 #include <string.h>
 #include <malloc.h>
 
-#include "wndmgr.h"
-#include "songdb_ui.h"
+
 #include "llist.h"
 #include "theme.h"
 #include "songdb.h"

@@ -23,14 +23,6 @@
 #include <string.h>
 #include <malloc.h>
 
-#include <SDL/SDL.h>
-#include <SDLTk.h>
-#include "SDL_Signal.h"
-
-#include "songdb_ui.h"
-#include "player_ui.h"
-#include "mixer_ui.h"
-
 #include "songdb.h"
 #include "player.h"
 #include "playlist.h"
@@ -38,9 +30,7 @@
 #include "osa.h"
 
 #include "search_window.h"
-#include "wndmgr.h"
 #include "theme.h"
-
 
 
 SDL_Widget *editwidget;

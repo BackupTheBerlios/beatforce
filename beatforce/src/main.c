@@ -36,11 +36,7 @@
 #include "file_window.h"
 #include "sampler.h"
 #include "effect.h"
-
-#include "wndmgr.h"
-#include "SDL_Window.h"
-
-
+#include "ui.h"
 
 int main(int argc, char *argv[])
 {
@@ -52,8 +48,7 @@ int main(int argc, char *argv[])
     
     FILEWINDOW_Init();
 
-    SDL_WidgetInit();
-    WNDMGR_Init(); 
+    UI_Init();
 
     /* Create lists of all available plugins */
     PLUGIN_Init (PLUGIN_TYPE_INPUT);
@@ -72,7 +67,7 @@ int main(int argc, char *argv[])
     MAINWINDOW_Open();
 
     /*beatforce UI*/
-    SDLTK_Main(); /* main loop */
+    UI_Main(); /* main loop */
 
 
     AUDIOOUTPUT_Cleanup();

@@ -25,11 +25,6 @@
 #include <SDL_Table.h>
 #include <malloc.h>
 
-#include "songdb_ui.h"
-#include "player_ui.h"
-#include "playlist_ui.h"
-#include "mixer_ui.h"
-
 #include "config.h"
 #include "mixer.h"
 #include "osa.h"
@@ -42,7 +37,6 @@
 #include "clock.h"
 
 #include "main_window.h"
-#include "wndmgr.h"
 #include "search_window.h"
 #include "config_window.h"
 

@@ -67,7 +67,7 @@ libs = []
 if os.environ.has_key("SCONS_LIB_DIR"):
     libs.append(os.environ["SCONS_LIB_DIR"])
 
-local = 'scons-local-' + __version__
+local = 'scons'
 if script_dir:
     local = os.path.join(script_dir, local)
 libs.append(local)
@@ -132,6 +132,7 @@ else:
 
 # Look first for 'scons-__version__' in all of our preference libs,
 # then for 'scons'.
+libs.extend(map(lambda x: os.path.join(x, 'scons'), prefs))
 libs.extend(map(lambda x: os.path.join(x, scons_version), prefs))
 libs.extend(map(lambda x: os.path.join(x, 'scons'), prefs))
 
