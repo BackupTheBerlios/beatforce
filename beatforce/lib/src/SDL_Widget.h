@@ -114,6 +114,7 @@ typedef enum E_Widget_Type
     SDL_PANEL,
     SDL_VOLUMEBAR,
     SDL_PROGRESSBAR,
+    SDL_TREE
 }E_Widget_Type;
 
 typedef struct SDL_Widget
@@ -154,6 +155,7 @@ extern const struct S_Widget_FunctionList SDL_Edit_FunctionList;
 extern const struct S_Widget_FunctionList SDL_Panel_FunctionList;
 extern const struct S_Widget_FunctionList SDL_VolumeBar_FunctionList;
 extern const struct S_Widget_FunctionList SDL_ProgressBar_FunctionList;
+extern const struct S_Widget_FunctionList SDL_Tree_FunctionList;
 
 /**
  *  Lookup table for converter functions
@@ -173,7 +175,8 @@ static const struct S_Widget_FunctionList * const WidgetTable[] =
     &SDL_Edit_FunctionList,        //SDL_EDIT
     &SDL_Panel_FunctionList,       //SDL_PANEL
     &SDL_VolumeBar_FunctionList,   //SDL_VOLUMEBAR
-    &SDL_ProgressBar_FunctionList  //SDL_PROGRESSBAR
+    &SDL_ProgressBar_FunctionList, //SDL_PROGRESSBAR
+    &SDL_Tree_FunctionList         //SDL_TREE
 };
 
 

@@ -17,6 +17,7 @@ libSDLTk_a_SOURCES = \
  SDL_Panel.c        SDL_Panel.h       \
  SDL_VolumeBar.c    SDL_VolumeBar.h   \
  SDL_ProgressBar.c  SDL_ProgressBar.h \
+ SDL_Tree.c         SDL_Tree.h        \
                                       \
  SDL_Font.c         SDL_Font.h        \
  SDL_FontFNT.c      SDL_FontFNT.h     \
