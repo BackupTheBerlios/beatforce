@@ -45,7 +45,7 @@ typedef signed short output_word;
 #define OUTPUT_RING_SIZE	(OUTPUT_BUFFER_SIZE*OUTPUT_RING_BUF_SIZE)
 #endif
 
-#define OUTPUT_N_CHANNELS	4
+#define OUTPUT_N_CHANNELS	12
 #define OUTPUT_BPM_HIST 	10
 #define OUTPUT_FFT_BANDS	15
 #define OUTPUT_FFT_HIST 	5

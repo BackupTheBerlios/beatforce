@@ -117,6 +117,7 @@ int THEME_Init()
     current=(ThemeConfig*)malloc(sizeof(ThemeConfig));
     memset(current,0,sizeof(ThemeConfig));
 
+#if 0
     dir=OSA_FindDirectories(THEME_DIR);
     if(dir == NULL)
     {
@@ -125,7 +126,7 @@ int THEME_Init()
     }
 
     NoOfThemes=LLIST_NoOfEntries(dir);
-        
+#endif   
     LIBXML_TEST_VERSION
     xmlKeepBlanksDefault(0);
 
@@ -133,7 +134,8 @@ int THEME_Init()
     {
         char path[255];
         FILE *fd;
-        sprintf(path,"%s/skin.xml",(char*)dir->data);
+//        sprintf(path,"%s/skin.xml",(char*)dir->data);
+        sprintf(path,"/usr/share/beatforce/themes/beatforce/skin.xml");
         if((fd=fopen(path,"rb")))
         {  
             fclose(fd);

@@ -37,10 +37,9 @@
 #define MODULE_ID SAMPLER
 #include "debug.h"
 
-BFList *SamplerPlugins;
+BFList *SamplerPlugins[10];
 
 Sample samples[10];
-Sample *current;
 
 int SAMPLER_Write (int c, void* buf, int len);
 
@@ -57,33 +56,35 @@ InputInterface sampler_if =
 
 int SAMPLER_Init()
 {
-    int i;
-    return 0;
+    int i=0;
+
     samples[0].filename=strdup("/home/beuving/test.mp3");
     samples[1].filename=strdup("/home/beuving/test.ogg");
+    samples[2].filename=strdup("/home/beuving/test.ogg");
+    samples[3].filename=strdup("/home/beuving/test.ogg");
+    samples[4].filename=strdup("/home/beuving/test.ogg");
+    samples[5].filename=strdup("/home/beuving/test.ogg");
+    samples[6].filename=strdup("/home/beuving/test.ogg");
+    samples[7].filename=strdup("/home/beuving/test.ogg");
+    samples[8].filename=strdup("/home/beuving/test.ogg");
+    samples[9].filename=strdup("/home/beuving/test.ogg");
 
-    SamplerPlugins = INPUT_Init (2, PLUGIN_GetList(PLUGIN_TYPE_INPUT));
 
-    current=NULL;
     for(i=0;i<10;i++)
+        SamplerPlugins[i] = INPUT_Init (i+2, PLUGIN_GetList(PLUGIN_TYPE_INPUT));
+
+    for(i=1;i<10;i++)
     {
         if(samples[i].filename)
         {
-            while(current != NULL)
-                SDL_Delay(10);
-            
             samples[i].buffer=malloc(4000000);
             samples[i].size=0;
-            samples[i].l = INPUT_WhoseFile (SamplerPlugins,samples[i].filename);
+            samples[i].l = INPUT_WhoseFile (SamplerPlugins[i],samples[i].filename);
             samples[i].channel=i+2;
             samples[i].playing=0;
-            
+
             INPUT_SetInputInterface(samples[i].l,&sampler_if);
-            
-            while(!INPUT_LoadFile(samples[i].l,samples[i].filename))
-                SDL_Delay(5);
-            
-            current=&samples[i];
+            INPUT_LoadFile(samples[i].l,samples[i].filename);
                
         }
     }
@@ -115,11 +116,12 @@ int play(void *data)
     }
     AUDIOOUTPUT_Close(d->channel);
     d->playing=0;
+    return 1;
 }
 
 int SAMPLER_Play(int s)
 {
-    if(s==0 || s==1)
+    if(s> 0 && s < 10)
     {
         if(samples[s].playing == 0)
            OSA_CreateThread(play,&samples[s]);
@@ -132,18 +134,15 @@ int SAMPLER_Play(int s)
 
 int SAMPLER_Write (int c, void* buf, int len)
 {
-    if(current == NULL)
-        return 0;
-    if((len + current->size) < 4000000)
+    if((len + samples[c-2].size) < 4000000)
     {
-        memcpy((current->buffer+current->size),buf,len);
-        current->size += len;
+        memcpy((samples[c-2].buffer+samples[c-2].size),buf,len);
+        samples[c-2].size += len;
     }
     else
     {
-        INPUT_Pause(current->l);
-        INPUT_CloseFile(current->l);
-        current=NULL;
+        INPUT_Pause(samples[c-2].l);
+        INPUT_CloseFile(samples[c-2].l);
     }
     return 1;
 }
