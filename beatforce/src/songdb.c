@@ -218,6 +218,9 @@ int SONGDB_RemovePlaylistEntry(struct SongDBSubgroup *sg,struct SongDBEntry *e)
 {
     struct SongDBEntry *list,*prev;
 
+    if(e == NULL)
+        return 0;
+
     if(sg->Playlist)
     {
         list=sg->Playlist;
@@ -250,19 +253,19 @@ struct SongDBSubgroup *SONGDB_GetSubgroup()
 
 int SONGDB_AddFileToSubgroup(struct SongDBSubgroup *sg,char *filename)
 {
-
     if(sg)
     {
         struct SongDBEntry *e;
         struct SongDBEntry *Playlist;
-
-        e = SONGDB_AllocEntry ();
-        
-        e->filename = strdup (filename);
-        e->id       = sg->Songcount++;
         
         if (INPUT_WhoseFile (PLAYER_GetData(0)->ip_plugins, filename) != NULL)
         {
+            e = SONGDB_AllocEntry ();
+            
+            e->filename = strdup (filename);
+            e->id       = sg->Songcount++;
+            e->next     = NULL;
+
             /* Add the created entry to the active database */
             if(sg->Playlist == NULL)
                 sg->Playlist = e;
@@ -274,6 +277,7 @@ int SONGDB_AddFileToSubgroup(struct SongDBSubgroup *sg,char *filename)
                 Playlist->next = e;
             }
         }
+
     
     }
     return 1;

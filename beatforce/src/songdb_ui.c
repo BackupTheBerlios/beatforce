@@ -164,7 +164,7 @@ void SONGDBUI_Redraw()
 
 void SONGDBUI_Play(int player_nr)
 {
-    long id
+    long id;
     PLAYER_GetPlayingID(player_nr,&id);
     SDL_WidgetPropertiesOf(table,SET_HIGHLIGHTED,id);    
 }
