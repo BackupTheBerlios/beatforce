@@ -601,7 +601,7 @@ static void AUDIOOUTPUT_Crossfade()
 /* main thread */
 static int AUDIOOUTPUT_Loop(void *arg)
 {
-    int channel=0, i=0
+    int channel=0, i=0;
     unsigned int sample=0;
 
     output_word *tmp_buf = malloc (2 * OUTPUT_BUFFER_SIZE (audiocfg));
