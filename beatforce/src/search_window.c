@@ -18,6 +18,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
+#include <config.h>
 #include <string.h>
 
 #include <SDL/SDL.h>
@@ -49,7 +50,7 @@ void searchwindow_Play(void *data);
 void songdb_searchstring(long row,int column,char *dest);
 int SEARCHWINDOW_EventHandler(SDL_Event event);
 
-Window SEARCHWINDOW={ SEARCHWINDOW_EventHandler };
+Window SEARCHWINDOW={ SEARCHWINDOW_EventHandler , NULL};
 SDL_Surface *SearchWindow;
 
 void SEARCHWINDOW_Init()
@@ -79,14 +80,14 @@ SDL_Surface *SEARCHWINDOW_Create()
 {
     SDL_Surface *SearchWindow;
 
-    SearchWindow = SDL_CreateRGBSurface(SDL_SWSURFACE,1000,650,32,0xff0000,0x00ff00,0x0000ff,0x000000);
+    SearchWindow = SDL_CreateRGBSurface(SDL_SWSURFACE,1024,685,32,0xff0000,0x00ff00,0x0000ff,0x000000);
 
     SDL_WidgetUseSurface(SearchWindow);
  
-    SDL_WidgetCreate(SDL_PANEL,0,0,1000,650);
-    SDL_WidgetProperties(SET_BG_COLOR,0x000fff);
-    
-    tablewidget=SDL_WidgetCreate(SDL_TABLE,5,50,790,540);
+    SDL_WidgetCreate(SDL_PANEL,0,0,1024,685);
+    SDL_WidgetProperties(SET_NORMAL_IMAGE,THEME_DIR"/beatforce/sbackground.bmp");
+        
+    tablewidget=SDL_WidgetCreate(SDL_TABLE,12,50,1000,540);
     SDL_WidgetProperties(SET_VISIBLE_ROWS,    36);
     SDL_WidgetProperties(SET_VISIBLE_COLUMNS, 1);
     SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
@@ -96,7 +97,7 @@ SDL_Surface *SEARCHWINDOW_Create()
     SDL_WidgetEventCallback(searchwindow_PlayClicked,SDL_CLICKED);
 //    SDL_WidgerProperties(SET_CALLBACK,SDL_CLICKED,
 
-    editwidget=SDL_WidgetCreate(SDL_EDIT,200,20,400,25);
+    editwidget=SDL_WidgetCreate(SDL_EDIT,312,20,400,25);
     SDL_WidgetProperties(SET_FONT,LargeBoldFont);
     SDL_WidgetProperties(SET_ALWAYS_FOCUS,1);
     SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_ANY,searchwindow_Search);

@@ -1,4 +1,4 @@
-search_window.o: search_window.c /usr/include/string.h \
+search_window.o: search_window.c ../config.h /usr/include/string.h \
  /usr/include/features.h /usr/include/sys/cdefs.h \
  /usr/include/gnu/stubs.h \
  /usr/lib/gcc-lib/i386-linux/2.95.4/include/stddef.h \
@@ -26,6 +26,7 @@ search_window.o: search_window.c /usr/include/string.h \
  mixer_ui.h songdb.h configfile.h llist.h player.h input_plugin.h \
  playlist.h mixer.h osa.h search_window.h wndmgr.h
 search_window.c :
+../config.h :
 /usr/include/string.h :
 /usr/include/features.h :
 /usr/include/sys/cdefs.h :

@@ -76,7 +76,7 @@ void eventhandler(SDL_Table *table)
     }
     PLAYLIST_SetEntry(player,e);
     player_set_song(player,0);  // when set_entry is excecuted we only have 1 item thus 0
-    UI_PlayerSetArtistTitle(player);
+//    UI_PlayerSetArtistTitle(player);
     
 }
 

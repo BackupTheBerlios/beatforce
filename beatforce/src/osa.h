@@ -43,3 +43,7 @@ void         OSA_RemoveTimer(unsigned int timer);
 //thread functions
 int OSA_CreateThread(int (*fn)(void *), void *data);
 void OSA_RemoveThread(int thread);
+
+
+//File functions (string)
+char *OSA_SearchFilename(char *filepath);

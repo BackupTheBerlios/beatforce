@@ -481,6 +481,7 @@ int PLAYER_GetTitle(int player_nr,char *label)
     return 0;
 }
 
+/* This functions return the filename with the filepath */
 int PLAYER_GetFilename(int player_nr,char *filename)
 {
     struct SongDBEntry *e;

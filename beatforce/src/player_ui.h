@@ -29,10 +29,9 @@
  */
 void PLAYERUI_CreateWindow(int nr, int x);
 
-/*
- *   Update the artist/title label
- */
-void UI_PlayerSetArtistTitle(int player);
+
+void PLAYERUI_Redraw();
+
 
 
 /* Player ui data structures */

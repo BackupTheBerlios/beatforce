@@ -42,30 +42,31 @@ void songend_callback(int player_nr)
 }
 
 int control_state;
-int MAINWINDOW_EventHandler(SDL_Event event);
+int mainwindow_EventHandler(SDL_Event event);
+int mainwindow_NotifyHandler();
+SDL_Surface *mainwindow_CreateWindow();
 
 SDL_Surface *MainWindow;
 
-Window MAINWINDOW={ MAINWINDOW_EventHandler };
+Window MAINWINDOW={ mainwindow_EventHandler , mainwindow_NotifyHandler };
 
 void MAINWINDOW_Init()
 {
     MainWindow = NULL;
 }
 
-SDL_Surface *MAINWINDOW_CreateWindow();
 
 void MAINWINDOW_Open()
 {
     if(MainWindow == NULL)
     {
-        MainWindow=MAINWINDOW_CreateWindow();
+        MainWindow=mainwindow_CreateWindow();
     }
     SDL_WidgetUseSurface(MainWindow);
     WNDMGR_Open(&MAINWINDOW);
 }
 
-SDL_Surface *MAINWINDOW_CreateWindow()
+SDL_Surface *mainwindow_CreateWindow()
 {
     SDL_Surface *MainWindow;
 
@@ -74,6 +75,7 @@ SDL_Surface *MAINWINDOW_CreateWindow()
     SDL_SetColorKey(MainWindow,0,0); // disable transparancy
 
     SDL_WidgetUseSurface(MainWindow);
+
     SDL_WidgetCreate(SDL_PANEL,0,0,1024,685);
     SDL_WidgetProperties(SET_NORMAL_IMAGE,THEME_DIR"/beatforce/sbackground.bmp");
 
@@ -93,7 +95,7 @@ SDL_Surface *MAINWINDOW_CreateWindow()
 
 
 
-int MAINWINDOW_EventHandler(SDL_Event event)
+int mainwindow_EventHandler(SDL_Event event)
 {
     switch(event.type)
     {
@@ -162,3 +164,10 @@ int MAINWINDOW_EventHandler(SDL_Event event)
     return 0;
 }
 
+
+
+int mainwindow_NotifyHandler()
+{
+    PLAYERUI_Redraw();
+    return 1;
+}

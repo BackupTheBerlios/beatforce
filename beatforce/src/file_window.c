@@ -19,6 +19,7 @@
 */
 #include <SDL/SDL.h>
 #include <SDL_Table.h>
+#include <config.h>
 #include <llist.h>
 #include <osa.h>
 #include <songdb.h>
@@ -73,6 +74,7 @@ void FILEWINDOW_Open()
     {
         SDL_WidgetUseSurface(FileWindow);
     }
+    WNDMGR_Open(&FILEWINDOW);
 }
 
 SDL_Surface *Window_CreateFileWindow()
@@ -85,12 +87,13 @@ SDL_Surface *Window_CreateFileWindow()
     char label[255];
     char label2[255];
 
-    FileWindow = SDL_CreateRGBSurface(SDL_SWSURFACE,1000,600,32,0xff0000,0x00ff00,0x0000ff,0x000000);
+    FileWindow = SDL_CreateRGBSurface(SDL_SWSURFACE,1024,685,32,0xff0000,0x00ff00,0x0000ff,0x000000);
 
     SDL_WidgetUseSurface(FileWindow);
- 
-    SDL_WidgetCreate(SDL_PANEL,0,0,1000,600);
-    SDL_WidgetProperties(SET_BG_COLOR,0x000fff);
+
+    SDL_WidgetCreate(SDL_PANEL,0,0,1024,685);
+    SDL_WidgetProperties(SET_NORMAL_IMAGE,THEME_DIR"/beatforce/sbackground.bmp");
+
     
     change=0;
     dirs=OSA_FindDirectories("/mnt/d/");
@@ -123,10 +126,12 @@ SDL_Surface *Window_CreateFileWindow()
 
     wLabel1=SDL_WidgetCreate(SDL_LABEL,10,440,450,23);
     SDL_WidgetProperties(SET_FONT,LargeBoldFont);
+    SDL_WidgetProperties(SET_FG_COLOR,WHITE);
     SDL_WidgetProperties(SET_CAPTION,label);
 
     wLabel2=SDL_WidgetCreate(SDL_LABEL,10,470,450,23);
     SDL_WidgetProperties(SET_FONT,LargeBoldFont);
+    SDL_WidgetProperties(SET_FG_COLOR,WHITE);
     SDL_WidgetProperties(SET_CAPTION,label2);
 
 

@@ -227,7 +227,6 @@ void OSA_RemoveThread(int thread)
 {
     if(thread > NO_OF_THREADS)
     {
-        printf("Sorry out of range\n");
         exit(1);
     }
     if(threads[thread])
@@ -235,4 +234,22 @@ void OSA_RemoveThread(int thread)
         SDL_WaitThread(threads[thread], NULL);
         threads[thread]=NULL;
     }
+}
+
+
+char *OSA_SearchFilename(char *filepath)
+{
+    char *p=strrchr(filepath,'/');
+    char *m;
+
+    if(p)
+    {
+        m=strrchr(p,'.');
+        if(m)
+          *m=0;
+        return p+1;
+    }
+    else
+        return p;
+    
 }

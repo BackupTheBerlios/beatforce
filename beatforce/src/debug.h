@@ -73,8 +73,8 @@ void printid(char *id,int line,char *message);
 #if MODULE_ID == MP3
 #undef TRACE
 #undef DEBUG
-#define TRACE TRACE_OFF
-#define DEBUG DEBUG_OFF
+#define TRACE TRACE_ON
+#define DEBUG DEBUG_ON
 #endif
 
 #if MODULE_ID == OSA

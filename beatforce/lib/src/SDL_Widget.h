@@ -46,7 +46,7 @@ typedef enum E_Widget_Properties
     SET_CALLBACK,        // sets a callback function for an event
     
     
-    BEFORE_DRAW_FUNCTION,   // This function is executed before the draw to set additional params
+//    BEFORE_DRAW_FUNCTION,   // This function is executed before the draw to set additional params
     SET_DATA_RETREIVAL_FUNCTION,      // Function for retreiving data
 
     GET_CAPTION,         // char *, read the caption

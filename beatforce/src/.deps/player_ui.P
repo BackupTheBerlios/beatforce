@@ -1,8 +1,8 @@
-player_ui.o: player_ui.c ../config.h player.h input_plugin.h songdb.h \
- configfile.h llist.h mixer.h playlist.h player_ui.h audio_output.h \
- types.h ringbuffer.h /usr/local/include/vrb.h /usr/include/stdlib.h \
- /usr/include/features.h /usr/include/sys/cdefs.h \
- /usr/include/gnu/stubs.h \
+player_ui.o: player_ui.c ../config.h osa.h llist.h player.h \
+ input_plugin.h songdb.h configfile.h mixer.h playlist.h player_ui.h \
+ audio_output.h types.h ringbuffer.h /usr/local/include/vrb.h \
+ /usr/include/stdlib.h /usr/include/features.h \
+ /usr/include/sys/cdefs.h /usr/include/gnu/stubs.h \
  /usr/lib/gcc-lib/i386-linux/2.95.4/include/stddef.h \
  /usr/include/sys/types.h /usr/include/bits/types.h \
  /usr/include/bits/pthreadtypes.h /usr/include/bits/sched.h \
@@ -30,11 +30,12 @@ player_ui.o: player_ui.c ../config.h player.h input_plugin.h songdb.h \
  /usr/include/SDL/SDL_image.h ../lib/src/SDL_ProgressBar.h
 player_ui.c :
 ../config.h :
+osa.h :
+llist.h :
 player.h :
 input_plugin.h :
 songdb.h :
 configfile.h :
-llist.h :
 mixer.h :
 playlist.h :
 player_ui.h :

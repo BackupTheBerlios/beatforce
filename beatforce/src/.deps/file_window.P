@@ -20,8 +20,8 @@ file_window.o: file_window.c /usr/include/SDL/SDL.h \
  /usr/include/SDL/SDL_video.h /usr/include/SDL/SDL_mutex.h \
  /usr/include/SDL/SDL_quit.h /usr/include/SDL/SDL_version.h \
  ../lib/src/SDL_Table.h ../lib/src/SDL_Widget.h \
- /usr/include/SDL/SDL_image.h ../lib/src/SDL_Font.h llist.h osa.h \
- songdb.h configfile.h /usr/include/string.h \
+ /usr/include/SDL/SDL_image.h ../lib/src/SDL_Font.h ../config.h \
+ llist.h osa.h songdb.h configfile.h /usr/include/string.h \
  /usr/include/bits/string.h /usr/include/bits/string2.h \
  /usr/include/endian.h /usr/include/bits/endian.h \
  /usr/include/stdlib.h /usr/include/malloc.h wndmgr.h songdb_ui.h
@@ -68,6 +68,7 @@ file_window.c :
 ../lib/src/SDL_Widget.h :
 /usr/include/SDL/SDL_image.h :
 ../lib/src/SDL_Font.h :
+../config.h :
 llist.h :
 osa.h :
 songdb.h :

@@ -21,6 +21,7 @@
 
 #include "config.h"
 
+#include "osa.h"
 #include "player.h"
 #include "mixer.h"
 #include "playlist.h"
@@ -43,6 +44,13 @@ void playerui_SetSpeed(void *data);
 void playerui_PlayButton(void *data);
 void UI_PlayerUpdateTimeLabel(void *data);
 void UI_ProgressBarClicked(void *data);
+
+/* Prototypes for redraw functions */
+void playerui_UpdateArtist(int player);
+void playerui_UpdateTime(int player);
+void playerui_UpdateTitle(int player);
+void playerui_UpdateFileInfo(int player);
+void playerui_UpdateVolume(int player);
 
 
  /* Exported functions */
@@ -68,7 +76,6 @@ void PLAYERUI_CreateWindow(int nr, int x)
 
     /* Time elapsed */
     UI_Players[nr].TimeElapsed=SDL_WidgetCreate(SDL_LABEL,x+9,90,105,22);
-    SDL_WidgetProperties(BEFORE_DRAW_FUNCTION,UI_PlayerUpdateTimeLabel,&UI_Players[nr]);
     SDL_WidgetProperties(SET_FONT,DigitsFont);
     SDL_WidgetProperties(SET_FG_COLOR,0xf0f0f0);
 
@@ -125,24 +132,22 @@ void PLAYERUI_CreateWindow(int nr, int x)
 
 }
 
-void UI_PlayerSetArtistTitle(int player)
+void PLAYERUI_Redraw()
 {
-    char artist[255];
-    char title[255];
+    playerui_UpdateArtist(0);
+    playerui_UpdateArtist(1);
 
-    memset(artist,0,255);
-    memset(title,0,255);
+    playerui_UpdateTitle(0);
+    playerui_UpdateTitle(1);
 
-    /* Get and set the artist information */
-    if(!PLAYER_GetArtist(player,artist) || !PLAYER_GetTitle(player,title))
-    {
-        PLAYER_GetFilename(player,artist);
-    }
-    if(UI_Players[player].Artist)
-        SDL_WidgetPropertiesOf(UI_Players[player].Artist,SET_CAPTION,artist);
-    if(UI_Players[player].Title)
-        SDL_WidgetPropertiesOf(UI_Players[player].Title,SET_CAPTION,title);
+    playerui_UpdateTime(0);
+    playerui_UpdateTime(1);
 
+    playerui_UpdateFileInfo(0);
+    playerui_UpdateFileInfo(1);
+
+    playerui_UpdateVolume(0);
+    playerui_UpdateVolume(1);
 }
 
 /* 
@@ -151,28 +156,48 @@ void UI_PlayerSetArtistTitle(int player)
  * 
  *
  */
+void playerui_UpdateArtist(int player)
+{
+    char artist[255];
+    memset(artist,0,255);
+    /* Get and set the artist information */
+    if(!PLAYER_GetArtist(player,artist))
+    {
+        char *filename;
+        PLAYER_GetFilename(player,artist);
+        filename=OSA_SearchFilename(artist);
+        if(filename)
+            sprintf(artist,"%s",filename);
+        
+    }
+    if(UI_Players[player].Artist)
+        SDL_WidgetPropertiesOf(UI_Players[player].Artist,SET_CAPTION,artist);
+}
 
-void UI_PlayerUpdateTimeLabel(void *data)
+
+void playerui_UpdateTitle(int player)
+{
+    char title[255];
+
+    memset(title,0,255);
+    PLAYER_GetTitle(player,title);
+
+    if(UI_Players[player].Title)
+        SDL_WidgetPropertiesOf(UI_Players[player].Title,SET_CAPTION,title);
+
+}
+
+void playerui_UpdateTime(int player)
 {
     char string[255];
-    long time=0;
-    long timeleft=0;
-    long totaltime=0;
-//    double progress;
-    double vol;
-    int sec;
-    int msec;
-    int min;
- 
-    PlayerDisplay *john;
-    
-    john=data;
+    long time,timeleft,totaltime;
+    int min,sec,msec;
 
-    UI_PlayerSetArtistTitle(john->PlayerNr);
-    time     = PLAYER_GetTimePlayed(john->PlayerNr);
-    timeleft = PLAYER_GetTimeLeft(john->PlayerNr);
-    totaltime= PLAYER_GetTimeTotal(john->PlayerNr);
+    timeleft = PLAYER_GetTimeLeft(player);
+    time     = PLAYER_GetTimePlayed(player);
+    totaltime= PLAYER_GetTimeTotal(player);
 
+    /* Time elapsed */
     if(totaltime)
     {
         msec = (time % 60000) % 1000;
@@ -184,29 +209,10 @@ void UI_PlayerUpdateTimeLabel(void *data)
     {
         sprintf(string,"--:--.--");
     }
-    
-    if(timeleft / 1000 == 5)
-    {
-        struct SongDBEntry * e;
-        if(!MIXER_FadeInProgress())
-        {
-            long id;
-            player_get_song(john->PlayerNr,&id);
-            id++;
-            e=SONGDB_GetEntry(id);
-            PLAYLIST_SetEntry(!john->PlayerNr,e);
-            player_set_song(!john->PlayerNr,0);  // when set_entry is excecuted we only have 1 item thus 0
-            MIXER_DoFade(1,0);
-            totaltime = 0;
-            timeleft  = 0;
-            time      = 0;
-            UI_PlayerSetArtistTitle(john->PlayerNr);
-            UI_PlayerSetArtistTitle(!john->PlayerNr);
-            
-        }
-    }
+    SDL_WidgetPropertiesOf(UI_Players[player].TimeElapsed,SET_CAPTION,string);
 
-    SDL_WidgetPropertiesOf(john->TimeElapsed,SET_CAPTION,string);
+
+    /* Time remaining */
     if(totaltime)
     {
         msec = ((timeleft % 60000) % 1000)/10;
@@ -218,33 +224,61 @@ void UI_PlayerUpdateTimeLabel(void *data)
     {
         sprintf(string,"--:--.--");
     }
-    SDL_WidgetPropertiesOf(john->TimeRemaining,SET_CAPTION,string);
+    SDL_WidgetPropertiesOf(UI_Players[player].TimeRemaining,SET_CAPTION,string);
 
-    if(john->SongProgress)
+
+    /* Check for the seconds left */
+    if(timeleft / 1000 == 5)
     {
-        SDL_WidgetPropertiesOf(john->SongProgress,SET_MAX_VALUE,totaltime/10);
-        SDL_WidgetPropertiesOf(john->SongProgress,SET_CUR_VALUE,(double)(time/10));
+        struct SongDBEntry * e;
+        if(!MIXER_FadeInProgress())
+        {
+            long id;
+            player_get_song(player,&id);
+            id++;
+            e=SONGDB_GetEntry(id);
+            PLAYLIST_SetEntry(!player,e);
+            player_set_song(!player,0);  // when set_entry is excecuted we only have 1 item thus 0
+            MIXER_DoFade(1,0);
+            totaltime = 0;
+            timeleft  = 0;
+            time      = 0;
+            
+        }
+    }
+
+    if(UI_Players[player].SongProgress)
+    {
+        SDL_WidgetPropertiesOf(UI_Players[player].SongProgress,SET_MAX_VALUE,totaltime/10);
+        SDL_WidgetPropertiesOf(UI_Players[player].SongProgress,SET_CUR_VALUE,(double)(time/10));
         
     }
-    {
-        int left=0,right=0;
-        output_get_volume_level(john->PlayerNr,&left,&right);
-        vol=(double)left;
-        SDL_WidgetPropertiesOf(john->VolumeLeft,SET_CUR_VALUE,vol);
-        vol=(double)right;
-        SDL_WidgetPropertiesOf(john->VolumeRight,SET_CUR_VALUE,vol);
-    }
-    {
-        char label[255];
-        sprintf(label,"%d Smpls",PLAYER_GetSamplerate(john->PlayerNr));
-        SDL_WidgetPropertiesOf(john->Samplerate,SET_CAPTION,label);
-        sprintf(label,"%d KBit",PLAYER_GetBitrate(john->PlayerNr)/1000);
-        SDL_WidgetPropertiesOf(john->Bitrate,SET_CAPTION,label);
-    }
-        
-    
-
 }
+
+void playerui_UpdateVolume(int player)
+{
+    int left=0,right=0;
+    double vol;
+    
+    output_get_volume_level(player,&left,&right);
+    vol=(double)left;
+    SDL_WidgetPropertiesOf(UI_Players[player].VolumeLeft,SET_CUR_VALUE,vol);
+    vol=(double)right;
+    SDL_WidgetPropertiesOf(UI_Players[player].VolumeRight,SET_CUR_VALUE,vol);
+}
+
+void playerui_UpdateFileInfo(int player)
+{
+    char label[255];
+    sprintf(label,"%d Smpls",PLAYER_GetSamplerate(player));
+    SDL_WidgetPropertiesOf(UI_Players[player].Samplerate,SET_CAPTION,label);
+    sprintf(label,"%d KBit",PLAYER_GetBitrate(player)/1000);
+    SDL_WidgetPropertiesOf(UI_Players[player].Bitrate,SET_CAPTION,label);
+}
+        
+  
+
+
 
 
 void playerui_PlayButton(void *data)

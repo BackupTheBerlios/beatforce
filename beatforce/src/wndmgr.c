@@ -149,7 +149,8 @@ void WNDMGR_Exit()
 
 int wndmgr_Redraw(void *data)
 {
-//    mainui_NotifyRedraw();
+    if(CurWindow->NotifyRedraw)
+        CurWindow->NotifyRedraw();
     SDL_DrawAllWidgets(screen);
     return 50; //redraw every 50ms 
 }

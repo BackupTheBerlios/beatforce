@@ -56,7 +56,6 @@ void* SDL_LabelCreate(SDL_Rect* rect)
     
     label->Background = NULL;
 
-    label->beforedraw = NULL;
     return label;
 }
 
@@ -70,11 +69,6 @@ void SDL_LabelDraw(void *label,SDL_Surface *dest)
 
     memset(string ,0,255);
 
-
-    if(Label->beforedraw)
-    {
-        Label->beforedraw(Label->beforedrawdata);
-    }
 
     if(Label->Redraw || SDL_WidgetNeedsRedraw())
     {
@@ -141,10 +135,6 @@ void  SDL_LabelProperties(void *label,int feature,va_list list)
 
     case SET_BG_COLOR:
         Label->bgcolor=va_arg(list,Uint32);
-        break;
-    case BEFORE_DRAW_FUNCTION:
-        Label->beforedraw     = va_arg(list,void*);
-        Label->beforedrawdata = va_arg(list,void*);
         break;
 
     }

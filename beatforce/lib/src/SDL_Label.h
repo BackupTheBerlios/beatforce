@@ -34,8 +34,6 @@ typedef struct SDL_Label
     int      Redraw;
 
     SDL_Surface *Background;
-    void  (*beforedraw)(void *data);
-    void *beforedrawdata;
 
 }SDL_Label;
 

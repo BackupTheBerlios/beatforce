@@ -302,7 +302,7 @@ mp3_get_tag (Private * h, char *path, struct SongDBEntry *e)
 	id3file = id3_file_open (path, ID3_FILE_MODE_READONLY);
 	if (id3file == NULL)
 	{
-            printf ("get_tag: Error opening file: %s\n", strerror (errno));
+            ERROR("get_tag: Error opening file: %s", strerror (errno));
             return -1;
 	}
 
@@ -433,7 +433,7 @@ mp3_get_tag (Private * h, char *path, struct SongDBEntry *e)
 	fd = fopen (path, "rb");
 	if (fd == NULL)
 	{
-            printf ("get_tag: Error opening file %s:%s\n", path, strerror (errno));
+            ERROR("get_tag: Error opening file %s:%s", path, strerror (errno));
             return ERROR_OPEN_ERROR;
 	}
 
@@ -446,7 +446,7 @@ mp3_get_tag (Private * h, char *path, struct SongDBEntry *e)
 	{
             fclose (fd);
 
-            printf ("get_tag: Error Reading File\n");
+//            printf ("get_tag: Error Reading File\n");
             return ERROR_READ_SEEK_ERROR;
 	}
 
@@ -525,22 +525,17 @@ mp3_load_file (Private * h, char *filename)
     struct mad_header header;
     int length=private->length;
 
-#ifdef MP3MAD_DEBUG
-    printf ("mp3_load_file: %s\n", filename);
-#endif
 
     if (h == NULL || filename == NULL || private->magic != MP3MAD_MAGIC)
         return ERROR_INVALID_ARG;
   
     if (private->fd && private->going)
     {
-	printf ("Already open!\n");
 	return ERROR_ALREADY_OPEN;
     }
 
     if (mp3_is_our_file (h, filename) != TRUE)
     {
-	printf ("Unknown file: %s!\n", filename);
 	return ERROR_UNKNOWN_FILE;
     }
 
@@ -549,7 +544,6 @@ mp3_load_file (Private * h, char *filename)
     private->synth  = malloc (sizeof (struct mad_synth));
     if (!private->frame || !private->stream || !private->synth)
     {
-	printf ("Unable to allocate memory!\n");
 	return ERROR_NO_MEMORY;
     }
 
@@ -565,7 +559,6 @@ mp3_load_file (Private * h, char *filename)
     private->fd = fopen (filename, "rb");
     if (private->fd == NULL)
     {
-	fprintf (stderr, "Error: %s\n", strerror (errno));
 	return ERROR_OPEN_ERROR;
     }
 
@@ -573,7 +566,6 @@ mp3_load_file (Private * h, char *filename)
     {
 	fclose (private->fd);
 	private->fd = NULL;
-	printf ("Error Reading Stream\n");
 	return ERROR_FILE_FORMAT_ERROR;
     }
 
@@ -604,15 +596,10 @@ mp3_load_file (Private * h, char *filename)
 	private->audio_error = TRUE;
 	fclose (private->fd);
 	private->fd = NULL;
-	printf ("Error opening output!\n");
 	return ERROR_OUTPUT_ERROR;
     }
 
     private->decode_thread=OSA_CreateThread(mp3_play_loop, (void *)private);
-
-#ifdef MP3MAD_DEBUG
-    printf ("mp3_load_file end.\n");
-#endif
     private->position = 0;
     return 0;
 }
@@ -621,10 +608,6 @@ int
 mp3_close_file (Private * h)
 {
     mp3Private *private = (mp3Private *) h;
-
-#ifdef MP3MAD_DEBUG
-    printf ("mp3_close_file: %d\n", private->ch_id);
-#endif
 
     if( h == NULL || private->magic != MP3MAD_MAGIC)
         return ERROR_INVALID_ARG;
@@ -666,7 +649,6 @@ mp3_play_loop (void *param)
 
     timer = duration = mad_timer_zero;
 
-    printf("Starting thread\n");
     if(param == NULL || private->input_buffer == NULL)
         return (void *) ERROR_INVALID_ARG;
   
@@ -705,7 +687,7 @@ mp3_play_loop (void *param)
 		}
 		else if (bytes < 0)
 		{
-                    printf ("Error Reading Data: %s\n", strerror (errno));
+//                    printf ("Error Reading Data: %s\n", strerror (errno));
                     break;
 		}
 
@@ -726,7 +708,6 @@ mp3_play_loop (void *param)
                     int new_position;
                     long pos;
 
-                    printf("Private size %d\n",private->size);
                  
                     if (private->seek < 0)
 			new_position = (double) private->length * -private->seek / 1000;
@@ -738,9 +719,9 @@ mp3_play_loop (void *param)
                     
                     pos = private->position * private->size / private->length;
                     
-                    printf("Vars %d %d %d\n",new_position,private->size,private->length);
-                    printf("Seeking to position %ld\n",((long)((double) new_position *
-                                                             private->size / private->length)));
+//                    printf("Vars %d %d %d\n",new_position,private->size,private->length);
+                    //                  printf("Seeking to position %ld\n",((long)((double) new_position *
+                    //                                       private->size / private->length)));
 
                     if (fseek (private->fd, (long)((double) new_position *
                                private->size / private->length), SEEK_SET) != -1)
@@ -767,7 +748,7 @@ mp3_play_loop (void *param)
                     }
                     else
                     {
-                        printf("Error seeking in file\n");
+//                        printf("Error seeking in file\n");
                     }
 		}
 
@@ -916,7 +897,6 @@ mp3_seek (Private * h, long msecs)
         return ERROR_INVALID_ARG;
 
     private->seek = (int) msecs;
-    printf("Seeking to %d\n",private->seek);
     private->eof = FALSE;
     return 0;
 }
@@ -1153,14 +1133,11 @@ scan_header (FILE * fd, struct mad_header *header, struct xing *xing)
             int bytes;
 
             bytes = fread (buffer + buflen, 1, 8192 - buflen, fd);
-#ifdef MP3MAD_DEBUG
-            printf ("read %d\n", bytes);
-#endif
+
             if (bytes <= 0)
             {
 		if (bytes == -1)
 		{
-                    printf ("could not read\n");
                     result = -1;
 		}
 		break;
@@ -1177,7 +1154,7 @@ scan_header (FILE * fd, struct mad_header *header, struct xing *xing)
             {
 		if (!MAD_RECOVERABLE (stream.error))
 		{
-                    printf ("decoding error!\n");
+//                    printf ("decoding error!\n");
                     break;
 		}
 
