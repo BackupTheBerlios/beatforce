@@ -2,7 +2,7 @@
   BeatForce
   songdb.c  -	song database
    
-  Copyright (c) 2001, Patrick Prasse (patrick.prasse@gmx.net)
+  Copyright (c) 2003, John Beuving (john.beuving@home.nl)
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public Licensse as published by
@@ -56,10 +56,15 @@ long n_index;
 /* local prototypes */
 struct SongDBEntry *SONGDB_AllocEntry (void);
 void songdb_FreeEntry (struct SongDBEntry *e);
-int songdb_JumpToFileMatch(char* song, char * keys[], int nw);
+
+/* prototypes ued for searching */
+static int SONGDB_JumpToFileMatch(char* song, char * keys[], int nw);
 int SONGDB_AddSubgroup(struct SongDBGroup *group,char *title);
 struct SongDBSubgroup *songdb_AddSubgroup(struct SongDBSubgroup *sg,char *title);
 
+
+static int SONGDB_LoadXMLDatabase(); /* Load entire database from xml file */
+static int SONGDB_SaveXMLDatabase(); /* Save entire database to xml file */
 
 static int subcount;
 
@@ -99,70 +104,6 @@ int parsesubgroup(xmlDocPtr doc, xmlNodePtr cur)
     return 1;
 }
 
-int ReadXML()
-{
-    xmlDocPtr doc = NULL;       /* document pointer */
-    xmlNodePtr cur = NULL;
-    xmlChar *key;
-    char filename[255];
-    char *dir;
-
-    subcount=0;
-
-    LIBXML_TEST_VERSION;
-    xmlKeepBlanksDefault(0);
-   
-    
-    /*
-     * build an XML tree from a the file;
-     */
-    dir=OSA_GetConfigDir();
-    sprintf(filename,"%s/music.xml",dir);
-    doc = xmlParseFile(filename);
-    if (doc == NULL) 
-        return 0;
-    
-    
-    cur = xmlDocGetRootElement(doc);
-    if (cur == NULL) 
-    {
-        fprintf(stderr,"empty document\n");
-        xmlFreeDoc(doc);
-        return 0;
-    }
-        
-    /* CHeck the root node */
-    if (xmlStrcmp(cur->name, (const xmlChar *) "songdb")) 
-    {
-        fprintf(stderr,"document of the wrong type, root node != Helping");
-        xmlFreeDoc(doc);
-        return 0;
-    }
-
-    cur = cur->xmlChildrenNode;
-    while (cur != NULL) 
-    {
-        if((!xmlStrcmp(cur->name, (const xmlChar *)"group"))) 
-        {
-            key = xmlGetProp(cur, "name");
-            if(key)
-                MainGroup->Name=strdup(key);
-            cur = cur->xmlChildrenNode;
-            while(cur != NULL)
-            {
-                if((!xmlStrcmp(cur->name, (const xmlChar *)"subgroup"))) 
-                {
-                    parsesubgroup(doc,cur);
-                }
-                if(cur)
-                    cur=cur->next;
-            }
-        }
-        if(cur)
-        cur=cur->next;
-    }
-    return 1;
-}
 
 int SONGDB_Init (SongDBConfig * our_cfg)
 {
@@ -173,7 +114,7 @@ int SONGDB_Init (SongDBConfig * our_cfg)
     n_search_results = 0;
     n_index = 0;
 
-    ReadXML();
+    SONGDB_LoadXMLDatabase();
 
     MainGroup->Changed = 1;
     MainGroup->Active   = MainGroup->Subgroup;
@@ -183,70 +124,7 @@ int SONGDB_Init (SongDBConfig * our_cfg)
 
 int SONGDB_Exit()
 {
-    xmlDocPtr doc = NULL;       /* document pointer */
-    xmlNodePtr root_node = NULL;
-    xmlNodePtr maingroup = NULL, subgroup = NULL, file = NULL;
-    struct SongDBEntry *Playlist;
-    char *dir;
-    char filename[255];
-    char time[255];
-
-    dir=OSA_GetConfigDir();
-    sprintf(filename,"%s/music.xml",dir);
-
-    LIBXML_TEST_VERSION;
-    /* 
-     * Creates a new document, a node and set it as a root node
-     */
-    doc = xmlNewDoc(BAD_CAST "1.0");
-    root_node = xmlNewNode(NULL, BAD_CAST "songdb");
-    xmlDocSetRootElement(doc, root_node);
-
-    /* 
-     * xmlNewChild() creates a new node, which is "attached" as child node
-     * of root_node node. 
-     */
-    maingroup=xmlNewChild(root_node, NULL, BAD_CAST "group", NULL);
-    xmlNewProp(maingroup, BAD_CAST "name", BAD_CAST MainGroup->Name);
-
-    while(MainGroup->Subgroup)
-    {
-        subgroup=xmlNewChild(maingroup, NULL, BAD_CAST "subgroup", NULL);
-        xmlNewProp(subgroup, BAD_CAST "name", BAD_CAST MainGroup->Subgroup->Name);
-        
-        Playlist=MainGroup->Subgroup->Playlist;
-
-        while(Playlist)
-        {
-            file=xmlNewChild(subgroup,NULL,"song",NULL);
-            xmlNewProp(file, BAD_CAST "filename", BAD_CAST Playlist->filename);
-            if(Playlist->time)
-            {
-                sprintf(time,"%ld",Playlist->time);
-                xmlNewProp(file, BAD_CAST "time", BAD_CAST time);
-            }
-            Playlist=Playlist->next;
-        }
-        MainGroup->Subgroup=MainGroup->Subgroup->next;
-    }
-
-    /* 
-     * Dumping document to stdio or file
-     */
-    xmlSaveFormatFileEnc(filename, doc, "UTF-8", 1);
-
-    /*free the document */
-    xmlFreeDoc(doc);
-
-    /*
-     *Free the global variables that may
-     *have been allocated by the parser.
-     */
-    xmlCleanupParser();
-
-
-    return(0);
-
+    return SONGDB_SaveXMLDatabase();
 }
 
 
@@ -522,7 +400,7 @@ struct SongDBSubgroup *SONGDB_GetActiveSubgroup()
 }
 
 
-int songdb_JumpToFileMatch(char* song, char * keys[], int nw)
+static int SONGDB_JumpToFileMatch(char* song, char * keys[], int nw)
 {
     int i;
     
@@ -584,24 +462,24 @@ void SONGDB_FindEntry(char *search_string)
             (nw == 1 && words[0][0] == '\0') || /* empty word */
             (nw == 1 && strlen(words[0]) == 1 && /* only one character */
              ((e->title &&
-              strchr(e->title,words[0][0])) || strchr(e->filename,words[0][0]))))
+               strchr(e->title,words[0][0])) || strchr(e->filename,words[0][0]))))
         {
             match=1;
         }
         else
             if (nw == 1 && strlen(words[0]) == 1)
-            match=0;
-        else
-        {
-            char song[256];
+                match=0;
+            else
+            {
+                char song[256];
  
-            for(ptr = e->title,i=0   ; ptr && *ptr && i < 254; i++, ptr++)
-                song[i]=tolower(*ptr);
-            for(ptr= e->filename,i=0 ; ptr && *ptr && i < 254; i++, ptr++)
-                song[i]=tolower(*ptr);
-            song[i] = '\0';
-            match=songdb_JumpToFileMatch(song,words,nw);
-        }
+                for(ptr = e->title,i=0   ; ptr && *ptr && i < 254; i++, ptr++)
+                    song[i]=tolower(*ptr);
+                for(ptr= e->filename,i=0 ; ptr && *ptr && i < 254; i++, ptr++)
+                    song[i]=tolower(*ptr);
+                song[i] = '\0';
+                match=songdb_JumpToFileMatch(song,words,nw);
+            }
 
         if(match)
         {
@@ -613,4 +491,139 @@ void SONGDB_FindEntry(char *search_string)
     }
 }
 
+
+
+static int SONGDB_LoadXMLDatabase()
+{
+    xmlDocPtr doc = NULL;       /* document pointer */
+    xmlNodePtr cur = NULL;
+    xmlChar *key;
+    char filename[255];
+    char *dir;
+
+    subcount=0;
+
+    LIBXML_TEST_VERSION;
+    xmlKeepBlanksDefault(0);
+   
+    
+    /*
+     * build an XML tree from a the file;
+     */
+    dir=OSA_GetConfigDir();
+    sprintf(filename,"%s/music.xml",dir);
+    doc = xmlParseFile(filename);
+    if (doc == NULL) 
+        return 0;
+    
+    
+    cur = xmlDocGetRootElement(doc);
+    if (cur == NULL) 
+    {
+        fprintf(stderr,"empty document\n");
+        xmlFreeDoc(doc);
+        return 0;
+    }
+        
+    /* CHeck the root node */
+    if (xmlStrcmp(cur->name, (const xmlChar *) "songdb")) 
+    {
+        fprintf(stderr,"document of the wrong type, root node != Helping");
+        xmlFreeDoc(doc);
+        return 0;
+    }
+
+    cur = cur->xmlChildrenNode;
+    while (cur != NULL) 
+    {
+        if((!xmlStrcmp(cur->name, (const xmlChar *)"group"))) 
+        {
+            key = xmlGetProp(cur, "name");
+            if(key)
+                MainGroup->Name=strdup(key);
+            cur = cur->xmlChildrenNode;
+            while(cur != NULL)
+            {
+                if((!xmlStrcmp(cur->name, (const xmlChar *)"subgroup"))) 
+                {
+                    parsesubgroup(doc,cur);
+                }
+                if(cur)
+                    cur=cur->next;
+            }
+        }
+        if(cur)
+            cur=cur->next;
+    }
+    return 1;
+
+
+}
+
+static int SONGDB_SaveXMLDatabase()
+{
+    xmlDocPtr doc = NULL;       /* document pointer */
+    xmlNodePtr root_node = NULL;
+    xmlNodePtr maingroup = NULL, subgroup = NULL, file = NULL;
+    struct SongDBEntry *Playlist;
+    char *dir;
+    char filename[255];
+    char time[255];
+
+    dir=OSA_GetConfigDir();
+    sprintf(filename,"%s/music.xml",dir);
+
+    LIBXML_TEST_VERSION;
+    /* 
+     * Creates a new document, a node and set it as a root node
+     */
+    doc = xmlNewDoc(BAD_CAST "1.0");
+    root_node = xmlNewNode(NULL, BAD_CAST "songdb");
+    xmlDocSetRootElement(doc, root_node);
+
+    /* 
+     * xmlNewChild() creates a new node, which is "attached" as child node
+     * of root_node node. 
+     */
+    maingroup=xmlNewChild(root_node, NULL, BAD_CAST "group", NULL);
+    xmlNewProp(maingroup, BAD_CAST "name", BAD_CAST MainGroup->Name);
+
+    while(MainGroup->Subgroup)
+    {
+        subgroup=xmlNewChild(maingroup, NULL, BAD_CAST "subgroup", NULL);
+        xmlNewProp(subgroup, BAD_CAST "name", BAD_CAST MainGroup->Subgroup->Name);
+        
+        Playlist=MainGroup->Subgroup->Playlist;
+
+        while(Playlist)
+        {
+            file=xmlNewChild(subgroup,NULL,"song",NULL);
+            xmlNewProp(file, BAD_CAST "filename", BAD_CAST Playlist->filename);
+            if(Playlist->time)
+            {
+                sprintf(time,"%ld",Playlist->time);
+                xmlNewProp(file, BAD_CAST "time", BAD_CAST time);
+            }
+            Playlist=Playlist->next;
+        }
+        MainGroup->Subgroup=MainGroup->Subgroup->next;
+    }
+
+    /* 
+     * Dumping document to stdio or file
+     */
+    xmlSaveFormatFileEnc(filename, doc, "UTF-8", 1);
+
+    /*free the document */
+    xmlFreeDoc(doc);
+
+    /*
+     *Free the global variables that may
+     *have been allocated by the parser.
+     */
+    xmlCleanupParser();
+
+
+    return 1;
+}
 
