@@ -1,7 +1,7 @@
 /*
   Beatforce/ Search window
 
-  one line to give the program's name and an idea of what it does.
+  This window is a jump to file type of window
   Copyright (C) 2003 John Beuving (john.beuving@home.nl)
 
   This program is free software; you can redistribute it and/or
@@ -46,7 +46,7 @@
 void *editwidget;
 void *tablewidget;
 
-void searchwindow_Search(void *data);
+static void SEARCHWINDOW_Search(void *data); /* This function is called when any key is pressed */
 void searchwindow_PlayClicked(void *data);
 void searchwindow_Play(void *data);
 void songdb_searchstring(long row,int column,char *dest);
@@ -117,7 +117,7 @@ SDL_Surface *SEARCHWINDOW_Create()
     editwidget=SDL_WidgetCreate(SDL_EDIT,312,20,400,25);
     SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
     SDL_WidgetProperties(SET_ALWAYS_FOCUS,1);
-    SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_ANY,searchwindow_Search);
+    SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_ANY,SEARCHWINDOW_Search);
     SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_RETURN,searchwindow_Play);
 
     return SearchWindow;
@@ -134,7 +134,7 @@ int SEARCHWINDOW_EventHandler(SDL_Event event)
         case SDLK_ESCAPE:
             WNDMGR_CloseWindow();
             break;
-      
+            
         default:
             break;
             
@@ -147,7 +147,7 @@ int SEARCHWINDOW_EventHandler(SDL_Event event)
 
 
 
-void searchwindow_Search(void *data)
+static void SEARCHWINDOW_Search(void *data)
 {
     char buffer[255];
     SDL_WidgetPropertiesOf(editwidget,GET_CAPTION,&buffer);
