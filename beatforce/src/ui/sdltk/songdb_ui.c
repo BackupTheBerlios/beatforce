@@ -105,7 +105,7 @@ void *SONGDBUI_CreateWindow(ThemeSongdb *ts)
     sw=malloc(sizeof(SongdbWidgets));
     Button=ts->Button;
     Widgets=sw;
-    SONGDB_Init ();
+    
 
     if(ts)
     {

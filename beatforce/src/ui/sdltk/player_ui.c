@@ -76,9 +76,6 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
     if(pt == NULL)
         return;
 
-    /* Initialize the player functionality */
-    PLAYER_Init(nr);
-
     Image     = pt->Image;
     Button    = pt->Button;
     Text      = pt->Text;

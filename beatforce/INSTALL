@@ -1,18 +1,18 @@
-use
+To build beatforce with the default user interface (sdltk)
+
 python scons.py
 
-to build beatforce with the default user interface.(sdltk)
+It is also possible to choose a different user interface by providing
+the command line option ui. Currently there are three possibilities.
 
-use 
+python scons.py ui=sdltk
 python scons.py ui=gtk
-
-or
 python scons.py ui=qt
 
-to build either gtk or a qt interface
+To install beatforce to the correct directory with the correct user interface
+type one of the following:
 
-as root run
+python scons.py ui=sdltk install
+python scons.py ui=gtk install
+python scons.py ui=qt install
 
-pyton scons.py install
-
-to install all files

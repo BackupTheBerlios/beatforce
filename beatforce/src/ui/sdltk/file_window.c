@@ -1,7 +1,7 @@
 /*
   Beatforce/ File window
 
-  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@beatforce.org)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -93,17 +93,20 @@ SDL_Window gFILEWINDOW={ FILEWINDOW_EventHandler , FILEWINDOW_NotifyHandler, NUL
 void FILEWINDOW_Init()
 {
     gFILEWINDOW.Surface = NULL;
-    subgroupsongs = NULL;
+    subgroupsongs       = NULL;
 }
 
 void FILEWINDOW_Open()
 {
+    TRACE("FILEWINDOW_Open");
     if(gFILEWINDOW.Surface == NULL)
     {
         gFILEWINDOW.Surface=Window_CreateFileWindow();
     }
+    SDL_TableSetSelected(TableSubgroup,0);
     SDL_WindowOpen(&gFILEWINDOW);
 }
+
 static int FILEWINDOW_NotifyHandler(SDL_Window *Win)
 {
     TRACE("FILEWINDOW_NotifyHandler");
@@ -312,7 +315,7 @@ static void FILEWINDOW_AddAll(void *data)
 }
 
 /* 
- *  Table callback function for the subgroups of th active 
+ *  Table callback function for the subgroups of the active 
  *  group. 
  */
 void FILEWINDOW_LoadSubgroups(SDL_Widget *widget)
@@ -321,6 +324,7 @@ void FILEWINDOW_LoadSubgroups(SDL_Widget *widget)
     char *string[1];
 
     string[0]=malloc(255);
+
     list=SONGDB_GetSubgroupList();
     SDL_TableDeleteAllRows(widget);
     while(list)
@@ -442,13 +446,21 @@ SDL_Surface *Window_CreateFileWindow()
     ThemeButton   *Button = NULL;
     ThemeTable    *Table  = NULL;
 
+    TRACE("Window_CreateFileWindow");
+
     if(tc == NULL)
+    {
+        ERROR("No active theme");
         return NULL;
+    }
 
     fw=tc->FileWindow;
     
     if(fw == NULL)
+    {
+        ERROR("No theme for filewindow");
         return NULL;
+    }
 
     Image  = fw->Image;
     Button = fw->Button;

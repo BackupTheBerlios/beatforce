@@ -61,9 +61,6 @@ static void PLAYERUI_EditTitleReturn(void *data);
 /* Exported functions */
 void PLAYERUI_CreateWindow(int nr,void *window)
 {
-    /* Initialize the player functionality */
-    PLAYER_Init(nr);
-
     UI_Players[nr].PlayerNr = nr;
     UI_Players[nr].Images   = NULL;
 

@@ -45,9 +45,11 @@ long no_of_entries;
 long curr_unique;
 static struct SongDBEntry *test;
 
+
 int PLAYLIST_Init (int player_nr)
 {
     TRACE("PLAYLIST_Init");
+
     curr_unique    = 0;
     no_of_entries  = 0;
     playlist[0]=NULL;

@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@beatforce.org)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -236,6 +236,7 @@ int SDL_TableProperties(SDL_Widget *widget,int feature,va_list list)
             if(Table->Selected == NULL)
             {
                 Table->CurrentRow=0;
+                
                 /* Add to selected */
                 SDL_TableAddSelected(Table);
             }
@@ -596,7 +597,13 @@ static void t(SDL_Table *table)
 
 }
 
+void SDL_TableSetSelected(SDL_Widget *table,int row)
+{
+    SDL_Table *Table=(SDL_Table*)table;
 
+    Table->CurrentRow = row;
+    SDL_TableAddSelected(Table);
+}
 
 static void SDL_TableAddSelected(SDL_Table *table)
 {

@@ -1,6 +1,5 @@
 
 
-
 opts = Options('custum.py');
 
 opts.Add(EnumOption('ui', 'Set user interface', 'sdltk',
@@ -27,7 +26,6 @@ env.SConscript(['src/SConscript'])
 env.SConscript(['plugins/SConscript'])
 
 env.SConscript(['themes/SConscript'])
-env.Install(dir = '/usr/share/beatforce',source = ['SConstruct']);
 
 
       

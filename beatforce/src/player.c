@@ -87,6 +87,9 @@ int PLAYER_Init(int player_nr)
 int PLAYER_Exit(int player_nr)
 {
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
+
+    TRACE("PLAYER_Exit %d",player_nr);
+
     if(p==NULL)
         return -1;
 

@@ -41,8 +41,6 @@ void MAIN_SegfaultHandler(int sig);
 int main(int argc, char *argv[])
 {
 
-    MAIN_ParseArgs(argc,argv);
-
     signal(SIGSEGV, MAIN_SegfaultHandler);
 
     OSA_Init();
@@ -63,22 +61,29 @@ int main(int argc, char *argv[])
     PLUGIN_Init (PLUGIN_TYPE_OUTPUT);
     PLUGIN_Init (PLUGIN_TYPE_EFFECT);
     
+    /* Initialize the player functionality */
+    PLAYER_Init(0);
+    PLAYER_Init(1);
+
     AUDIOOUTPUT_Init ();
     EFFECT_Init();
     MIXER_Init  ();
     SAMPLER_Init();
 
 //    OSACDROM_Init();
-
+    SONGDB_Init ();
     MAINWINDOW_Open();
 
-    /*beatforce UI*/
+    MAIN_ParseArgs(argc,argv);
+    
+    /* beatforce UI */
     UI_Main(); /* main loop */
 
-
-    AUDIOOUTPUT_Cleanup();
+ 
+   AUDIOOUTPUT_Cleanup();
 
     SONGDB_Exit();
+
     EFFECT_Cleanup();
     PLUGIN_Cleanup();
 
@@ -98,10 +103,69 @@ void MAIN_SegfaultHandler(int sig)
 void MAIN_ParseArgs(int argc,char **argv)
 {
     int i;
+    char *ext;
 
     for(i=1;i<argc;i++)
     {
-        
+        if(argv[i][0] == '/')
+        {
+            ext = strrchr(argv[i],'.');
+            if(ext == NULL)
+                printf("No extension, assuming directory\n");
+            else
+            {
+                if(!strcmp(ext,".m3u"))
+                {
+                    FILE *fp;
+                    char *line;
+                    char *filename;
+                    struct SongDBSubgroup *sg;
+                    fp=fopen(argv[i],"r");
+                    line=malloc(1024);
+                    while(fgets(line,1024,fp))
+                    {
+                        if(!strncmp(line,"#EXTM3U",7))
+                        {
+                            filename=strrchr(argv[i],'.');
+                            if(filename != NULL)
+                            {
+                                *filename=0;
+                                filename=strrchr(argv[i],'/');
+                                if(filename != NULL)
+                                {
+                                    filename++;
+                                    SONGDB_AddSubgroup(SONGDB_GetActiveGroup(),filename);
+                                }
+                                else
+                                {
+                                    SONGDB_AddSubgroup(SONGDB_GetActiveGroup(),"M3U");
+                                }
+                            }
+                            else
+                            {
+                                SONGDB_AddSubgroup(SONGDB_GetActiveGroup(),"M3U");
+                            }
+                            sg=SONGDB_GetActiveSubgroup();
+                            continue;
+                        }
+
+                        if(line[0]=='/')
+                        {
+                            if(sg == NULL)
+                                exit(3);
+                            while (line[strlen(line) - 1] == '\r' ||
+                                   line[strlen(line) - 1] == '\n')
+                                line[strlen(line) - 1] = '\0';
+                            printf("%s\n",line);
+                            
+                            SONGDB_AddFileToSubgroup(sg,line);
+                        }
+                    }
+                    fclose(fp);
+                    free(line);
+                }
+            }
+        }
     }
 
 }

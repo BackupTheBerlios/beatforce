@@ -3,6 +3,7 @@
    mp3.c - mpeg layer 1/2/3 ouput plugin  using libmad
    
    Copyright (c) 2001, Patrick Prasse (patrick.prasse@gmx.net)
+   Copyright (c) 2001-2004, John Beuving (john.beuving@beatforce.org)
 
    Credits to Rob Leslie (rob@mars.org) who wrote the mad winamp plugin
    on which this plugin is based.
@@ -222,11 +223,13 @@ mp3_is_our_file (Private * h, char *filename)
 
     ext = strrchr (filename, '.');
     if (ext)
-	if (!strcmp (ext, ".mp3") || !strcmp (ext, ".mp2")
-            || !strcmp (ext, ".mpg") || !strcmp (ext, ".mpeg"))
+    {
+	if (!strcmp (ext, ".mp3") || !strcmp (ext, ".MP3") ||
+            !strcmp (ext, ".mpg") || !strcmp (ext, ".mpeg"))
 	{
             return TRUE;
 	}
+    }
     return FALSE;
 }
 
