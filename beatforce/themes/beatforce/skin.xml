@@ -50,7 +50,11 @@
 	normal="playonly_green.bmp"
 	highlight="playonly_green_highlight.bmp"
         pressed="playonly_green_pressed.bmp"
-       action="PLAY"/>
+        action="PLAY"/>
+
+     <button x="167" y="167"
+        normal="pauseonly_green.bmp"
+        action="PAUSE"/>   
 
      <text x="19" y="90" w="105" h="22" font="digits" fgcolor="0xf0f0f0" display="TIME_ELAPSED"/>
      <text x="175" y="90" w="105" h="22" font="digits"  fgcolor="0xf0f0f0" display="TIME_REMAINING"/>
