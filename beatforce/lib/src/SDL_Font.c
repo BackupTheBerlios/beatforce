@@ -82,6 +82,9 @@ void SDL_FontDrawStringRect(SDL_Surface *dest,SDL_Font *font,
     {
         return;
     }
+    if(string == NULL)
+        return;
+
     size=strlen(string);
     
     for(i=0;i<size;i++)
@@ -134,11 +137,10 @@ int SDL_FontDrawStringLimited(SDL_Surface *dest,SDL_Font *font,
     int i;
     int size;
     int pixelsize;
-    int xoffset=rect->x;
+    int xoffset=0;
     SDL_Rect pos;
-    int count=0;
 
-    if(font == NULL )//|| font->font == NULL)
+    if(font == NULL )
     {
         return 0;
     }
@@ -150,14 +152,18 @@ int SDL_FontDrawStringLimited(SDL_Surface *dest,SDL_Font *font,
     size=strlen(string);
     pixelsize=SDL_FontGetStringWidth(font,string);
 
-    for(i=count;i<size;i++)
+    for(i=0;i<size;i++)
     {
-        pos.x=xoffset;
+        if(SDL_FontGetCharWidth(font,string[i]) + xoffset > rect->w)
+            return 0;
+
+        pos.x=xoffset+rect->x;
         pos.y=rect->y;
-        pos.w=0;
-        pos.h=0;
-        xoffset+=SDL_FontDrawChar(dest,font,string[i],&pos,clip);
+        pos.w=rect->w;
+        pos.h=rect->h;
+        xoffset+=SDL_FontDrawChar(dest,font,string[i],&pos,NULL);
     }
+
     return 1;
 
 }

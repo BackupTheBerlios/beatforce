@@ -36,6 +36,9 @@
 #include "input.h"
 #include "playlist.h"
 
+#define MODULE_ID SONGDB
+#include "debug.h"
+
 #define NUMBER_OF 8
 
 /* master index */
@@ -61,8 +64,6 @@ struct SongDBSubgroup *songdb_AddSubgroup(struct SongDBSubgroup *sg,char *title)
 
 int SONGDB_Init (SongDBConfig * our_cfg)
 {
-    int i;
-
     MainGroup=malloc(sizeof(SongDBGroup));
     memset(MainGroup,0,sizeof(SongDBGroup));
 
@@ -78,12 +79,10 @@ int SONGDB_Init (SongDBConfig * our_cfg)
     songdbcfg = our_cfg;
 
     MainGroup->Name=strdup("All");
+    MainGroup->Changed=1;
     
-    for(i=0;i<songdbcfg->Tabs;i++)
-    {
-        MainGroup->Subgroup=songdb_AddSubgroup(MainGroup->Subgroup,songdbcfg->TabTitle[i]);
-    }
-    
+    MainGroup->Subgroup = songdb_AddSubgroup(MainGroup->Subgroup,"Beatforce");
+    MainGroup->Active   = MainGroup->Subgroup;
     return 0;
 }
 
@@ -92,6 +91,7 @@ int SONGDB_AddSubgroup(char *title)
     if(title == NULL)
         return 0;
     MainGroup->Subgroup=songdb_AddSubgroup(MainGroup->Subgroup,title);
+    MainGroup->Changed=1;
     return 1;
 }
 
@@ -105,6 +105,7 @@ int SONGDB_RenameSubgroup(int which, char *title)
             free(sg->Name);
 
         sg->Name=strdup(title);
+        MainGroup->Changed=1;
         return 1;
     }
     return 0;
@@ -141,6 +142,7 @@ int SONGDB_RemoveSubgroup(int which)
             free(list->Name);
             free(list);
             return 1;
+            MainGroup->Changed=1;
         }
         
         list=list->next;
@@ -169,6 +171,60 @@ struct SongDBSubgroup *SONGDB_GetSubgroup(int which)
     return NULL;
 }
 
+int SONGDB_SubgroupCount()
+{
+    struct SongDBSubgroup *list;
+    int count=0;
+
+    list=MainGroup->Subgroup;
+
+    while(list)
+    {
+        list=list->next;
+        count++;
+    }
+    return count;
+}
+
+int SONGDB_AddFileTo(int which,char *filename)
+{
+    struct SongDBSubgroup *sg;
+    
+    sg=SONGDB_GetSubgroup(which);
+    if(sg)
+    {
+        struct SongDBEntry *e;
+        
+        e = songdb_AllocEntry ();
+        
+        e->filename = strdup (filename);
+        e->id       = sg->Songcount++;
+        
+        if (input_whose_file (PLAYER_GetData(0)->ip_plugins, filename) != NULL)
+        {
+            /* Add the created entry to the active database */
+            sg->Playlist = realloc (sg->Playlist, sg->Songcount * DBENTRY_PTR_LEN);
+            if(sg->Playlist==NULL)
+            {
+                ERROR("Realloc failed");
+            }
+            sg->Playlist[sg->Songcount-1] = e;
+            
+        }
+    
+    }
+    return 1;
+}
+
+int SONGDB_GroupChanged()
+{
+    int retval;
+    
+    retval = MainGroup->Changed;
+    MainGroup->Changed = 0;
+    return retval;
+}
+
 struct SongDBSubgroup *songdb_AddSubgroup(struct SongDBSubgroup *sg,char *title)
 {
     if(sg == NULL)
@@ -176,6 +232,8 @@ struct SongDBSubgroup *songdb_AddSubgroup(struct SongDBSubgroup *sg,char *title)
         sg=malloc(sizeof(SongDBSubgroup));
         memset(sg,0,sizeof(SongDBSubgroup));
         sg->Name=strdup(title);
+        sg->Songcount=0;
+        sg->Playlist=NULL;
     }
     else
     {
@@ -187,7 +245,10 @@ struct SongDBSubgroup *songdb_AddSubgroup(struct SongDBSubgroup *sg,char *title)
         last->next=malloc(sizeof(SongDBSubgroup));
         memset(last->next,0,sizeof(SongDBSubgroup));
         last->next->Name=strdup(title);
+        last->next->Songcount=0;
+        last->next->Playlist=NULL;
         last->next->prev=last;
+
     }
     return sg;
 }
@@ -233,7 +294,10 @@ void songdb_FreeEntry (struct SongDBEntry *e)
 
 long SONGDB_GetNoOfEntries (void)
 {
-    return n_id[active];
+    if(MainGroup->Active)
+        return MainGroup->Active->Songcount;
+    else
+        return 0;
 }
 
 long SONGDB_GetNoOfSearchResults(void)
@@ -254,22 +318,34 @@ struct SongDBEntry *SONGDB_GetEntryID(long id)
 {
     struct SongDBEntry *e = NULL;
 
-    if (id >= n_id[active] || id == SONGDB_ID_UNKNOWN)
-    {
+    if(id < 0)
         return NULL;
-    }
-    e = songdb[active][id];
-    if (e != NULL && e->id == id)
+
+    if(id < MainGroup->Active->Songcount)
+        e = MainGroup->Active->Playlist[id];
+
+    if (e != NULL)
         return e;
     return NULL;
 }
 
-
-int SONGDB_SetActiveList(int db)
+int SONGDB_SetActiveSubgroup(int which)
 {
-    active=db;
+    struct SongDBSubgroup *sg;
+    sg=SONGDB_GetSubgroup(which);
+    if(sg)
+        MainGroup->Active=sg;
+    else
+        return 0;
+    
     return 1;
 }
+
+struct SongDBSubgroup *SONGDB_GetActiveSubgroup()
+{
+    return MainGroup->Active;
+}
+
 
 int SONGDB_AddFile(char *filename)
 {
@@ -407,10 +483,10 @@ void SONGDB_FindEntry(char *search_string)
     free(search_results);
     search_results = NULL;
 
-    for(entry=0; entry < n_id[active]; entry++)
+    for(entry=0; entry < MainGroup->Active->Songcount; entry++)
     {
         int match = 0; 
-        e = songdb[active][entry];
+        e = MainGroup->Active->Playlist[entry];
         
         if (nw == 0   ||        /* No words yet */
             (nw == 1 && words[0][0] == '\0') || /* empty word */

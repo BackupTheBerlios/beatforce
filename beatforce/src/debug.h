@@ -24,8 +24,8 @@
 #define __DEBUG_H__
 
 #define AUDIO_OUTPUT 1
-#define INPUT        2
-#define WNDMGR       3
+#define FILEWINDOW   2
+#define INPUT        3
 #define MP3          4
 #define OSA          5
 #define OUTPUT       6
@@ -36,6 +36,7 @@
 #define SONGDB       11
 #define SONGDB_UI    12
 #define THEME        13
+#define WNDMGR       14
 
 #define name(x) x
 #define module( x ) ( #x )
@@ -61,6 +62,11 @@ void printid(char *id,int line,char *message);
 #if MODULE_ID == AUDIO_OUTPUT
 #define TRACE TRACE_ON
 #define DEBUG DEBUG_ON
+#endif
+
+#if MODULE_ID == FILEWINDOW
+#define TRACE TRACE_OFF
+#define DEBUG DEBUG_OFF
 #endif
 
 #if MODULE_ID == INPUT

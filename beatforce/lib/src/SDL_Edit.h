@@ -46,11 +46,11 @@ typedef struct SDL_Edit
 }SDL_Edit;
 
 
-// prototypes
+/* prototypes */
 void* SDL_EditCreate(SDL_Rect *rect);
 void  SDL_EditDraw(void *edit,SDL_Surface *dest);
 void  SDL_EditHandler(void * edit,SDL_Event *event);
-void  SDL_EditProperties(void *edit,int feature,va_list list);
+int   SDL_EditProperties(void *edit,int feature,va_list list);
 void  SDL_EditEventHandler(void *edit,SDL_Event *event);
 
 

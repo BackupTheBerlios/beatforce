@@ -82,6 +82,8 @@ typedef struct SongDBTest
 typedef struct SongDBGroup
 {
     char *Name;
+    int Changed;
+    struct SongDBSubgroup *Active;
     struct SongDBSubgroup *Subgroup;
     struct SongDBGroup *next;
     struct SongDBGroup *prev;
@@ -90,9 +92,8 @@ typedef struct SongDBGroup
 typedef struct SongDBSubgroup
 {
     char *Name;
-    char *String;
-    struct SongDBEntry *Playlist;
-    struct SongDBEntry *List;
+    int Songcount;
+    struct SongDBEntry **Playlist;
     struct SongDBSubgroup *next;
     struct SongDBSubgroup *prev;
 }SongDBSubgroup;
@@ -105,7 +106,6 @@ typedef struct SongDBSubgroup
 
 int SONGDB_Init (SongDBConfig * our_cfg);
 int SONGDB_AddFilename(char *filename);
-int SONGDB_SetActiveList(int db);
 void SONGDB_FreeActiveList();
 struct SongDBEntry *SONGDB_GetEntryID(long id);
 struct SongDBEntry *SONGDB_GetSearchEntry(long id);
@@ -113,8 +113,18 @@ long SONGDB_GetNoOfEntries (void);
 long SONGDB_GetNoOfSearchResults(void);
 void SONGDB_FindEntry(char *search_string);
 
+/* Group related functions */
+int SONGDB_GroupChanged();
+
+int SONGDB_SetActiveSubgroup(int which);
+
 /* Subgroup modifiers */
 int SONGDB_AddSubgroup(char *title);
+int SONGDB_RemoveSubgroup(int which);
+int SONGDB_RenameSubgroup(int which, char *title);
 struct SongDBSubgroup *SONGDB_GetSubgroup(int which);
-
+int SONGDB_SubgroupCount();
+int SONGDB_AddFileTo(int which,char *filename);
+int SONGDB_SetActiveSubgroup(int which);
+struct SongDBSubgroup *SONGDB_GetActiveSubgroup();
 #endif

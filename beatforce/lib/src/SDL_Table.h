@@ -62,6 +62,8 @@ typedef struct SDL_Table
     int CurrentRow;
     int CurrentColumn;
 
+    int Selectable;
+
     //helper variables
     int TablePreviousHighlightedRow;
     int TableSelectionChanged;

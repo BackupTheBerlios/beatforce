@@ -73,7 +73,7 @@ void  SDL_EditDraw(void *edit,SDL_Surface *dest)
 {
     SDL_Edit *Edit=(SDL_Edit*)edit;
     SDL_Rect cursor;
-    int y_pos;
+    SDL_Rect StringPos;
     int StringWidth;
     char *caption;
     
@@ -89,23 +89,26 @@ void  SDL_EditDraw(void *edit,SDL_Surface *dest)
         
         SDL_FillRect(dest,&Edit->rect,Edit->bgcolor);
 
-        y_pos = Edit->rect.y + ((Edit->rect.h - Edit->Font->height)/2);
+        StringPos.y = Edit->rect.y + ((Edit->rect.h - Edit->Font->height)/2);
+        StringPos.x = Edit->rect.x;
+        StringPos.w = Edit->rect.w;
+        StringPos.h = Edit->rect.h;
 
         StringWidth=SDL_FontGetStringWidth(Edit->Font,Edit->Caption);
+
         if(StringWidth <= Edit->rect.w )
         {
-            SDL_FontDrawString(dest,Edit->Font,Edit->Caption,
-                               Edit->rect.x,y_pos);
+            SDL_FontDrawStringRect(dest,Edit->Font,Edit->Caption,&StringPos);
         }
         else
         {
             caption=Edit->Caption;
             while(SDL_FontGetStringWidth(Edit->Font,caption) > Edit->rect.w)
                 caption++;
-            SDL_FontDrawString(dest,Edit->Font,caption,Edit->rect.x,y_pos);
+            SDL_FontDrawString(dest,Edit->Font,caption,Edit->rect.x,StringPos.y);
         }
 
-        //draw cursor
+        /* draw cursor */
 
         if(SDL_WidgetHasFocus(edit) || Edit->Focus)
         {
@@ -114,24 +117,16 @@ void  SDL_EditDraw(void *edit,SDL_Surface *dest)
                 cursor.x = Edit->rect.x + Edit->rect.w - 2;
             else
                 cursor.x = Edit->rect.x + SDL_FontGetStringWidth(Edit->Font,Edit->Caption)+2;
-            cursor.y = y_pos;
+            cursor.y = StringPos.y;
             cursor.w = 1;
             cursor.h = Edit->Font->height;
             SDL_FillRect(dest,&cursor,0x000007);
         }
-
-        //update screen
-        SDL_UpdateRect(dest,
-                       Edit->rect.x,
-                       Edit->rect.y,
-                       Edit->rect.w,
-                       Edit->rect.h);
-
         Edit->Redraw = 0;
     }
 }
 
-void SDL_EditProperties(void *edit,int feature,va_list list)
+int SDL_EditProperties(void *edit,int feature,va_list list)
 {
     SDL_Edit *Edit=(SDL_Edit*)edit;
 
@@ -170,6 +165,7 @@ void SDL_EditProperties(void *edit,int feature,va_list list)
         Edit->Redraw = 1;
         break;
     }
+    return 1;
 }
 
 void SDL_EditEventHandler(void *edit,SDL_Event *event)
@@ -207,7 +203,6 @@ void SDL_EditEventHandler(void *edit,SDL_Event *event)
             {
                 if(key>=SDLK_a && key <= SDLK_z)
                 {
-                    printf("Capital letter %d\n",key);
                     key -= 32;
                 }
                 if(key == SDLK_SEMICOLON)

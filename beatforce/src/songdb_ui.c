@@ -44,14 +44,13 @@
 #define MODULE_ID SONGDB_UI
 #include "debug.h"
 
-
-extern SongDBConfig   *songdbcfg;
+extern SongDBGroup *MainGroup;
 
 /* Prototypes for functions for buttosn below */
-void UI_SongdbChangeDirClicked(void *data);
+static void SONGDBUI_ChangeGroupClicked(void *data);
+
 void UI_SongdbRenameClicked(void *data);
 void UI_SongdbAddTabClicked(void *data);
-void UI_SongdbRenameFinished(void *data);
 void songdbui_RemoveTab(void *data);
 
 void UI_SongdbChangeDatabase();
@@ -98,28 +97,8 @@ void SONGDBUI_CreateWindow(ThemeSongdb *ts)
     tabwidget=SDL_WidgetCreate(SDL_TAB,30,580,500,20);
     SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
     SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
-    {
-        int i;
-        for(i=0;i<songdbcfg->Tabs;i++)
-        {
-            SDL_WidgetProperties(TAB_ADD,songdbcfg->TabTitle[i]);
-            if(songdbcfg->TabString[i])
-            {
-                BFList *mp3;
-                SONGDB_SetActiveList(i);
-                SONGDB_FreeActiveList();
-                mp3  = OSA_FindFiles(songdbcfg->TabString[i],".mp3",1); //recursive search
-                while(mp3)
-                {
-                    SONGDB_AddFile((char*)mp3->data);
-                    mp3=mp3->next;
-                }
-            }
-        }
-        SONGDBUI_ChangeDatabase(songdbcfg->TabString[0]);
-    }
     SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,SONGDBUI_ChangeDatabase,NULL);
-    SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_RETURN,UI_SongdbRenameFinished);
+
 
     /* Create buttons which change the tabs */
     while(Button)
@@ -131,22 +110,7 @@ void SONGDBUI_CreateWindow(ThemeSongdb *ts)
             SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
             SDL_WidgetProperties(SET_NORMAL_IMAGE,Button->normal);
             SDL_WidgetProperties(SET_PRESSED_IMAGE,Button->pressed);
-            SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,UI_SongdbChangeDirClicked,NULL);        
-            break;
-        case BUTTON_RENAME:
-            //rename highlighted tab
-            SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
-            SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,UI_SongdbRenameClicked,NULL);        
-            break;
-        case BUTTON_ADD:
-            //add a empty tab button
-            SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
-            SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,UI_SongdbAddTabClicked,NULL);        
-            break;
-        case BUTTON_REMOVE:
-            //remove the active tab
-            SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
-            SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,songdbui_RemoveTab,NULL);        
+            SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,SONGDBUI_ChangeGroupClicked,NULL);        
             break;
         }
         Button=Button->next;
@@ -160,104 +124,53 @@ void SONGDBUI_ChangeDatabase(char *string)
     TRACE("SONGDBUI_ChangeDabase enter %s",string);
     
     t=(SDL_Tab *)tabwidget;
-    SONGDB_SetActiveList(t->hl->index);
+    SONGDB_SetActiveSubgroup(t->hl->index);
     SDL_WidgetPropertiesOf(table,ROWS,SONGDB_GetNoOfEntries());
     
-    if(string)
-    {
-        if(t->hl->index < songdbcfg->Tabs)
-        {
-
-            sprintf(songdbcfg->TabString[t->hl->index],"%s",string);
-        }
-
-    }
 }
 
 void SONGDBUI_Redraw()
 {
         
-    SongDBSubgroup *sg=SONGDB_GetSubgroup(0);
+    SongDBSubgroup *sg;
     
-
-
-    while(SDL_WidgetPropertiesOf(tabwidget,TAB_REMOVE,NULL))
+    if(SONGDB_GroupChanged())
     {
-    }
-
-    while(sg)
-    {
-        SDL_WidgetPropertiesOf(tabwidget,TAB_ADD,sg->Name);
-        sg=sg->next;
+        sg=SONGDB_GetSubgroup(0);
+        
+        while(SDL_WidgetPropertiesOf(tabwidget,TAB_REMOVE,NULL))
+        {
+        }
+        
+        while(sg)
+        {
+            SDL_WidgetPropertiesOf(tabwidget,TAB_ADD,sg->Name);
+            sg=sg->next;
+        }
     }
     
 
 
 }
-void UI_SongdbChangeDirClicked(void *data)
+
+static void SONGDBUI_ChangeGroupClicked(void *data)
 {
     /* Will call void UI_SongdbChangeDatabase(char *string) when finished */
     FILEWINDOW_Open();
 }
 
-void UI_SongdbRenameFinished(void *data)
-{
-    SDL_Tab *t;
-    t=(SDL_Tab *)tabwidget;
-    
-    if(songdbcfg->TabTitle[t->hl->index-1] == NULL)
-        printf("Can't rename empty tab\n");
-    
-    if(t->hl->caption == NULL)
-        printf("Nothing to copy from\n");
-    
-    strcpy(songdbcfg->TabTitle[t->hl->index],t->hl->caption);
-    WNDMGR_EnableEventhandler();
-}
-
-void UI_SongdbRenameClicked(void *data)
-{
-    WNDMGR_DisableEventhandler();
-}
-
-
-
-void UI_SongdbAddTabClicked(void *data)
-{
-    songdbcfg->Tabs++;
-    songdbcfg->TabString = (char**)realloc( songdbcfg->TabString, songdbcfg->Tabs * sizeof(char*));
-    songdbcfg->TabTitle  = realloc( songdbcfg->TabTitle , songdbcfg->Tabs * sizeof(char*));
-    songdbcfg->TabTitle[songdbcfg->Tabs - 1] = malloc(255 *sizeof(char));
-    songdbcfg->TabString[songdbcfg->Tabs - 1] = malloc(255 *sizeof(char));
-    
-    memset(songdbcfg->TabTitle[songdbcfg->Tabs - 1],0,255);
-    memset(songdbcfg->TabString[songdbcfg->Tabs - 1],0,255);
-
-   
-    /* Add an empty tab */
-    SDL_WidgetPropertiesOf(tabwidget,TAB_ADD,NULL);
-}
-
-void songdbui_RemoveTab(void *data)
-{
-    if(SDL_WidgetPropertiesOf(tabwidget,TAB_REMOVE,NULL))
-    {
-        songdbcfg->Tabs--;
-    }
-}
-
 void songdbstring(long row,int column,char *dest)
 {
-    struct SongDBEntry *e;
+    struct SongDBEntry *e = NULL;
     
     if(row < 0)
         return;
-
-    if(SONGDB_GetNoOfEntries()<row)
-        return;
-
-    e = SONGDB_GetEntryID(row);
-
+    
+    if(row < SONGDB_GetNoOfEntries())
+    {
+        e = MainGroup->Active->Playlist[row];
+    }
+    
     dest[0]='\0';
     if(e)
     {

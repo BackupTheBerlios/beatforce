@@ -65,7 +65,7 @@ void *SDL_TabCreate(SDL_Rect *rect)
     SDL_Tab *newtab;
 
     newtab=(SDL_Tab*)malloc(sizeof(SDL_Tab));
-    newtab->NoOfTabs=1;
+    newtab->NoOfTabs=0;
     newtab->rect=(SDL_Rect*)malloc(sizeof(SDL_Rect));
     newtab->rect->x    = rect->x;
     newtab->rect->y    = rect->y;
@@ -75,6 +75,7 @@ void *SDL_TabCreate(SDL_Rect *rect)
     newtab->min_height = TAB_DEFAULTHEIGHT;
     newtab->tabs  = NULL;
     newtab->next  = NULL;
+    newtab->hl    = NULL;
     newtab->bgcolor     = 0xff0000;
     newtab->fgcolor     = WHITE;
     newtab->normal      = NULL;
@@ -96,8 +97,6 @@ void SDL_TabDraw(void *data,SDL_Surface *dest)
 {
     SDL_Tab     *tab=(SDL_Tab*)data;
     SDL_TabList *tablist;
-    //SDL_Surface *drawtab=NULL;
-
 
     if(tab->tabs==NULL)
     {
@@ -110,7 +109,7 @@ void SDL_TabDraw(void *data,SDL_Surface *dest)
     }
 
   
-    Tab_Recalculate(tab); // we can only run this with a valid surface
+    Tab_Recalculate(tab); /* we can only run this with a valid surface */
     SDL_FillRect(dest,tab->rect,0x222222);        
     while(tablist)
     {
@@ -452,8 +451,9 @@ static int Tab_DrawTabWithCaption(SDL_Surface *dest,SDL_Tab *tab,SDL_TabList * t
     SDL_FontSetColor(tab->font,0xffffee);
 
     if(tl->caption)
+    {
         SDL_FontDrawStringLimited(dest,tab->font,tl->caption,&set,&dst);
-    
+    }
     
     return 1;
 }
@@ -517,8 +517,13 @@ static int Tab_RemoveTab(SDL_Tab *tab)
 
     if(tab->NoOfTabs > 0)
     {
-        remove=tab->hl;    
+        if(tab->hl)
+            remove=tab->hl;    
+        else
+            return 0;
+
         tab->hl=tab->hl->prev;        
+        
             
         if(remove->next)
             remove->next->prev=remove->prev;
@@ -534,6 +539,7 @@ static int Tab_RemoveTab(SDL_Tab *tab)
 
         if(remove->caption)
             free(remove->caption);
+
         free(remove->rect);
         free(remove);
         tab->NoOfTabs--; 
@@ -560,10 +566,8 @@ void Tab_EditReturnKeyPressed(void *data)
     SDL_WidgetPropertiesOf(Tab->edit,GET_CAPTION,&string);
 
     if(Tab->hl->caption == NULL)
-        Tab->hl->caption = malloc(sizeof(char)*255);
+        Tab->hl->caption = strdup(string);
 
-    sprintf(Tab->hl->caption,"%s",string);
-    
     SDL_WidgetClose(Tab->edit);
     Tab->edit=NULL;
 

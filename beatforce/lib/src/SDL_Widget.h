@@ -61,6 +61,7 @@ typedef enum E_Widget_Properties
     COLUMN_WIDTH,        // int
     GET_SELECTED,         // void *
     CLEAR_SELECTED,
+    SET_SELECTABLE,  // to enable selection
 
     SET_PERCENTAGE,       // int, slider specific
     SET_MAX_VALUE,      

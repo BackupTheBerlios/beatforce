@@ -220,7 +220,7 @@ int SDL_SliderProperties(void *slider,int feature,va_list list)
 
 
     }
-
+    return 1;
 }
 
 

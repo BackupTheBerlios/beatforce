@@ -89,6 +89,7 @@ void* SDL_TableCreate(SDL_Rect* rect)
     newtable->edit              = NULL;
    
     newtable->selected          = NULL;
+    newtable->Selectable        = 0;
     newtable->FirstVisibleRow   = 0;
     newtable->HighlightedRow    = -1;
     newtable->editcaption       = NULL;
@@ -275,6 +276,9 @@ int SDL_TableProperties(void *table,int feature,va_list list)
             }
         }
         break;
+    case SET_SELECTABLE:
+        Table->Selectable = va_arg(list,int);
+        break;
     case SET_STATE_EDIT:
         {
             if(Table->edit == NULL)
@@ -302,7 +306,6 @@ int SDL_TableProperties(void *table,int feature,va_list list)
                         SDL_WidgetProperties(SET_ALWAYS_FOCUS,1);
                         SDL_WidgetProperties(SET_BG_COLOR,Table->bgcolor);
                         SDL_WidgetProperties(SET_FG_COLOR,BLACK);
-
                         SDL_WidgetProperties(SET_CAPTION,label);
                         SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_RETURN , Table_EditReturnKeyPressed , Table);
                     }
@@ -378,7 +381,7 @@ void SDL_TableEventHandler(void *table,SDL_Event *event)
                         memset(string,0,255);
                         Table->Table_GetString(Table->CurrentRow,0,(char*)&string);
                      
-                        if(strlen(string))
+                        if(strlen(string) && Table->Selectable)
                         {
                             /* Add to selected */
                             SDL_TableAddSelected(Table);
@@ -471,7 +474,7 @@ static void SDL_TableDrawRow(SDL_Surface *dest,SDL_Table *Table,int row)
         SDL_FillRect(dest,&RowDims,SDL_MapRGB(dest->format,255,55,0));
         SDL_FontSetColor(Table->font,Table->fgcolor);
     }
-    else if(SDL_TableIsRowSelected(Table,row))
+    else if(Table->Selectable && SDL_TableIsRowSelected(Table,row))
     {
         SDL_FillRect(dest,&RowDims,0x00ff00);
     }
