@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003 John Beuving (john.beuving@home.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -56,10 +56,11 @@ SDL_Widget* SDL_LabelCreate(SDL_Rect* rect)
     Label->Caption = NULL;
     Label->Font    = &DefaultFont;
 
-    Label->fgcolor = 0x000000;
+    Label->fgcolor = BLACK;//0x000000;
     Label->bgcolor = TRANSPARANT;
     Label->offset   = 0;
     Label->increase = 1;
+    Label->Alignment = 0;
 
     Label->Pattern    = LABEL_NORMAL;
 
@@ -87,7 +88,6 @@ void SDL_LabelDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
         
         SDL_FontDrawStringLimited(dest,Label->Font,Label->Caption,&DrawPosititon,&widget->Rect);
     }
-   
 }
 
 int SDL_LabelProperties(SDL_Widget *widget,int feature,va_list list)
@@ -100,11 +100,8 @@ int SDL_LabelProperties(SDL_Widget *widget,int feature,va_list list)
         Label->Font=va_arg(list,SDL_Font*);
         break;
     case SET_CAPTION:
-        if(Label->Caption != NULL)
-            free(Label->Caption);
-        
-        Label->Caption=(char*)strdup(va_arg(list,char*));
-        SDL_WidgetRedrawEvent(widget);
+        printf("Please change code to new API\n");
+        exit(1);
         break;
     case SET_FG_COLOR:
         Label->fgcolor=va_arg(list,Uint32);
@@ -175,20 +172,40 @@ static void Label_CalculatePattern(SDL_Label *Label,SDL_Rect *Rect)
     else
     {
         int height=Label->Font->Height;
-#if 0
-        // no alignment string is in upper left corner
-        Rect->x = widget->Rect.x;
-        Rect->y = widget->Rect.y;
-        Rect->w = widget->Rect.w;
-        Rect->h = widget->Rect.h;
-#endif 
-        Rect->x = widget->Rect.x + (widget->Rect.w - StringWidth)/2;
-        Rect->y = widget->Rect.y + (widget->Rect.h - height     )/2 + 1;
-        Rect->w = widget->Rect.w;
-        Rect->h = widget->Rect.h;
+
+        if(Label->Alignment == 0)
+        {
+            // no alignment string is in upper left corner
+            Rect->x = widget->Rect.x;
+            Rect->y = widget->Rect.y;
+            Rect->w = widget->Rect.w;
+            Rect->h = widget->Rect.h;
+        }
+        else
+        {
+            Rect->x = widget->Rect.x + (widget->Rect.w - StringWidth)/2;
+            Rect->y = widget->Rect.y + (widget->Rect.h - height     )/2 + 1;
+            Rect->w = widget->Rect.w;
+            Rect->h = widget->Rect.h;
+        }
 
     }
     
 
 }
 
+void SDL_LabelSetText(SDL_Widget *widget,char *text)
+{
+    SDL_Label *Label=(SDL_Label*)widget;
+
+    Label->Caption=strdup(text);
+    SDL_WidgetRedrawEvent(widget);
+}
+
+void SDL_LabelSetAlignment(SDL_Widget *widget,int Alignment)
+{
+    SDL_Label *Label=(SDL_Label*)widget;
+
+    Label->Alignment = Alignment;
+
+}

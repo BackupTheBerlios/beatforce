@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003 John Beuving (john.beuving@home.nl)
+  Copyright (C) 2003 John Beuving (john.beuving@wanadoo.nl)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -19,8 +19,8 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef __SDL_BUTTON_H__
-#define __SDL_BUTTON_H__
+#ifndef __SDL_TOGGLEBUTTON_H__
+#define __SDL_TOGGLEBUTTON_H__
 
 #include <stdarg.h>
 
@@ -34,7 +34,7 @@ typedef enum
     SDL_BUTTON_HIGHLIGHTED
 }SDL_ButtonState;
 
-typedef struct SDL_Button
+typedef struct SDL_ToggleButton
 {
     SDL_Widget       Widget;
     SDL_Surface      *disabled;
@@ -46,20 +46,15 @@ typedef struct SDL_Button
     SDL_Widget *Label;
 
 
-}SDL_Button;
+}SDL_ToggleButton;
 
-/*
-void UpdateButtons(SDL_Surface *dest,int x, int y, int pressed);
-void CreateButton(int x, int y);
-*/
-
-SDL_Widget* SDL_ButtonCreate(SDL_Rect *rect);
-void        SDL_ButtonDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area);
-int         SDL_ButtonProperties(SDL_Widget *widget,int feature,va_list list);
-int         SDL_ButtonEventHandler(SDL_Widget *widget,SDL_Event *event);
-void        SDL_ButtonClose(SDL_Widget *widget);
+SDL_Widget* SDL_ToggleButtonCreate(SDL_Rect *rect);
+void        SDL_ToggleButtonDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area);
+int         SDL_ToggleButtonProperties(SDL_Widget *widget,int feature,va_list list);
+int         SDL_ToggleButtonEventHandler(SDL_Widget *widget,SDL_Event *event);
+void        SDL_ToggleButtonClose(SDL_Widget *widget);
 
 /* Set a label to the button */
 void SDL_ButtonSetLabel(SDL_Widget *widget,char *title);
 
-#endif /* __BUTTON_H__ */
+#endif /* __TOGGLEBUTTON_H__ */

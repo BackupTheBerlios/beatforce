@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003 John Beuving (john.beuving@home.nl)
+  Copyright (C) 2003 John Beuving (john.beuving@wanadoo.nl)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -20,22 +20,24 @@
 */
 #include <stdarg.h>
 #include <malloc.h>
+#include <string.h>
 
 #include "SDL_Widget.h"
 #include "SDL_Edit.h"
+#include "SDL_Signal.h"
+
+void SDL_EditKeyDownCB(SDL_Widget *widget,SDL_Event *event);
 
 const struct S_Widget_FunctionList SDL_Edit_FunctionList =
 {
     SDL_EditCreate,
     SDL_EditDraw,
     SDL_EditProperties,
-    SDL_EditEventHandler,
+    NULL,
     NULL,
 };
 
 
-static void SDL_EditSetCallback(SDL_Widget *widget,int event,void *function,void *data);
-void SDL_EditCallback(SDL_Widget *widget,int event);
 
 
 SDL_Widget *SDL_EditCreate(SDL_Rect* rect)
@@ -54,20 +56,18 @@ SDL_Widget *SDL_EditCreate(SDL_Rect* rect)
     Widget->Rect.h    = rect->h;
     Widget->Focusable = 1;
     
+    
+    SDL_SignalConnect(Widget,"keydown",SDL_EditKeyDownCB,Widget);
+    
     Edit->Caption = (char*)malloc(1024);
     memset(Edit->Caption,0,1024);
 
-    Edit->Font    = NULL;
-    Edit->Shift   = 0;
+    Edit->Font    = &DefaultFont;
 
+    Edit->CursorPosition = 0;
     Edit->bgcolor = 0xfffff7;
     Edit->fgcolor = 0x000000;
 
-    /* Reset the callback functions */
-    Edit->AnyKeyPressCallback = NULL;
-    Edit->ReturnPressCallback = NULL;
-    Edit->AnyKeyData    = NULL;
-    Edit->ReturnKeyData = NULL;
 
     return (SDL_Widget*)Edit;
 }
@@ -78,7 +78,6 @@ void  SDL_EditDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
     SDL_Rect cursor;
     SDL_Rect StringPos;
     int StringWidth;
-    char *caption;
     
     if(Edit->Font == NULL)
     {
@@ -100,41 +99,68 @@ void  SDL_EditDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
     }
     
     StringPos.y = widget->Rect.y + ((widget->Rect.h - SDL_FontGetHeight(Edit->Font))/2);
-    StringPos.x = widget->Rect.x;
-    StringPos.w = widget->Rect.w;
+    StringPos.x = widget->Rect.x + 2;
+    StringPos.w = widget->Rect.w - 2;
     StringPos.h = widget->Rect.h;
     
     StringWidth=SDL_FontGetStringWidth(Edit->Font,Edit->Caption);
     
-    if(StringWidth <= widget->Rect.w )
     {
-        SDL_FontDrawStringRect(dest,Edit->Font,Edit->Caption,&StringPos);
-    }
-    else
-    {
-        caption=Edit->Caption;
+        char tmp[255];
+        unsigned int size;
+        int size2;
 
-        while(SDL_FontGetStringWidth(Edit->Font,caption) > widget->Rect.w)
-            caption++;
+        size=strlen(Edit->Caption);
+        {
+            size = size - (size - Edit->CursorPosition);
+            if(size >= 0)
+            {
+                int w;
+                char *caption;
 
-        SDL_FontDrawStringRect(dest,Edit->Font,caption,&StringPos);
+                memset(tmp,0,255);
+                strncpy(tmp,Edit->Caption,size);
+                tmp[size]=0;
+
+                w = SDL_FontGetStringWidth(Edit->Font,tmp);
+
+                caption=&tmp;
+                while(w > widget->Rect.w)
+                {
+                    w=SDL_FontGetStringWidth(Edit->Font,caption);
+                    caption++;
+                }
+                SDL_FontDrawStringRect(dest,Edit->Font,caption,&StringPos);
+
+                if(SDL_WidgetHasFocus(widget))
+                {
+                    StringWidth = SDL_FontGetStringWidth(Edit->Font,caption);
+                    if(StringWidth > widget->Rect.w)
+                        cursor.x = widget->Rect.x + widget->Rect.w - 4;
+                    else
+                        cursor.x = widget->Rect.x + SDL_FontGetStringWidth(Edit->Font,caption)+3;
+                    cursor.y = StringPos.y;
+                    cursor.w = 1;
+                    cursor.h = SDL_FontGetHeight(Edit->Font);
+                    
+                    SDL_DrawLine(dest,cursor.x,cursor.y,cursor.x,cursor.y+cursor.h,0x000007ff);
+                }
+
+                /* Draw the part behind the cursor */
+                size2=strlen(Edit->Caption) - size;
+                if(size2 > 0)
+                {
+                    memset(tmp,0,255);
+                    strncpy(tmp,Edit->Caption+size,size2);
+                    StringPos.x = cursor.x + 1;
+                    SDL_FontDrawStringRect(dest,Edit->Font,tmp,&StringPos);
+                }
+            }
+
+        }
     }
     
-    /* draw cursor */
-    
-    if(SDL_WidgetHasFocus(widget))
-    {
-        StringWidth = SDL_FontGetStringWidth(Edit->Font,Edit->Caption);
-        if(StringWidth > widget->Rect.w)
-            cursor.x = widget->Rect.x + widget->Rect.w - 2;
-        else
-            cursor.x = widget->Rect.x + SDL_FontGetStringWidth(Edit->Font,Edit->Caption)+2;
-        cursor.y = StringPos.y;
-        cursor.w = 1;
-        cursor.h = SDL_FontGetHeight(Edit->Font);
-        SDL_FillRect(dest,&cursor,0x000007);
-    }
-    
+   
 }
 
 int SDL_EditProperties(SDL_Widget *widget,int feature,va_list list)
@@ -155,115 +181,108 @@ int SDL_EditProperties(SDL_Widget *widget,int feature,va_list list)
     case SET_BG_COLOR:
         Edit->bgcolor = va_arg(list,Uint32);
         break;
-    case SET_CALLBACK:
-    {
-        int event=va_arg(list,int);
-        void *p    = va_arg(list,void*);
-        void *data = va_arg(list,void*);
-        SDL_EditSetCallback(widget,event,p,data);
-        break;
-    }
-    case GET_CAPTION:
-        sprintf(va_arg(list,char*),"%s",Edit->Caption);
-        break;
     }
     return 1;
 }
 
-int SDL_EditEventHandler(SDL_Widget *widget,SDL_Event *event)
+void SDL_EditKeyDownCB(SDL_Widget *widget,SDL_Event *event)
 {
-    int retval = 0;
     SDL_Edit *Edit=(SDL_Edit*)widget;
-    char key;
+    SDLMod mod;
+    int key;
 
     if(!SDL_WidgetHasFocus(widget))
-        return 0;
-    
-    switch(event->type) 
-    {
-    case SDL_KEYDOWN:
-        switch( event->key.keysym.sym ) 
-        {
-        case SDLK_BACKSPACE:
-            Edit->Caption[strlen(Edit->Caption)-1]='\0';
-            if(Edit->AnyKeyPressCallback)
-                Edit->AnyKeyPressCallback(Edit->AnyKeyData);
+        return;
 
-            break;
-        case SDLK_ESCAPE:
-//            SDL_WidgetLoseFocus();
-//            retval=1;
-            break;
-        case SDLK_LSHIFT:
-        case SDLK_RSHIFT:
-            Edit->Shift=1;
-            break;
-        case SDLK_RETURN:
-            if(Edit->ReturnPressCallback)
-                Edit->ReturnPressCallback(Edit->ReturnKeyData);
-            
-            retval=1;
-            SDL_WidgetLoseFocus();
-            break;
-        default:
-            key=event->key.keysym.sym;
-            if(Edit->Shift)
+    mod = SDL_GetModState();
+
+    switch(event->key.keysym.sym)
+    {
+        case SDLK_DELETE:
             {
-                if(key>=SDLK_a && key <= SDLK_z)
+                if(Edit->CursorPosition >= 0)
                 {
-                    retval = 1;
-                    key -= 32;
-                }
-                if(key == SDLK_SEMICOLON)
-                {
-                    key=SDLK_COLON;
+                    strcpy(Edit->Caption+Edit->CursorPosition,Edit->Caption+Edit->CursorPosition+1);
+                    SDL_WidgetDraw(widget,&widget->Rect);
+                    SDL_SignalEmit(widget,"changed");
                 }
             }
-            sprintf(Edit->Caption,"%s%c",Edit->Caption,key);
-            if(Edit->AnyKeyPressCallback)
-                Edit->AnyKeyPressCallback();
             break;
-        }
-        break;
-    case SDL_KEYUP:
-        switch( event->key.keysym.sym ) 
-        {
-        case SDLK_LSHIFT:
-        case SDLK_RSHIFT:
-            Edit->Shift=0;
+        case SDLK_BACKSPACE:
+            {
+                if(Edit->CursorPosition > 0)
+                {
+                    Edit->CursorPosition--;
+                    strcpy(Edit->Caption+Edit->CursorPosition,Edit->Caption+Edit->CursorPosition+1);
+                    SDL_WidgetDraw(widget,&widget->Rect);
+                    SDL_SignalEmit(widget,"changed");
+                }
+            }
             break;
-        default:
+        case SDLK_HOME:
+            Edit->CursorPosition = 0; 
+            SDL_WidgetDraw(widget,&widget->Rect);
             break;
-        }
-        break;
-        
+        case SDLK_END:
+            Edit->CursorPosition = strlen(Edit->Caption)+1; 
+            SDL_WidgetDraw(widget,&widget->Rect);
+            break;
+         case SDLK_LEFT:
+             if(Edit->CursorPosition > 0)
+                Edit->CursorPosition--;
+             SDL_WidgetDraw(widget,&widget->Rect);
+             break;
+         case SDLK_RIGHT:
+             if(Edit->CursorPosition < strlen(Edit->Caption))
+                Edit->CursorPosition++;
+             SDL_WidgetDraw(widget,&widget->Rect);
+             break;
+         case SDLK_RETURN:
+             SDL_SignalEmit(widget,"activate");
+             break;
+         default:
+            key=event->key.keysym.sym;
+            if ((key >= 0x20) && (key <= 0xFF))
+            {
+                if(mod & KMOD_SHIFT)
+                {
+                    if(key>=SDLK_a && key <= SDLK_z)
+                    {
+                        key -= 32;
+                    }
+                    if(key == SDLK_SEMICOLON)
+                    {
+                        key=SDLK_COLON;
+                    }
+                }
+                {   
+                    char tmp[255];
+                    memset(tmp,0,255);
+                    sprintf(tmp,"%c%s",key,Edit->Caption+Edit->CursorPosition);
+                    Edit->Caption[Edit->CursorPosition+1]=0;
+                    sprintf(Edit->Caption,"%s%s",Edit->Caption,tmp);
+                }
+                Edit->CursorPosition++;
+                SDL_WidgetDraw(widget,&widget->Rect);
+                SDL_SignalEmit(widget,"changed");
+            }
+            break;
     }
-    return retval;
 }
 
-static void SDL_EditSetCallback(SDL_Widget *widget,int event,void *function,void *data)
+
+
+
+char *SDL_EditGetText(SDL_Widget *widget)
 {
     SDL_Edit *Edit=(SDL_Edit*)widget;
-
-    if(event ==  SDL_KEYDOWN_RETURN)
-    {
-        Edit->ReturnPressCallback = function;
-        Edit->ReturnKeyData = data;
-    }
-    else if(event == SDL_KEYDOWN_ANY)
-    {
-        Edit->AnyKeyPressCallback=function;
-        Edit->AnyKeyData = data;
-    }
-
+    return Edit->Caption;
 }
 
-void SDL_EditCallback(SDL_Widget *widget,int event)
+void SDL_EditSetText(SDL_Widget *widget,const char *text)
 {
     SDL_Edit *Edit=(SDL_Edit*)widget;
-    if(event ==  SDL_KEYDOWN_RETURN)
-    {
-        Edit->ReturnPressCallback(NULL);
-    }
-}
+    strcpy(Edit->Caption,text);
+    Edit->CursorPosition=strlen(Edit->Caption)+1;
 
+}

@@ -102,7 +102,7 @@ int fastPixelColorNolockNoclip(SDL_Surface * dst, Sint16 x, Sint16 y, Uint32 col
 	}
 	break;
     case 4:
-	*(Uint32 *) p = color;
+ 	*(Uint32 *) p = color;
 	break;
     }				/* switch */
 
@@ -1436,7 +1436,7 @@ int boxRGBA(SDL_Surface * dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8
 
 #define ABS(a) (((a)<0) ? -(a) : (a))
 
-int lineColor(SDL_Surface * dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint32 color)
+int SDL_DrawLine(SDL_Surface * dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint32 color)
 {
     int pixx, pixy;
     int x, y;
@@ -1635,7 +1635,7 @@ int lineRGBA(SDL_Surface * dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint
     /*
      * Draw 
      */
-    return (lineColor(dst, x1, y1, x2, y2, ((Uint32) r << 24) | ((Uint32) g << 16) | ((Uint32) b << 8) | (Uint32) a));
+    return (SDL_DrawLine(dst, x1, y1, x2, y2, ((Uint32) r << 24) | ((Uint32) g << 16) | ((Uint32) b << 8) | (Uint32) a));
 }
 
 /* AA Line */
@@ -1720,7 +1720,7 @@ int aalineColorInt(SDL_Surface * dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2
 	/*
 	 * Diagonal line 
 	 */
-	return (lineColor(dst, x1, y1, x2, y2, color));
+	return (SDL_DrawLine(dst, x1, y1, x2, y2, color));
     }
 
     /*
@@ -3024,7 +3024,7 @@ int filledpieColor(SDL_Surface * dst, Sint16 x, Sint16 y, Sint16 rad, Sint16 sta
     } else if (numpoints == 2) {
 	posX = x + (int) (dr * cos(start_angle));
 	posY = y + (int) (dr * sin(start_angle));
-	return (lineColor(dst, x, y, posX, posY, color));
+	return (SDL_DrawLine(dst, x, y, posX, posY, color));
     }
 
     /* Allocate vertex array */
@@ -3193,13 +3193,13 @@ int polygonColor(SDL_Surface * dst, Sint16 * vx, Sint16 * vy, int n, Uint32 colo
      */
     result = 0;
     for (i = 1; i < n; i++) {
-	result |= lineColor(dst, *x1, *y1, *x2, *y2, color);
+	result |= SDL_DrawLine(dst, *x1, *y1, *x2, *y2, color);
 	x1 = x2;
 	y1 = y2;
 	x2++;
 	y2++;
     }
-    result |= lineColor(dst, *x1, *y1, *vx, *vy, color);
+    result |= SDL_DrawLine(dst, *x1, *y1, *vx, *vy, color);
 
     return (result);
 }
@@ -3472,7 +3472,7 @@ int bezierColor(SDL_Surface * dst, Sint16 * vx, Sint16 * vy, int n, int s, Uint3
 	t += stepsize;
 	x2=(Sint16)evaluateBezier(x,n,t);
 	y2=(Sint16)evaluateBezier(y,n,t);
-	result |= lineColor(dst, x1, y1, x2, y2, color);
+	result |= SDL_DrawLine(dst, x1, y1, x2, y2, color);
 	x1 = x2;
 	y1 = y2;
     }

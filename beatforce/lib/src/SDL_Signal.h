@@ -1,8 +1,7 @@
 /*
-  Beatforce/SDLTk
+  Beatforce/ SDLTk
 
-  one line to give the program's name and an idea of what it does.
-  Copyright (C) 2004 John Beuving (john.beuving@wanadoo.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -19,24 +18,30 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef __SDLTK_H__
-#define __SDLTK_H__
+#ifndef __SDL_SIGNAL_H__
+#define __SDL_SIGNAL_H__
 
 #include "SDL_Widget.h"
-#include "SDL_Window.h"
 
-#include "SDL_Button.h"
-#include "SDL_Label.h"
-#include "SDL_Panel.h"
-#include "SDL_ProgressBar.h"
-#include "SDL_Slider.h"
-#include "SDL_Signal.h"
-#include "SDL_Tab.h"
-#include "SDL_Table.h"
-#include "SDL_Tree.h"
-#include "SDL_VolumeBar.h"
+typedef struct CallbackList
+{
+    SDL_Widget *Widget;
+    void *callback;
+    void *data;
+    struct CallbackList *Next;
+}CallbackList;
 
-#endif /* __SDLTK_H__ */
+typedef struct SignalList
+{
+    char *Signal;
+    int Type;
+    struct CallbackList *CallList;
+    struct SignalList   *Next;
+}SignalList;
 
+void SDL_SignalNew(char *signal,int type);
+void SDL_SignalInit();
+int SDL_SignalConnect(SDL_Widget *widget,char *signal,void *callback,void *data);
+int SDL_SignalEmit(SDL_Widget *widget,char *signal,...);
 
-
+#endif /* __SDL_SIGNAL_H__ */

@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003 John Beuving (john.beuving@home.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -27,6 +27,7 @@
 #include "SDL_Window.h"
 #include "SDL_WidTool.h"
 #include "SDL_Panel.h"
+#include "SDL_Signal.h"
 
 T_Widget_EventHandler user_eventhandler;
 int StackLock;
@@ -53,6 +54,28 @@ int SDL_WidgetInit()
 {
     target_surface = NULL;
     StackLock = 0;
+    SDL_SignalInit();
+    
+
+    /* Widget */
+    SDL_SignalNew("mousebuttondown",1);
+    SDL_SignalNew("mousemotion",1);
+    SDL_SignalNew("keydown",1);
+    SDL_SignalNew("hide",0);
+    SDL_SignalNew("show",0);
+    /* Button */
+    SDL_SignalNew("clicked",0); 
+    /* Tab */
+    SDL_SignalNew("switch-tab",0);
+    /* Table */
+    SDL_SignalNew("select-row",0);
+    SDL_SignalNew("edited",0);
+    /* Slider */
+    SDL_SignalNew("value-changed",0);
+    /* Edit */
+    SDL_SignalNew("changed",0);
+    SDL_SignalNew("activate",0);
+
     MyMutex=SDL_CreateMutex();
     return 1;
 }
@@ -107,16 +130,16 @@ SDL_Widget* SDL_WidgetCreateR(E_Widget_Type WidgetType,SDL_Rect dest)
     if(WidgetTable[WidgetType])
     {
         create=WidgetTable[WidgetType]->create;
-        
-        NewWidget=create(&dest);
+        if(create)
+        {
+            NewWidget=create(&dest);
 
-        SDL_StoreWidget(NewWidget);
-        return NewWidget;
+            NewWidget->Visible = 1;
+            SDL_StoreWidget(NewWidget);
+            return NewWidget;
+        }
     }
-    else
-    {
-        return NULL;
-    }
+    return NULL;
 }
 
 int SDL_WidgetPropertiesOf(SDL_Widget *widget,int feature,...)
@@ -130,7 +153,10 @@ int SDL_WidgetPropertiesOf(SDL_Widget *widget,int feature,...)
     if(widget)
     {
         properties=WidgetTable[widget->Type]->properties;
-        retval=properties(widget,feature,ap);
+        if(properties)
+        {
+            retval=properties(widget,feature,ap);
+        }
     }
     else
     {
@@ -142,16 +168,16 @@ int SDL_WidgetPropertiesOf(SDL_Widget *widget,int feature,...)
 /*
  * Closes the widget
  */
-int SDL_WidgetClose(void *widget)
+int SDL_WidgetClose(SDL_Widget *Widget)
 {
     SDL_WidgetList *current_widget,*prev;
-    return 0;
+
     current_widget=SDL_StackGetStack(NULL);
     prev=NULL;
 
     while(current_widget)
     {
-        if(current_widget->Widget == widget)
+        if(current_widget->Widget == Widget)
         {
             prev->Next = current_widget->Next;
             break;
@@ -159,8 +185,6 @@ int SDL_WidgetClose(void *widget)
         prev=current_widget;
         current_widget=current_widget->Next;
     }
-    
-
     return 1;
 }
 
@@ -214,14 +238,17 @@ int SDL_DrawAllWidgets(SDL_Surface *screen)
     while(WidgetList)
     {
         Widget=(SDL_Widget*)WidgetList->Widget;
-        draw=WidgetTable[Widget->Type]->draw;
-        draw(Widget,screen,NULL);
+        if(Widget->Visible)
+        {
+            draw=WidgetTable[Widget->Type]->draw;
+            draw(Widget,screen,NULL);
+        }
         WidgetList=WidgetList->Next;
     }
     
     
-    SDL_Flip(screen);
-//    SDL_UpdateRect(screen,0,0,0,0);                
+    
+    SDL_UpdateRect(screen,0,0,0,0);                
     SDL_mutexV(MyMutex);
 
 
@@ -238,107 +265,31 @@ int SDL_DrawAllWidgets(SDL_Surface *screen)
     return 1;
 }
 
-int SDL_WidgetEvent(SDL_Event *event)
+int SDL_WidgetEvent(SDL_Widget *widget,SDL_Event *event)
 {
-    int retval =0;
-    T_Widget_EventHandler eh;
-    SDL_WidgetList* WidgetList;
-    SDL_WidgetList* focus_widget=NULL;
+   switch(event->type)
+   {
+   case SDL_KEYDOWN:
+       SDL_SignalEmit(widget,"keydown",event);
+       break;
+   case SDL_KEYUP:
+       SDL_SignalEmit(widget,"keyup",event);
+       break;
+   case SDL_MOUSEMOTION:
+       SDL_SignalEmit(widget,"mousemotion",event);
+       break;
+   case SDL_MOUSEBUTTONDOWN:
+       SDL_SignalEmit(widget,"mousebuttondown",event);
+       break;
+   case SDL_MOUSEBUTTONUP:
+       SDL_SignalEmit(widget,"mousebuttonup",event);
+       break;
+   default:
+       break;
+   }
+ 
 
-    switch(event->type)
-    {
-
-    case SDL_MOUSEBUTTONDOWN:
-    {
-        focus_widget=SDL_StackGetStack(NULL);
-        
-        while(focus_widget)
-        {
-            SDL_Widget *w=(SDL_Widget*)focus_widget->Widget;
-            if(SDL_WidgetIsInside(w,event->motion.x,event->motion.y))
-            {
-                if(focus_widget->Widget->Focusable)
-                {
-                    SDL_StackSetFocus(focus_widget->Widget);
-                }
-                // Bug found when there are overlapping widgets the focus is set to the wrong widget
-//                break;
-            }
-            focus_widget=focus_widget->Next;
-        }
-
-    }   
-    break;
-
-    case SDL_KEYDOWN:
-        switch( event->key.keysym.sym ) 
-        {
-        case SDLK_TAB:
-        {
-            SDL_Widget     *FocusWidget;
-            SDL_WidgetList *WidgetList;
-            SDL_Widget     *FirstFocusWidget=NULL;
-            int store=0;
-
-            WidgetList=SDL_StackGetStack(NULL);
-            FocusWidget=SDL_StackGetFocus();
-            
-            while(WidgetList)
-            {
-                if(FocusWidget == NULL)
-                {
-                    if(WidgetList->Widget->Focusable)
-                    {
-                        SDL_StackSetFocus(WidgetList->Widget);
-                        break;
-                    }
-                }
-                else
-                {
-                    if(WidgetList->Widget->Focusable && FirstFocusWidget == NULL)
-                        FirstFocusWidget=WidgetList->Widget;
-
-                    if(store && WidgetList->Widget->Focusable)
-                    {
-                        SDL_StackSetFocus(WidgetList->Widget);
-                        break;
-                    }
-                    if(WidgetList->Widget == FocusWidget)
-                        store=1;
-
-                }
-                WidgetList = WidgetList->Next;
-            
-            }
-            if(WidgetList == NULL)
-                SDL_StackSetFocus(FirstFocusWidget);
-            
-        }   
-        break;
-        default:
-            break;
-        }
-        break;
-        
-    }
-
-    WidgetList=SDL_StackGetStack(NULL);
-
-    while(WidgetList)
-    {
-        SDL_Widget *Widget=(SDL_Widget*)WidgetList->Widget;
-        eh = WidgetTable[Widget->Type]->eventhandler;
-        if(eh)
-        {
-            if(eh(Widget,event))
-            {
-                retval=1;
-            }
-        }
-        WidgetList=WidgetList->Next;
-    }
-
-    return retval;
+    return 0;
 }
 
 int SDL_WidgetSetFocus(SDL_Widget *widget)
@@ -368,10 +319,46 @@ void SDL_WidgetRedrawEvent(SDL_Widget *widget)
 {
     SDL_Event event;
     
+    if(widget == NULL)
+        return;
+
     event.type = SDL_USEREVENT;
     event.user.code = 0;
     event.user.data1 = widget;
     event.user.data2 = 0;
     SDL_PushEvent(&event);
 }
+
+void SDL_WidgetHide(SDL_Widget *widget)
+{
+    SDL_Event event;
+    
+    if(widget == NULL)
+        return;
+
+    event.type = SDL_USEREVENT;
+    event.user.code = 1;
+    event.user.data1 = widget;
+    event.user.data2 = 0;
+    SDL_PushEvent(&event);
+    SDL_SignalEmit(widget,"hide");
+}
+
+
+void SDL_WidgetShow(SDL_Widget *widget)
+{
+    SDL_Event event;
+    
+    if(widget == NULL)
+        return;
+    
+    event.type = SDL_USEREVENT;
+    event.user.code = 2;
+    event.user.data1 = widget;
+    event.user.data2 = 0;
+    SDL_PushEvent(&event);
+    SDL_SignalEmit(widget,"show");
+}
+
+
 

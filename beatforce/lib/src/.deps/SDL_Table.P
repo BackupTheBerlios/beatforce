@@ -23,7 +23,7 @@ SDL_Table.o: SDL_Table.c \
  /usr/include/SDL/SDL_video.h /usr/include/SDL/SDL_mutex.h \
  /usr/include/SDL/SDL_quit.h /usr/include/SDL/SDL_version.h \
  SDL_Widget.h /usr/include/SDL/SDL_image.h SDL_Table.h SDL_Font.h \
- SDL_Edit.h SDL_Slider.h SDL_WidTool.h
+ SDL_Edit.h SDL_Scrollbar.h SDL_WidTool.h SDL_Signal.h
 SDL_Table.c :
 /usr/lib/gcc-lib/i386-linux/2.95.4/include/stdarg.h :
 /usr/include/malloc.h :
@@ -75,5 +75,6 @@ SDL_Widget.h :
 SDL_Table.h :
 SDL_Font.h :
 SDL_Edit.h :
-SDL_Slider.h :
+SDL_Scrollbar.h :
 SDL_WidTool.h :
+SDL_Signal.h :

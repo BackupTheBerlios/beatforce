@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003 John Beuving (john.beuving@home.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -26,6 +26,8 @@
 #include "SDL_Widget.h"
 #include "SDL_WidTool.h"
 #include "SDL_Tab.h"
+#include "SDL_Primitives.h"
+#include "SDL_Signal.h"
 
 #define TAB_DEFAULTHEIGHT    16
 #define TAB_LINE_WIDTH       1
@@ -35,8 +37,8 @@
 /* Prototypes for local tab functions */
 
 static void Tab_AddArrows(SDL_Tab *tab);
-static void Tab_AddTab(SDL_Tab *tab,char *string);
-static int  Tab_RemoveTab(SDL_Tab *tab);
+
+
 static void Tab_Recalculate(SDL_Tab *tab);
 static int  Tab_DrawTabWithCaption(SDL_Surface *dest,SDL_Tab *tab,
                                    SDL_TabList * tl, int high);
@@ -50,6 +52,9 @@ void Tab_EditReturnKeyPressed();
 void Tab_ArrowLeftPressed(void *data);
 void Tab_ArrowRightPressed(void *data);
 
+/* signal handler prototype */
+void SDL_TabMouseButtonDownCB(SDL_Widget *widget,SDL_Event *event);
+
 extern void DrawPixel(SDL_Surface *screen, int x, int y,unsigned int color2);
 
 const struct S_Widget_FunctionList SDL_Tab_FunctionList =
@@ -57,7 +62,7 @@ const struct S_Widget_FunctionList SDL_Tab_FunctionList =
     SDL_TabCreate,
     SDL_TabDraw,
     SDL_TabProperties,
-    SDL_TabEventHandler,
+    NULL,
     NULL
 };
 
@@ -80,7 +85,6 @@ SDL_Widget *SDL_TabCreate(SDL_Rect *rect)
     newtab->min_width  = 35;
     newtab->min_height = TAB_DEFAULTHEIGHT;
     newtab->tabs  = NULL;
-    newtab->next  = NULL;
     newtab->hl    = NULL;
     newtab->bgcolor     = 0xff0000;
     newtab->fgcolor     = WHITE;
@@ -93,8 +97,11 @@ SDL_Widget *SDL_TabCreate(SDL_Rect *rect)
     newtab->edit        = NULL;
     newtab->ArrowLeft   = NULL;
     newtab->ArrowRight  = NULL;
-    newtab->OnClicked   = NULL;
-    newtab->OnReturn    = NULL;
+
+
+    SDL_SignalConnect(Widget,"mousebuttondown",SDL_TabMouseButtonDownCB,newtab);
+
+    newtab->font        = &DefaultFont;
     return (SDL_Widget*)newtab;
 
 }
@@ -104,9 +111,10 @@ void SDL_TabDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
     SDL_Tab     *Tab=(SDL_Tab*)widget;
     SDL_TabList *tablist;
 
+
     if(Tab->tabs==NULL)
     {
-        SDL_FillRect(dest, &widget->Rect,Tab->bgcolor);
+        //SDL_FillRect(dest, &widget->Rect,Tab->bgcolor);
         return;
     }
     else
@@ -116,7 +124,13 @@ void SDL_TabDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
 
   
     Tab_Recalculate(Tab); /* we can only run this with a valid surface */
-    SDL_FillRect(dest,&widget->Rect,0x222222);        
+
+    rectangleColor(dest,widget->Rect.x,widget->Rect.y,
+                        widget->Rect.x+widget->Rect.w,
+                        widget->Rect.y+widget->Rect.h - Tab->tabs->rect->h -1,
+                        0x000000ff);
+
+    //SDL_FillRect(dest,&widget->Rect,0x222222);        
     while(tablist)
     {
         Tab_DrawTabWithCaption(dest,Tab,tablist,0);
@@ -141,14 +155,6 @@ int SDL_TabProperties(SDL_Widget *widget,int feature,va_list list)
         Tab->font=va_arg(list,SDL_Font*);
         break;
 
-    case TAB_ADD:
-        Tab_AddTab(Tab,va_arg(list,char*));
-        break;
-
-    case TAB_REMOVE:
-        retval=Tab_RemoveTab(Tab);
-        break;
-
     case SET_BG_COLOR:
         Tab->bgcolor = va_arg(list,Uint32);
         break;
@@ -156,19 +162,6 @@ int SDL_TabProperties(SDL_Widget *widget,int feature,va_list list)
     case SET_FG_COLOR:
         Tab->fgcolor = va_arg(list,Uint32);
         break;
-
-    case SET_CALLBACK:
-        {
-            int why=va_arg(list,int);
-            if(why==SDL_CLICKED)
-                Tab->OnClicked = va_arg(list,void*);
-            else if(why == SDL_KEYDOWN_RETURN)
-            {
-                //for the edit/rename widget
-                Tab->OnReturn = va_arg(list,void*);
-            }
-            break;
-        }
 
     case SET_CAPTION:
     {
@@ -183,60 +176,59 @@ int SDL_TabProperties(SDL_Widget *widget,int feature,va_list list)
     return retval;
 }
 
-int SDL_TabEventHandler(SDL_Widget* widget,SDL_Event *event)
+void SDL_TabMouseButtonDownCB(SDL_Widget *widget,SDL_Event *event)
 {
     SDL_Tab *Tab=(SDL_Tab*)widget;
     SDL_TabList *tl = Tab->tabs;
 
-    switch(event->type)
+    if(SDL_WidgetIsInside(widget,event->motion.x,event->motion.y))
     {
-    case SDL_MOUSEMOTION:
-        break;
-    case SDL_MOUSEBUTTONDOWN:
-        if(SDL_WidgetIsInside(widget,event->motion.x,event->motion.y))
+        if(event->button.button == 1)
         {
-            if(event->button.button == 1)
-            {
-                /* Don't handle events when clicked on one of the arrows */
-                if(Tab->ArrowLeft && SDL_WidgetIsInside(Tab->ArrowLeft,event->motion.x,event->motion.y))
-                    return 0;
-            
-                if(Tab->ArrowRight && SDL_WidgetIsInside(Tab->ArrowRight,event->motion.x,event->motion.y))
-                    return 0;
+            if(tl == NULL)
+                return;
 
-                while(tl && event->motion.x > (tl->rect->x + widget->Rect.x - Tab->startx) && 
-                      event->motion.x > (widget->Rect.x + tl->rect->x + tl->rect->w - Tab->startx))
+            /* Dont process the event when clicked above the tabs */
+            if(event->motion.y < widget->Rect.y + widget->Rect.h - tl->rect->h)
+                return;
+
+            /* Don't handle events when clicked on one of the arrows */
+            if(Tab->ArrowLeft && SDL_WidgetIsInside(Tab->ArrowLeft,event->motion.x,event->motion.y))
+                return;
+            
+            if(Tab->ArrowRight && SDL_WidgetIsInside(Tab->ArrowRight,event->motion.x,event->motion.y))
+                return;
+
+              
+            while(tl && event->motion.x > (tl->rect->x + widget->Rect.x - Tab->startx) && 
+                    event->motion.x > (widget->Rect.x + tl->rect->x + tl->rect->w - Tab->startx))
                     tl=tl->next;
 
-                if(tl)
-                {   
-                    Tab->hl=tl;
-    
-                    if(Tab->OnClicked)
-                    {
-                        Tab->OnClicked(NULL);
-                    }
-                }
+            if(tl && tl != Tab->hl)
+            {   
+                SDL_WidgetHide(Tab->hl->Child);
+                SDL_WidgetShow(tl->Child);
+                Tab->hl=tl;
+                    
+                SDL_SignalEmit(widget,"switch-tab");
+                SDL_WidgetDraw(widget,&widget->Rect);
             }
-            if(event->button.button == 4)
-            {
-                if(Tab->doesntfit)
-                    Tab->startx+=5;
-            }
-            if(event->button.button == 5)
-            {
-                if(Tab->doesntfit)
-                    Tab->startx-=5;
-            }
-            
         }
-    case SDL_MOUSEBUTTONUP:
-        break;
-    default:
-        break;
+        if(event->button.button == 4)
+        {
+            if(Tab->doesntfit)
+                Tab->startx+=5;
+        }
+        if(event->button.button == 5)
+        {
+            if(Tab->doesntfit)
+                Tab->startx-=5;
+        }
+            
     }
-    return 0;
 }
+
+
 
 void Tab_AddArrows(SDL_Tab *tab)
 {
@@ -251,8 +243,8 @@ void Tab_AddArrows(SDL_Tab *tab)
 
     tab->ArrowLeft=SDL_WidgetCreate(SDL_BUTTON,LeftArrow.x,LeftArrow.y,
                                     LeftArrow.w,LeftArrow.h);
-    SDL_WidgetPropertiesOf(tab->ArrowLeft,SET_CALLBACK,SDL_CLICKED,Tab_ArrowLeftPressed, tab);
-
+    SDL_SignalConnect(tab->ArrowLeft,"clicked",Tab_ArrowLeftPressed,tab);
+    
     RightArrow.x = widget->Rect.x + widget->Rect.w - widget->Rect.h - 2;
     RightArrow.y = widget->Rect.y + 1;
     RightArrow.w = widget->Rect.h - 2;
@@ -260,65 +252,11 @@ void Tab_AddArrows(SDL_Tab *tab)
 
     tab->ArrowRight=SDL_WidgetCreate(SDL_BUTTON,RightArrow.x,RightArrow.y,
                                      RightArrow.w,RightArrow.h);
-    SDL_WidgetPropertiesOf(tab->ArrowRight,SET_CALLBACK,SDL_CLICKED,Tab_ArrowRightPressed, tab);
+    SDL_SignalConnect(tab->ArrowRight,"clicked",Tab_ArrowRightPressed,tab);
     
 }
 
-static void Tab_AddTab(SDL_Tab *tab,char *caption)
-{
-    SDL_Widget *widget=(SDL_Widget*)tab;
-    SDL_TabList *l;
 
-    if(tab->tabs == NULL)
-    { 
-        tab->tabs   = (SDL_TabList*)malloc(sizeof(SDL_TabList));
-        tab->tabs->rect= (SDL_Rect *)malloc(sizeof(SDL_Rect));
-        if(caption)
-        {
-            tab->tabs->caption = strdup(caption);
-        }
-        else
-        {
-            tab->tabs->caption = malloc(255 * sizeof(char));
-            memset(tab->tabs->caption,0,255);
-        }
-        tab->NoOfTabs=0;
-        tab->hl=tab->tabs;
-        tab->tabs->draw    = 1;
-        tab->tabs->rect->x = 0;
-        tab->tabs->rect->y = 0;
-        tab->tabs->rect->h = widget->Rect.h;
-        tab->tabs->rect->w = 0;
-        tab->tabs->next = NULL;
-        tab->tabs->prev = NULL;
-        tab->tabs->index = tab->NoOfTabs;
-    }
-    else
-    {
-          
-        l=tab->tabs;
-
-        while(l->next)
-        {
-            l=l->next;
-        }
-        l->next= (SDL_TabList*) malloc(sizeof(SDL_TabList));
-        if(caption)
-            l->next->caption = strdup(caption);
-        else
-            l->next->caption = NULL;
-        l->next->rect = (SDL_Rect*)malloc(sizeof(SDL_Rect));
-        l->next->rect->y = 0;
-        l->next->rect->h = widget->Rect.h;
-        l->next->rect->x = 0;
-        l->next->rect->w = 0;
-        l->next->index = tab->NoOfTabs;
-        l->next->next = NULL;
-        l->next->prev = l;
-        
-    }
-    tab->NoOfTabs++;
-}
 
 static int Tab_DrawSlope(SDL_Surface *dest,SDL_Tab *tab,SDL_TabList * tl, int high,int left)
 {
@@ -465,7 +403,7 @@ static void Tab_Recalculate(SDL_Tab *tab)
     {
         width = 0;
         /*just take a value of 10 for additional space */
-        if(tablist->caption)
+        if(tablist->caption && tab->font)
             width = SDL_FontGetStringWidth(tab->font,tablist->caption) + 2;
         if(width < 35)
             width = 35;
@@ -480,7 +418,7 @@ static void Tab_Recalculate(SDL_Tab *tab)
         {
             /* this is the first item in the tabtablist */
             tablist->rect->x = 10;
-            tablist->rect->y = 0;
+            tablist->rect->y = widget->Rect.h - tablist->rect->h - 1;
         }
         else
         {
@@ -505,43 +443,6 @@ static void Tab_Recalculate(SDL_Tab *tab)
         tab->startx = 0;
 }
 
-static int Tab_RemoveTab(SDL_Tab *tab)
-{
-    SDL_TabList *remove;
-
-    if(tab->NoOfTabs > 0)
-    {
-        if(tab->hl)
-            remove=tab->hl;    
-        else
-            return 0;
-
-        tab->hl=tab->hl->prev;        
-        
-            
-        if(remove->next)
-            remove->next->prev=remove->prev;
-        if(remove->prev)
-        {
-            remove->prev->next=remove->next;
-        }
-        else
-        {
-            tab->tabs=remove->next; /* move the root node */
-            tab->hl=tab->tabs;      /* highlight the first node */
-        }
-
-        if(remove->caption)
-            free(remove->caption);
-
-        free(remove->rect);
-        free(remove);
-        tab->NoOfTabs--; 
-        return 1;
-    }
-    return 0;
-}
-
 
 /*
  * Functions used for the edit widget when renaming a tab
@@ -552,23 +453,6 @@ void Tab_EditAnyKeyPressed(void *data)
 
 }
 
-void Tab_EditReturnKeyPressed(void *data)
-{
-    SDL_Tab *Tab=(SDL_Tab*)data;
-    char string[255];
-
-    SDL_WidgetPropertiesOf((SDL_Widget*)Tab->edit,GET_CAPTION,&string);
-
-    if(Tab->hl->caption == NULL)
-        Tab->hl->caption = strdup(string);
-
-    SDL_WidgetClose(Tab->edit);
-    Tab->edit=NULL;
-
-    if(Tab->OnReturn)
-        Tab->OnReturn();
-
-}
 
 void Tab_ArrowLeftPressed(void *data)
 {
@@ -582,4 +466,161 @@ void Tab_ArrowRightPressed(void *data)
 
     Tab->startx +=25;
 
+}
+
+int SDL_NotebookAppendTab(SDL_Widget *parent,SDL_Widget *child,char *caption)
+{
+    SDL_Tab *tab=(SDL_Tab*)parent;
+    SDL_TabList *l;
+
+    if(tab->tabs == NULL)
+    { 
+        tab->tabs   = (SDL_TabList*)malloc(sizeof(SDL_TabList));
+        tab->tabs->rect= (SDL_Rect *)malloc(sizeof(SDL_Rect));
+        if(caption)
+        {
+            tab->tabs->caption = strdup(caption);
+        }
+        else
+        {
+            tab->tabs->caption = malloc(255 * sizeof(char));
+            memset(tab->tabs->caption,0,255);
+        }
+        tab->NoOfTabs=0;
+        tab->hl=tab->tabs;
+        tab->tabs->draw    = 1;
+        tab->tabs->rect->x = 0;
+        tab->tabs->rect->y = 0;
+        tab->tabs->rect->h = parent->Rect.h;
+        tab->tabs->rect->w = 0;
+        tab->tabs->Child = child;
+        tab->tabs->next = NULL;
+        tab->tabs->prev = NULL;
+        tab->tabs->index = tab->NoOfTabs;
+        if(child)
+            child->Visible = 1;
+    }
+    else
+    {
+          
+        l=tab->tabs;
+
+        while(l->next)
+        {
+            l=l->next;
+        }
+        l->next= (SDL_TabList*) malloc(sizeof(SDL_TabList));
+        if(caption)
+            l->next->caption = strdup(caption);
+        else
+            l->next->caption = NULL;
+        l->next->rect = (SDL_Rect*)malloc(sizeof(SDL_Rect));
+        l->next->rect->y = 0;
+        l->next->rect->h = parent->Rect.h;
+        l->next->rect->x = 0;
+        l->next->rect->w = 0;
+        l->next->Child   = child;
+        l->next->index = tab->NoOfTabs;
+        l->next->next = NULL;
+        l->next->prev = l;
+        if(child)
+            child->Visible = 0;
+            
+    }
+    tab->NoOfTabs++;
+ 
+    return 1;
+}
+
+
+int SDL_NotebookRemoveTab(SDL_Widget *widget,int tabnr)
+{
+    SDL_Tab *tab=(SDL_Tab*)widget;
+    SDL_TabList *remove;
+
+    if(tab->NoOfTabs > 0 && tabnr < tab->NoOfTabs)
+    {
+        remove=tab->tabs;
+        if(tabnr == 0)
+        {
+            tab->tabs       = remove->next;
+            tab->tabs->prev = NULL;
+        }
+        else
+        {
+            while(tabnr--)
+            {
+                remove=remove->next;
+            }
+            remove->prev->next=remove->next;
+            remove->next->prev=remove->prev;
+
+        }
+        if(remove->caption)
+            free(remove->caption);
+
+        free(remove->rect);
+        free(remove);
+        tab->NoOfTabs--; 
+        SDL_WidgetRedrawEvent(widget);
+        return 1;
+    }
+    return 0;
+}
+
+int SDL_NotebookSetCurrentTab(SDL_Widget *widget,int tabnr)
+{
+    SDL_Tab *tab=(SDL_Tab*)widget;
+    SDL_TabList *page;
+
+    if(tab->NoOfTabs > 0 && tabnr < tab->NoOfTabs)
+    {
+        page=tab->tabs;
+        while(tabnr--)
+            page=page->next;
+
+        SDL_WidgetHide(tab->hl->Child);
+        SDL_WidgetShow(page->Child);
+        tab->hl=page;
+        SDL_WidgetRedrawEvent(widget);
+
+    }
+    return 1;
+
+}
+
+int SDL_NotebookGetCurrentPage(SDL_Widget *widget)
+{
+    SDL_Tab *tab=(SDL_Tab*)widget;
+    
+    return tab->hl->index;
+}
+
+SDL_Widget *SDL_NotebookGetChildWidget(SDL_Widget *widget)
+{
+    SDL_Tab *tab=(SDL_Tab*)widget;
+
+    return tab->hl->Child;
+}
+
+void SDL_NotebookClear(SDL_Widget *widget)
+{
+    SDL_Tab *Tab=(SDL_Tab*)widget;
+    SDL_TabList *page;
+    if(Tab->hl)
+    {
+        SDL_WidgetHide(Tab->hl->Child);
+        SDL_WidgetClose(Tab->hl->Child);
+    }
+    Tab->hl       = NULL;
+    
+    page=Tab->tabs;
+    while(page)
+    {
+        page->Child->Visible = 0;
+        page=page->next;
+    }
+
+    Tab->tabs     = NULL;
+    Tab->NoOfTabs = 0;
 }

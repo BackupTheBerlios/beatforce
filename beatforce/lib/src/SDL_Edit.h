@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003 John Beuving (john.beuving@home.nl)
+  Copyright (C) 2003 John Beuving (john.beuving@wanadoo.nl)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -30,14 +30,8 @@ typedef struct SDL_Edit
     SDL_Font   *Font;
 
     char    *Caption;
-    int      Shift;
 
-    void (*AnyKeyPressCallback)();
-    void *AnyKeyData;
-
-    void (*ReturnPressCallback)();
-    void *ReturnKeyData;
-
+    unsigned int CursorPosition;
     Uint32   fgcolor;
     Uint32   bgcolor;
 
@@ -48,7 +42,8 @@ typedef struct SDL_Edit
 SDL_Widget* SDL_EditCreate(SDL_Rect *rect);
 void        SDL_EditDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area);
 int         SDL_EditProperties(SDL_Widget *widget,int feature,va_list list);
-int         SDL_EditEventHandler(SDL_Widget *widget,SDL_Event *event);
 
+char *SDL_EditGetText(SDL_Widget *widget);
+void SDL_EditSetText(SDL_Widget *widget,const char *text);
 
 #endif /* __SDL_EDIT_H__ */

@@ -85,6 +85,6 @@ enum
     LARGE_STEP
 };
 
-
+double SDL_SliderGetCurrentValue(SDL_Widget *widget);
 
 #endif /* __SDL_SLIDER_H__ */

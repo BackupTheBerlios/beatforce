@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003 John Beuving (john.beuving@home.nl)
+  Copyright (C) 2003 John Beuving (john.beuving@wanadoo.nl)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -39,3 +39,5 @@ SDL_Widget*  SDL_PanelCreate(SDL_Rect *rect);
 void         SDL_PanelDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area);
 int          SDL_PanelProperties(SDL_Widget *widget,int feature,va_list list);
 
+
+void SDL_PanelSetImage(SDL_Widget *widget,SDL_Surface *image);

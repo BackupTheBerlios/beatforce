@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003 John Beuving (john.beuving@home.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -24,6 +24,7 @@
 #include "SDL_Widget.h"
 #include "SDL_WidTool.h"
 #include "SDL_ProgressBar.h"
+#include "SDL_Signal.h"
 
 
 /* Prototypes for Internal functions */
@@ -71,11 +72,7 @@ SDL_Widget* SDL_ProgressBarCreate(SDL_Rect* rect)
 
     /* Used for drawing */
     progressbar->CurrentLine   = 0;
-
-    /* Event callback SDL_CLICKED */
     progressbar->State         = PROGRESSBAR_NORMAL;
-    progressbar->OnClicked     = NULL;
-    progressbar->OnClickedData = NULL;
 
     return (SDL_Widget*)progressbar;
 }
@@ -120,7 +117,7 @@ int  SDL_ProgressBarProperties(SDL_Widget *widget,int feature,va_list list)
         val=va_arg(list,double);
         if(ProgressBar->State == PROGRESSBAR_DRAG)
             return 0;
-        ProgressBar->CurrentValue = val; 
+        ProgressBar->CurrentValue = (int)val; 
         if(ProgressBar->Orientation == VERTICAL)
         {
             ProgressBar->CurrentLine  = (val * widget->Rect.h) / 
@@ -133,26 +130,6 @@ int  SDL_ProgressBarProperties(SDL_Widget *widget,int feature,va_list list)
         }
         SDL_WidgetRedrawEvent(widget);
         break;
-    case SET_CALLBACK:
-    {
-        int event=va_arg(list,int);
-        if(event== SDL_CLICKED)
-        {
-            ProgressBar->OnClicked     = va_arg(list,void*);
-            ProgressBar->OnClickedData = va_arg(list,void*);
-        }
-        break;
-    }
-    case GET_CUR_VALUE:
-    {
-        double *value;
-        value=va_arg(list,double*);
-        if(value)
-        {
-            *value=ProgressBar->CurrentValue;
-        }
-    }
-    break;
     case GET_STATE:
     {
         int *value;
@@ -164,6 +141,7 @@ int  SDL_ProgressBarProperties(SDL_Widget *widget,int feature,va_list list)
         break;
     }
     default:
+        printf("%s%d\n",__FILE__,__LINE__);
         break;          
     
     }
@@ -185,6 +163,7 @@ int SDL_ProgressBarEventHandler(SDL_Widget *widget, SDL_Event *event)
                 ProgressBar->State=PROGRESSBAR_DRAG;
                 ProgressBar->CurrentLine = event->motion.x - widget->Rect.x;
                 ProgressBar_CurrentValue(ProgressBar);
+                SDL_WidgetDraw(widget,&widget->Rect);
             }
         }
         break;
@@ -195,6 +174,7 @@ int SDL_ProgressBarEventHandler(SDL_Widget *widget, SDL_Event *event)
             {
                 ProgressBar->CurrentLine = event->motion.x - widget->Rect.x;
                 ProgressBar_CurrentValue(ProgressBar);
+                SDL_WidgetDraw(widget,&widget->Rect);
             }
         }
         break;
@@ -206,15 +186,16 @@ int SDL_ProgressBarEventHandler(SDL_Widget *widget, SDL_Event *event)
             {
                 ProgressBar->CurrentLine = event->motion.y - widget->Rect.y;
                 ProgressBar_CurrentValue(ProgressBar);
+                SDL_WidgetDraw(widget,&widget->Rect);
             }
             else if(ProgressBar->Orientation == HORIZONTAL)
             {
                 ProgressBar->CurrentLine = event->motion.x - widget->Rect.x;
                 ProgressBar_CurrentValue(ProgressBar);
+                SDL_WidgetDraw(widget,&widget->Rect);
             }
             ProgressBar->State=PROGRESSBAR_NORMAL;
-            if(ProgressBar->OnClicked)
-                ProgressBar->OnClicked(ProgressBar->OnClickedData);
+            SDL_SignalEmit(widget,"clicked");
         }
         break;
     default:
@@ -275,5 +256,10 @@ static void ProgressBar_CurrentValue(SDL_ProgressBar * ProgressBar)
     ProgressBar->CurrentValue += ProgressBar->MinValue;
 }
 
+double SDL_ProgressBarGetCurrentValue(SDL_Widget *widget)
+{
+    SDL_ProgressBar *ProgressBar=(SDL_ProgressBar*)widget;
+    return ProgressBar->CurrentValue;
+}
 
 

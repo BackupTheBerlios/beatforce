@@ -28,17 +28,7 @@ extern "C" {
 #define SDL_GFXPRIMITIVES_MINOR	0
 #define SDL_GFXPRIMITIVES_MICRO	10
 
-/* ----- W32 DLL interface */
-
-#ifdef WIN32
-#ifdef BUILD_DLL
-#define DLLINTERFACE __declspec(dllexport)
-#else
-#define DLLINTERFACE __declspec(dllimport)
-#endif
-#else
 #define DLLINTERFACE
-#endif
 
 /* ----- Prototypes */
 
@@ -73,7 +63,7 @@ extern "C" {
 
 /* Line */
 
-    int lineColor(SDL_Surface * dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint32 color);
+    int SDL_DrawLine(SDL_Surface * dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint32 color);
     DLLINTERFACE int lineRGBA(SDL_Surface * dst, Sint16 x1, Sint16 y1,
 			      Sint16 x2, Sint16 y2, Uint8 r, Uint8 g, Uint8 b, Uint8 a);
 

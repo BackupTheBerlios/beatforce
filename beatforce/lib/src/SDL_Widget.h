@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003 John Beuving (john.beuving@home.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -43,27 +43,23 @@ typedef enum E_Widget_Properties
     SET_BG_COLOR,        // Uint32 eg 0xff0011
     SET_FG_COLOR,        // Uint32 eg 0xff0011
     SET_CAPTION,         // char * , sets the caption of the highlighted widget/subtab
-    SET_CALLBACK,        // sets a callback function for an event
     
-    
-//    BEFORE_DRAW_FUNCTION,   // This function is executed before the draw to set additional params
-    SET_DATA_RETREIVAL_FUNCTION,      // Function for retreiving data
+  
 
-    GET_CAPTION,         // char *, read the caption
+   // GET_CAPTION,         // char *, read the caption
     GET_WIDTH,           // int *
     GET_HEIGHT,          // int *
     GET_STATE,           // int *
     
 
-    SET_VISIBLE_ROWS,    // int table specific
+    //COLUMN_WIDTH,
     SET_VISIBLE_COLUMNS, // int 
 
-    COLUMN_WIDTH,        // int
     GET_SELECTED,         // void *
     CLEAR_SELECTED,
     SET_SELECTION_MODE,  // to enable selection
 
-    SET_PERCENTAGE,       // int, slider specific
+  
     SET_MAX_VALUE,      
     SET_MIN_VALUE,
     SET_CUR_VALUE,
@@ -71,29 +67,15 @@ typedef enum E_Widget_Properties
     SET_BUTTON_IMAGE,
     SET_NORMAL_STEP_SIZE,
     
-    GET_CUR_VALUE,       // float *
-
-    TAB_ADD,             ////cchar * with caption  tab specific can only be started with loaded font
-    TAB_REMOVE,
-    
+   
     SET_STATE_EDIT,
-    SET_VISIBLE,
+
     SET_HIGHLIGHTED,
     SET_IMAGE,
     
 }E_Widget_Properties;
 
 
-/*
- * Widget specific events, additional to SDL events 
- */
-typedef enum E_Widget_Event
-{
-    SDL_CLICKED,
-    SDL_KEYDOWN_RETURN,  /* SDL events: SDL_KEYDOWN with keysym SDLK_RETURN */
-    SDL_KEYDOWN_ANY,
-    SDL_CHANGED
-}E_Widget_Event;
 
 
 /*
@@ -102,16 +84,20 @@ typedef enum E_Widget_Event
 
 typedef enum E_Widget_Type
 {
-    SDL_BUTTON,             /* 0 */
-    SDL_TAB,                /* 1 */
-    SDL_TABLE,              /* 2 */
-    SDL_SLIDER,             /* 3 */
-    SDL_LABEL,              /* 4 */
-    SDL_EDIT,               /* 5 */
-    SDL_PANEL,              /* 6 */
-    SDL_VOLUMEBAR,          /* 7 */
-    SDL_PROGRESSBAR,        /* 8 */
-    SDL_TREE                /* 9 */
+    SDL_BUTTON,             /* 0  */
+    SDL_TAB,                /* 1  */
+    SDL_TABLE,              /* 2  */
+    SDL_SLIDER,             /* 3  */
+    SDL_LABEL,              /* 4  */
+    SDL_EDIT,               /* 5  */
+    SDL_PANEL,              /* 6  */
+    SDL_VOLUMEBAR,          /* 7  */
+    SDL_PROGRESSBAR,        /* 8  */
+    SDL_TREE,               /* 9  */
+    SDL_SCROLLBAR,          /* 10 */
+    SDL_MENU,               /* 11 */
+    SDL_TOGGLEBUTTON,       /* 12 */
+    SDL_TOOLTIP             /* 13 */
 }E_Widget_Type;
 
 typedef struct SDL_Widget
@@ -119,6 +105,8 @@ typedef struct SDL_Widget
     SDL_Rect      Rect;
     E_Widget_Type Type;
     int           Focusable;
+    int           Visible;
+    int           Inside;
 }SDL_Widget;
 
 /**
@@ -153,7 +141,10 @@ extern const struct S_Widget_FunctionList SDL_Panel_FunctionList;
 extern const struct S_Widget_FunctionList SDL_VolumeBar_FunctionList;
 extern const struct S_Widget_FunctionList SDL_ProgressBar_FunctionList;
 extern const struct S_Widget_FunctionList SDL_Tree_FunctionList;
-
+extern const struct S_Widget_FunctionList SDL_Scrollbar_FunctionList;
+extern const struct S_Widget_FunctionList SDL_Menu_FunctionList;
+extern const struct S_Widget_FunctionList SDL_ToggleButton_FunctionList;
+extern const struct S_Widget_FunctionList SDL_Tooltip_FunctionList;
 /**
  *  Lookup table for converter functions
  *
@@ -173,7 +164,11 @@ static const struct S_Widget_FunctionList * const WidgetTable[] =
     &SDL_Panel_FunctionList,       //SDL_PANEL
     &SDL_VolumeBar_FunctionList,   //SDL_VOLUMEBAR
     &SDL_ProgressBar_FunctionList, //SDL_PROGRESSBAR
-    &SDL_Tree_FunctionList         //SDL_TREE
+    &SDL_Tree_FunctionList,        //SDL_TREE
+    &SDL_Scrollbar_FunctionList,   //SDL_SCROLLBAR
+    &SDL_Menu_FunctionList,        //SDL_MENU
+    &SDL_ToggleButton_FunctionList,//SDL_TOGGLEBUTTON
+    &SDL_Tooltip_FunctionList      //SDL_TOOLTIP
 };
 
 
@@ -192,18 +187,21 @@ int SDL_WidgetMain();
 int   SDL_WidgetPropertiesOf(SDL_Widget* widget, int feature,...);
 
 int   SDL_DrawAllWidgets(SDL_Surface *screen);
-int   SDL_WidgetEventCallback(void *function,E_Widget_Event event);
-int   SDL_WidgetEvent(SDL_Event *event);
+//int   SDL_WidgetEventCallback(void *function,E_Widget_Event event);
+int SDL_WidgetEvent(SDL_Widget *widget,SDL_Event *event);
 
 int   SDL_WidgetHasFocus(SDL_Widget *widget);
 int   SDL_WidgetLoseFocus();
 int SDL_WidgetSetFocus(SDL_Widget *widget);
 
 int SDL_WidgetNeedsRedraw();
-int SDL_WidgetClose(void *widget);
+int SDL_WidgetClose(SDL_Widget *widget);
+void SDL_WidgetSetParent(SDL_Surface *surface,SDL_Widget *widget);
 
-
-
+void SDL_WidgetHide(SDL_Widget *widget);
+void SDL_WidgetShow(SDL_Widget *widget);
+void SDL_WidgetRedrawEvent(SDL_Widget *widget);
+void SDL_WidgetDraw(SDL_Widget *widget,SDL_Rect *Rect);
 #endif //__SDL_WIDGET_H
 
 

@@ -19,45 +19,33 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef __SDL_LABEL_H__
-#define __SDL_LABEL_H__
+#ifndef __SDL_TOOLTIP_H__
+#define __SDL_TOOLTIP_H__
 
+#include <SDL/SDL.h>
 #include "SDL_Widget.h"
 #include "SDL_Font.h"
 
-typedef struct SDL_Label
+typedef struct SDL_Tooltip
 {
     SDL_Widget Widget;
-    SDL_Font *Font;
-    
-    Uint32  bgcolor;
-    Uint32  fgcolor;
+    SDL_Widget *Parent;
 
-    int Visible;
-    int offset;
-    int increase;
-    int Alignment;
+    SDL_TimerID  *Timer;
 
-    int Pattern;
+    SDL_Font     *Font;
 
-    char    *Caption;
-}SDL_Label;
+    int Lines;
+
+    int x;
+    int y;
+
+    char *string;
+}SDL_Tooltip;
 
 
-enum LabelPattern
-{
-    LABEL_NORMAL,
-    LABEL_BOUNCE,
-    LABEL_SCROLL_LEFT,
-    LABEL_SCROLL_RIGHT,
-}LabelPattern;
+SDL_Widget* SDL_TooltipCreate(SDL_Widget *parent, char *text);
+void SDL_TooltipDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area);
+void SDL_TooltipSetFont(SDL_Widget *Widget,SDL_Font *Font);
 
-// prototypes
-SDL_Widget* SDL_LabelCreate(SDL_Rect *rect);
-void        SDL_LabelDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area);
-int         SDL_LabelProperties(SDL_Widget *widget,int feature,va_list list);
-
-void SDL_LabelSetText(SDL_Widget *widget,char *text);
-void SDL_LabelSetAlignment(SDL_Widget *widget,int Alignment);
-
-#endif /* __SDL_LABEL_H__ */
+#endif /* __SDL_TOOLTIP_H__ */

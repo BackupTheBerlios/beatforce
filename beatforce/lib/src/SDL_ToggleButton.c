@@ -20,7 +20,7 @@
 */
 
 #include <SDL/SDL.h>
-#include "SDL_Button.h"
+#include "SDL_ToggleButton.h"
 #include "SDL_Widget.h"
 #include "SDL_Window.h"
 #include "SDL_WidTool.h"
@@ -29,27 +29,27 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
-static void SDL_ButtonPaint(SDL_Widget *Widget,SDL_Surface *screen);
-void SDL_ButtonMouseButtonDownCB(SDL_Widget *widget,SDL_Event *event);
+static void SDL_ToggleButtonPaint(SDL_Widget *Widget,SDL_Surface *screen);
+void SDL_ToggleButtonMouseButtonDownCB(SDL_Widget *widget,SDL_Event *event);
 
-const struct S_Widget_FunctionList SDL_Button_FunctionList =
+const struct S_Widget_FunctionList SDL_ToggleButton_FunctionList =
 {
-    SDL_ButtonCreate,
-    SDL_ButtonDraw,
-    SDL_ButtonProperties,
-    SDL_ButtonEventHandler,
-    SDL_ButtonClose
+    SDL_ToggleButtonCreate,
+    SDL_ToggleButtonDraw,
+    SDL_ToggleButtonProperties,
+    SDL_ToggleButtonEventHandler,
+    SDL_ToggleButtonClose
 };
 
-SDL_Widget* SDL_ButtonCreate(SDL_Rect* rect)
+SDL_Widget* SDL_ToggleButtonCreate(SDL_Rect* rect)
 {    
-    SDL_Button *newbutton;
+    SDL_ToggleButton *newbutton;
     SDL_Widget *widget;
 
-    newbutton=(SDL_Button*)malloc(sizeof(SDL_Button));
+    newbutton=(SDL_ToggleButton*)malloc(sizeof(SDL_ToggleButton));
     
     widget=(SDL_Widget*)newbutton;
-    widget->Type            = SDL_BUTTON;
+    widget->Type            = SDL_TOGGLEBUTTON;
     widget->Rect.x          = rect->x;
     widget->Rect.y          = rect->y;
     widget->Rect.w          = rect->w;
@@ -57,7 +57,7 @@ SDL_Widget* SDL_ButtonCreate(SDL_Rect* rect)
     widget->Focusable       = 0;
     
     
-    SDL_SignalConnect(widget,"mousebuttondown",SDL_ButtonMouseButtonDownCB,newbutton);
+    SDL_SignalConnect(widget,"mousebuttondown",SDL_ToggleButtonMouseButtonDownCB,newbutton);
 
     newbutton->disabled     = NULL; 
     newbutton->normal       = NULL;
@@ -69,9 +69,9 @@ SDL_Widget* SDL_ButtonCreate(SDL_Rect* rect)
     return (SDL_Widget*)newbutton;
 }
 
-void SDL_ButtonDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
+void SDL_ToggleButtonDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
 {
-    SDL_Button  *button=(SDL_Button*)widget;
+    SDL_ToggleButton  *button=(SDL_ToggleButton*)widget;
     SDL_Surface *drawbutton=NULL;
     SDL_Rect src;
 
@@ -104,7 +104,7 @@ void SDL_ButtonDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
         src.h=widget->Rect.h;
 
         //SDL_SetClipRect(dest,&src);
-        SDL_ButtonPaint(widget,dest);
+        SDL_ToggleButtonPaint(widget,dest);
         //SDL_SetClipRect(dest,NULL);
         return;
     }
@@ -149,9 +149,9 @@ void SDL_ButtonDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
             
 }
 
-int SDL_ButtonProperties(SDL_Widget *widget,int feature,va_list list)
+int SDL_ToggleButtonProperties(SDL_Widget *widget,int feature,va_list list)
 {
-    SDL_Button *Button=(SDL_Button*)widget;
+    SDL_ToggleButton *Button=(SDL_ToggleButton*)widget;
 
     switch(feature)
     {
@@ -184,9 +184,9 @@ int SDL_ButtonProperties(SDL_Widget *widget,int feature,va_list list)
     return 1;
 }
 
-void SDL_ButtonMouseButtonDownCB(SDL_Widget *widget,SDL_Event *event)
+void SDL_ToggleButtonMouseButtonDownCB(SDL_Widget *widget,SDL_Event *event)
 {
-    SDL_Button *Button=(SDL_Button*)widget;
+    SDL_ToggleButton *Button=(SDL_ToggleButton*)widget;
     if(SDL_WidgetIsInside(widget,event->motion.x,event->motion.y))
     {
         Button->State = SDL_BUTTON_DOWN;
@@ -197,9 +197,9 @@ void SDL_ButtonMouseButtonDownCB(SDL_Widget *widget,SDL_Event *event)
         Button->State = SDL_BUTTON_UP;        
 }
 
-int SDL_ButtonEventHandler(SDL_Widget *widget,SDL_Event *event)
+int SDL_ToggleButtonEventHandler(SDL_Widget *widget,SDL_Event *event)
 {
-    SDL_Button *Button=(SDL_Button*)widget;
+    SDL_ToggleButton *Button=(SDL_ToggleButton*)widget;
 
     switch(event->type)
     {
@@ -232,17 +232,17 @@ int SDL_ButtonEventHandler(SDL_Widget *widget,SDL_Event *event)
 }
 
 
-void SDL_ButtonClose(SDL_Widget *widget)
+void SDL_ToggleButtonClose(SDL_Widget *widget)
 {
-    SDL_Button *Button=(SDL_Button*)widget;
+    SDL_ToggleButton *Button=(SDL_ToggleButton*)widget;
     free(Button);
 }
 
 
 
-static void SDL_ButtonPaint(SDL_Widget *Widget,SDL_Surface *screen)
+static void SDL_ToggleButtonPaint(SDL_Widget *Widget,SDL_Surface *screen)
 {
-    SDL_Button *Button=(SDL_Button*)Widget;
+    SDL_ToggleButton *Button=(SDL_ToggleButton*)Widget;
     SDL_Rect r;
     int x,y,width,height;
     r.x = Widget->Rect.x;
@@ -293,13 +293,15 @@ static void SDL_ButtonPaint(SDL_Widget *Widget,SDL_Surface *screen)
     }
 }
 
-void SDL_ButtonSetLabel(SDL_Widget *widget,char *title)
+void SDL_ToggleButtonSetLabel(SDL_Widget *widget,char *title)
 {
-    SDL_Button *Button=(SDL_Button*)widget;
+    SDL_ToggleButton *Button=(SDL_ToggleButton*)widget;
     
     if(Button->Label == NULL)
         Button->Label=SDL_WidgetCreate(SDL_LABEL,widget->Rect.x,widget->Rect.y,
                                                  widget->Rect.w,widget->Rect.h);
 
     SDL_LabelSetText(Button->Label,title);
+    
+
 }

@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003 John Beuving (john.beuving@home.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -32,7 +32,7 @@
 typedef enum
 {
     TABLE_MODE_NONE,       /* No selection possible             */
-    TABLE_MODE_BROWSE,     /* Only one can be selected          */
+    TABLE_MODE_SINGLE,     /* Only one can be selected          */
     TABLE_MODE_MULTIPLE    /* Multiple entries can be selected  */
 }E_TableMode;
 
@@ -45,6 +45,7 @@ typedef struct SDL_TableCell
 typedef struct SDL_TableRow
 {
     SDL_TableCell *Cell;
+    Uint32   fgcolor;
     struct SDL_TableRow *Next;
 }SDL_TableRow;
 
@@ -98,7 +99,8 @@ typedef struct SDL_Table
     void *ClickedData;
     void (*OnReturn) ();
 
-    SDL_Widget *edit;
+    SDL_Widget *Edit;
+    SDL_TableCell *EditCell;
 
     char *editcaption;
 
@@ -107,6 +109,7 @@ typedef struct SDL_Table
     /* Scrollbar */
     void* Scrollbar;
     int   ScrollbarWidth;
+    int Editable;
     SDL_Surface *ScrollbarImage;
 
     struct SDL_Table    *next;
@@ -153,6 +156,18 @@ int  SDL_TableEventHandler(SDL_Widget *widget,SDL_Event *event);
 
 
 /* Modification functions */
-void SDL_TableAddRow(SDL_Widget *Table,char *Titles[]); /* Add a row to the end of the table */
+void SDL_TableAddRow(SDL_Widget *Widget,char *Titles[]); /* Add a row to the end of the table */
+void SDL_TableDeleteRow(SDL_Widget *Widget,int row);
+void SDL_TableDeleteAllRows(SDL_Widget *widget);
+
+int SDL_TableSetColumnTitle(SDL_Widget *widget,int column, char *title);
+void SDL_TableSetEditable(SDL_Widget *widget,int value);
+void SDL_TableSetCursor(SDL_Widget *widget,int row,int column);
+
+void SDL_TableSetText(SDL_Widget *widget,int row,int column,char *text);
+void SDL_TableSetStyle(SDL_Widget *widget,int row,Uint32 color);
+void SDL_TableEnsureRowVisible(SDL_Widget *widget,int row);
+int SDL_TableIsVisible(SDL_Widget *widget,int row);
+void SDL_TableSetColumnWidth(SDL_Widget *widget,int column,int width);
 
 #endif /* __SDL_TABLE_H__ */

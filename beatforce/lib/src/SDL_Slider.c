@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003 John Beuving (john.beuving@home.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -151,10 +151,16 @@ int SDL_SliderProperties(SDL_Widget *widget,int feature,va_list list)
         /* is calculated but the size of the button is not used yet     */
         /* because it doesn't have to be available at this moment       */
         val= va_arg(list,double);
-        Slider->CurrentValue = val;
-        SDL_SliderPixeloffset(Slider);
-        if(Slider->CurrentValue > Slider->MaxValue)
-            Slider->CurrentValue = Slider->MaxValue;
+        if(val != Slider->CurrentValue)
+        {
+            Slider->CurrentValue = val;
+            SDL_SliderPixeloffset(Slider);
+            if(Slider->CurrentValue > Slider->MaxValue)
+                Slider->CurrentValue = Slider->MaxValue;
+            SDL_SignalEmit(widget,"value-changed");
+            if(widget->Visible)
+                SDL_WidgetRedrawEvent(widget);
+        }
         break;
     case SET_NORMAL_STEP_SIZE:
         val= va_arg(list,double);
@@ -179,16 +185,6 @@ int SDL_SliderProperties(SDL_Widget *widget,int feature,va_list list)
             }
         }
         break;
-    case GET_CUR_VALUE:
-    {
-        double *value;
-        value=va_arg(list,double*);
-        if(value)
-        {
-            *value=Slider->CurrentValue;
-        }
-        break;
-    }
     case GET_WIDTH:
     {
         int *value;
@@ -209,16 +205,7 @@ int SDL_SliderProperties(SDL_Widget *widget,int feature,va_list list)
         }
         break;
     }
-    case SET_CALLBACK:
-    {
-        int event=va_arg(list,int);
-        if(event==SDL_CHANGED)
-        {
-            Slider->OnSliderChanged=va_arg(list,void*);
-            Slider->OnSliderChangedData=va_arg(list,void*);
-        }
-        break;
-    }
+
     default:
         break;
 
@@ -328,9 +315,8 @@ int SDL_SliderEventHandler(SDL_Widget *widget,SDL_Event *event)
 
     if(Slider->changed)
     {
+        SDL_SignalEmit(widget,"value-changed");
         // Run event handler if available (SDL_CHANGED event)
-        if(Slider->OnSliderChanged != NULL)
-            Slider->OnSliderChanged(Slider->OnSliderChangedData);
         Slider->changed=0;
         SDL_WidgetDraw(widget,&widget->Rect);
     }
@@ -409,7 +395,7 @@ static void SDL_SliderCurrentValue(SDL_Slider *Slider)
 
             Slider->CurrentValue = (double)((Slider->MaxValue -Slider->MinValue)* Slider->pixeloffset) 
                 /(double)(widget->Rect.w - Slider->SliderButton->w);
-        }
+         }
         else
         {
             if(Slider->pixeloffset > (widget->Rect.h - Slider->SliderButton->h))
@@ -417,7 +403,7 @@ static void SDL_SliderCurrentValue(SDL_Slider *Slider)
 
             Slider->CurrentValue = (double)((Slider->MaxValue -Slider->MinValue)* Slider->pixeloffset) 
                 / (double)(widget->Rect.h - Slider->SliderButton->h);
-        }
+         }
     }
 }
 
@@ -425,4 +411,10 @@ static void SDL_SliderPaint(SDL_Slider *Slider)
 {
 
 
+}
+
+double SDL_SliderGetCurrentValue(SDL_Widget *widget)
+{
+    SDL_Slider *Slider=(SDL_Slider*)widget;
+    return Slider->CurrentValue;
 }

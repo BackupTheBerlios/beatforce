@@ -20,7 +20,7 @@ SDL_Widget.o: SDL_Widget.c /usr/include/malloc.h \
  /usr/include/SDL/SDL_video.h /usr/include/SDL/SDL_mutex.h \
  /usr/include/SDL/SDL_quit.h /usr/include/SDL/SDL_version.h \
  /usr/include/SDL/SDL_image.h SDL_Window.h SDL_WidTool.h SDL_Panel.h \
- SDL_Font.h
+ SDL_Font.h SDL_Signal.h
 SDL_Widget.c :
 /usr/include/malloc.h :
 /usr/include/features.h :
@@ -67,3 +67,4 @@ SDL_Window.h :
 SDL_WidTool.h :
 SDL_Panel.h :
 SDL_Font.h :
+SDL_Signal.h :

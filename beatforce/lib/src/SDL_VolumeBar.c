@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003 John Beuving (john.beuving@home.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -105,9 +105,9 @@ void SDL_VolumeBarDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
     }
 }
 
-int SDL_VolumeBarProperties(SDL_Widget *widget,int feature,va_list list)
+int SDL_VolumeBarProperties(SDL_Widget *Widget,int feature,va_list list)
 {
-    SDL_VolumeBar *VolumeBar=(SDL_VolumeBar*)widget;
+    SDL_VolumeBar *VolumeBar=(SDL_VolumeBar*)Widget;
     double val;
 
     switch(feature)
@@ -118,8 +118,12 @@ int SDL_VolumeBarProperties(SDL_Widget *widget,int feature,va_list list)
         break;
     case SET_CUR_VALUE:
         val=va_arg(list,double);
-        VolumeBar->CurrentValue = val; 
-        VolumeBar->CurrentLine  = (val * widget->Rect.h) / (VolumeBar->MaxValue - VolumeBar->MinValue); 
+        if(val != VolumeBar->CurrentValue)
+        {
+            VolumeBar->CurrentValue = val; 
+            VolumeBar->CurrentLine  = (val * Widget->Rect.h) / (VolumeBar->MaxValue - VolumeBar->MinValue); 
+            SDL_WidgetRedrawEvent(Widget);
+        }
         break;
     default:
         break;

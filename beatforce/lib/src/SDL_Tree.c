@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003 John Beuving (john.beuving@home.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -27,6 +27,8 @@
 #include "SDL_WidTool.h"
 #include "SDL_Tree.h"
 #include "SDL_Primitives.h"
+#include "SDL_Scrollbar.h"
+#include "SDL_Signal.h"
 
 const struct S_Widget_FunctionList SDL_Tree_FunctionList =
 {
@@ -101,6 +103,7 @@ void SDL_TreeDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
     if(n > Tree->nItems)
     {
         n-=Tree->nItems;
+        n++;
         if(Tree->Scrollbar == NULL)
         {
             SDL_Rect SliderRect;
@@ -108,27 +111,25 @@ void SDL_TreeDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
             /* 
              * Attach the Slider widget 
              */
-            SliderRect.x     = widget->Rect.x + widget->Rect.w - 45;
+            SliderRect.x     = widget->Rect.x + widget->Rect.w - 9;
             SliderRect.y     = widget->Rect.y;
             SliderRect.h     = widget->Rect.h;
-            SliderRect.w     = 45;
+            SliderRect.w     = 9;
                 
-            Tree->Scrollbar = SDL_WidgetCreateR(SDL_SLIDER,SliderRect);
-            
-            SDL_WidgetPropertiesOf(Tree->Scrollbar,SET_MAX_VALUE,n);
-            SDL_WidgetPropertiesOf(Tree->Scrollbar,SET_MIN_VALUE,0);
+            Tree->Scrollbar = SDL_WidgetCreateR(SDL_SCROLLBAR,SliderRect);
+            SDL_ScrollbarSetMaxValue(Tree->Scrollbar,n);
         }
         else
         {
-            SDL_WidgetPropertiesOf(Tree->Scrollbar,SET_MAX_VALUE,n);
+            SDL_ScrollbarSetMaxValue(Tree->Scrollbar,n);
         }
     }
     
     if(Tree->Scrollbar)
     {
-        double val;
-        SDL_WidgetPropertiesOf(Tree->Scrollbar,GET_CUR_VALUE,&val);
-        row=(int)val;
+        int val;
+        val=SDL_ScrollbarGetCurrentValue(Tree->Scrollbar);
+        row=val;
         Tree->FirstVisible=row;
     }
 
@@ -184,9 +185,9 @@ static void SDL_TreeDrawExpander(SDL_Surface *screen,
 
     boxColor(screen,x,y, x+8, y+8,0xffffffff);
 	rectangleColor (screen,x,y, x+8, y+8,0x000000ff);
-    lineColor (screen,x + 2, y + 4, x + 6, y + 4,0x000000ff);
+    SDL_DrawLine (screen,x + 2, y + 4, x + 6, y + 4,0x000000ff);
     if(Item->collapsed == 1)
-        lineColor (screen,x + 4, y + 2, x + 4, y + 6,0x000000ff);
+        SDL_DrawLine (screen,x + 4, y + 2, x + 4, y + 6,0x000000ff);
 
 }
 
@@ -201,7 +202,7 @@ static void SDL_TreeDrawLines(SDL_Surface *screen,
 
     /* The small line on the bottom of the expander */
     if(Item->collapsed == 0)
-        lineColor (screen,x + 4, y + height - 1, x + 4, y + height   ,0x000000ff);
+        SDL_DrawLine (screen,x + 4, y + height - 1, x + 4, y + height   ,0x000000ff);
 
     if(Parent == NULL) /* return when it is the root node */
         return;
@@ -211,16 +212,16 @@ static void SDL_TreeDrawLines(SDL_Surface *screen,
 
     /* Vertical line */
     if(Item->Next )
-        lineColor (screen,x + 4, y    , x + 4, y + height   ,0x000000ff);
+        SDL_DrawLine (screen,x + 4, y    , x + 4, y + height   ,0x000000ff);
     else
-        lineColor (screen,x + 4, y    , x + 4, y + height/2,0x000000ff);
+        SDL_DrawLine (screen,x + 4, y    , x + 4, y + height/2,0x000000ff);
     
 
     /* Horizontal line */
     if(Item->collapsed == 2) /*If there is no expander make the line a little longer */
-        lineColor (screen,x + 5, y + height/2, x + 15, y + height/2,0x000000ff);
+        SDL_DrawLine (screen,x + 5, y + height/2, x + 15, y + height/2,0x000000ff);
     else
-        lineColor (screen,x + 5, y + height/2, x + 9, y + height/2,0x000000ff);
+        SDL_DrawLine (screen,x + 5, y + height/2, x + 9, y + height/2,0x000000ff);
 
     /* Parent line */
     while(Parent)
@@ -229,7 +230,7 @@ static void SDL_TreeDrawLines(SDL_Surface *screen,
         if(Parent->Parent && Parent->Parent->collapsed == 0)
         {
             if(Parent->Next) /* Parent vertical line */
-                lineColor (screen,x + 4, y    , x + 4, y + height ,0x000000ff);
+                SDL_DrawLine (screen,x + 4, y    , x + 4, y + height ,0x000000ff);
         }
         Parent=Parent->Parent;
     }
@@ -262,13 +263,6 @@ int SDL_TreeProperties(SDL_Widget *widget,int feature,va_list list)
         Tree->bgcolor=va_arg(list,Uint32);
         break;
 
-    case SET_CALLBACK:
-    {
-        int t=va_arg(list,int);
-        Tree->Clicked=va_arg(list,void*);
-        Tree->ClickedData=va_arg(list,void*);
-   }
-    break;
     }
     return 1;
 }
@@ -297,30 +291,29 @@ int SDL_TreeEventHandler(SDL_Widget *widget,SDL_Event *event)
                 row=row+Tree->FirstVisible;
                 SDL_TreeCollapse(Tree->Tree,row);
                 Tree->Selected=SDL_TreeGetItem(Tree->Tree,&row);
-                if(Tree->Clicked)
-                    Tree->Clicked(Tree->ClickedData);
+                SDL_SignalEmit(widget,"clicked");
                 SDL_WidgetDraw(widget,&widget->Rect);
             }
             if(event->button.button == 4) /* mousehweel down */
             {
-                double row;
+                int row;
                 if(Tree->Scrollbar)
                 {
-                    SDL_WidgetPropertiesOf(Tree->Scrollbar,GET_CUR_VALUE,&row);
+                    row=SDL_ScrollbarGetCurrentValue(Tree->Scrollbar);
                     row-=1;
-                    SDL_WidgetPropertiesOf(Tree->Scrollbar,SET_CUR_VALUE,row);
+                    SDL_ScrollbarSetCurrentValue(Tree->Scrollbar,row);
                     SDL_WidgetDraw(widget,&widget->Rect);
                 }
 
             }
             if(event->button.button == 5) /* Mousewheel up */
             {
-                double row;
+                int row;
                 if(Tree->Scrollbar)
                 {
-                    SDL_WidgetPropertiesOf(Tree->Scrollbar,GET_CUR_VALUE,&row);
+                    row=SDL_ScrollbarGetCurrentValue(Tree->Scrollbar);
                     row+=1;
-                    SDL_WidgetPropertiesOf(Tree->Scrollbar,SET_CUR_VALUE,row);
+                    SDL_ScrollbarSetCurrentValue(Tree->Scrollbar,row);
                     SDL_WidgetDraw(widget,&widget->Rect);
                 }
             }

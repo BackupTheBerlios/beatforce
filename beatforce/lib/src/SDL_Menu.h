@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
+  Copyright (C) 2003 John Beuving (john.beuving@home.nl)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -19,45 +19,19 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef __SDL_LABEL_H__
-#define __SDL_LABEL_H__
-
 #include "SDL_Widget.h"
 #include "SDL_Font.h"
 
-typedef struct SDL_Label
+typedef struct SDL_Menu
 {
     SDL_Widget Widget;
-    SDL_Font *Font;
-    
-    Uint32  bgcolor;
-    Uint32  fgcolor;
+    SDL_Widget *OldWidget;
+    char *string[2];
+}SDL_Menu;
 
-    int Visible;
-    int offset;
-    int increase;
-    int Alignment;
-
-    int Pattern;
-
-    char    *Caption;
-}SDL_Label;
-
-
-enum LabelPattern
-{
-    LABEL_NORMAL,
-    LABEL_BOUNCE,
-    LABEL_SCROLL_LEFT,
-    LABEL_SCROLL_RIGHT,
-}LabelPattern;
 
 // prototypes
-SDL_Widget* SDL_LabelCreate(SDL_Rect *rect);
-void        SDL_LabelDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area);
-int         SDL_LabelProperties(SDL_Widget *widget,int feature,va_list list);
+SDL_Widget*  SDL_MenuCreate(SDL_Rect *rect);
+void         SDL_MenuDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area);
+void SDL_MenuAppend(SDL_Widget *widget,char *txt);
 
-void SDL_LabelSetText(SDL_Widget *widget,char *text);
-void SDL_LabelSetAlignment(SDL_Widget *widget,int Alignment);
-
-#endif /* __SDL_LABEL_H__ */

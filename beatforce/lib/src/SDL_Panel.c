@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003 John Beuving (john.beuving@home.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -49,7 +49,7 @@ SDL_Widget* SDL_PanelCreate(SDL_Rect* rect)
     widget->Rect.h    = rect->h;
     widget->Focusable = 0;
     
-    panel->color  = 0xfffff7;
+    panel->color  = WHITE;
     panel->Image  = NULL;
 
     return (SDL_Widget*)panel;
@@ -75,7 +75,7 @@ void SDL_PanelDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
     
     if(Panel->Image)
     {
-        if(Area)
+        if(Area != NULL)
         {
             src.x = Area->x - widget->Rect.x;
             src.y = Area->y - widget->Rect.y;
@@ -104,9 +104,8 @@ int SDL_PanelProperties(SDL_Widget *widget,int feature,va_list list)
     case SET_IMAGE:
         if(Panel->Image == NULL)
         {
-            Panel->Image = va_arg(list,SDL_Surface*);
-            if(Panel->Image)
-                SDL_SetColorKey(Panel->Image,SDL_SRCCOLORKEY,TRANSPARANT);
+            printf("obsolete SET_IMAGE\n");
+            exit(1);
         }
         break;
     case SET_BG_COLOR:
@@ -121,6 +120,18 @@ int SDL_PanelProperties(SDL_Widget *widget,int feature,va_list list)
 
 
 
+void SDL_PanelSetImage(SDL_Widget *widget,SDL_Surface *image)
+{
+    SDL_Panel *Panel=(SDL_Panel*)widget;
+    
+    if(image == NULL)
+        return;
 
+    if(Panel->Image == NULL)
+    {
+        Panel->Image = image;
+        SDL_SetColorKey(Panel->Image,SDL_SRCCOLORKEY,TRANSPARANT);
+    }
+}
 
 

@@ -25,7 +25,10 @@ SDL_Tab.o: SDL_Tab.c /usr/include/malloc.h /usr/include/features.h \
  /usr/include/SDL/SDL_video.h /usr/include/SDL/SDL_mutex.h \
  /usr/include/SDL/SDL_quit.h /usr/include/SDL/SDL_version.h \
  /usr/include/SDL/SDL_image.h SDL_WidTool.h SDL_Tab.h SDL_Button.h \
- SDL_Edit.h SDL_Font.h
+ SDL_Edit.h SDL_Font.h SDL_Primitives.h /usr/include/math.h \
+ /usr/include/bits/huge_val.h /usr/include/bits/mathdef.h \
+ /usr/include/bits/mathcalls.h /usr/include/bits/mathinline.h \
+ SDL_Signal.h
 SDL_Tab.c :
 /usr/include/malloc.h :
 /usr/include/features.h :
@@ -87,3 +90,10 @@ SDL_Tab.h :
 SDL_Button.h :
 SDL_Edit.h :
 SDL_Font.h :
+SDL_Primitives.h :
+/usr/include/math.h :
+/usr/include/bits/huge_val.h :
+/usr/include/bits/mathdef.h :
+/usr/include/bits/mathcalls.h :
+/usr/include/bits/mathinline.h :
+SDL_Signal.h :

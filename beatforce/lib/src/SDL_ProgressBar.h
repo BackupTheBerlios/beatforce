@@ -43,10 +43,6 @@ typedef struct SDL_ProgressBar
     int MaxValue;
     int CurrentValue;
 
-    /* Event handler for SDL_CLICKED */
-    void (*OnClicked)();
-    void *OnClickedData;
-
     /* Settings for internal draw functions */
     int CurrentLine;   /* line where the volume is at */
 
@@ -64,5 +60,7 @@ void        SDL_ProgressBarDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *A
 int         SDL_ProgressBarEventHandler(SDL_Widget *widget,SDL_Event *event);
 int         SDL_ProgressBarProperties(SDL_Widget *widget,int feature,va_list list);
 
+
+double SDL_ProgressBarGetCurrentValue(SDL_Widget *widget);
 
 #endif /* __SDL_PROGRESSBAR_H__ */

@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003 John Beuving (john.beuving@home.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -32,6 +32,7 @@ typedef struct SDL_TabList
     char                    *caption;
     int index;
     SDL_Rect                *rect;
+    SDL_Widget              *Child;
     int                     draw;
     struct SDL_TabList      *next;
     struct SDL_TabList      *prev;
@@ -68,10 +69,7 @@ typedef struct SDL_Tab
     Uint32          bgcolor;
     Uint32          fgcolor;
 
-    void (*OnClicked)();
-    void (*OnReturn) ();
-
-    struct SDL_Tab       *next;
+//    void (*OnReturn) ();
 }SDL_Tab;
 
 
@@ -79,7 +77,15 @@ typedef struct SDL_Tab
 SDL_Widget *SDL_TabCreate(SDL_Rect *rect);
 void SDL_TabDraw(SDL_Widget *data,SDL_Surface *dest,SDL_Rect *Area);
 int SDL_TabProperties(SDL_Widget *tab,int feature,va_list list);
-int SDL_TabEventHandler(SDL_Widget* tab,SDL_Event *event);
+
+
+/* modifier functions */
+int SDL_NotebookSetCurrentTab(SDL_Widget *widget,int tabnr);
+int SDL_NotebookGetCurrentPage(SDL_Widget *widget);
+SDL_Widget *SDL_NotebookGetChildWidget(SDL_Widget *widget);
+
+int SDL_NotebookAppendTab(SDL_Widget *parent,SDL_Widget *child,char *caption);
+void SDL_NotebookClear(SDL_Widget *widget);
 
 #endif //__SDL_TAB_H
 
