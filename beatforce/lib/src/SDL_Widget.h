@@ -80,7 +80,8 @@ typedef enum E_Widget_Properties
     TAB_REMOVE,
     
     SET_STATE_EDIT,
-    SET_VISIBLE
+    SET_VISIBLE,
+    SET_HIGHLIGHTED
     
 }E_Widget_Properties;
 

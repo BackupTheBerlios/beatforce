@@ -138,12 +138,11 @@ static void SONGDBUI_ChangeDatabase()
     }
     SDL_WidgetPropertiesOf(table,ROWS,SONGDB_GetNoOfEntries());
     
-    
 }
 
 void SONGDBUI_Redraw()
 {
-        
+    long id;
     SongDBSubgroup *sg;
     
     if(SONGDB_GroupChanged())
@@ -161,10 +160,20 @@ void SONGDBUI_Redraw()
         }
         SONGDBUI_ChangeDatabase();
     }
-    
-
-
+    if(PLAYER_IsPlaying(0))
+    {
+        PLAYER_GetPlayingID(0,&id);
+        SDL_WidgetPropertiesOf(table,SET_HIGHLIGHTED,id);    
+    }
+    if(PLAYER_IsPlaying(1))
+    {
+        PLAYER_GetPlayingID(1,&id);
+        SDL_WidgetPropertiesOf(table,SET_HIGHLIGHTED,id);    
+    }
 }
+       
+
+
 
 static void SONGDBUI_ChangeGroupClicked(void *data)
 {

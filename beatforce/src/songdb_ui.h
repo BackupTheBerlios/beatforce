@@ -28,5 +28,4 @@ void SONGDBUI_Redraw();
 void SONGDBUI_CreateWindow(ThemeSongdb *ts);
 
 
-
 #endif /* __SONGDB_UI_H__ */

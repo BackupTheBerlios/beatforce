@@ -166,6 +166,7 @@ int SDL_TableProperties(void *table,int feature,va_list list)
     SDL_Table *Table=(SDL_Table*)table;
     int column,width;
     int totalwidth,i;
+    double row;
 
     switch(feature)
     {
@@ -277,6 +278,14 @@ int SDL_TableProperties(void *table,int feature,va_list list)
             if(c)
                 *c=Table->SelectedCount;
             
+        }
+        break;
+    case SET_HIGHLIGHTED:
+        Table->ActiveEntry=va_arg(list,int);
+        if(Table->Scrollbar)
+        {
+            row=(double)Table->ActiveEntry;
+            SDL_WidgetPropertiesOf(Table->Scrollbar,SET_CUR_VALUE,row);
         }
         break;
     case CLEAR_SELECTED:
@@ -502,6 +511,11 @@ static void SDL_TableDrawRow(SDL_Surface *dest,SDL_Table *Table,int row)
             SDL_FillRect(dest,&RowDims,Table->bgcolor);
 
         SDL_FontSetColor(Table->font,Table->fgcolor);
+    }
+
+    if(Table->ActiveEntry == row + Table->FirstVisibleRow)
+    {
+        SDL_FontSetColor(Table->font,0x0000ff);
     }
 
 
