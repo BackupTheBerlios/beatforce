@@ -262,23 +262,28 @@ int SONGDB_AddFileToSubgroup(struct SongDBSubgroup *sg,char *filename)
         {
             e = SONGDB_AllocEntry ();
             
-            e->filename = strdup (filename);
-            e->id       = sg->Songcount++;
-            e->next     = NULL;
-
-            /* Add the created entry to the active database */
-            if(sg->Playlist == NULL)
-                sg->Playlist = e;
-            else
+            if(e)
             {
-                Playlist=sg->Playlist;
-                while(Playlist->next)
-                    Playlist=Playlist->next;
-                Playlist->next = e;
+                e->filename = strdup (filename);
+                e->id       = sg->Songcount++;
+                e->next     = NULL;
+                
+                /* Add the created entry to the active database */
+                if(sg->Playlist == NULL)
+                    sg->Playlist = e;
+                else
+                {
+                    Playlist=sg->Playlist;
+                    while(Playlist->next)
+                        Playlist=Playlist->next;
+                    Playlist->next = e;
+                }
             }
         }
-
-    
+        else
+        {
+            return 0;
+        }
     }
     return 1;
 }
@@ -329,6 +334,7 @@ struct SongDBEntry *SONGDB_AllocEntry (void)
     if (e == NULL)
     {
         perror ("songdb_alloc_entry");
+        return NULL;
     }
     memset (e, 0, DBENTRY_LEN);
 

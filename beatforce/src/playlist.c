@@ -96,13 +96,12 @@ void PLAYLIST_SetEntry(int player_nr, struct SongDBEntry *e)
     struct PlEntry *pe;
     struct PlEntry *newlist = playlist[0];
 
-    TRACE("PLAYLIST_SetEntry player:%d filename: %s",player_nr,e->filename);
-
     if (e == NULL)
     {
         ERROR("entry == NULL");
         return;
     }
+    TRACE("PLAYLIST_SetEntry player:%d filename: %s",player_nr,e->filename);
     pe = playlist_AllocEntry(e);
     
     test=e;
