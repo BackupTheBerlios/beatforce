@@ -30,75 +30,75 @@
 
 enum channel
 {
-  CHANNEL_STEREO = 0,
-  CHANNEL_MONO = 1,
-  CHANNEL_LEFT = 2,
-  CHANNEL_RIGHT = 3,
-  CHANNEL_REVERSE = 4
+    CHANNEL_STEREO = 0,
+    CHANNEL_MONO = 1,
+    CHANNEL_LEFT = 2,
+    CHANNEL_RIGHT = 3,
+    CHANNEL_REVERSE = 4
 };
 
 struct stats
 {
-  int vbr;
-  unsigned int bitrate;
-  unsigned long frames;
-  unsigned long vbr_rate;
-  unsigned long clipped;
-  unsigned long sync_errors;
-  unsigned long crc_errors;
-  unsigned long other_errors;
-  unsigned long ms_joint;
-  unsigned long i_joint;
-  unsigned long ms_i_joint;
+    int vbr;
+    unsigned int bitrate;
+    unsigned long frames;
+    unsigned long vbr_rate;
+    unsigned long clipped;
+    unsigned long sync_errors;
+    unsigned long crc_errors;
+    unsigned long other_errors;
+    unsigned long ms_joint;
+    unsigned long i_joint;
+    unsigned long ms_i_joint;
 };
 
 struct config
 {
-  AFormat format;				/* bits per output sample */
-  int autoatt;			/* auto clipping attenuation? */
-  long attsensitivity;			/* auto attenuation sensitivity */
-  int lengthcalc;			/* full (slow) length calculation? */
-  int avgbitrate;			/* display average bitrate? */
+    AFormat format;				/* bits per output sample */
+    int autoatt;			/* auto clipping attenuation? */
+    long attsensitivity;			/* auto attenuation sensitivity */
+    int lengthcalc;			/* full (slow) length calculation? */
+    int avgbitrate;			/* display average bitrate? */
 };
 
 
 typedef struct
 {
-  char *filename;				/* currently playing path/URL */
-  OggVorbis_File vf;
-  FILE *fd;
+    char *filename;				/* currently playing path/URL */
+    OggVorbis_File vf;
+    FILE *fd;
 
-  long size;					/* file size in bytes */
-  int length;					/* total playing time in ms */
-  int bitrate;					/* average bitrate in kbps */
-  int position; 				/* current playing position in ms */
-  int paused;					/* are we paused? */
-  int seek;					/* seek target in ms, or -1 */
-  int going;					/* stop flag */
-  int eof;
+    long size;					/* file size in bytes */
+    int length;					/* total playing time in ms */
+    int bitrate;					/* average bitrate in kbps */
+    int position; 				/* current playing position in ms */
+    int paused;					/* are we paused? */
+    int seek;					/* seek target in ms, or -1 */
+    int going;					/* stop flag */
+    int eof;
 
-  enum channel channel; 		/* channel selection */
+    enum channel channel; 		/* channel selection */
 
-  struct stats stats;			/* statistics */
+    struct stats stats;			/* statistics */
 
-  int ch_id;
-  int rate;
-  int channels;
-  long magic;
+    int ch_id;
+    int rate;
+    int channels;
+    long magic;
 
-  int max_bytes;
+    int max_bytes;
 
     int decode_thread;
-  //pthread_t decode_thread;
+    //pthread_t decode_thread;
 
-  int audio_error;
+    int audio_error;
 
-  char *input_buffer;
-  int input_size;
+    char *input_buffer;
+    int input_size;
 
-  char *output_buffer;
-  int output_size;
-
+    char *output_buffer;
+    int output_size;
+    InputInterface ogg_if;
 }
 oggPrivate;
 
@@ -124,7 +124,6 @@ int ogg_pause (Private *);
 int ogg_seek (Private *, long);
 
 long ogg_get_time (Private *);
-
-int ogg_set_input_interface(InputInterface *api);
+int ogg_set_interface(Private *p,InputInterface *api);
 
 #endif

@@ -34,7 +34,6 @@
 #include "sampler.h"
 #include "audio_output.h"
 
-
 #define MODULE_ID SAMPLER
 #include "debug.h"
 
@@ -87,6 +86,7 @@ int SAMPLER_Init()
                
         }
     }
+    
     return 1;
 }
 

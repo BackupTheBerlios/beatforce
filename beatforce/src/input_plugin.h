@@ -23,6 +23,7 @@
 #ifndef __INPUT_PLUGIN_H__
 #define __INPUT_PLUGIN_H__
 
+#include "types.h"
 #include "songdb.h"
 /*
  * INFO: A input plugin can be instaciated multiple times by calling init more than once.
@@ -62,11 +63,8 @@ typedef struct
     int (*set_volume) (void *, int *ch);       /* set volume */
 
     int (*cleanup) (void *);
-
-    int (*set_interface) (void *);
-
-    //InputPluginOutput *output;
-
+    int (*set_api) (void *,InputInterface *api);
+    
 }
 InputPlugin;
 

@@ -465,7 +465,6 @@ int SONGDB_FindSubgroup(struct SongDBEntry *e)
 
     if(e==NULL)
     {
-        printf("Cannot search\n");
         return 0;
     }
         

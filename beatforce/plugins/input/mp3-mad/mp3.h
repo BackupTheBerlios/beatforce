@@ -40,19 +40,19 @@
 
 struct xing
 {
-  int flags;
-  unsigned long frames;
-  unsigned long bytes;
-  unsigned char toc[100];
-  long scale;
+    int flags;
+    unsigned long frames;
+    unsigned long bytes;
+    unsigned char toc[100];
+    long scale;
 };
 
 enum
 {
-  XING_FRAMES = 0x0001,
-  XING_BYTES = 0x0002,
-  XING_TOC = 0x0004,
-  XING_SCALE = 0x0008
+    XING_FRAMES = 0x0001,
+    XING_BYTES = 0x0002,
+    XING_TOC = 0x0004,
+    XING_SCALE = 0x0008
 };
 
 # define XING_MAGIC (('X' << 24) | ('i' << 16) | ('n' << 8) | 'g')
@@ -60,92 +60,93 @@ enum
 
 enum channel
 {
-  CHANNEL_STEREO = 0,
-  CHANNEL_MONO = 1,
-  CHANNEL_LEFT = 2,
-  CHANNEL_RIGHT = 3,
-  CHANNEL_REVERSE = 4
+    CHANNEL_STEREO = 0,
+    CHANNEL_MONO = 1,
+    CHANNEL_LEFT = 2,
+    CHANNEL_RIGHT = 3,
+    CHANNEL_REVERSE = 4
 };
 
 struct stats
 {
-  int vbr;
-  unsigned int bitrate;
-  unsigned long frames;
-  unsigned long vbr_rate;
-  unsigned long clipped;
-  mad_fixed_t clipping;
-  unsigned long sync_errors;
-  unsigned long crc_errors;
-  unsigned long other_errors;
-  unsigned long ms_joint;
-  unsigned long i_joint;
-  unsigned long ms_i_joint;
+    int vbr;
+    unsigned int bitrate;
+    unsigned long frames;
+    unsigned long vbr_rate;
+    unsigned long clipped;
+    mad_fixed_t clipping;
+    unsigned long sync_errors;
+    unsigned long crc_errors;
+    unsigned long other_errors;
+    unsigned long ms_joint;
+    unsigned long i_joint;
+    unsigned long ms_i_joint;
 };
 
 struct config
 {
-  AFormat format;				/* bits per output sample */
-  int autoatt;			/* auto clipping attenuation? */
-  long attsensitivity;			/* auto attenuation sensitivity */
-  int lengthcalc;			/* full (slow) length calculation? */
-  int avgbitrate;			/* display average bitrate? */
+    AFormat format;				/* bits per output sample */
+    int autoatt;			/* auto clipping attenuation? */
+    long attsensitivity;			/* auto attenuation sensitivity */
+    int lengthcalc;			/* full (slow) length calculation? */
+    int avgbitrate;			/* display average bitrate? */
 };
 
 
 typedef struct
 {
-  char *filename;				/* currently playing path/URL */
-  FILE *fd;
+    char *filename;				/* currently playing path/URL */
+    FILE *fd;
 
-  long size;					/* file size in bytes */
-  int length;					/* total playing time in ms */
-  int bitrate;					/* average bitrate in kbps */
-  int position; 				/* current playing position in ms */
-  int paused;					/* are we paused? */
-  int seek;					/* seek target in ms, or -1 */
-  int going;					/* stop flag */
-  int eof;
+    long size;					/* file size in bytes */
+    int length;					/* total playing time in ms */
+    int bitrate;					/* average bitrate in kbps */
+    int position; 				/* current playing position in ms */
+    int paused;					/* are we paused? */
+    int seek;					/* seek target in ms, or -1 */
+    int going;					/* stop flag */
+    int eof;
 
-  enum channel channel; 		/* channel selection */
-  mad_fixed_t attenuation;		/* attenuation factor */
+    enum channel channel; 		/* channel selection */
+    mad_fixed_t attenuation;		/* attenuation factor */
 
-  struct stats stats;			/* statistics */
+    struct stats stats;			/* statistics */
 
-  int ch_id;
-  int rate;
-  int channels;
-  long magic;
+    int ch_id;
+    int rate;
+    int channels;
+    long magic;
 
-  int max_bytes;
+    int max_bytes;
 
     int decode_thread;
-  //pthread_t decode_thread;
+    //pthread_t decode_thread;
 
-  int audio_error;
+    int audio_error;
 
-  struct mad_stream *stream;
-  struct mad_frame *frame;
-  struct mad_synth *synth;
+    struct mad_stream *stream;
+    struct mad_frame *frame;
+    struct mad_synth *synth;
 
-  char *input_buffer;
-  int input_size;
+    char *input_buffer;
+    int input_size;
 
-  char *output_buffer;
-  int output_size;
-
+    char *output_buffer;
+    int output_size;
+    
+    InputInterface mp3_if;
 }
 mp3Private;
 
 struct id3tag
 {
-  char tag[3];
-  char title[30];
-  char artist[30];
-  char album[30];
-  char year[4];
-  char comment[30];
-  unsigned char genre;
+    char tag[3];
+    char title[30];
+    char artist[30];
+    char album[30];
+    char year[4];
+    char comment[30];
+    unsigned char genre;
 };
 
 
@@ -168,14 +169,14 @@ int mp3_pause (Private *);
 int mp3_seek (Private *, long);
 
 long mp3_get_time (Private *);
-int mp3_set_input_interface(InputInterface *api);
+int mp3_set_interface(Private *p,InputInterface *api);
 
 static __inline signed long
 linear_dither (unsigned int, mad_fixed_t,
-			   mad_fixed_t *, unsigned long *, mad_fixed_t *);
+               mad_fixed_t *, unsigned long *, mad_fixed_t *);
 static unsigned int pack_pcm (unsigned char *, unsigned int,
-							  mad_fixed_t const *, mad_fixed_t const *,
-							  int, unsigned long *, mad_fixed_t *);
+                              mad_fixed_t const *, mad_fixed_t const *,
+                              int, unsigned long *, mad_fixed_t *);
 
 static int vbr_update (struct stats *, unsigned long);
 

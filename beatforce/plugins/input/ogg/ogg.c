@@ -87,17 +87,7 @@ InputPlugin ogg_ip = {
     NULL,
 
     ogg_cleanup,
-    ogg_set_input_interface
-};
-
-InputInterface ogg_if = {
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    ogg_set_interface
 };
 
 InputPlugin *
@@ -106,16 +96,21 @@ get_input_info ()
      return &ogg_ip;
 }
 
-int ogg_set_input_interface(InputInterface *api)
+int
+ogg_set_interface(Private *p,InputInterface *api)
 {
-    ogg_if.input_eof          = api->input_eof;   
-    ogg_if.output_buffer_free = api->output_buffer_free;
-    ogg_if.output_close       = api->output_close;
-    ogg_if.output_get_time    = api->output_get_time;
-    ogg_if.output_open        = api->output_open;
-    ogg_if.output_pause       = api->output_pause;
-    ogg_if.output_write       = api->output_write;
+    oggPrivate *ogg_priv = (oggPrivate *) p;
+    
+    ogg_priv->ogg_if.output_open        = api->output_open;
+    ogg_priv->ogg_if.output_write       = api->output_write;
+    ogg_priv->ogg_if.output_pause       = api->output_pause;
+    ogg_priv->ogg_if.output_buffer_free = api->output_buffer_free;
+    ogg_priv->ogg_if.output_get_time    = api->output_get_time;
+    ogg_priv->ogg_if.output_close       = api->output_close;
+    ogg_priv->ogg_if.input_eof          = api->input_eof;
     return 1;
+
+
 }
 
 /*ch_id is equal to player_nr */
@@ -352,7 +347,7 @@ ogg_load_file (Private * h, char *filename)
     private->channels = 2;
     private->rate = 44100;
 
-    if (ogg_if.output_open
+    if (private->ogg_if.output_open
         (private->ch_id,
          FMT_S16_NE, private->rate, private->channels, &private->max_bytes))
     {
@@ -387,7 +382,7 @@ ogg_close_file (Private * h)
         DEBUG("Stopping thread");
 	private->going = 0;
         OSA_RemoveThread(private->decode_thread);
-	ogg_if.output_close (private->ch_id);
+	private->ogg_if.output_close (private->ch_id);
 	fclose (private->fd);
 	private->fd = NULL;
 
@@ -436,14 +431,14 @@ ogg_play_loop (void *param)
             } 
             else 
             {
-                while(ogg_if.output_buffer_free (private->ch_id) < (ret))
+                while(private->ogg_if.output_buffer_free (private->ch_id) < (ret))
                 {
                     SDL_Delay(10);
                 }
                 
                 /* we don't bother dealing with sample rate changes, etc, but
                    you'll have to*/
-                ogg_if.output_write (private->ch_id, pcmout,ret);
+                private->ogg_if.output_write (private->ch_id, pcmout,ret);
                 private->position=(long)(time);
                 private->position*=10;
             }
@@ -463,7 +458,7 @@ ogg_play (Private * h)
     if( h == NULL )
         return 0;
    
-    ogg_if.output_pause (private->ch_id, 0);
+    private->ogg_if.output_pause (private->ch_id, 0);
     return 1;
 }
 
@@ -474,7 +469,7 @@ ogg_pause (Private * h)
     if( h == NULL)
         return 0;
   
-    ogg_if.output_pause (private->ch_id, 1);
+    private->ogg_if.output_pause (private->ch_id, 1);
     return 1;
 }
 

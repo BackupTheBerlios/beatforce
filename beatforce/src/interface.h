@@ -17,6 +17,9 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
+#ifndef __INTERFACE_H__
+#define __INTERFACE_H__
+
 #include "types.h"
 #include "audio_output.h"
 #include "input.h"
@@ -32,3 +35,5 @@ InputInterface beatforce_if =
     AUDIOOUTPUT_Close,
     INPUT_EOF
 };
+
+#endif /* __INTERFACE_H__ */

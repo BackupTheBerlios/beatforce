@@ -118,17 +118,7 @@ InputPlugin cdda_ip = {
     NULL,
 
     cdda_cleanup,
-    CDDA_SetInputInterface
-};
-
-InputInterface cdda_if = {
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    cdda_set_interface
 };
 
 InputPlugin *
@@ -138,17 +128,21 @@ get_input_info ()
 }
 
 int
-CDDA_SetInputInterface(InputInterface *api)
+cdda_set_interface(Private *p,InputInterface *api)
 {
-    cdda_if.input_eof          = api->input_eof;   
-    cdda_if.output_buffer_free = api->output_buffer_free;
-    cdda_if.output_close       = api->output_close;
-    cdda_if.output_get_time    = api->output_get_time;
-    cdda_if.output_open        = api->output_open;
-    cdda_if.output_pause       = api->output_pause;
-    cdda_if.output_write       = api->output_write;
+    cddaPrivate *cdda_priv = (cddaPrivate *) p;
+    
+    cdda_priv->cdda_if.output_open        = api->output_open;
+    cdda_priv->cdda_if.output_write       = api->output_write;
+    cdda_priv->cdda_if.output_pause       = api->output_pause;
+    cdda_priv->cdda_if.output_buffer_free = api->output_buffer_free;
+    cdda_priv->cdda_if.output_get_time    = api->output_get_time;
+    cdda_priv->cdda_if.output_close       = api->output_close;
+    cdda_priv->cdda_if.input_eof          = api->input_eof;
     return 1;
 }
+
+
 
 /*ch_id is equal to player_nr */
 int
@@ -425,7 +419,7 @@ cdda_load_file (Private * h, char *filename)
 
         
         
-        if (cdda_if.output_open
+        if (private->cdda_if.output_open
             (private->ch_id,
              FMT_S16_NE, private->rate, private->channels, &private->max_bytes))
         {
@@ -451,7 +445,7 @@ cdda_close_file (Private * h)
     {
 	private->going = 0;
         OSA_RemoveThread(private->decode_thread);
-	cdda_if.output_close (private->ch_id);
+	private->cdda_if.output_close (private->ch_id);
 	private->fd = -1;
         private->position=0;
 	return 1;
@@ -506,18 +500,18 @@ cdda_play_loop (void *param)
 
             }
 
-            while(cdda_if.output_buffer_free (private->ch_id) < (2352*5) && private->going)
+            while(private->cdda_if.output_buffer_free (private->ch_id) < (2352*5) && private->going)
                 SDL_Delay(5);
 
             {
-                cdda_if.output_write (private->ch_id, buffer,2352*5);
+                private->cdda_if.output_write (private->ch_id, buffer,2352*5);
                 lba+=5;
                 private->position+=67;
             }
         }
         if(lba > ourtoc[private->track].dwStartSector)
         {
-            cdda_if.input_eof (private->ch_id);
+            private->cdda_if.input_eof (private->ch_id);
             break;
         }
        
@@ -536,7 +530,7 @@ cdda_play (Private * h)
     if( h == NULL)
         return 0;
    
-    cdda_if.output_pause (private->ch_id, 0);
+    private->cdda_if.output_pause (private->ch_id, 0);
     return 1;
 }
 
@@ -547,7 +541,7 @@ cdda_pause (Private * h)
     if( h == NULL )
         return ERROR_INVALID_ARG;
   
-    cdda_if.output_pause (private->ch_id, 1);
+    private->cdda_if.output_pause (private->ch_id, 1);
     return 1;
 }
 

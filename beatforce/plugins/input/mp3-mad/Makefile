@@ -86,7 +86,7 @@ libdir = /usr/share/beatforce/plugins/input
 
 libbeatforcemp3mad_la_LDFLAGS = -module -avoid-version
 
-libbeatforcemp3mad_la_SOURCES = mp3.c mp3.h
+libbeatforcemp3mad_la_SOURCES = mp3.c osa.c llist.c debug.c
 
 INCLUDES = -I../../../src -I$(top_builddir)/src $(MADDIR)
 LIBS = -lmad -lid3tag 
@@ -100,7 +100,7 @@ DEFS = -DHAVE_CONFIG_H -I. -I$(srcdir) -I../../..
 CPPFLAGS = 
 LDFLAGS = 
 libbeatforcemp3mad_la_LIBADD = 
-libbeatforcemp3mad_la_OBJECTS =  mp3.lo
+libbeatforcemp3mad_la_OBJECTS =  mp3.lo osa.lo llist.lo debug.lo
 CFLAGS = -g -O2 -I/usr/include -DHAVE_MP3
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -113,7 +113,7 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = tar
 GZIP_ENV = --best
-DEP_FILES =  .deps/mp3.P
+DEP_FILES =  .deps/debug.P .deps/llist.P .deps/mp3.P .deps/osa.P
 SOURCES = $(libbeatforcemp3mad_la_SOURCES)
 OBJECTS = $(libbeatforcemp3mad_la_OBJECTS)
 

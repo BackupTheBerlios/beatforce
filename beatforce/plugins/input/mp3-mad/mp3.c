@@ -91,17 +91,7 @@ InputPlugin mp3_ip = {
     NULL,
 
     mp3_cleanup,
-    mp3_set_input_interface
-};
-
-InputInterface mp3_if = {
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    mp3_set_interface
 };
 
 InputPlugin *
@@ -110,17 +100,21 @@ get_input_info ()
     return &mp3_ip;
 }
 
-int mp3_set_input_interface(InputInterface *api)
+int
+mp3_set_interface(Private *p,InputInterface *api)
 {
-    mp3_if.input_eof          = api->input_eof;   
-    mp3_if.output_buffer_free = api->output_buffer_free;
-    mp3_if.output_close       = api->output_close;
-    mp3_if.output_get_time    = api->output_get_time;
-    mp3_if.output_open        = api->output_open;
-    mp3_if.output_pause       = api->output_pause;
-    mp3_if.output_write       = api->output_write;
-
+    mp3Private *mp3_priv = (mp3Private *) p;
+    
+    mp3_priv->mp3_if.output_open        = api->output_open;
+    mp3_priv->mp3_if.output_write       = api->output_write;
+    mp3_priv->mp3_if.output_pause       = api->output_pause;
+    mp3_priv->mp3_if.output_buffer_free = api->output_buffer_free;
+    mp3_priv->mp3_if.output_get_time    = api->output_get_time;
+    mp3_priv->mp3_if.output_close       = api->output_close;
+    mp3_priv->mp3_if.input_eof          = api->input_eof;
     return 1;
+
+
 }
 
 /*ch_id is equal to player_nr */
@@ -621,7 +615,7 @@ mp3_load_file (Private * h, char *filename)
     private->channels = MAD_NCHANNELS (&header);
     private->rate = header.samplerate;
 
-    if (mp3_if.output_open
+    if (private->mp3_if.output_open
         (private->ch_id,
          FMT_S16_NE, private->rate, private->channels, &private->max_bytes))
     {
@@ -656,7 +650,7 @@ mp3_close_file (Private * h)
         DEBUG("Stopping thread");
 	private->going = 0;
         OSA_RemoveThread(private->decode_thread);
-	mp3_if.output_close (private->ch_id);
+	private->mp3_if.output_close (private->ch_id);
 	fclose (private->fd);
 	private->fd = NULL;
 
@@ -701,7 +695,7 @@ mp3_play_loop (void *param)
     {
 	if (private->eof)
 	{
-            mp3_if.input_eof (private->ch_id);
+            private->mp3_if.input_eof (private->ch_id);
             SDL_Delay(30);
 	}
 
@@ -855,7 +849,7 @@ mp3_play_loop (void *param)
 
                     while (private->going
                            && !(private->seek != -1 && private->length >= 0)
-                           && mp3_if.output_buffer_free (private->ch_id) < bytes)
+                           && private->mp3_if.output_buffer_free (private->ch_id) < bytes)
                         SDL_Delay(10);
 
                     if (!private->going
@@ -867,7 +861,7 @@ mp3_play_loop (void *param)
                     
                     if(private->going == 0)
                         break;
-                    mp3_if.output_write (private->ch_id, output_ptr, bytes);
+                    private->mp3_if.output_write (private->ch_id, output_ptr, bytes);
 
                     output_ptr += bytes;
                     output_length -= bytes;
@@ -893,7 +887,7 @@ mp3_play_loop (void *param)
 	if (private->going)
 	{
             private->eof = 1;
-            mp3_if.input_eof (private->ch_id);
+            private->mp3_if.input_eof (private->ch_id);
 	}
     }
 
@@ -910,7 +904,7 @@ mp3_play (Private * h)
     if( h == NULL || private->magic != MP3MAD_MAGIC)
         return 0;
    
-    mp3_if.output_pause (private->ch_id, 0);
+    private->mp3_if.output_pause (private->ch_id, 0);
     return 1;
 }
 
@@ -921,7 +915,7 @@ mp3_pause (Private * h)
     if( h == NULL || private->magic != MP3MAD_MAGIC)
         return ERROR_INVALID_ARG;
   
-    mp3_if.output_pause (private->ch_id, 1);
+    private->mp3_if.output_pause (private->ch_id, 1);
     return 1;
 }
 

@@ -11,7 +11,8 @@ llist.lo llist.o : llist.c /usr/include/stdio.h /usr/include/features.h \
  /usr/include/endian.h /usr/include/bits/endian.h \
  /usr/include/sys/select.h /usr/include/bits/select.h \
  /usr/include/bits/sigset.h /usr/include/bits/time.h \
- /usr/include/sys/sysmacros.h /usr/include/alloca.h llist.h
+ /usr/include/sys/sysmacros.h /usr/include/alloca.h \
+ ../../../src/llist.h
 llist.c :
 /usr/include/stdio.h :
 /usr/include/features.h :
@@ -40,4 +41,4 @@ llist.c :
 /usr/include/bits/time.h :
 /usr/include/sys/sysmacros.h :
 /usr/include/alloca.h :
-llist.h :
+../../../src/llist.h :

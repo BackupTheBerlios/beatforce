@@ -79,7 +79,7 @@ typedef struct
 
     char *output_buffer;
     int output_size;
-
+    InputInterface cdda_if;
 }
 cddaPrivate;
 
@@ -99,7 +99,7 @@ int cdda_pause (Private *);
 int cdda_seek (Private *, long);
 
 long cdda_get_time (Private *);
-int CDDA_SetInputInterface(InputInterface *api);
+int cdda_set_interface(Private *p,InputInterface *api);
 
 
 #endif /* __CDDA_H__ */

@@ -81,10 +81,10 @@ BFList *INPUT_Init (int channel, BFList * plugin_list)
         
         ipd->ip = (InputPlugin *) next->data;
 
-        /* Init the plugin with the default write/read function */
-        ipd->ip->set_interface(&beatforce_if);
         ipd->ip->init (&ipd->priv, channel);
-
+        
+        /* Init the plugin with the default write/read function */
+        ipd->ip->set_api(ipd->priv,&beatforce_if);
 
         ip_plugins = LLIST_Append(ip_plugins, (void*) ipd);
         
@@ -258,7 +258,7 @@ int INPUT_SetInputInterface(InputPluginData *Plugin,InputInterface *iif)
     if(iif == NULL)
         return 0;
     else
-        return Plugin->ip->set_interface(iif);
+        return Plugin->ip->set_api(Plugin->priv,iif);
     
     
 }

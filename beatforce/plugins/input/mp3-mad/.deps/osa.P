@@ -28,7 +28,8 @@ osa.lo osa.o : osa.c /usr/include/SDL/SDL.h /usr/include/SDL/SDL_main.h \
  /usr/include/bits/local_lim.h /usr/include/linux/limits.h \
  /usr/include/string.h /usr/include/bits/string.h \
  /usr/include/bits/string2.h /usr/include/dlfcn.h \
- /usr/include/bits/dlfcn.h osa.h llist.h debug.h
+ /usr/include/bits/dlfcn.h ../../../src/osa.h ../../../src/llist.h \
+ ../../../src/debug.h
 osa.c :
 /usr/include/SDL/SDL.h :
 /usr/include/SDL/SDL_main.h :
@@ -90,6 +91,6 @@ osa.c :
 /usr/include/bits/string2.h :
 /usr/include/dlfcn.h :
 /usr/include/bits/dlfcn.h :
-osa.h :
-llist.h :
-debug.h :
+../../../src/osa.h :
+../../../src/llist.h :
+../../../src/debug.h :

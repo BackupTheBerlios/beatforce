@@ -86,10 +86,10 @@ libdir = @PLUGIN_DIR@/input
 
 libbeatforcecdda_la_LDFLAGS = -module -avoid-version
 
-libbeatforcecdda_la_SOURCES = cdda.c cddb.c http.c 
+libbeatforcecdda_la_SOURCES = cdda.c cddb.c http.c osa.c debug.c llist.c
 
 INCLUDES = -I../../../src -I$(top_builddir)/src $(MADDIR) -L../../../src
-LIBS = -lmad -lid3tag -losa
+LIBS = -lmad -lid3tag 
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../../../config.h
 CONFIG_CLEAN_FILES = 
@@ -100,7 +100,8 @@ DEFS = @DEFS@ -I. -I$(srcdir) -I../../..
 CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 libbeatforcecdda_la_LIBADD = 
-libbeatforcecdda_la_OBJECTS =  cdda.lo cddb.lo http.lo
+libbeatforcecdda_la_OBJECTS =  cdda.lo cddb.lo http.lo osa.lo debug.lo \
+llist.lo
 CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -113,7 +114,8 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = tar
 GZIP_ENV = --best
-DEP_FILES =  .deps/cdda.P .deps/cddb.P .deps/http.P
+DEP_FILES =  .deps/cdda.P .deps/cddb.P .deps/debug.P .deps/http.P \
+.deps/llist.P .deps/osa.P
 SOURCES = $(libbeatforcecdda_la_SOURCES)
 OBJECTS = $(libbeatforcecdda_la_OBJECTS)
 
