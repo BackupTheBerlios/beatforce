@@ -107,8 +107,8 @@ ThemeImage *XML_ParseImage(ThemeImage *image,xmlDocPtr doc, xmlNodePtr cur)
 
 int THEME_Init()
 {
-    BFList *dir;
-    int NoOfThemes;
+    BFList *dir=NULL;
+//    int NoOfThemes;
     ThemeConfig *current;
     xmlNodePtr cur;
     xmlDocPtr doc=NULL;

@@ -382,7 +382,7 @@ ogg_close_file (Private * h)
     oggPrivate *private = (oggPrivate *) h;
 
     TRACE("ogg_close_file");
-fprintf(stderr, "Closing File??... ");
+    fprintf(stderr, "Closing File??... ");
     if( h == NULL)
     {
         ERROR("Invalid arguments");

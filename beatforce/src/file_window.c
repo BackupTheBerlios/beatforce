@@ -242,6 +242,7 @@ static void FILEWINDOW_AddAll(void *data)
     struct SongDBSubgroup *sg;
     BFList *l;
 
+    TRACE("FILEWINDOW_AddAll");
     FILEWINDOW_GetSelectedSubgroup(&sg);
     if(sg)
     {
@@ -538,6 +539,7 @@ SDL_Surface *Window_CreateFileWindow()
     ThemeImage    *Image  = NULL;
     ThemeButton   *Button = NULL;
     ThemeTable    *Table  = NULL;
+    ThemeTree     *Tree   = NULL;
 
     if(tc == NULL)
         return NULL;

@@ -167,6 +167,11 @@ typedef struct ThemeTable
     struct ThemeTable *next;
 }ThemeTable;
 
+typedef struct ThemeTree
+{
+    SDL_Rect Rect;
+}ThemeTree;
+
 typedef struct ThemeVolumeBar
 {
     SDL_Rect Rect;
