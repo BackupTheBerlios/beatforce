@@ -20,7 +20,6 @@
 #ifndef __PLAYLIST_H__
 #define __PLAYLIST_H__
 
-
 struct PlEntry
 {
     struct SongDBEntry *e;
@@ -28,6 +27,12 @@ struct PlEntry
     int  index;
     struct PlEntry *next;
 };
+
+enum
+{
+    MODE_SINGLE,
+    MODE_DOUBLE,
+}E_PlaylistMode;
 
 #define PL_ENTRY_LEN  ( sizeof(struct PlEntry) )
 #define PLAYLIST_UNIQUE_UNKNOWN     0xffffff00
@@ -39,6 +44,6 @@ struct PlEntry *PLAYLIST_GetSong (int player_nr, int no);
 void PLAYLIST_AddEntry(int player_nr, struct SongDBEntry *e);
 int PLAYLIST_Remove(int player_nr,struct SongDBEntry *e);
 
-#endif
+#endif /* __PLAYLIST_H__ */
 
 

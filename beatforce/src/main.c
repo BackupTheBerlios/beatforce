@@ -70,10 +70,9 @@ int main(int argc, char *argv[])
     SONGDB_Init ();
 
 
-    OSACDROM_Init();
+//    OSACDROM_Init();
 
     MAINWINDOW_Open();
-    OSACDROM_CheckForDiscs();
 
     /*beatforce UI*/
     SDLTK_Main(); /* main loop */

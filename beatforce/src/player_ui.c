@@ -34,10 +34,7 @@
 #include "wndmgr.h"
 #include "songdb_ui.h"
 
-#include "SDL_Font.h"
-#include "SDL_Slider.h"
-#include "SDL_Widget.h"
-#include "SDL_ProgressBar.h"
+#include "SDLTk.h"
 
 #define MODULE_ID PLAYER_UI
 #include "debug.h"
@@ -75,19 +72,19 @@ static void PLAYERUI_HidePlayer(void *data)
     {
         BFList *l=UI_Players[0].Images;
         
-        SDL_WidgetPropertiesOf(UI_Players[0].ButtonPlay,SET_VISIBLE,0);
-        SDL_WidgetPropertiesOf(UI_Players[0].ButtonPause,SET_VISIBLE,0);
-        SDL_WidgetPropertiesOf(UI_Players[0].SongProgress,SET_VISIBLE,0);        
-        SDL_WidgetPropertiesOf(UI_Players[0].Artist,SET_VISIBLE,0);
-        SDL_WidgetPropertiesOf(UI_Players[0].Title,SET_VISIBLE,0);
-        SDL_WidgetPropertiesOf(UI_Players[0].PlayerState,SET_VISIBLE,0);
-        SDL_WidgetPropertiesOf(UI_Players[0].Pitch,SET_VISIBLE,0);
-        SDL_WidgetPropertiesOf(UI_Players[0].TimeRemaining,SET_VISIBLE,0);
-        SDL_WidgetPropertiesOf(UI_Players[0].TimeElapsed,SET_VISIBLE,0);
-        SDL_WidgetPropertiesOf(UI_Players[0].Bitrate,SET_VISIBLE,0);
-        SDL_WidgetPropertiesOf(UI_Players[0].Samplerate,SET_VISIBLE,0);
-        SDL_WidgetPropertiesOf(UI_Players[0].VolumeLeft,SET_VISIBLE,0);
-        SDL_WidgetPropertiesOf(UI_Players[0].VolumeRight,SET_VISIBLE,0);
+        SDL_WidgetPropertiesOf(UI_Players[0].Normal.ButtonPlay,SET_VISIBLE,0);
+        SDL_WidgetPropertiesOf(UI_Players[0].Normal.ButtonPause,SET_VISIBLE,0);
+        SDL_WidgetPropertiesOf(UI_Players[0].Normal.SongProgress,SET_VISIBLE,0);        
+        SDL_WidgetPropertiesOf(UI_Players[0].Normal.Artist,SET_VISIBLE,0);
+        SDL_WidgetPropertiesOf(UI_Players[0].Normal.Title,SET_VISIBLE,0);
+        SDL_WidgetPropertiesOf(UI_Players[0].Normal.PlayerState,SET_VISIBLE,0);
+        SDL_WidgetPropertiesOf(UI_Players[0].Normal.Pitch,SET_VISIBLE,0);
+        SDL_WidgetPropertiesOf(UI_Players[0].Normal.TimeRemaining,SET_VISIBLE,0);
+        SDL_WidgetPropertiesOf(UI_Players[0].Normal.TimeElapsed,SET_VISIBLE,0);
+        SDL_WidgetPropertiesOf(UI_Players[0].Normal.Bitrate,SET_VISIBLE,0);
+        SDL_WidgetPropertiesOf(UI_Players[0].Normal.Samplerate,SET_VISIBLE,0);
+        SDL_WidgetPropertiesOf(UI_Players[0].Normal.VolumeLeft,SET_VISIBLE,0);
+        SDL_WidgetPropertiesOf(UI_Players[0].Normal.VolumeRight,SET_VISIBLE,0);
         while(l)
         {
             SDL_WidgetPropertiesOf(l->data,SET_VISIBLE,0);        
@@ -99,17 +96,17 @@ static void PLAYERUI_HidePlayer(void *data)
     {
         BFList *l=UI_Players[0].Images;
 
-        SDL_WidgetPropertiesOf(UI_Players[0].SongProgress,SET_VISIBLE,1);        
-        SDL_WidgetPropertiesOf(UI_Players[0].Artist,SET_VISIBLE,1);
-        SDL_WidgetPropertiesOf(UI_Players[0].Title,SET_VISIBLE,1);
-        SDL_WidgetPropertiesOf(UI_Players[0].PlayerState,SET_VISIBLE,1);
-        SDL_WidgetPropertiesOf(UI_Players[0].Pitch,SET_VISIBLE,1);
-        SDL_WidgetPropertiesOf(UI_Players[0].TimeRemaining,SET_VISIBLE,1);
-        SDL_WidgetPropertiesOf(UI_Players[0].TimeElapsed,SET_VISIBLE,1);
-        SDL_WidgetPropertiesOf(UI_Players[0].Bitrate,SET_VISIBLE,1);
-        SDL_WidgetPropertiesOf(UI_Players[0].Samplerate,SET_VISIBLE,1);
-        SDL_WidgetPropertiesOf(UI_Players[0].VolumeLeft,SET_VISIBLE,1);
-        SDL_WidgetPropertiesOf(UI_Players[0].VolumeRight,SET_VISIBLE,1);
+        SDL_WidgetPropertiesOf(UI_Players[0].Normal.SongProgress,SET_VISIBLE,1);        
+        SDL_WidgetPropertiesOf(UI_Players[0].Normal.Artist,SET_VISIBLE,1);
+        SDL_WidgetPropertiesOf(UI_Players[0].Normal.Title,SET_VISIBLE,1);
+        SDL_WidgetPropertiesOf(UI_Players[0].Normal.PlayerState,SET_VISIBLE,1);
+        SDL_WidgetPropertiesOf(UI_Players[0].Normal.Pitch,SET_VISIBLE,1);
+        SDL_WidgetPropertiesOf(UI_Players[0].Normal.TimeRemaining,SET_VISIBLE,1);
+        SDL_WidgetPropertiesOf(UI_Players[0].Normal.TimeElapsed,SET_VISIBLE,1);
+        SDL_WidgetPropertiesOf(UI_Players[0].Normal.Bitrate,SET_VISIBLE,1);
+        SDL_WidgetPropertiesOf(UI_Players[0].Normal.Samplerate,SET_VISIBLE,1);
+        SDL_WidgetPropertiesOf(UI_Players[0].Normal.VolumeLeft,SET_VISIBLE,1);
+        SDL_WidgetPropertiesOf(UI_Players[0].Normal.VolumeRight,SET_VISIBLE,1);
         while(l)
         {
             SDL_WidgetPropertiesOf(l->data,SET_VISIBLE,1);        
@@ -156,7 +153,7 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
         {
         case BUTTON_PLAY:
             /* Create the play button */
-            UI_Players[nr].ButtonPlay=SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
+            UI_Players[nr].Normal.ButtonPlay=SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
             SDL_WidgetProperties(SET_NORMAL_IMAGE,   IMG_Load(Button->normal));
             SDL_WidgetProperties(SET_HIGHLIGHT_IMAGE,IMG_Load(Button->highlighted));
             SDL_WidgetProperties(SET_PRESSED_IMAGE,  IMG_Load(Button->pressed));
@@ -164,7 +161,7 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
             break;
         case BUTTON_PAUSE:
             /* Create the pause button */
-            UI_Players[nr].ButtonPause=SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
+            UI_Players[nr].Normal.ButtonPause=SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
             if(Button->normal)
                 SDL_WidgetProperties(SET_NORMAL_IMAGE,   IMG_Load(Button->normal));
             if(Button->highlighted)
@@ -176,7 +173,7 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
             break;
         case BUTTON_INFO:
             /* Create the info button */
-            UI_Players[nr].ButtonInfo=SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
+            UI_Players[nr].Normal.ButtonInfo=SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
             if(Button->normal)
                 SDL_WidgetProperties(SET_NORMAL_IMAGE,   IMG_Load(Button->normal));
             if(Button->highlighted)
@@ -195,48 +192,48 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
         {
         case TEXT_TIME_ELAPSED:
             /* Time elapsed */
-            UI_Players[nr].TimeElapsed=SDL_WidgetCreateR(SDL_LABEL,Text->Rect);
+            UI_Players[nr].Normal.TimeElapsed=SDL_WidgetCreateR(SDL_LABEL,Text->Rect);
             SDL_WidgetProperties(SET_FONT,THEME_Font(Text->font));
             SDL_WidgetProperties(SET_FG_COLOR,Text->fgcolor);
             break;
 
         case TEXT_TIME_REMAINING:
             /* Time remaining */
-            UI_Players[nr].TimeRemaining=SDL_WidgetCreateR(SDL_LABEL,Text->Rect);
+            UI_Players[nr].Normal.TimeRemaining=SDL_WidgetCreateR(SDL_LABEL,Text->Rect);
             SDL_WidgetProperties(SET_FONT,THEME_Font(Text->font));
             SDL_WidgetProperties(SET_FG_COLOR,Text->fgcolor);
             break;
 
         case TEXT_SONG_ARTIST:
             /* Create the artist label */
-            UI_Players[nr].Artist=SDL_WidgetCreateR(SDL_LABEL,Text->Rect);
+            UI_Players[nr].Normal.Artist=SDL_WidgetCreateR(SDL_LABEL,Text->Rect);
             SDL_WidgetProperties(SET_FONT,THEME_Font(Text->font));
             SDL_WidgetProperties(SET_FG_COLOR,Text->fgcolor);
             break;
 
         case TEXT_SONG_TITLE:
             /* Create the title label */
-            UI_Players[nr].Title=SDL_WidgetCreateR(SDL_LABEL,Text->Rect);
+            UI_Players[nr].Normal.Title=SDL_WidgetCreateR(SDL_LABEL,Text->Rect);
             SDL_WidgetProperties(SET_FONT,THEME_Font(Text->font));
             SDL_WidgetProperties(SET_FG_COLOR,Text->fgcolor);
             break;
 
         case TEXT_PLAYER_STATE:
             /* Draw the state of the player  as a string */
-            UI_Players[nr].PlayerState=SDL_WidgetCreateR(SDL_LABEL,Text->Rect);
+            UI_Players[nr].Normal.PlayerState=SDL_WidgetCreateR(SDL_LABEL,Text->Rect);
             SDL_WidgetProperties(SET_FONT,THEME_Font(Text->font));
             SDL_WidgetProperties(SET_FG_COLOR,Text->fgcolor);
             break;
 
         case TEXT_SAMPLERATE:
             /* Create the samplerate label */
-            UI_Players[nr].Samplerate=SDL_WidgetCreateR(SDL_LABEL,Text->Rect);
+            UI_Players[nr].Normal.Samplerate=SDL_WidgetCreateR(SDL_LABEL,Text->Rect);
             SDL_WidgetProperties(SET_FONT,THEME_Font(Text->font));
             SDL_WidgetProperties(SET_FG_COLOR,Text->fgcolor);
             break;
         case TEXT_BITRATE:
             /* Create the bitrate label */
-            UI_Players[nr].Bitrate=SDL_WidgetCreateR(SDL_LABEL,Text->Rect);
+            UI_Players[nr].Normal.Bitrate=SDL_WidgetCreateR(SDL_LABEL,Text->Rect);
             SDL_WidgetProperties(SET_FONT,THEME_Font(Text->font));
             SDL_WidgetProperties(SET_FG_COLOR,Text->fgcolor);
             break;
@@ -251,12 +248,12 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
         {
         case VOLUMEBAR_VOLUME_LEFT:
             /* Create the volume bar widget */
-            UI_Players[nr].VolumeLeft=SDL_WidgetCreateR(SDL_VOLUMEBAR,VolumeBar->Rect);
+            UI_Players[nr].Normal.VolumeLeft=SDL_WidgetCreateR(SDL_VOLUMEBAR,VolumeBar->Rect);
             SDL_WidgetProperties(SET_MAX_VALUE,127);
             SDL_WidgetProperties(SET_MIN_VALUE,0);
             break;
         case VOLUMEBAR_VOLUME_RIGHT:
-            UI_Players[nr].VolumeRight=SDL_WidgetCreateR(SDL_VOLUMEBAR,VolumeBar->Rect);
+            UI_Players[nr].Normal.VolumeRight=SDL_WidgetCreateR(SDL_VOLUMEBAR,VolumeBar->Rect);
             SDL_WidgetProperties(SET_MAX_VALUE,127);
             SDL_WidgetProperties(SET_MIN_VALUE,0);
             break;
@@ -267,14 +264,14 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
     if(pt->ProgressBar)
     {
         /* Create the progressbar */
-        UI_Players[nr].SongProgress=SDL_WidgetCreateR(SDL_PROGRESSBAR,pt->ProgressBar->Rect);
+        UI_Players[nr].Normal.SongProgress=SDL_WidgetCreateR(SDL_PROGRESSBAR,pt->ProgressBar->Rect);
         SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,UI_ProgressBarClicked,&UI_Players[nr]);
     }
 
     if(pt->Slider)
     {
         /* Create the pitch slider */
-        UI_Players[nr].Pitch=SDL_WidgetCreateR(SDL_SLIDER,pt->Slider->Rect);
+        UI_Players[nr].Normal.Pitch=SDL_WidgetCreateR(SDL_SLIDER,pt->Slider->Rect);
         SDL_WidgetProperties(SET_BUTTON_IMAGE,IMG_Load(pt->Slider->button));
         SDL_WidgetProperties(SET_MAX_VALUE,2);
         SDL_WidgetProperties(SET_MIN_VALUE,0);
@@ -285,7 +282,7 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
 #if 0    
     if(pt->Edit)
     {
-        UI_Players[nr].EditTitle=SDL_WidgetCreateR(SDL_EDIT,pt->Edit->Rect);
+        UI_Players[nr].Info.EditTitle=SDL_WidgetCreateR(SDL_EDIT,pt->Edit->Rect);
         SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
         SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_RETURN,PLAYERUI_EditTitleReturn,&UI_Players[nr]);
     }
@@ -334,26 +331,26 @@ void PLAYERUI_Redraw()
     {
         if(PLAYER_IsPlaying(0))
         {
-            SDL_WidgetPropertiesOf(UI_Players[0].ButtonPlay,SET_VISIBLE,0);
-            SDL_WidgetPropertiesOf(UI_Players[0].ButtonPause,SET_VISIBLE,1);
+            SDL_WidgetPropertiesOf(UI_Players[0].Normal.ButtonPlay,SET_VISIBLE,0);
+            SDL_WidgetPropertiesOf(UI_Players[0].Normal.ButtonPause,SET_VISIBLE,1);
         }    
         else
         {
-            SDL_WidgetPropertiesOf(UI_Players[0].ButtonPause , SET_VISIBLE,0);
-            SDL_WidgetPropertiesOf(UI_Players[0].ButtonPlay  , SET_VISIBLE,1);
+            SDL_WidgetPropertiesOf(UI_Players[0].Normal.ButtonPause , SET_VISIBLE,0);
+            SDL_WidgetPropertiesOf(UI_Players[0].Normal.ButtonPlay  , SET_VISIBLE,1);
         }
         
-        if(UI_Players[1].ButtonPause)
+        if(UI_Players[1].Normal.ButtonPause)
         {
             if(PLAYER_IsPlaying(1))
             {
-                SDL_WidgetPropertiesOf(UI_Players[1].ButtonPlay,SET_VISIBLE,0);
-                SDL_WidgetPropertiesOf(UI_Players[1].ButtonPause,SET_VISIBLE,1);
+                SDL_WidgetPropertiesOf(UI_Players[1].Normal.ButtonPlay,SET_VISIBLE,0);
+                SDL_WidgetPropertiesOf(UI_Players[1].Normal.ButtonPause,SET_VISIBLE,1);
             }
             else
             {
-                SDL_WidgetPropertiesOf(UI_Players[1].ButtonPlay,SET_VISIBLE,1);
-                SDL_WidgetPropertiesOf(UI_Players[1].ButtonPause,SET_VISIBLE,0);
+                SDL_WidgetPropertiesOf(UI_Players[1].Normal.ButtonPlay,SET_VISIBLE,1);
+                SDL_WidgetPropertiesOf(UI_Players[1].Normal.ButtonPause,SET_VISIBLE,0);
             }
         }
     }
@@ -381,8 +378,8 @@ static void PLAYERUI_UpdateArtist(int player)
         
     }
 
-    if(UI_Players[player].Artist)
-        SDL_WidgetPropertiesOf(UI_Players[player].Artist,SET_CAPTION,artist);
+    if(UI_Players[player].Normal.Artist)
+        SDL_WidgetPropertiesOf(UI_Players[player].Normal.Artist,SET_CAPTION,artist);
 }
 
 
@@ -393,8 +390,8 @@ static void PLAYERUI_UpdateTitle(int player)
     memset(title,0,255);
     PLAYER_GetTitle(player,title);
 
-    if(UI_Players[player].Title)
-        SDL_WidgetPropertiesOf(UI_Players[player].Title,SET_CAPTION,title);
+    if(UI_Players[player].Normal.Title)
+        SDL_WidgetPropertiesOf(UI_Players[player].Normal.Title,SET_CAPTION,title);
 
 }
 
@@ -423,21 +420,21 @@ static void PLAYERUI_UpdateTime(int player)
     }
 
 
-    SDL_WidgetPropertiesOf(UI_Players[player].SongProgress,GET_STATE,&state);
+    SDL_WidgetPropertiesOf(UI_Players[player].Normal.SongProgress,GET_STATE,&state);
     if(state == PROGRESSBAR_DRAG)
     {
         double curvalue;
         int curval;
-        SDL_WidgetPropertiesOf(UI_Players[player].SongProgress,GET_CUR_VALUE,&curvalue);
+        SDL_WidgetPropertiesOf(UI_Players[player].Normal.SongProgress,GET_CUR_VALUE,&curvalue);
         curval=(int)curvalue*10;
         msec = ((curval % 60000) % 1000)/10;
         sec  = (curval % 60000) / 1000;
         min  =  curval / 60000;
         sprintf(string,"%02d:%02d.%02d",min,sec,msec);
-        SDL_WidgetPropertiesOf(UI_Players[player].TimeElapsed,SET_CAPTION,string);
+        SDL_WidgetPropertiesOf(UI_Players[player].Normal.TimeElapsed,SET_CAPTION,string);
     }
     else
-        SDL_WidgetPropertiesOf(UI_Players[player].TimeElapsed,SET_CAPTION,string);
+        SDL_WidgetPropertiesOf(UI_Players[player].Normal.TimeElapsed,SET_CAPTION,string);
 
 
     /* Time remaining */
@@ -457,17 +454,17 @@ static void PLAYERUI_UpdateTime(int player)
     {
         double curvalue;
         int curval;
-        SDL_WidgetPropertiesOf(UI_Players[player].SongProgress,GET_CUR_VALUE,&curvalue);
+        SDL_WidgetPropertiesOf(UI_Players[player].Normal.SongProgress,GET_CUR_VALUE,&curvalue);
         curval=(int)curvalue*10;
         curval=totaltime-curval;
         msec = ((curval % 60000) % 1000)/10;
         sec  = (curval % 60000) / 1000;
         min  =  curval / 60000;
         sprintf(string,"%02d:%02d.%02d",min,sec,msec);
-        SDL_WidgetPropertiesOf(UI_Players[player].TimeRemaining,SET_CAPTION,string);
+        SDL_WidgetPropertiesOf(UI_Players[player].Normal.TimeRemaining,SET_CAPTION,string);
     }
     else
-        SDL_WidgetPropertiesOf(UI_Players[player].TimeRemaining,SET_CAPTION,string);
+        SDL_WidgetPropertiesOf(UI_Players[player].Normal.TimeRemaining,SET_CAPTION,string);
 
 
     /* Check for the seconds left */
@@ -479,7 +476,7 @@ static void PLAYERUI_UpdateTime(int player)
             if(PLAYLIST_GetSong(player,0))
             {
                 PLAYER_SetSong(!player,0);
-                MIXER_DoFade(1,0);
+                MIXER_DoFade(1,1);
                 SONGDBUI_Play(!player);
                 totaltime = 0;
                 timeleft  = 0;
@@ -504,12 +501,12 @@ static void PLAYERUI_UpdateTime(int player)
         }
     }
     
-    if(UI_Players[player].SongProgress)
+    if(UI_Players[player].Normal.SongProgress)
     {
         if(state == PROGRESSBAR_NORMAL)
         {
-            SDL_WidgetPropertiesOf(UI_Players[player].SongProgress,SET_CUR_VALUE,(double)(time/10));
-            SDL_WidgetPropertiesOf(UI_Players[player].SongProgress,SET_MAX_VALUE,totaltime/10);
+            SDL_WidgetPropertiesOf(UI_Players[player].Normal.SongProgress,SET_CUR_VALUE,(double)(time/10));
+            SDL_WidgetPropertiesOf(UI_Players[player].Normal.SongProgress,SET_MAX_VALUE,totaltime/10);
         }
     }
 }
@@ -521,18 +518,18 @@ static void PLAYERUI_UpdateVolume(int player)
     
     AUDIOOUTPUT_GetVolumeLevel(player,&left,&right);
     vol=(double)left;
-    SDL_WidgetPropertiesOf(UI_Players[player].VolumeLeft,SET_CUR_VALUE,vol);
+    SDL_WidgetPropertiesOf(UI_Players[player].Normal.VolumeLeft,SET_CUR_VALUE,vol);
     vol=(double)right;
-    SDL_WidgetPropertiesOf(UI_Players[player].VolumeRight,SET_CUR_VALUE,vol);
+    SDL_WidgetPropertiesOf(UI_Players[player].Normal.VolumeRight,SET_CUR_VALUE,vol);
 }
 
 static void PLAYERUI_UpdateFileInfo(int player)
 {
     char label[255];
     sprintf(label,"%d Smpls",PLAYER_GetSamplerate(player));
-    SDL_WidgetPropertiesOf(UI_Players[player].Samplerate,SET_CAPTION,label);
+    SDL_WidgetPropertiesOf(UI_Players[player].Normal.Samplerate,SET_CAPTION,label);
     sprintf(label,"%d KBit",PLAYER_GetBitrate(player)/1000);
-    SDL_WidgetPropertiesOf(UI_Players[player].Bitrate,SET_CAPTION,label);
+    SDL_WidgetPropertiesOf(UI_Players[player].Normal.Bitrate,SET_CAPTION,label);
 }
 
 #if 0
@@ -570,7 +567,7 @@ static void PLAYERUI_UpdateState(int player)
         sprintf(label,"INTERNAL ERROR");
         break;
     }
-    SDL_WidgetPropertiesOf(UI_Players[player].PlayerState,SET_CAPTION,label);
+    SDL_WidgetPropertiesOf(UI_Players[player].Normal.PlayerState,SET_CAPTION,label);
 }
 
 static void PLAYERUI_PlayButton(void *data)
@@ -581,14 +578,14 @@ static void PLAYERUI_PlayButton(void *data)
     memset(title,0,255);
     PLAYER_GetTitle(current->PlayerNr,title);
     
-    SDL_WidgetPropertiesOf(UI_Players[current->PlayerNr].EditTitle,SET_CAPTION,title);
+    SDL_WidgetPropertiesOf(UI_Players[current->PlayerNr].Info.EditTitle,SET_CAPTION,title);
 
     TRACE("PLAYERUI_PlayButton %d",current->PlayerNr);    
 
     if(PLAYER_IsPlaying(current->PlayerNr))
     {
-        SDL_WidgetPropertiesOf(UI_Players[0].ButtonPlay,SET_VISIBLE,1);
-        SDL_WidgetPropertiesOf(UI_Players[0].ButtonPause,SET_VISIBLE,0);
+        SDL_WidgetPropertiesOf(UI_Players[0].Normal.ButtonPlay,SET_VISIBLE,1);
+        SDL_WidgetPropertiesOf(UI_Players[0].Normal.ButtonPause,SET_VISIBLE,0);
         PLAYER_Pause (current->PlayerNr);
     }
     else
@@ -602,7 +599,7 @@ static void PLAYERUI_PlayButton(void *data)
 void UI_ProgressBarClicked(void *playerdata)
 {
     PlayerDisplay *Player= (PlayerDisplay*)playerdata;
-    SDL_Widget *ProgressBar=(SDL_Widget*)UI_Players[Player->PlayerNr].SongProgress;
+    SDL_Widget *ProgressBar=(SDL_Widget*)UI_Players[Player->PlayerNr].Normal.SongProgress;
 
     int time=((SDL_ProgressBar*)ProgressBar)->CurrentValue;
 
@@ -616,7 +613,7 @@ static void PLAYERUI_SetSpeed(void *data)
     double curval;
     PlayerDisplay *active=(PlayerDisplay*)data;
    
-    SDL_WidgetPropertiesOf(active->Pitch,GET_CUR_VALUE,&curval);
+    SDL_WidgetPropertiesOf(active->Normal.Pitch,GET_CUR_VALUE,&curval);
     curval=2.0-curval;
     PLAYER_SetSpeed(active->PlayerNr,curval);
 }

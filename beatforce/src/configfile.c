@@ -34,6 +34,9 @@
 #include "osa.h"
 #include "configfile.h"
 
+#define MODULE_ID CONFIGFILE
+#include "debug.h"
+
 static BeatforceConfig *gBeatforceConfig;
 
 AudioConfig *
@@ -174,7 +177,7 @@ int CONFIGFILE_CreateDir (void)
     {
         if (mkdir (dirname, 0755) != 0)
         {
-            fprintf(stderr,"Couldn´t create directory %s.", dirname);
+            ERROR("Couldn´t create directory %s.", dirname);
             return 0;
         }
     }

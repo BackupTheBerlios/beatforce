@@ -18,9 +18,7 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 #include <SDL/SDL.h>
-#include "SDL_Window.h"
-#include <SDL_Table.h>
-#include <SDL_Tree.h>
+#include <SDLTk.h>
 #include <config.h>
 
 #include "osa.h"
@@ -401,7 +399,6 @@ SDL_Surface *Window_CreateFileWindow()
     ThemeImage    *Image  = NULL;
     ThemeButton   *Button = NULL;
     ThemeTable    *Table  = NULL;
-    ThemeTree     *Tree   = NULL;
 
     if(tc == NULL)
         return NULL;
@@ -486,7 +483,7 @@ SDL_Surface *Window_CreateFileWindow()
             SDL_WidgetProperties(SET_VISIBLE_COLUMNS, 1);
             SDL_WidgetProperties(SET_VISIBLE_ROWS, 19);
             SDL_WidgetProperties(COLUMN_WIDTH,1,Table->Rect.w);
-            SDL_WidgetProperties(SET_SELECTABLE,2);
+            SDL_WidgetProperties(SET_SELECTION_MODE,TABLE_MODE_BROWSE);
             SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
             SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
             SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION,FILEWINDOW_GetSubgroup);
@@ -501,7 +498,7 @@ SDL_Surface *Window_CreateFileWindow()
             SDL_WidgetProperties(COLUMN_WIDTH,1,Table->Rect.w);
             SDL_WidgetProperties(ROWS,LLIST_NoOfEntries(files));
             SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
-            SDL_WidgetProperties(SET_SELECTABLE,-1);
+            SDL_WidgetProperties(SET_SELECTION_MODE,TABLE_MODE_MULTIPLE);
             SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION,FILEWINDOW_GetFilesInDirectory);
             SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
             SDL_WidgetProperties(SET_IMAGE,IMG_Load(THEME_DIR"/beatforce/tablescrollbar.jpg"));
@@ -512,7 +509,7 @@ SDL_Surface *Window_CreateFileWindow()
             SDL_WidgetProperties(SET_VISIBLE_ROWS, 190);
             SDL_WidgetProperties(COLUMN_WIDTH,1,Table->Rect.w);
             SDL_WidgetProperties(ROWS, 10);
-            SDL_WidgetProperties(SET_SELECTABLE,1);
+            SDL_WidgetProperties(SET_SELECTION_MODE,TABLE_MODE_MULTIPLE);
             SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
             SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION,FILEWINDOW_GetFilesInSubgroup);
             SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
@@ -533,37 +530,20 @@ SDL_Surface *Window_CreateFileWindow()
     {
         BFList *l;
         char *r;
-#if 0
-        case CONTENTS_DIRECTORIES:
-            TableDirectories=SDL_WidgetCreateR(SDL_TABLE,Table->Rect);
-            SDL_WidgetProperties(SET_VISIBLE_COLUMNS, 1);
-            SDL_WidgetProperties(COLUMN_WIDTH,1,Table->Rect.w);
-            SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
-            SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION,FILEWINDOW_GetDirectories);
-            SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
-            SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,FILEWINDOW_DirectoryClicked,NULL);
-            SDL_WidgetProperties(SET_IMAGE,IMG_Load(THEME_DIR"/beatforce/tablescrollbar.jpg"));
 
-            break;
-#endif
-
-
-
-            TableDirectories=SDL_WidgetCreate(SDL_TREE,10,200,200,170);
-            SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
-            SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
-            SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,FILEWINDOW_DirectoryClicked,TableDirectories);
+        TableDirectories=SDL_WidgetCreate(SDL_TREE,10,200,200,170);
+        SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
+        SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
+        SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,FILEWINDOW_DirectoryClicked,TableDirectories);
         
-            l=OSA_FindDirectories(directory);
-            while(l)
-            {
-                r=(char*)l->data;
-                if(r[0] != '.')
-                    SDL_TreeInsertItem(TableDirectories,NULL,(char*)l->data);
-                l=l->next;
-            }
-
-
+        l=OSA_FindDirectories(directory);
+        while(l)
+        {
+            r=(char*)l->data;
+            if(r[0] != '.')
+                SDL_TreeInsertItem(TableDirectories,NULL,(char*)l->data);
+            l=l->next;
+        }
     }
 
     return FileWindow;

@@ -171,6 +171,9 @@ typedef struct ThemeTable
 typedef struct ThemeTree
 {
     SDL_Rect Rect;
+    char *Font;
+    unsigned int fgcolor;
+    unsigned int bgcolor;
 }ThemeTree;
 
 typedef struct ThemeVolumeBar
@@ -259,6 +262,7 @@ typedef struct ThemeFileWindow
     ThemeImage  *Image;
     ThemeText   *Text;
     ThemeButton *Button;
+    ThemeTree   *Tree;
 }ThemeFileWindow;
 
 typedef struct

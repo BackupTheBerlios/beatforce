@@ -49,8 +49,8 @@ static struct SongDBEntry *test;
 int PLAYLIST_Init (int player_nr)
 {
     TRACE("PLAYLIST_Init");
-    curr_unique = 0;
-    no_of_entries=0;
+    curr_unique    = 0;
+    no_of_entries  = 0;
     playlist[0]=NULL;
     playlist[1]=NULL;
     return 1;

@@ -51,7 +51,7 @@ ThemeFont   *XML_ParseFont(xmlDocPtr doc, xmlNodePtr cur);
 ThemeText   *XML_ParseText(ThemeText *text,xmlDocPtr doc, xmlNodePtr cur);
 ThemeButton *XML_ParseButton(ThemeButton *button,xmlDocPtr doc, xmlNodePtr cur);
 ThemeTable  *XML_ParseTable(ThemeTable *pp,xmlDocPtr doc, xmlNodePtr cur);
-
+ThemeTree   *XML_ParseTree(xmlDocPtr doc, xmlNodePtr cur);
 
 /* Window parsers */
 ThemeMainWindow   *XML_ParseMainwindow(xmlDocPtr doc, xmlNodePtr cur);
@@ -382,6 +382,10 @@ ThemeFileWindow *XML_ParseFilewindow(xmlDocPtr doc, xmlNodePtr cur)
             {
                 filewindow->Text=XML_ParseText(filewindow->Text,doc,cur);
             }
+            if ((!xmlStrcmp(cur->name, (const xmlChar *)"tree"))) 
+            {
+                filewindow->Tree=XML_ParseTree(doc,cur);
+            }
             cur=cur->next;
         }
     }
@@ -525,6 +529,32 @@ ThemeClock *XML_ParseClock(xmlDocPtr doc, xmlNodePtr cur)
 
     StorePropertyAsString(cur,"font",&clock->font);
     return clock;
+}
+
+ThemeTree *XML_ParseTree(xmlDocPtr doc, xmlNodePtr cur)
+{
+    ThemeTree *tree;
+    char *color;
+    tree=malloc(sizeof(ThemeTree));
+    memset(tree,0,sizeof(ThemeTree));
+
+    StorePropertyAsShort(cur,"x",&tree->Rect.x);
+    StorePropertyAsShort(cur,"y",&tree->Rect.y);
+    StorePropertyAsShort(cur,"w",&tree->Rect.w);
+    StorePropertyAsShort(cur,"h",&tree->Rect.h);
+
+#if 0
+    StorePropertyAsString(cur,"bgcolor",&color);
+    tree->bgcolor=getcolor(color);
+    free(color);
+    StorePropertyAsString(cur,"fgcolor",&color);
+
+    tree->fgcolor=getcolor(color);
+    free(color);
+
+    StorePropertyAsString(cur,"font",&tree->Font);
+#endif
+    return tree;
 }
 
 
@@ -761,6 +791,7 @@ ThemeText *XML_ParseText(ThemeText *text,xmlDocPtr doc, xmlNodePtr cur)
     }
     return text;    
 }
+
 
 ThemeVolumeBar *XML_ParseVolumeBar(ThemeVolumeBar *volumebar, xmlDocPtr doc, 
                                    xmlNodePtr cur)

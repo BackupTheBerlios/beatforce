@@ -474,6 +474,49 @@ int SDL_TableEventHandler(SDL_Widget *widget,SDL_Event *event)
             }
         }
         break;
+    case SDL_KEYDOWN:
+        switch( event->key.keysym.sym ) 
+        {
+        case SDLK_DOWN:
+            if(Table->Scrollbar)
+            {
+                double row;
+                SDL_WidgetPropertiesOf(Table->Scrollbar,GET_CUR_VALUE,&row);
+                row+=1.0;
+                SDL_WidgetPropertiesOf(Table->Scrollbar,SET_CUR_VALUE,row);
+            }
+            break;
+        case SDLK_UP:
+            if(Table->Scrollbar)
+            {
+                double row;
+                SDL_WidgetPropertiesOf(Table->Scrollbar,GET_CUR_VALUE,&row);
+                row-=1.0;
+                SDL_WidgetPropertiesOf(Table->Scrollbar,SET_CUR_VALUE,row);
+            }
+            break;
+        case SDLK_PAGEUP:
+            if(Table->Scrollbar)
+            {
+                double row;
+                SDL_WidgetPropertiesOf(Table->Scrollbar,GET_CUR_VALUE,&row);
+                row-=10.0;
+                SDL_WidgetPropertiesOf(Table->Scrollbar,SET_CUR_VALUE,row);
+            }
+            break;
+        case SDLK_PAGEDOWN:
+            if(Table->Scrollbar)
+            {
+                double row;
+                SDL_WidgetPropertiesOf(Table->Scrollbar,GET_CUR_VALUE,&row);
+                row+=10.0;
+                SDL_WidgetPropertiesOf(Table->Scrollbar,SET_CUR_VALUE,row);
+            }
+            break;
+        default:
+            break;
+        }
+        break;
     default:
         break;
     }

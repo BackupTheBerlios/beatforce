@@ -243,7 +243,7 @@ int SDL_TreeEventHandler(SDL_Widget *widget,SDL_Event *event)
                 
                 if(event->motion.x < widget->Rect.x + widget->Rect.w)
                     if(event->motion.x > (widget->Rect.x + (widget->Rect.w -45)))
-                        return;
+                        return 0;
                     
                 
                 row=y/row;
@@ -254,7 +254,7 @@ int SDL_TreeEventHandler(SDL_Widget *widget,SDL_Event *event)
                 if(Tree->Clicked)
                     Tree->Clicked(Tree->ClickedData);
             }
-            if(event->button.button == 4) //mousehweel down
+            if(event->button.button == 4) /* mousehweel down */
             {
                 double row;
                 if(Tree->Scrollbar)
@@ -265,7 +265,7 @@ int SDL_TreeEventHandler(SDL_Widget *widget,SDL_Event *event)
                 }
 
             }
-            if(event->button.button == 5)
+            if(event->button.button == 5) /* Mousewheel up */
             {
                 double row;
                 if(Tree->Scrollbar)

@@ -57,7 +57,7 @@ typedef struct SDL_Tree
     void (*Clicked)(void *data);
     void *ClickedData;
 
-    void* Scrollbar;
+    SDL_Widget* Scrollbar;
     
 }SDL_Tree;
 

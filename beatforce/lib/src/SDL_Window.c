@@ -279,6 +279,7 @@ int SDLTK_Main()
     int handled;
 
     timer=SDL_AddTimer(1,SDL_WidgetRedraw,NULL);
+    SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY,SDL_DEFAULT_REPEAT_INTERVAL);
 
     while(CurWindow)
     {
@@ -287,9 +288,12 @@ int SDLTK_Main()
             handled=0;
             switch(test_event.type) 
             {
-               case SDL_QUIT:
-                   CurWindow=NULL;
-                   break;
+            case SDL_QUIT:
+                CurWindow=NULL;
+                break;
+//            case SDL_VIDEOEXPOSE:
+//                SDL_WidgetRedraw(10,NULL);
+                break;
             default:
                 break;
             }

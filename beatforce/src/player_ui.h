@@ -22,6 +22,7 @@
 #ifndef __PLAYER_UI_H__
 #define __PLAYER_UI_H__
 
+#include "SDLTk.h"
 #include "theme.h"
 #include "llist.h"
 /* Public routines */
@@ -41,32 +42,41 @@ enum
 };
 
 
-/* Player ui data structures */
+typedef struct PlayerDisplayNormal
+{
+    SDL_Widget *ButtonPause;
+    SDL_Widget *ButtonPlay;
+    SDL_Widget *ButtonInfo;
+    
+    SDL_Widget *TimeElapsed;
+    SDL_Widget *TimeRemaining;
 
+    SDL_Widget *Title;
+    SDL_Widget *Artist;
+    SDL_Widget *PlayerState;
+    SDL_Widget *Samplerate;
+    SDL_Widget *Bitrate;
+    SDL_Widget *SongProgress; 
+    SDL_Widget *VolumeLeft;
+    SDL_Widget *VolumeRight;
+
+    SDL_Widget *Pitch;
+}PlayerDisplayNormal;
+
+typedef struct PlayerDisplayInfo
+{
+
+   SDL_Widget *EditTitle;
+}PlayerDisplayInfo;
+
+/* Player ui data structures */
 typedef struct PlayerDisplay
 {
     int PlayerNr;
     int State;
 
-    void *ButtonPause;
-    void *ButtonPlay;
-    void *ButtonInfo;
-    
-    void *TimeElapsed;
-    void *TimeRemaining;
-
-    void *Title;
-    void *Artist;
-    void *PlayerState;
-    void *Samplerate;
-    void *Bitrate;
-    void *SongProgress; 
-    void *VolumeLeft;
-    void *VolumeRight;
-
-    void *Pitch;
-
-    void *EditTitle;
+    PlayerDisplayNormal Normal;
+    PlayerDisplayInfo   Info;
     BFList *Images;
     
 }PlayerDisplay;
