@@ -132,7 +132,6 @@ else:
 
 # Look first for 'scons-__version__' in all of our preference libs,
 # then for 'scons'.
-libs.extend(map(lambda x: os.path.join(x, 'scons'), prefs))
 libs.extend(map(lambda x: os.path.join(x, scons_version), prefs))
 libs.extend(map(lambda x: os.path.join(x, 'scons'), prefs))
 
