@@ -43,10 +43,8 @@
 
 #include "ogg.h"
 
-#define DEBUG printf
-#define ERROR printf
-#define TRACE printf
-#define LOG printf
+#define MODULE_ID OGG
+#include "debug.h"
 
 void *ogg_play_loop (void *);
 
@@ -324,6 +322,7 @@ ogg_load_file (Private * h, char *filename)
     length=(unsigned long)ov_pcm_total(&private->vf,-1);
 
   {
+#if 0
       char **ptr=ov_comment(&private->vf,-1)->user_comments;
       vorbis_info *vi=ov_info(&private->vf,-1);
       while(*ptr)
@@ -336,6 +335,7 @@ ogg_load_file (Private * h, char *filename)
               (long)ov_pcm_total(&private->vf,-1));
       fprintf(stderr,"Encoded by: %s\n\n",ov_comment(&private->vf,-1)->vendor);
       fprintf(stderr,"Total file time %g\n",ov_time_total(&private->vf,-1));
+#endif
   }
   
 
@@ -347,9 +347,8 @@ ogg_load_file (Private * h, char *filename)
     private->channels = 2;
     private->rate = 44100;
 
-    if (private->ogg_if.output_open
-        (private->ch_id,
-         FMT_S16_NE, private->rate, private->channels, &private->max_bytes))
+    if (!private->ogg_if.output_open(private->ch_id,FMT_S16_NE, private->rate, private->channels, 
+                                     &private->max_bytes))
     {
 	private->audio_error = TRUE;
 	fclose (private->fd);

@@ -31,6 +31,7 @@ enum
     /*Main window */
     BUTTON_PLAY=1, 
     BUTTON_PAUSE,
+    BUTTON_INFO,
     BUTTON_RESET_FADER,
     BUTTON_CHANGE_DIR,
 

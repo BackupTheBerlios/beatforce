@@ -1,5 +1,5 @@
 /*
-  Beatforce/ Startup of beatforce
+  Beatforce/ Effect
 
   Copyright (C) 2003 John Beuving (john.beuving@home.nl)
 
@@ -17,34 +17,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-#ifndef __PLUGIN_H__
-#define __PLUGIN_H__
 
-#include "config.h"
-#include "llist.h"
-
-#ifndef PLUGIN_DIR
-#define PLUGIN_DIR                      /usr/share/beatforce/plugins/
-#endif
-
-#ifndef PLUGIN_ROOT_DIR
-#define PLUGIN_ROOT_DIR 		PLUGIN_DIR
-#endif
-
-#ifndef INPUT_DIR
-#define INPUT_DIR				"input"
-#endif
-
-#ifndef OUTPUT_DIR
-#define OUTPUT_DIR				"output"
-#endif
-
-#define PLUGIN_TYPE_INPUT		1
-#define PLUGIN_TYPE_OUTPUT		2
-#define PLUGIN_TYPE_EFFECT              3
-
-int PLUGIN_Init(int type);
-BFList *PLUGIN_GetList (int type);
-int PLUGIN_Cleanup();
-
-#endif
+int EFFECT_Init();
+int EFFECT_Run(int size);
+int EFFECT_Cleanup();

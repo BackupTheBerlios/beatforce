@@ -42,7 +42,8 @@ void MIXERUI_MainVolumeChanged(void *data);
 
 void playsample(void *s)
 {
-    SAMPLER_Play(8);
+    EFFECT_Play();
+//    SAMPLER_Play(8);
 }
 
 void playsample2(void *s)

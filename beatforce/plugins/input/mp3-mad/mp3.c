@@ -615,9 +615,8 @@ mp3_load_file (Private * h, char *filename)
     private->channels = MAD_NCHANNELS (&header);
     private->rate = header.samplerate;
 
-    if (private->mp3_if.output_open
-        (private->ch_id,
-         FMT_S16_NE, private->rate, private->channels, &private->max_bytes))
+    if (!private->mp3_if.output_open(private->ch_id,FMT_S16_NE, private->rate, private->channels, 
+                                     &private->max_bytes))
     {
 	private->audio_error = TRUE;
 	fclose (private->fd);

@@ -71,8 +71,8 @@ typedef signed short output_word;
 struct OutChannel
 {
     output_word *buffer;
-
     output_word *buffer2;
+
     int buffer2_size;
 
     struct OutRingBuffer *rb;

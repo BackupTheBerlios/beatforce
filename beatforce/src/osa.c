@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <dirent.h>
 #include <string.h>
 #include <dlfcn.h>
@@ -68,6 +69,8 @@ BFList *OSA_FindDirectories(char *dir)
     DIR *d;
     struct dirent* dent;
     BFList *dirs = NULL;
+    char dirname[255];
+    struct stat buf;
 
     TRACE("OSA_FindDirectories enter %s",dir);
 
@@ -91,23 +94,12 @@ BFList *OSA_FindDirectories(char *dir)
     }
     while(dent)
     {
-        if(dent->d_type == DT_DIR)
+        sprintf(dirname,"%s/%s",dir,dent->d_name);
+        stat(dirname,&buf);
+        if(S_ISDIR(buf.st_mode))
         {
-            char *dirname;
-            dirname=malloc(255);
-            memset(dirname,0,255);
-            if(dir[strlen(dir)-1]!='/')
-            {
-                sprintf(dirname,"%s/%s",dir,dent->d_name);
-                TRACE("%s",dirname);
-            }
-            else
-            {
-                sprintf(dirname,"%s%s",dir,dent->d_name);
-                TRACE("%s",dirname);
-            }
             if(strlen(dirname))
-                dirs=LLIST_Append(dirs,dirname);
+                dirs=LLIST_Append(dirs,strdup(dirname));
         }
         dent=readdir(d);
     }
@@ -122,6 +114,8 @@ BFList *OSA_FindFiles(char *dir,char *extension,int recursive)
     struct dirent* dent;
     BFList *files=NULL;
     int offset=0;
+    char filename[255];
+    struct stat buf;
 
     if(dir == NULL)
     {
@@ -137,7 +131,10 @@ BFList *OSA_FindFiles(char *dir,char *extension,int recursive)
     dent=readdir(d);
     while(dent)
     {
-        if(dent->d_type==8 && strlen(dent->d_name)>4)
+        sprintf(filename,"%s/%s",dir,dent->d_name);
+        stat(filename,&buf);
+        
+        if(S_ISREG(buf.st_mode) && strlen(dent->d_name)>4)
         {
             char *ext;
 
@@ -146,14 +143,11 @@ BFList *OSA_FindFiles(char *dir,char *extension,int recursive)
             {
                 if(!strcmp(ext,extension))
                 {
-                    char *filename;
-                    filename=(char*)malloc(255);
-                    sprintf(filename,"%s/%s",dir,dent->d_name);
-                    files=LLIST_Append (files,filename);
+                    files=LLIST_Append(files,strdup(filename));
                 }
             }
         }
-        if(dent->d_type==4 && dent->d_name[0]!='.')
+        if(S_ISDIR(buf.st_mode) && dent->d_name[0]!='.')
         {
             char newdir[255];
 

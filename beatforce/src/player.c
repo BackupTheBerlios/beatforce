@@ -80,7 +80,6 @@ int PLAYER_Init(int player_nr, PlayerConfig * cfg)
     
     player->ip_plugins=INPUT_Init (player_nr, PLUGIN_GetList(PLUGIN_TYPE_INPUT));
 
-    printf("PL %p\n",player->ip_plugins);
     PLAYLIST_Init (player_nr);
     return 0;
 }
@@ -251,19 +250,19 @@ int PLAYER_SetSong (int player_nr, int no)
     if(!player_load (player_nr))
     {
         p->e = NULL;
-        printf ("player_set_song: error loading song ID %ld. Retrying...\n",
-                pe->e->id);
+//        printf ("player_set_song: error loading song ID %ld. Retrying...\n",
+//                pe->e->id);
         if(!player_load (player_nr))
         {
-            printf ("player_set_song: error loading song ID %ld.", pe->e->id);
+//            printf ("player_set_song: error loading song ID %ld.", pe->e->id);
 
             if (PLAYLIST_GetNoOfEntries (player_nr) > 1)
             {
                 PLAYER_SetSong (player_nr, no + 1);
-                printf ("trying next!\n");
+//                printf ("trying next!\n");
             }
-            else
-                printf ("no more songs\n");
+//            else
+//                printf ("no more songs\n");
 
         }
     }

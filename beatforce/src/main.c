@@ -35,6 +35,7 @@
 #include "search_window.h"
 #include "file_window.h"
 #include "sampler.h"
+#include "effect.h"
 
 #include "wndmgr.h"
 #include "SDL_Widget.h"
@@ -78,6 +79,8 @@ int main(int argc, char *argv[])
     PLUGIN_Init (PLUGIN_TYPE_EFFECT);
 
     AUDIOOUTPUT_Init (audiocfg);
+    EFFECT_Init();
+    
     MIXER_Init  ();
     PLAYER_Init (0, playercfg0);
     PLAYER_Init (1, playercfg1);
@@ -96,7 +99,8 @@ int main(int argc, char *argv[])
     AUDIOOUTPUT_Cleanup();
 
     SONGDB_Exit();
-
+    EFFECT_Cleanup();
+    PLUGIN_Cleanup();
     // save everything on exit
     cfgfile = bf_cfg_open_default_file ();
     bf_cfg_write_AudioConfig   (cfgfile, audiocfg);

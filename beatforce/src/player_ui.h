@@ -50,6 +50,7 @@ typedef struct PlayerDisplay
 
     void *ButtonPause;
     void *ButtonPlay;
+    void *ButtonInfo;
     
     void *TimeElapsed;
     void *TimeRemaining;

@@ -150,12 +150,6 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
         Image=Image->next;
         
     }        
-    if(nr == 0)
-    {
-        SDL_WidgetCreate(SDL_BUTTON,273,34,0,0);
-        SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,PLAYERUI_HidePlayer,NULL);
-        SDL_WidgetProperties(SET_NORMAL_IMAGE, IMG_Load("/home/beuving/beatforce/themes/beatforce/info.bmp"));
-    }
     while(Button)
     {
         switch(Button->action)
@@ -180,6 +174,17 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
             SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,PLAYERUI_PlayButton,&UI_Players[nr]);
             SDL_WidgetProperties(SET_VISIBLE,0);
             break;
+        case BUTTON_INFO:
+            /* Create the info button */
+            UI_Players[nr].ButtonInfo=SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
+            if(Button->normal)
+                SDL_WidgetProperties(SET_NORMAL_IMAGE,   IMG_Load(Button->normal));
+            if(Button->highlighted)
+                SDL_WidgetProperties(SET_HIGHLIGHT_IMAGE,IMG_Load(Button->highlighted));
+            if(Button->pressed)
+                SDL_WidgetProperties(SET_PRESSED_IMAGE,  IMG_Load(Button->pressed));
+            SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,PLAYERUI_HidePlayer,&UI_Players[nr]);
+            
         }
         Button=Button->next;
     }
@@ -583,7 +588,7 @@ static void PLAYERUI_PlayButton(void *data)
     
     SDL_WidgetPropertiesOf(UI_Players[current->PlayerNr].EditTitle,SET_CAPTION,title);
 
-    TRACE("playerui_PlayButton %d",current->PlayerNr);    
+    TRACE("PLAYERUI_PlayButton %d",current->PlayerNr);    
 
     if(PLAYER_IsPlaying(current->PlayerNr))
     {

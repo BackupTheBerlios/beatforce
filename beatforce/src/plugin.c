@@ -27,8 +27,8 @@
 #include "llist.h"
 #include "input_plugin.h"
 #include "output_plugin.h"
+#include "effect_plugin.h"
 #include "osa.h"
-#include "ladspa.h"
 
 
 #define MODULE_ID PLUGIN
@@ -95,14 +95,38 @@ BFList *PLUGIN_GetList (int type)
     return NULL;
 }
 
+int PLUGIN_Cleanup()
+{
+    BFList *temp;
+    EffectPlugin *e;
+    TRACE("PLUGIN_Cleanup");
+    printf("PLUGIN_CLEANUP\n");
+    temp=effect_list;
+
+    while(temp)
+    {
+        e=(EffectPlugin*)temp->data;
+        if(e)
+        {
+            if(e->handle)
+                OSA_CloseLibrary(e->handle);
+
+            if(e->filename)
+                free(e->filename);
+        }
+        temp=temp->next;
+    }
+    return 1;
+}
+
+
 static void 
 PLUGIN_AddPlugin(char * filename, int type, BFList ** plugins)
 {
     void *h;
     void *(*gpi) (void);
     void *(*gpo) (void);
-    LADSPA_Descriptor_Function dis;
-
+    
     TRACE("PLUGIN_AddPlugin %s",filename);
     if ((h = OSA_LoadLibrary(filename)) != NULL)
     {
@@ -136,22 +160,22 @@ PLUGIN_AddPlugin(char * filename, int type, BFList ** plugins)
             }
             break;
         case PLUGIN_TYPE_EFFECT:
-            if ((dis = OSA_GetFunctionAddress (h, "ladspa_descriptor")) != NULL)
+            if (OSA_GetFunctionAddress (h, "ladspa_descriptor") != NULL)
             {
-                unsigned long i;
-                const LADSPA_Descriptor *dc;
-                dc=NULL;
-                for(i=0;;i++)
+                EffectPlugin *p;
+                /* Error in delay plugin : skip it*/
+                if(strstr(filename,"delay"))
                 {
-                    dc=dis(i);
-                    if(dc==NULL)
-                        break;
-                    printf("Effect: %s\n",dc->Label);
-                    
+                    OSA_CloseLibrary(h);
+                    break;
                 }
-
-                *plugins = LLIST_Append (*plugins, (void*) h);
-                OSA_CloseLibrary(h);
+                p=malloc(sizeof(EffectPlugin));
+                memset(p,0,sizeof(EffectPlugin));
+                p->dis  = OSA_GetFunctionAddress (h, "ladspa_descriptor");
+                p->handle = h;
+                p->filename = (char*)strdup (filename);
+                
+                *plugins = LLIST_Append (*plugins, (void*) p);
             }
             break;
         default:
@@ -185,3 +209,4 @@ PLUGIN_ScanPlugins (char *dirname, int type, BFList ** plugins)
     }
 
 }
+

@@ -70,6 +70,7 @@ OUTPUT_PluginInit(struct OutGroup *grp, AudioConfig * cfg, int i)
     grp->dev = malloc (sizeof (OutputDevice));
     memset (grp->dev, 0, sizeof (OutputDevice));
 
+    /* The output id should be something else than "none" */
     if (strcmp (cfg->output_id[i], "none"))
     {
         next = list;

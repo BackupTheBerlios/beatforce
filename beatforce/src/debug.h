@@ -25,22 +25,24 @@
 
 #define AUDIO_OUTPUT 1
 #define CLOCK        2
-#define FILEWINDOW   3
-#define INPUT        4
-#define MP3          5
-#define OSA          6
-#define OUTPUT       7
-#define PLAYER       8
-#define PLAYER_UI    9
-#define PLAYLIST     10
-#define PLAYLIST_UI  11
-#define PLUGIN       12
-#define RINGBUFFER   13
-#define SAMPLER      14
-#define SONGDB       15
-#define SONGDB_UI    16
-#define THEME        17
-#define WNDMGR       18
+#define EFFECT       3
+#define FILEWINDOW   4
+#define INPUT        5
+#define MP3          6
+#define OGG          7
+#define OSA          8
+#define OUTPUT       9
+#define PLAYER       10
+#define PLAYER_UI    11
+#define PLAYLIST     12
+#define PLAYLIST_UI  13
+#define PLUGIN       14
+#define RINGBUFFER   15
+#define SAMPLER      16
+#define SONGDB       17
+#define SONGDB_UI    18
+#define THEME        19
+#define WNDMGR       20
 
 #define name(x) x
 #define module( x ) ( #x )
@@ -73,6 +75,11 @@ void printid(char *id,int line,char *message);
 #define DEBUG DEBUG_OFF
 #endif
 
+#if MODULE_ID == EFFECT
+#define TRACE TRACE_ON
+#define DEBUG DEBUG_OFF
+#endif
+
 #if MODULE_ID == FILEWINDOW
 #define TRACE TRACE_OFF
 #define DEBUG DEBUG_OFF
@@ -95,6 +102,11 @@ void printid(char *id,int line,char *message);
 #if MODULE_ID == MP3
 #undef TRACE
 #undef DEBUG
+#define TRACE TRACE_OFF
+#define DEBUG DEBUG_OFF
+#endif
+
+#if MODULE_ID == OGG
 #define TRACE TRACE_OFF
 #define DEBUG DEBUG_OFF
 #endif

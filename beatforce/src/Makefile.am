@@ -11,6 +11,7 @@ llist.c         llist.h         \
 mixer.c         mixer.h         \
 input.c         input.h         \
 output.c        output.h        \
+effect.c        effect.h        \
 playlist.c      playlist.h      \
 songdb.c        songdb.h        \
 ringbuffer.c    ringbuffer.h    \
@@ -22,6 +23,7 @@ theme.c         theme.h         \
 types.h                         \
 input_plugin.h                  \
 output_plugin.h                 \
+effect_plugin.h                 \
 err.h                           \
 interface.h                     \
                                 \

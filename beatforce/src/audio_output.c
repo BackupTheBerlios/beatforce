@@ -42,7 +42,7 @@
 #include "output.h"
 #include "osa.h"
 #include "mixer.h"
-
+#include "effect.h"
 
 #define MODULE_ID AUDIO_OUTPUT
 #include "debug.h"
@@ -137,15 +137,9 @@ int AUDIOOUTPUT_Init (AudioConfig * audio_cfg)
 
         if(!OUTPUT_PluginInit (group[i], audiocfg, i))
         {
-            char str[255];
-
-            sprintf(str,"output_init: error initializing output device of group %d!\n(error 0x%x)\n",
-                    i,i);
-            printf(str);
-
             if (i == 0)               /* dialog only when group is MASTER(0) */
             {
-                printf (str);
+                ERROR("AUDIOOUTPUT_Init: can not open master output device");
                 return 0;
             }
         }
@@ -214,9 +208,15 @@ int AUDIOOUTPUT_Open(int c, AFormat fmt, int rate, int nch, int *max_bytes)
 {
 
     if (c >= OUTPUT_N_CHANNELS || c < 0)
+    {
+        ERROR("Wrong channel number");
         return 0;
+    }
     if(ch[c] == NULL)
+    {
+        ERROR("Channel not initialised");
         return 0;
+    }
 
     if (ch[c]->open)
     {
@@ -250,7 +250,7 @@ int AUDIOOUTPUT_Open(int c, AFormat fmt, int rate, int nch, int *max_bytes)
     ch[c]->beats = 0;
     ch[c]->bpm = 0;
     n_open++;
-    return 0;
+    return 1;
 }
 
 int AUDIOOUTPUT_Close(int c)
@@ -631,6 +631,11 @@ static int AUDIOOUTPUT_Loop(void *arg)
                 output_read (channel, (unsigned char *) ch[channel]->buffer,
                              OUTPUT_BUFFER_SIZE (audiocfg));
 
+            if(channel==0)
+            {
+                EFFECT_Run(OUTPUT_BUFFER_SIZE(audiocfg));
+            }
+
             if (n_read < 0)
             {
                 printf ("Audio read error: 0x%x\n", n_read);
@@ -1007,7 +1012,10 @@ convert_buffer (AFormat afmt, int nch,
         for (i = 0; i < length >> 1; i++)
             out_buf[i] = ptr1[i] - 32768;
     }
-
+    if(afmt == FMT_FLOAT32)
+    {
+        ERROR("FMT_FLOAT32 not supported");
+    }
     return length;
 }
 

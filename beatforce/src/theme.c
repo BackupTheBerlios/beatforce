@@ -538,6 +538,8 @@ ThemeButton *XML_ParseButton(ThemeButton *button,xmlDocPtr doc, xmlNodePtr cur)
         {
             if(!strcmp(action,"PLAY"))
                 button->action=BUTTON_PLAY;
+            if(!strcmp(action,"INFO"))
+                button->action=BUTTON_INFO;
             if(!strcmp(action,"PAUSE"))
                 button->action=BUTTON_PAUSE;
             if(!strcmp(action,"RESET_FADER"))
@@ -586,6 +588,8 @@ ThemeButton *XML_ParseButton(ThemeButton *button,xmlDocPtr doc, xmlNodePtr cur)
         {
             if(!strcmp(action,"PLAY"))
                 last->next->action=BUTTON_PLAY;
+            if(!strcmp(action,"INFO"))
+                button->action=BUTTON_INFO;
             if(!strcmp(action,"PAUSE"))
                 last->next->action=BUTTON_PAUSE;
             if(!strcmp(action,"RESET_FADER"))

@@ -49,6 +49,7 @@
      <image filename="playerbg.bmp" x="14" y="55"/>
      <image filename="horline.bmp" x="314" y="46"/>
 
+     <button x="273" y="34" normal="info.bmp" action="INFO"/>
      <button x="167" y="176" 
 	normal="playonly_green.bmp"
 	highlight="playonly_green_highlight.bmp"
