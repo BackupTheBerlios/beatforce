@@ -17,8 +17,7 @@
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-
- */
+*/
 
 
 #include <stdlib.h>
@@ -26,12 +25,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-
 #include <stdio.h>
 #include <errno.h>
 #include <time.h>
-
-
 #include <math.h>
 
 #include <vorbis/codec.h>
@@ -62,7 +58,7 @@ char *str_mpeg25_l3=NULL;
 InputPlugin ogg_ip = {
     NULL, 						/* handle, BeatForce fills it */
     NULL, 						/* filename, BeatForce filled */
-    "ogg input plugin",                                 /* Description */
+    "ogg input plugin",         /* Description */
 
     ogg_init,
     ogg_configure,
@@ -71,7 +67,7 @@ InputPlugin ogg_ip = {
 
     ogg_get_tag,
     ogg_get_add_info,
-    NULL,                   // write_tag
+    NULL,                       /* write_tag */
     ogg_load_file,
     ogg_close_file,
     ogg_play,
@@ -97,7 +93,8 @@ get_input_info ()
 
 int
 ogg_set_interface(Private *p,InputInterface *api)
-{
+{   
+    /* ToDo check for NULL */
     oggPrivate *ogg_priv = (oggPrivate *) p;
     
     ogg_priv->ogg_if.output_open        = api->output_open;
@@ -108,8 +105,6 @@ ogg_set_interface(Private *p,InputInterface *api)
     ogg_priv->ogg_if.output_close       = api->output_close;
     ogg_priv->ogg_if.input_eof          = api->input_eof;
     return 1;
-
-
 }
 
 /*ch_id is equal to player_nr */
@@ -143,8 +138,6 @@ ogg_init (Private ** p, int ch_id)
         ERROR("Not enough memory");
 	return 0;
     }
-
-    
     memset (ogg_priv, 0, sizeof (oggPrivate));
 
     ogg_priv->input_buffer  = malloc (OGG_INPUT_BUFFER_SIZE);
@@ -207,10 +200,10 @@ ogg_cleanup (Private * p)
         if (NULL != ogg_priv->input_buffer)
 	    free (ogg_priv->input_buffer);
         if (NULL != ogg_priv->output_buffer)
-            free (ogg_priv->output_buffer);
+	    free (ogg_priv->output_buffer);
         if (NULL != ogg_priv->vorbis_buffer)
-            free (ogg_priv->vorbis_buffer);
-        free (ogg_priv);
+	    free (ogg_priv->vorbis_buffer);
+         free (ogg_priv);
         ogg_priv = NULL;
     }	
     if (NULL != cfg)
@@ -245,7 +238,7 @@ ogg_get_tag (Private * h, char *path, struct SongDBEntry *e)
     oggPrivate *private = (oggPrivate *) h;
     OggVorbis_File *vobf;
     vorbis_comment *comments;
-    char *title, *tmp_title;
+    char *title, *t;
     double time;
     FILE *fp;
 
@@ -261,22 +254,28 @@ ogg_get_tag (Private * h, char *path, struct SongDBEntry *e)
 
         comments=ov_comment(vobf,-1);
         
+        /* ToDo scan through all strings */        
         title=strdup(*comments->user_comments);
-        tmp_title = title;          /* use tmp_title so title can be free'd */
-        /* strip "title=" from tmp_title */
-        while (*tmp_title)
+       if (NULL != title)
         {
-            if ('=' == *tmp_title++)
-                break;
-        }
-        e->title=strdup(tmp_title);
-
+            /* strip "title=" title */
+            t = strstr(title, "title=");
+            if (NULL != t)
+            {
+                t = &t[6];
+                e->title=strdup(t);
+            }
+            /* didn't find title, maybe something of interest? */
+            else
+                e->title = strdup(title);
+            free(title);
+        } 
+       
         time=ov_time_total(vobf,-1);
         /* ToDo oggs never reach eof? */       
-        e->time=(long)(time * 1000);
+        e->time=(long)(time*1000);
         
         free(vobf);
-        free(title);
         fclose(fp);
     }
     return 1;
@@ -298,9 +297,7 @@ ogg_load_file (Private * h, char *filename)
 {
     oggPrivate *private = (oggPrivate *) h;
     int length=private->length;
-    vorbis_info *vi;
 
-    
     TRACE("ogg_load_file %s\n",filename);
 
     if (h == NULL || filename == NULL)
@@ -308,7 +305,7 @@ ogg_load_file (Private * h, char *filename)
         ERROR("Invalid argument");
         return 0;
     }
-  
+
     if (private->fd && private->going)
     {
         ERROR("File already open");
@@ -318,7 +315,7 @@ ogg_load_file (Private * h, char *filename)
     if (ogg_is_our_file (h, filename) != TRUE)
     {
         ERROR("unknown file");
-	return 0;
+    	return 0;
     }
     
     private->fd = fopen (filename, "rb");
@@ -326,21 +323,20 @@ ogg_load_file (Private * h, char *filename)
     {
         ERROR("Opening file");
         return 0;
-    }    
+    }
     fseek(private->fd,0,SEEK_END);
     private->size=ftell(private->fd);
     fseek(private->fd,0,SEEK_SET);
-    
-    if(ov_open(private->fd, &private->vf, NULL, 0) < 0) 
+
+    if (ov_open(private->fd, &private->vf, NULL, 0) < 0) 
     {
         fprintf(stderr,"Input does not appear to be an Ogg bitstream.\n");
     }
 
-
     length=(unsigned long)ov_pcm_total(&private->vf,-1);
-    vi=ov_info(&private->vf,-1);
 
 #if 0
+      vorbis_info *vi=ov_info(&private->vf,-1);
       char **ptr=ov_comment(&private->vf,-1)->user_comments;
       vorbis_info *vi=ov_info(&private->vf,-1);
       while(*ptr)
@@ -360,17 +356,17 @@ ogg_load_file (Private * h, char *filename)
     private->seek    = -1;
     private->eof     = 0;
 
-    private->channels = vi->channels;
-    private->rate = vi->rate;
+    private->channels = 2;;
+    private->rate = 44100;
 
     if (!private->ogg_if.output_open(private->ch_id,FMT_S16_NE, private->rate, private->channels, 
                                      &private->max_bytes))
     {
-	private->audio_error = TRUE;
-	fclose (private->fd);
-	private->fd = NULL;
+        private->audio_error = TRUE;
+        fclose (private->fd);
+        private->fd = NULL;
         ERROR("Audio open");
-	return 0;
+        return 0;
     }
 
     private->going    = 1;
@@ -395,11 +391,11 @@ ogg_close_file (Private * h)
     if (private->going && private->fd != NULL)
     {
         DEBUG("Stopping thread");
-	private->going = 0;
+        private->going = 0;
         OSA_RemoveThread(private->decode_thread);
-	private->ogg_if.output_close (private->ch_id);
-	fclose (private->fd);
-	private->fd = NULL;
+        private->ogg_if.output_close (private->ch_id);
+        fclose (private->fd);
+        private->fd = NULL;
     }
 
     return 1;
@@ -410,12 +406,11 @@ void *
 ogg_play_loop (void *param)
 {
     oggPrivate *private = param;
-    unsigned int input_length = 0, output_length = 0;
-    int resolution = 16;
+    double ov_pos;
     int current_section;
+    long ret;
+    double time;
     
-    int avgbitrate, bitrate, last_bitrate = 0, seek_skip = 0, last_error = 0;
-
     if(param == NULL || private->input_buffer == NULL)
         return (void *) 0;
   
@@ -424,22 +419,32 @@ ogg_play_loop (void *param)
 
     while(!private->eof && private->going)
     {
-        long ret=ov_read(&private->vf,
-                        private->vorbis_buffer,
-                        VORBIS_READ_BUFFER_SIZE,
-                        0, 2, 1, &current_section);
-        double time=ov_time_tell(&private->vf);
+        if (private->seek != -1 && private->length >= 0)
+        {
+            if (private->seek < 0)
+            {
+                ov_pos = (double) (private->length * -private->seek) / 1000;
+                private->position = (int) (ov_pos * 1000);
+            }
+            else
+            {
+                ov_pos = (double) private->seek / 1000;
+                private->position = private->seek;
+            }
+            ov_time_seek(&private->vf, ov_pos);
+            private->seek = -1;
+        }
+        ret=ov_read(&private->vf,
+                    private->vorbis_buffer,
+                    VORBIS_READ_BUFFER_SIZE,
+                    0, 2, 1, &current_section);
+        time=ov_time_tell(&private->vf);
         time=time*100;
         if (ret == 0)   /* EOF */
         {
             private->eof = 1;
             private->going = 0;
             break;
-        } 
-        else if (ret < 0) 
-        {
-            /* error in the stream.  Not a problem, just reporting it in
-               case we (the app) cares.  In this case, we don't. */
         } 
         else 
         {
@@ -458,7 +463,7 @@ ogg_play_loop (void *param)
             private->position*=10;
         }
     }
-    if (private->ogg_if.input_eof(private->ch_id))
+    if (private->eof)           /* we never get here? */
     {
         private->ogg_if.input_eof (private->ch_id);
         SDL_Delay(30);
@@ -513,10 +518,10 @@ ogg_get_time (Private * h)
         return 0;
   
     if (private->eof)
-	return 0;
+        return 0;
 
     if (!private->going)
-	return 0;
+        return 0;
     
     return private->position;
 }
