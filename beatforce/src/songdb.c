@@ -381,7 +381,8 @@ long SONGDB_GetNoOfSearchResults(void)
 
 struct SongDBEntry *SONGDB_GetSearchEntry(long id)
 {
-    if ((id >= n_search_results && id < 0) || id == SONGDB_ID_UNKNOWN)
+    printf("%ld %ld\n",id,n_search_results);
+    if (id >= n_search_results || id < 0 || id == SONGDB_ID_UNKNOWN)
     {
         return NULL;
     }
@@ -517,6 +518,7 @@ void SONGDB_FindEntry(char *search_string)
         if(match)
         {
             n_search_results++;
+            printf("n_search_results %d %p\n",n_search_results,e);
             search_results = realloc (search_results, n_search_results * DBENTRY_PTR_LEN);
             search_results[n_search_results - 1] = e;
         }

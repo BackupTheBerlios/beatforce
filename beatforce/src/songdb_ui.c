@@ -49,15 +49,14 @@ extern SongDBGroup *MainGroup;
 /* Prototypes for functions for buttosn below */
 static void SONGDBUI_ChangeGroupClicked(void *data);
 
-void UI_SongdbRenameClicked(void *data);
-void UI_SongdbAddTabClicked(void *data);
-void songdbui_RemoveTab(void *data);
-
 static void SONGDBUI_ChangeDatabase();
+static int SONGDBUI_GetHighlightedTab();
 
 void songdbstring(long row,int column,char *dest);
 void *table;
 void *tabwidget;
+
+static int activesong[2];
 
 void eventhandler(SDL_Table *table)
 {
@@ -114,20 +113,26 @@ void SONGDBUI_CreateWindow(ThemeSongdb *ts)
             break;
         }
         Button=Button->next;
-
     }
+    activesong[0]=-1;
+    activesong[1]=-1;
 }
 
 static void SONGDBUI_ChangeDatabase()
 {
-    SDL_Tab *t;
+
     int count;
     struct SongDBSubgroup *sg;
 
-    t=(SDL_Tab *)tabwidget;
-    if(t && t->hl)
+    count=SONGDBUI_GetHighlightedTab();
+      
+    if(activesong[0]==count)
+        SDL_WidgetPropertiesOf(table,SET_HIGHLIGHTED,activesong[1]);                  
+    else
+        SDL_WidgetPropertiesOf(table,SET_HIGHLIGHTED,-1);    
+
+    if(count >=0)
     {
-        count=t->hl->index;
         sg=SONGDB_GetSubgroup();
         while(count)
         {
@@ -137,6 +142,7 @@ static void SONGDBUI_ChangeDatabase()
         SONGDB_SetActiveSubgroup(sg);
     }
     SDL_WidgetPropertiesOf(table,ROWS,SONGDB_GetNoOfEntries());
+
     
 }
 
@@ -165,12 +171,30 @@ void SONGDBUI_Redraw()
 void SONGDBUI_Play(int player_nr)
 {
     long id;
-    PLAYER_GetPlayingID(player_nr,&id);
-    SDL_WidgetPropertiesOf(table,SET_HIGHLIGHTED,id);    
+    int tab;
+    tab=SONGDBUI_GetHighlightedTab();
+    
+    if(tab>=0)
+    {
+        PLAYER_GetPlayingID(player_nr,&id);
+        activesong[0]=tab;
+        activesong[1]=id;
+        SDL_WidgetPropertiesOf(table,SET_HIGHLIGHTED,id);    
+    }
 }
        
 
+static int SONGDBUI_GetHighlightedTab()
+{
+    SDL_Tab *t;
+    t=(SDL_Tab *)tabwidget;
+    if(t && t->hl)
+    {
+        return t->hl->index;
+    }
+    return -1;
 
+}
 
 static void SONGDBUI_ChangeGroupClicked(void *data)
 {
