@@ -1,5 +1,6 @@
 
+#include <qapplication.h>
 
 
-int UI_Init(int argc,char **argv);
-int UI_Main();
+extern "C" int UI_Init(int argc,char **argv);
+extern "C" int UI_Main();

@@ -86,7 +86,7 @@ elif env['ui'] == 'qt':
                         'plugin.c',
                         'configfile.c'
                 ],
-                        LIBS=['m','SDL','fftw3','SDL_image','xml2','ui'],
+                        LIBS=['m','SDL','fftw3','xml2','ui','qt'],
                         LIBPATH=['/usr/lib/gtk/','ui/qt/'])      
 
 
