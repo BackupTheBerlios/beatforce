@@ -510,7 +510,7 @@ static void SDL_TableDrawRow(SDL_Surface *dest,SDL_Table *Table,int row)
 
             if(strlen(string))
             {
-                SDL_FontDrawStringRect(dest,Table->font,string,&RowDims);
+                SDL_FontDrawStringRect(dest,Table->font,string,&la);
             }
             RowDims.x +=Table->ColumnWidths[column];
         }

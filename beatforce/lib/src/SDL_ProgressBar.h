@@ -29,8 +29,11 @@ typedef struct SDL_ProgressBar
     
     Uint32  color1;
     Uint32  color2;
+    Uint32  color3;
+    Uint32  color4;
     
     int Redraw;
+    int State;
 
     int Orientation;
 
@@ -50,9 +53,13 @@ typedef struct SDL_ProgressBar
 #define HORIZONTAL 1
 #define VERTICAL   2
 
+#define PROGRESSBAR_NORMAL 3
+#define PROGRESSBAR_DRAG   4
+
 // prototypes
 void* SDL_ProgressBarCreate(SDL_Rect *rect);
 void  SDL_ProgressBarDraw(void *progressbar,SDL_Surface *dest);
 void  SDL_ProgressBarEventHandler(void * progressbar,SDL_Event *event);
-void  SDL_ProgressBarProperties(void *progressbar,int feature,va_list list);
+int   SDL_ProgressBarProperties(void *progressbar,int feature,va_list list);
+
 
