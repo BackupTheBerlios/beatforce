@@ -54,6 +54,7 @@ enum
     SONG_TITLE,
     SONG_ARTIST,
     SAMPLERATE,
+    PLAYER_STATE,
     BITRATE
 }eTextDisplay;
 

@@ -32,7 +32,7 @@
 
 typedef enum ePlayerState
 {
-    PLAYER_IDLE,
+    PLAYER_IDLE = 1,
     PLAYER_PAUSE,
     PLAYER_PLAY
 }ePlayerState;
@@ -100,6 +100,8 @@ int PLAYER_SetSpeed(double speed);
 int PLAYER_GetArtist(int player_nr,char *artist);
 int PLAYER_GetTitle(int player_nr,char *title);
 int PLAYER_GetFilename(int player_nr,char *filename);
+
+int PLAYER_GetState(int player_nr);
 
 long PLAYER_GetTimeTotal(int player_nr);
 long PLAYER_GetTimeLeft(int player_nr);

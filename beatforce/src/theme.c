@@ -545,6 +545,8 @@ ThemeText *XML_ParseText(ThemeText *text,xmlDocPtr doc, xmlNodePtr cur)
                 text->display=TIME_REMAINING;
             if(!strcmp(display,"SONG_TITLE"))
                 text->display=SONG_TITLE;
+            if(!strcmp(display,"PLAYER_STATE"))
+                text->display=PLAYER_STATE;
             if(!strcmp(display,"SAMPLERATE"))
                 text->display=SAMPLERATE;
             if(!strcmp(display,"BITRATE"))
@@ -592,6 +594,8 @@ ThemeText *XML_ParseText(ThemeText *text,xmlDocPtr doc, xmlNodePtr cur)
                 last->next->display=SONG_ARTIST;
             if(!strcmp(display,"SONG_TITLE"))
                 last->next->display=SONG_TITLE;
+            if(!strcmp(display,"PLAYER_STATE"))
+                last->next->display=PLAYER_STATE;
             if(!strcmp(display,"SAMPLERATE"))
                 last->next->display=SAMPLERATE;
             if(!strcmp(display,"BITRATE"))

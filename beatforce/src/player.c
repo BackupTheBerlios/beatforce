@@ -449,6 +449,14 @@ int player_load (int player_nr)
     return 0;
 
 }
+int PLAYER_GetState(int player_nr)
+{
+    struct PlayerPrivate *p = PLAYER_GetData(player_nr);
+    if(p == NULL)
+        return 0;
+    
+    return p->State;
+}
 
 int PLAYER_GetArtist(int player_nr,char *label)
 {

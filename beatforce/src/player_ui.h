@@ -46,6 +46,7 @@ typedef struct PlayerDisplay
 
     void *Title;
     void *Artist;
+    void *State;
     void *Samplerate;
     void *Bitrate;
     void *SongProgress; 

@@ -53,6 +53,7 @@ void playerui_UpdateTime(int player);
 void playerui_UpdateTitle(int player);
 void playerui_UpdateFileInfo(int player);
 void playerui_UpdateVolume(int player);
+void playerui_UpdateState(int player);
 
 
  /* Exported functions */
@@ -124,6 +125,14 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
             SDL_WidgetProperties(SET_FONT,THEME_Font(Text->font));
             SDL_WidgetProperties(SET_FG_COLOR,Text->fgcolor);
             break;
+
+        case PLAYER_STATE:
+            /* Draw the state of the player  as a string */
+            UI_Players[nr].State=SDL_WidgetCreateR(SDL_LABEL,Text->Rect);
+            SDL_WidgetProperties(SET_FONT,THEME_Font(Text->font));
+            SDL_WidgetProperties(SET_FG_COLOR,Text->fgcolor);
+            break;
+
         case SAMPLERATE:
             /* Create the samplerate label */
             UI_Players[nr].Samplerate=SDL_WidgetCreateR(SDL_LABEL,Text->Rect);
@@ -207,6 +216,9 @@ void PLAYERUI_Redraw()
 
     playerui_UpdateVolume(0);
     playerui_UpdateVolume(1);
+
+    playerui_UpdateState(0);
+    playerui_UpdateState(1);
 }
 
 /* 
@@ -347,9 +359,29 @@ void playerui_UpdateFileInfo(int player)
 }
         
   
+void playerui_UpdateState(int player)
+{
+    char label[255];
+    int state;
 
-
-
+    state=PLAYER_GetState(player);
+    switch(state)
+    {
+    case PLAYER_PLAY:
+        sprintf(label,"PLAY");
+        break;
+    case PLAYER_IDLE:
+        sprintf(label,"IDLE");
+        break;
+    case PLAYER_PAUSE:
+        sprintf(label,"PAUSE");
+        break;
+    default:
+        sprintf(label,"INTERNAL ERROR");
+        break;
+    }
+    SDL_WidgetPropertiesOf(UI_Players[player].State,SET_CAPTION,label);
+}
 
 void playerui_PlayButton(void *data)
 {
