@@ -333,7 +333,6 @@ int MIXER_GetFaderValue (double *val)
 
 int MIXER_SetFaderValue (double value)
 {
-
     mutex_lock (fader_mutex);
 
     if (cfader == NULL)

@@ -34,16 +34,19 @@ const struct S_Widget_FunctionList SDL_Panel_FunctionList =
 };
 
 
-void* SDL_PanelCreate(SDL_Rect* rect)
+SDL_Widget* SDL_PanelCreate(SDL_Rect* rect)
 {
-    SDL_Panel *panel;
+    SDL_Widget *widget;
+    SDL_Panel  *panel;
 
     panel=(SDL_Panel*) malloc(sizeof(SDL_Panel));
+    widget=(SDL_Widget*)panel;
 
-    panel->rect.x  = rect->x;
-    panel->rect.y  = rect->y;
-    panel->rect.w  = rect->w;
-    panel->rect.h  = rect->h;
+    widget->Type    = SDL_PANEL;
+    widget->Rect.x  = rect->x;
+    widget->Rect.y  = rect->y;
+    widget->Rect.w  = rect->w;
+    widget->Rect.h  = rect->h;
 
     panel->color  = 0xfffff7;
     panel->Redraw = 1;
@@ -53,9 +56,9 @@ void* SDL_PanelCreate(SDL_Rect* rect)
     return panel;
 }
 
-void SDL_PanelDraw(void *panel,SDL_Surface *dest)
+void SDL_PanelDraw(SDL_Widget *widget,SDL_Surface *dest)
 {
-    SDL_Panel *Panel=(SDL_Panel*)panel;
+    SDL_Panel *Panel=(SDL_Panel*)widget;
     SDL_Rect src;
 
     if(Panel->Visible == 0)
@@ -63,36 +66,36 @@ void SDL_PanelDraw(void *panel,SDL_Surface *dest)
 
     src.x=0;
     src.y=0;
-    if(Panel->rect.w == 0 && Panel->Image)
+    if(widget->Rect.w == 0 && Panel->Image)
         src.w=Panel->Image->w;
     else
-        src.w=Panel->rect.w;
+        src.w=widget->Rect.w;
     
-    if(Panel->rect.h == 0 && Panel->Image)
+    if(widget->Rect.h == 0 && Panel->Image)
         src.h=Panel->Image->h;
     else
-        src.h=Panel->rect.h;
+        src.h=widget->Rect.h;
     
     
     if(Panel->Redraw)
     {
         if(Panel->Image)
         {
-            if(SDL_BlitSurface(Panel->Image,&src,dest,&Panel->rect)<0)
+            if(SDL_BlitSurface(Panel->Image,&src,dest,&widget->Rect)<0)
                 ;
         }
         else
         {
-            SDL_FillRect(dest,&Panel->rect,Panel->color);
+            SDL_FillRect(dest,&widget->Rect,Panel->color);
         }
         Panel->Redraw=0;
     }
     
 }
 
-int SDL_PanelProperties(void *panel,int feature,va_list list)
+int SDL_PanelProperties(SDL_Widget *widget,int feature,va_list list)
 {
-    SDL_Panel *Panel=(SDL_Panel*)panel;
+    SDL_Panel *Panel=(SDL_Panel*)widget;
 
     switch(feature)
     {
@@ -122,7 +125,7 @@ int SDL_PanelProperties(void *panel,int feature,va_list list)
     return 1;
 }
 
-void SDL_PanelEventHandler(void *panel,SDL_Event *event)
+void SDL_PanelEventHandler(SDL_Widget *widget,SDL_Event *event)
 {
 
 

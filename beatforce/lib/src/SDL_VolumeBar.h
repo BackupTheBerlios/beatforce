@@ -24,8 +24,8 @@
 
 typedef struct SDL_VolumeBar
 {
+    SDL_Widget Widget;
     SDL_Font *Font;
-    SDL_Rect rect;
     
     Uint32  color1;
     Uint32  color2;
@@ -48,8 +48,8 @@ typedef struct SDL_VolumeBar
 
 
 // prototypes
-void* SDL_VolumeBarCreate(SDL_Rect *rect);
-void  SDL_VolumeBarDraw(void *label,SDL_Surface *dest);
-void  SDL_VolumeBarEventHandler(void * label,SDL_Event *event);
-int   SDL_VolumeBarProperties(void *label,int feature,va_list list);
+SDL_Widget* SDL_VolumeBarCreate(SDL_Rect *rect);
+void        SDL_VolumeBarDraw(SDL_Widget *widget,SDL_Surface *dest);
+void        SDL_VolumeBarEventHandler(SDL_Widget *widget,SDL_Event *event);
+int         SDL_VolumeBarProperties(SDL_Widget *widget,int feature,va_list list);
 

@@ -41,16 +41,19 @@ const struct S_Widget_FunctionList SDL_ProgressBar_FunctionList =
 };
 
 
-void* SDL_ProgressBarCreate(SDL_Rect* rect)
+SDL_Widget* SDL_ProgressBarCreate(SDL_Rect* rect)
 {
+    SDL_Widget      *widget;
     SDL_ProgressBar *progressbar;
-
+    
     progressbar=(SDL_ProgressBar*)malloc(sizeof(SDL_ProgressBar));
+    widget=(SDL_Widget*)progressbar;
 
-    progressbar->rect.x  = rect->x;
-    progressbar->rect.y  = rect->y;
-    progressbar->rect.w  = rect->w;
-    progressbar->rect.h  = rect->h;
+    widget->Type    = SDL_PROGRESSBAR;
+    widget->Rect.x  = rect->x;
+    widget->Rect.y  = rect->y;
+    widget->Rect.w  = rect->w;
+    widget->Rect.h  = rect->h;
 
     if(rect->w > rect->h)
         progressbar->Orientation = HORIZONTAL;
@@ -77,12 +80,12 @@ void* SDL_ProgressBarCreate(SDL_Rect* rect)
     progressbar->Redraw  = 1;
     progressbar->Visible = 1;
 
-    return progressbar;
+    return (SDL_Widget*)progressbar;
 }
 
-void SDL_ProgressBarDraw(void *progressbar,SDL_Surface *dest)
+void SDL_ProgressBarDraw(SDL_Widget *widget,SDL_Surface *dest)
 {
-    SDL_ProgressBar *ProgressBar=(SDL_ProgressBar*)progressbar;
+    SDL_ProgressBar *ProgressBar=(SDL_ProgressBar*)widget;
     int line;
     int highlight=0;
     int Maxline=0;
@@ -91,13 +94,13 @@ void SDL_ProgressBarDraw(void *progressbar,SDL_Surface *dest)
         return;
 
     if(ProgressBar->Orientation == VERTICAL)
-        Maxline = ProgressBar->rect.h;
+        Maxline = widget->Rect.h;
     else if(ProgressBar->Orientation == HORIZONTAL)
-        Maxline = ProgressBar->rect.w;
+        Maxline = widget->Rect.w;
 
     if(ProgressBar->Redraw)
     {
-        SDL_FillRect(dest,&ProgressBar->rect,BLACK);
+        SDL_FillRect(dest,&widget->Rect,BLACK);
 
         for( line=0; line < Maxline ; line+=2)
         {
@@ -111,9 +114,9 @@ void SDL_ProgressBarDraw(void *progressbar,SDL_Surface *dest)
     }
 }
 
-int  SDL_ProgressBarProperties(void *progressbar,int feature,va_list list)
+int  SDL_ProgressBarProperties(SDL_Widget *widget,int feature,va_list list)
 {
-    SDL_ProgressBar *ProgressBar=(SDL_ProgressBar*)progressbar;
+    SDL_ProgressBar *ProgressBar=(SDL_ProgressBar*)widget;
     double val;
 
     switch(feature)
@@ -130,12 +133,12 @@ int  SDL_ProgressBarProperties(void *progressbar,int feature,va_list list)
         ProgressBar->CurrentValue = val; 
         if(ProgressBar->Orientation == VERTICAL)
         {
-            ProgressBar->CurrentLine  = (val * ProgressBar->rect.h) / 
+            ProgressBar->CurrentLine  = (val * widget->Rect.h) / 
                 (ProgressBar->MaxValue - ProgressBar->MinValue); 
         }
         else
         {
-            ProgressBar->CurrentLine  = (val * ProgressBar->rect.w) 
+            ProgressBar->CurrentLine  = (val * widget->Rect.w) 
                 / (ProgressBar->MaxValue - ProgressBar->MinValue); 
         }
         ProgressBar->Redraw       = 1;
@@ -183,19 +186,19 @@ int  SDL_ProgressBarProperties(void *progressbar,int feature,va_list list)
     return 1;
 }
 
-void SDL_ProgressBarEventHandler(void *progressbar, SDL_Event *event)
+void SDL_ProgressBarEventHandler(SDL_Widget *widget, SDL_Event *event)
 {
-    SDL_ProgressBar *ProgressBar=(SDL_ProgressBar*)progressbar;
+    SDL_ProgressBar *ProgressBar=(SDL_ProgressBar*)widget;
     
     switch(event->type)
     {
     case SDL_MOUSEBUTTONDOWN:
-        if(SDL_WidgetIsInside(&ProgressBar->rect,event->motion.x,event->motion.y))
+        if(SDL_WidgetIsInside(&widget->Rect,event->motion.x,event->motion.y))
         {
             if(ProgressBar->Orientation == HORIZONTAL)
             {
                 ProgressBar->State=PROGRESSBAR_DRAG;
-                ProgressBar->CurrentLine = event->motion.x - ProgressBar->rect.x;
+                ProgressBar->CurrentLine = event->motion.x - widget->Rect.x;
                 ProgressBar_CurrentValue(ProgressBar);
             }
         }
@@ -205,23 +208,23 @@ void SDL_ProgressBarEventHandler(void *progressbar, SDL_Event *event)
         {
             if(ProgressBar->State==PROGRESSBAR_DRAG)
             {
-                ProgressBar->CurrentLine = event->motion.x - ProgressBar->rect.x;
+                ProgressBar->CurrentLine = event->motion.x - widget->Rect.x;
                 ProgressBar_CurrentValue(ProgressBar);
             }
         }
         break;
     case SDL_MOUSEBUTTONUP:
         if(ProgressBar->State == PROGRESSBAR_DRAG ||
-           SDL_WidgetIsInside(&ProgressBar->rect,event->motion.x,event->motion.y))
+           SDL_WidgetIsInside(&widget->Rect,event->motion.x,event->motion.y))
         {
             if(ProgressBar->Orientation == VERTICAL)
             {
-                ProgressBar->CurrentLine = event->motion.y - ProgressBar->rect.y;
+                ProgressBar->CurrentLine = event->motion.y - widget->Rect.y;
                 ProgressBar_CurrentValue(ProgressBar);
             }
             else if(ProgressBar->Orientation == HORIZONTAL)
             {
-                ProgressBar->CurrentLine = event->motion.x - ProgressBar->rect.x;
+                ProgressBar->CurrentLine = event->motion.x - widget->Rect.x;
                 ProgressBar_CurrentValue(ProgressBar);
             }
             ProgressBar->State=PROGRESSBAR_NORMAL;
@@ -242,21 +245,22 @@ void SDL_ProgressBarEventHandler(void *progressbar, SDL_Event *event)
 
 void ProgressBar_DrawStripe(SDL_Surface *dest,SDL_ProgressBar *ProgressBar,int line,Uint32 color)
 {
+    SDL_Widget *widget=(SDL_Widget*)ProgressBar;
     SDL_Rect rect;
 
     if(ProgressBar->Orientation == VERTICAL)
     {
-        rect.x = ProgressBar->rect.x;
-        rect.y = ProgressBar->rect.y + ProgressBar->rect.h - line;
-        rect.w = ProgressBar->rect.w;
+        rect.x = widget->Rect.x;
+        rect.y = widget->Rect.y + widget->Rect.h - line;
+        rect.w = widget->Rect.w;
         rect.h = 1;
     }
     else if(ProgressBar->Orientation == HORIZONTAL)
     {
-        rect.x = ProgressBar->rect.x + line;
-        rect.y = ProgressBar->rect.y;
+        rect.x = widget->Rect.x + line;
+        rect.y = widget->Rect.y;
         rect.w = 1;
-        rect.h = ProgressBar->rect.h;
+        rect.h = widget->Rect.h;
     }
     SDL_FillRect(dest,&rect,color);
 }
@@ -264,6 +268,7 @@ void ProgressBar_DrawStripe(SDL_Surface *dest,SDL_ProgressBar *ProgressBar,int l
 
 static void ProgressBar_CurrentValue(SDL_ProgressBar * ProgressBar)
 {
+    SDL_Widget *widget=(SDL_Widget*)ProgressBar;
     int BarRange=1; // in pixels
 
     if(ProgressBar->CurrentLine < 0)
@@ -271,11 +276,11 @@ static void ProgressBar_CurrentValue(SDL_ProgressBar * ProgressBar)
 
     if(ProgressBar->Orientation == HORIZONTAL)
     {
-        BarRange = ProgressBar->rect.w;
+        BarRange = widget->Rect.w;
     }
     else if(ProgressBar->Orientation == VERTICAL)
     {
-        BarRange = ProgressBar->rect.h;
+        BarRange = widget->Rect.h;
     }
     if(ProgressBar->CurrentLine > BarRange)
         ProgressBar->CurrentLine = BarRange;

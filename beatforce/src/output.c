@@ -242,7 +242,7 @@ int OUTPUT_PluginGetVolume (struct OutGroup *grp)
 int
 OUTPUT_PluginSetVolume (struct OutGroup *grp)
 {
-    int err;
+    int err=0;
 
     if(grp == NULL)
     {
@@ -262,10 +262,6 @@ OUTPUT_PluginSetVolume (struct OutGroup *grp)
     }
 
     err = grp->dev->op->set_volume (grp->dev->priv, grp->mainvolume);
-    if (err)
-    {
-        ERROR("Unable to set volume: error %d", -err);
-    }
     return err;
 }
 

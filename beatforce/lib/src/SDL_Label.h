@@ -24,8 +24,8 @@
 
 typedef struct SDL_Label
 {
+    SDL_Widget Widget;
     SDL_Font *Font;
-    SDL_Rect rect;
     
     Uint32  bgcolor;
     Uint32  fgcolor;
@@ -52,7 +52,7 @@ enum LabelPattern
 }LabelPattern;
 
 // prototypes
-void* SDL_LabelCreate(SDL_Rect *rect);
-void  SDL_LabelDraw(void *label,SDL_Surface *dest);
-int   SDL_LabelProperties(void *label,int feature,va_list list);
-void  SDL_LabelEventHandler(void *label,SDL_Event *event);
+SDL_Widget* SDL_LabelCreate(SDL_Rect *rect);
+void        SDL_LabelDraw(SDL_Widget *widget,SDL_Surface *dest);
+int         SDL_LabelProperties(SDL_Widget *widget,int feature,va_list list);
+void        SDL_LabelEventHandler(SDL_Widget *widget,SDL_Event *event);

@@ -37,15 +37,19 @@ const struct S_Widget_FunctionList SDL_Slider_FunctionList =
     NULL
 };
 
-void* SDL_SliderCreate(SDL_Rect* rect)
+SDL_Widget* SDL_SliderCreate(SDL_Rect* rect)
 {
     SDL_Slider *slider;
+    SDL_Widget *widget;
 
     slider = (SDL_Slider*) malloc (sizeof(SDL_Slider));
-    slider->rect.x=rect->x;
-    slider->rect.y=rect->y;
-    slider->rect.w=rect->w;
-    slider->rect.h=rect->h;
+    widget = (SDL_Widget*) slider;
+    
+    widget->Type =  SDL_SLIDER;
+    widget->Rect.x=rect->x;
+    widget->Rect.y=rect->y;
+    widget->Rect.w=rect->w;
+    widget->Rect.h=rect->h;
 
     if(rect->w > rect->h)
         slider->orientation = HORIZONTAL;
@@ -76,14 +80,14 @@ void* SDL_SliderCreate(SDL_Rect* rect)
     slider->OnSliderChangedData  = NULL;
     slider->Visible = 1;
 
-    return slider;
+    return (SDL_Widget*)slider;
 }
 
 
-void SDL_SliderDraw(void *slider,SDL_Surface *dest)
+void SDL_SliderDraw(SDL_Widget *widget,SDL_Surface *dest)
 {
 // drawing order is always background, line , button
-    SDL_Slider *Slider=(SDL_Slider*)slider;
+    SDL_Slider *Slider=(SDL_Slider*)widget;
     SDL_Rect   button;
     int x_offset=0;
     int y_offset=0;
@@ -102,10 +106,10 @@ void SDL_SliderDraw(void *slider,SDL_Surface *dest)
          */
         if(Slider->background == NULL)
         {
-            Slider->background=SDL_WidgetGetBackground(dest,&Slider->rect);
+            Slider->background=SDL_WidgetGetBackground(dest,&widget->Rect);
         }
         
-        if(SDL_BlitSurface(Slider->background,NULL,dest,&Slider->rect)<0)
+        if(SDL_BlitSurface(Slider->background,NULL,dest,&widget->Rect)<0)
             fprintf(stderr, "BlitSurface error: %s\n", SDL_GetError());
         
     }
@@ -113,7 +117,7 @@ void SDL_SliderDraw(void *slider,SDL_Surface *dest)
 
     if(Slider->line)
     {
-        if(SDL_BlitSurface(Slider->line,NULL,dest,&Slider->rect)<0)
+        if(SDL_BlitSurface(Slider->line,NULL,dest,&widget->Rect)<0)
             fprintf(stderr, "BlitSurface error: %s\n", SDL_GetError());
     }
 
@@ -124,11 +128,11 @@ void SDL_SliderDraw(void *slider,SDL_Surface *dest)
     else
     {
         y_offset = Slider->pixeloffset;
-        x_offset = (Slider->rect.w - Slider->SliderButton->w) / 2 ;
+        x_offset = (widget->Rect.w - Slider->SliderButton->w) / 2 ;
     }
 
-    button.x = Slider->rect.x + x_offset;
-    button.y = Slider->rect.y + y_offset;
+    button.x = widget->Rect.x + x_offset;
+    button.y = widget->Rect.y + y_offset;
     button.w = Slider->SliderButton->w;
     button.h = Slider->SliderButton->h;
 
@@ -140,9 +144,9 @@ void SDL_SliderDraw(void *slider,SDL_Surface *dest)
 
 }
 
-int SDL_SliderProperties(void *slider,int feature,va_list list)
+int SDL_SliderProperties(SDL_Widget *widget,int feature,va_list list)
 {
-    SDL_Slider *Slider=(SDL_Slider*)slider;
+    SDL_Slider *Slider=(SDL_Slider*)widget;
     double val;
 
     switch(feature)
@@ -205,7 +209,7 @@ int SDL_SliderProperties(void *slider,int feature,va_list list)
         value=va_arg(list,int*);
         if(value)
         {
-            *value=Slider->rect.w;
+            *value=widget->Rect.w;
         }
         break;
     }
@@ -245,14 +249,14 @@ int SDL_SliderProperties(void *slider,int feature,va_list list)
 }
 
 
-void SDL_SliderEventHandler(void * slider,SDL_Event *event)
+void SDL_SliderEventHandler(SDL_Widget *widget,SDL_Event *event)
 {
-    SDL_Slider *Slider=(SDL_Slider*)slider;
+    SDL_Slider *Slider=(SDL_Slider*)widget;
 
     switch(event->type)
     {
     case SDL_MOUSEBUTTONDOWN:
-        if(Slider->SliderButton && SDL_WidgetIsInside(&Slider->rect,event->motion.x,event->motion.y))
+        if(Slider->SliderButton && SDL_WidgetIsInside(&widget->Rect,event->motion.x,event->motion.y))
         {
             int motion;
 
@@ -263,12 +267,12 @@ void SDL_SliderEventHandler(void * slider,SDL_Event *event)
                 if(event->button.button == SDL_BUTTON_LEFT)
                 {
                     /* if the button click is on the left side of the button */
-                    if(motion < (Slider->rect.x + Slider->pixeloffset))
+                    if(motion < (widget->Rect.x + Slider->pixeloffset))
                     {
                         SDL_SliderStep(Slider,LEFT,NORMAL_STEP);
                     }
                     /* the button click is on the right side off the button */
-                    else if (motion > Slider->rect.x +Slider->pixeloffset + Slider->SliderButton->w)
+                    else if (motion > widget->Rect.x + Slider->pixeloffset + Slider->SliderButton->w)
                     {
                         SDL_SliderStep(Slider,RIGHT,NORMAL_STEP);
                     }
@@ -294,11 +298,11 @@ void SDL_SliderEventHandler(void * slider,SDL_Event *event)
                 if(event->button.button == SDL_BUTTON_LEFT)
                 {
                     /* if the button click is below the button */
-                    if(motion > (Slider->rect.y + Slider->pixeloffset + Slider->SliderButton->h))
+                    if(motion > (widget->Rect.y + Slider->pixeloffset + Slider->SliderButton->h))
                     {
                         SDL_SliderStep(Slider,DOWN,NORMAL_STEP);
                     }
-                    else if (motion > Slider->rect.y + Slider->pixeloffset)
+                    else if (motion > widget->Rect.y + Slider->pixeloffset)
                     {
                         Slider->state=SLIDER_DRAG;
                     }
@@ -329,11 +333,11 @@ void SDL_SliderEventHandler(void * slider,SDL_Event *event)
         {
             if(Slider->orientation == HORIZONTAL)
             {
-                Slider->pixeloffset = event->motion.x - Slider->rect.x - (Slider->SliderButton->w/2);
+                Slider->pixeloffset = event->motion.x - widget->Rect.x - (Slider->SliderButton->w/2);
             }
             else
             {
-                Slider->pixeloffset = event->motion.y - Slider->rect.y - (Slider->SliderButton->h/2);
+                Slider->pixeloffset = event->motion.y - widget->Rect.y - (Slider->SliderButton->h/2);
             }
             SDL_SliderCurrentValue(Slider);
             Slider->changed=1;
@@ -377,6 +381,8 @@ static void SDL_SliderStep(SDL_Slider *Slider,int direction,int step)
 
 static void SDL_SliderPixeloffset(SDL_Slider *Slider)
 {
+    SDL_Widget *widget=(SDL_Widget*)Slider;
+
     if(Slider->CurrentValue < Slider->MinValue)
         Slider->CurrentValue = Slider->MinValue;
 
@@ -387,7 +393,7 @@ static void SDL_SliderPixeloffset(SDL_Slider *Slider)
     {
         if(Slider->SliderButton)
         {
-            Slider->pixeloffset = ((Slider->rect.w - Slider->SliderButton->w) * Slider->CurrentValue) 
+            Slider->pixeloffset = ((widget->Rect.w - Slider->SliderButton->w) * Slider->CurrentValue) 
                 / (Slider->MaxValue - Slider->MinValue);
         }
     }
@@ -395,7 +401,7 @@ static void SDL_SliderPixeloffset(SDL_Slider *Slider)
     {
         if(Slider->SliderButton)
         {
-            Slider->pixeloffset = ((Slider->rect.h - Slider->SliderButton->h) * Slider->CurrentValue) 
+            Slider->pixeloffset = ((widget->Rect.h - Slider->SliderButton->h) * Slider->CurrentValue) 
                 / (Slider->MaxValue - Slider->MinValue);
            
         }
@@ -406,6 +412,7 @@ static void SDL_SliderPixeloffset(SDL_Slider *Slider)
 
 static void SDL_SliderCurrentValue(SDL_Slider *Slider)
 {
+    SDL_Widget *widget=(SDL_Widget*)Slider;
     /* First do a check on the current value of pixeloffset */
 
     if(Slider->pixeloffset < 0)
@@ -416,19 +423,19 @@ static void SDL_SliderCurrentValue(SDL_Slider *Slider)
     {
         if(Slider->orientation == HORIZONTAL)
         {
-            if(Slider->pixeloffset > (Slider->rect.w - Slider->SliderButton->w))
-                Slider->pixeloffset = (Slider->rect.w - Slider->SliderButton->w);
+            if(Slider->pixeloffset > (widget->Rect.w - Slider->SliderButton->w))
+                Slider->pixeloffset = (widget->Rect.w - Slider->SliderButton->w);
 
             Slider->CurrentValue = (double)((Slider->MaxValue -Slider->MinValue)* Slider->pixeloffset) 
-                /(double)(Slider->rect.w - Slider->SliderButton->w);
+                /(double)(widget->Rect.w - Slider->SliderButton->w);
         }
         else
         {
-            if(Slider->pixeloffset > (Slider->rect.h - Slider->SliderButton->h))
-                Slider->pixeloffset = (Slider->rect.h - Slider->SliderButton->h);
+            if(Slider->pixeloffset > (widget->Rect.h - Slider->SliderButton->h))
+                Slider->pixeloffset = (widget->Rect.h - Slider->SliderButton->h);
 
             Slider->CurrentValue = (double)((Slider->MaxValue -Slider->MinValue)* Slider->pixeloffset) 
-                / (double)(Slider->rect.h - Slider->SliderButton->h);
+                / (double)(widget->Rect.h - Slider->SliderButton->h);
         }
     }
 }

@@ -27,7 +27,6 @@
 typedef struct Stack
 {
     SDL_Rect dest;
-    int type;
     void *data;
     struct    Stack *next;
 }Stack;

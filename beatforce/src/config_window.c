@@ -74,7 +74,11 @@ static SDL_Surface *CONFIGWINDOW_CreateWindow()
         Image=Image->next;
     }
 
+    SDL_WidgetCreate(SDL_EDIT,312,20,400,25);
+    SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
+
     ConfigWindowClock=CLOCK_Create(cw->Clock);
+
     
     return ConfigWindow;
 }

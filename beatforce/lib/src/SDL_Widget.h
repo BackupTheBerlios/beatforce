@@ -119,19 +119,18 @@ typedef enum E_Widget_Type
 
 typedef struct SDL_Widget
 {
-    SDL_Rect Rect;
-    char changed;
-    void *widgetdata;
+    SDL_Rect      Rect;
+    E_Widget_Type Type;
 }SDL_Widget;
 
 /**
  *  Converter function pointer types
  */
-typedef void*             (*T_Widget_Create)       (SDL_Rect*);
-typedef void              (*T_Widget_Draw)         (void*,SDL_Surface *);
-typedef int               (*T_Widget_Properties)   (void*,int,va_list ap);
-typedef void              (*T_Widget_EventHandler) (void*,SDL_Event*);
-typedef void              (*T_Widget_Close)        (void*);
+typedef SDL_Widget*       (*T_Widget_Create)       (SDL_Rect*);
+typedef void              (*T_Widget_Draw)         (SDL_Widget*,SDL_Surface *);
+typedef int               (*T_Widget_Properties)   (SDL_Widget*,int,va_list ap);
+typedef void              (*T_Widget_EventHandler) (SDL_Widget*,SDL_Event*);
+typedef void              (*T_Widget_Close)        (SDL_Widget*);
 
 /**
  *  Structure type for converter functions

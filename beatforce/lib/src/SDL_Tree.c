@@ -40,41 +40,44 @@ static TreeNode* SDL_TreeGetItem(TreeNode *Tree,int *number);
 static void SDL_TreeCollapse(TreeNode *Tree,int number);
 static int SDL_TreeCount(TreeNode *Tree,int *number);
 
-void* SDL_TreeCreate(SDL_Rect* rect)
+SDL_Widget* SDL_TreeCreate(SDL_Rect* rect)
 {
-    SDL_Tree *tree;
+    SDL_Widget *Widget;
+    SDL_Tree   *Tree;
 
-    tree=(SDL_Tree*)malloc(sizeof(SDL_Tree));
+    Tree=(SDL_Tree*)malloc(sizeof(SDL_Tree));
+    Widget=(SDL_Widget*)Tree;
+    
+    Widget->Type    = SDL_TREE;
+    Widget->Rect.x  = rect->x;
+    Widget->Rect.y  = rect->y;
+    Widget->Rect.w  = rect->w;
+    Widget->Rect.h  = rect->h;
 
-    tree->rect.x  = rect->x;
-    tree->rect.y  = rect->y;
-    tree->rect.w  = rect->w;
-    tree->rect.h  = rect->h;
+    Tree->nItems       = 0; /* Number of items to draw */
+    Tree->FirstVisible = 0; /* First item to draw      */
 
-    tree->nItems       = 0; /* Number of items to draw */
-    tree->FirstVisible = 0; /* First item to draw      */
+    Tree->Selected = NULL;
 
-    tree->Selected = NULL;
+    Tree->Font    = NULL;
 
-    tree->Font    = NULL;
-
-    tree->fgcolor = 0x000000;
-    tree->bgcolor = TRANSPARANT;
+    Tree->fgcolor = 0x000000;
+    Tree->bgcolor = TRANSPARANT;
 
     
-    tree->Redraw     = 1;
-    tree->Background = NULL;
+    Tree->Redraw     = 1;
+    Tree->Background = NULL;
 
     
-    tree->Scrollbar  = NULL;
-    tree->Visible    = 1;
-    tree->Tree       = NULL;
-    return tree;
+    Tree->Scrollbar  = NULL;
+    Tree->Visible    = 1;
+    Tree->Tree       = NULL;
+    return (SDL_Widget*)Tree;
 }
 
-void SDL_TreeDraw(void *tree,SDL_Surface *dest)
+void SDL_TreeDraw(SDL_Widget *widget,SDL_Surface *dest)
 {
-    SDL_Tree *Tree=(SDL_Tree*)tree;
+    SDL_Tree *Tree=(SDL_Tree*)widget;
     TreeNode *Item;
     int w;
     SDL_Rect r;
@@ -90,14 +93,14 @@ void SDL_TreeDraw(void *tree,SDL_Surface *dest)
     {
         if(Tree->Background == NULL)
         {
-            Tree->Background = SDL_WidgetGetBackground(dest,&Tree->rect);
+            Tree->Background = SDL_WidgetGetBackground(dest,&widget->Rect);
         }
-        if(SDL_BlitSurface(Tree->Background,NULL,dest,&Tree->rect)<0)
+        if(SDL_BlitSurface(Tree->Background,NULL,dest,&widget->Rect)<0)
             fprintf(stderr, "BlitSurface error: %s\n", SDL_GetError());
     }
     else
     {
-        SDL_FillRect(dest,&Tree->rect,Tree->bgcolor);
+        SDL_FillRect(dest,&widget->Rect,Tree->bgcolor);
     }
 
     {
@@ -115,9 +118,9 @@ void SDL_TreeDraw(void *tree,SDL_Surface *dest)
                 /* 
                  * Attach the Slider widget 
                  */
-                SliderRect.x     = Tree->rect.x + Tree->rect.w - 45;
-                SliderRect.y     = Tree->rect.y;
-                SliderRect.h     = Tree->rect.h;
+                SliderRect.x     = widget->Rect.x + widget->Rect.w - 45;
+                SliderRect.y     = widget->Rect.y;
+                SliderRect.h     = widget->Rect.h;
                 SliderRect.w     = 45;
                 
                 Tree->Scrollbar = SDL_WidgetCreateR(SDL_SLIDER,SliderRect);
@@ -166,10 +169,10 @@ void SDL_TreeDraw(void *tree,SDL_Surface *dest)
                 else
                     sprintf(string,"%s-%s",string,Item->Label);
 
-                r.x = Tree->rect.x;
+                r.x = widget->Rect.x;
                 r.h = SDL_FontGetHeight(Tree->Font);
-                r.y = (w-row) * r.h + Tree->rect.y;
-                r.w = Tree->rect.w;
+                r.y = (w-row) * r.h + widget->Rect.y;
+                r.w = widget->Rect.w;
                 
                 if(Item == Tree->Selected)
                     SDL_FontSetColor(Tree->Font,0xff0000);
@@ -183,9 +186,9 @@ void SDL_TreeDraw(void *tree,SDL_Surface *dest)
     
 }
 
-int SDL_TreeProperties(void *tree,int feature,va_list list)
+int SDL_TreeProperties(SDL_Widget *widget,int feature,va_list list)
 {
-    SDL_Tree *Tree=(SDL_Tree*)tree;
+    SDL_Tree *Tree=(SDL_Tree*)widget;
 
     switch(feature)
     {
@@ -196,7 +199,7 @@ int SDL_TreeProperties(void *tree,int feature,va_list list)
         h=SDL_FontGetHeight(Tree->Font);
         if(h)
         {
-            Tree->nItems=Tree->rect.h / h;
+            Tree->nItems=widget->Rect.h / h;
         }
     }
     break;
@@ -224,22 +227,22 @@ int SDL_TreeProperties(void *tree,int feature,va_list list)
     return 1;
 }
 
-void SDL_TreeEventHandler(void *tree,SDL_Event *event)
+void SDL_TreeEventHandler(SDL_Widget *widget,SDL_Event *event)
 {
-    SDL_Tree *Tree=(SDL_Tree*)tree;
+    SDL_Tree *Tree=(SDL_Tree*)widget;
     
     switch(event->type)
     {
     case SDL_MOUSEBUTTONDOWN:
-        if(SDL_WidgetIsInside(&Tree->rect,event->motion.x,event->motion.y))
+        if(SDL_WidgetIsInside(&widget->Rect,event->motion.x,event->motion.y))
         {
             if(event->button.button == 1)
             {
                 int row=SDL_FontGetHeight(Tree->Font);
-                int y=event->motion.y - Tree->rect.y;
+                int y=event->motion.y - widget->Rect.y;
                 
-                if(event->motion.x < Tree->rect.x + Tree->rect.w)
-                    if(event->motion.x > (Tree->rect.x + (Tree->rect.w -45)))
+                if(event->motion.x < widget->Rect.x + widget->Rect.w)
+                    if(event->motion.x > (widget->Rect.x + (widget->Rect.w -45)))
                         return;
                     
                 

@@ -32,11 +32,11 @@ typedef enum
 
 typedef struct SDL_Button
 {
+    SDL_Widget       Widget;
     SDL_Surface      *disabled;
     SDL_Surface      *normal;
     SDL_Surface      *highlighted;
     SDL_Surface      *pressed;
-    SDL_Rect         rect;
     SDL_ButtonStates state;
     int              Visible;
 
@@ -52,8 +52,8 @@ void UpdateButtons(SDL_Surface *dest,int x, int y, int pressed);
 void CreateButton(int x, int y);
 */
 
-void* SDL_ButtonCreate(SDL_Rect *rect);
-void  SDL_ButtonDraw(void *button,SDL_Surface *dest);
-int   SDL_ButtonProperties(void *button,int feature,va_list list);
-void  SDL_ButtonEventHandler(void *button,SDL_Event *event);
-void  SDL_ButtonClose(void *button);
+SDL_Widget* SDL_ButtonCreate(SDL_Rect *rect);
+void        SDL_ButtonDraw(SDL_Widget *widget,SDL_Surface *dest);
+int         SDL_ButtonProperties(SDL_Widget *widget,int feature,va_list list);
+void        SDL_ButtonEventHandler(SDL_Widget *widget,SDL_Event *event);
+void        SDL_ButtonClose(SDL_Widget *widget);

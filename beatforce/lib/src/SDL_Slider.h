@@ -30,6 +30,7 @@
 
 typedef struct SDL_Slider
 {
+    SDL_Widget  Widget; /* Parent object */
     SDL_Surface *normal;
     SDL_Surface *line;
     SDL_Surface *SliderButton;
@@ -58,15 +59,14 @@ typedef struct SDL_Slider
     void (*OnSliderChangedData)(void*);
 
     int Visible;
-    SDL_Rect rect;  //dimensions of the widget area
 }SDL_Slider;
 
 
-// prototypes
-void* SDL_SliderCreate(SDL_Rect *rect);
-void SDL_SliderDraw(void *slider,SDL_Surface *dest);
-void SDL_SliderEventHandler (void * slider,SDL_Event *event);
-int  SDL_SliderProperties(void *slider,int feature,va_list list);
+/* prototypes */
+SDL_Widget* SDL_SliderCreate(SDL_Rect *rect);
+void        SDL_SliderDraw(SDL_Widget *widget,SDL_Surface *dest);
+void        SDL_SliderEventHandler (SDL_Widget *widget,SDL_Event *event);
+int         SDL_SliderProperties(SDL_Widget *widget,int feature,va_list list);
 
 // internal enums
 enum

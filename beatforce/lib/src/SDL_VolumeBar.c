@@ -39,16 +39,19 @@ const struct S_Widget_FunctionList SDL_VolumeBar_FunctionList =
 };
 
 
-void* SDL_VolumeBarCreate(SDL_Rect* rect)
+SDL_Widget* SDL_VolumeBarCreate(SDL_Rect* rect)
 {
     SDL_VolumeBar *volumebar;
+    SDL_Widget    *widget;
 
     volumebar=(SDL_VolumeBar*)malloc(sizeof(SDL_VolumeBar));
+    widget   =(SDL_Widget*)volumebar;
 
-    volumebar->rect.x  = rect->x;
-    volumebar->rect.y  = rect->y;
-    volumebar->rect.w  = rect->w;
-    volumebar->rect.h  = rect->h;
+    widget->Type = SDL_VOLUMEBAR;
+    widget->Rect.x  = rect->x;
+    widget->Rect.y  = rect->y;
+    widget->Rect.w  = rect->w;
+    widget->Rect.h  = rect->h;
 
     volumebar->color1  = 0x790000;
     volumebar->color2  = 0xfa0000;
@@ -62,18 +65,18 @@ void* SDL_VolumeBarCreate(SDL_Rect* rect)
     volumebar->CurrentValue  = 0;
 
     /* Used for drawing */
-    volumebar->CriticalLine  = (volumebar->CriticalValue * volumebar->rect.h) / volumebar->MaxValue;
+    volumebar->CriticalLine  = (volumebar->CriticalValue * widget->Rect.h) / volumebar->MaxValue;
     volumebar->CurrentLine   = 0;
     
     volumebar->Redraw  = 1;
     volumebar->Visible = 1;
 
-    return volumebar;
+    return (SDL_Widget*)volumebar;
 }
 
-void SDL_VolumeBarDraw(void *volumebar,SDL_Surface *dest)
+void SDL_VolumeBarDraw(SDL_Widget *widget,SDL_Surface *dest)
 {
-    SDL_VolumeBar *VolumeBar=(SDL_VolumeBar*)volumebar;
+    SDL_VolumeBar *VolumeBar=(SDL_VolumeBar*)widget;
     int line;
     int highlight=0;
     
@@ -82,9 +85,9 @@ void SDL_VolumeBarDraw(void *volumebar,SDL_Surface *dest)
 
     if(VolumeBar->Redraw)
     {
-        SDL_FillRect(dest,&VolumeBar->rect,0x000000);
+        SDL_FillRect(dest,&widget->Rect,0x000000);
 
-        for( line=0; line < VolumeBar->rect.h ; line++)
+        for( line=0; line < widget->Rect.h ; line++)
         {
             highlight= (line < VolumeBar->CurrentLine);
 
@@ -111,9 +114,9 @@ void SDL_VolumeBarDraw(void *volumebar,SDL_Surface *dest)
     }
 }
 
-int SDL_VolumeBarProperties(void *volumebar,int feature,va_list list)
+int SDL_VolumeBarProperties(SDL_Widget *widget,int feature,va_list list)
 {
-    SDL_VolumeBar *VolumeBar=(SDL_VolumeBar*)volumebar;
+    SDL_VolumeBar *VolumeBar=(SDL_VolumeBar*)widget;
     double val;
 
     switch(feature)
@@ -125,7 +128,7 @@ int SDL_VolumeBarProperties(void *volumebar,int feature,va_list list)
     case SET_CUR_VALUE:
         val=va_arg(list,double);
         VolumeBar->CurrentValue = val; 
-        VolumeBar->CurrentLine  = (val * VolumeBar->rect.h) / (VolumeBar->MaxValue - VolumeBar->MinValue); 
+        VolumeBar->CurrentLine  = (val * widget->Rect.h) / (VolumeBar->MaxValue - VolumeBar->MinValue); 
         VolumeBar->Redraw       = 1;
         break;
     case SET_VISIBLE:
@@ -140,7 +143,7 @@ int SDL_VolumeBarProperties(void *volumebar,int feature,va_list list)
     return 1;
 }
 
-void SDL_VolumeBarEventHandler(void *volumebar,SDL_Event *event)
+void SDL_VolumeBarEventHandler(SDL_Widget *widget,SDL_Event *event)
 {
 
 
@@ -152,11 +155,12 @@ void SDL_VolumeBarEventHandler(void *volumebar,SDL_Event *event)
 
 void VolumeBar_DrawStripe(SDL_Surface *dest,SDL_VolumeBar *VolumeBar,int line,Uint32 color)
 {
+    SDL_Widget *widget=(SDL_Widget*)VolumeBar;
     SDL_Rect rect;
 
-    rect.x = VolumeBar->rect.x;
-    rect.y = VolumeBar->rect.y + VolumeBar->rect.h - line;
-    rect.w = VolumeBar->rect.w;
+    rect.x = widget->Rect.x;
+    rect.y = widget->Rect.y + widget->Rect.h - line;
+    rect.w = widget->Rect.w;
     rect.h = 1;
     
     SDL_FillRect(dest,&rect,color);

@@ -122,7 +122,6 @@ void SDL_AddToStack(int item,SDL_Rect* dest,void *data)
         CreateOnStack->stack->dest.y=dest->y;
         CreateOnStack->stack->dest.w=dest->w;
         CreateOnStack->stack->dest.h=dest->h;
-        CreateOnStack->stack->type=item;
         CreateOnStack->stack->data=data;
         CreateOnStack->stack->next=NULL;
 
@@ -155,7 +154,6 @@ void SDL_AddToStack(int item,SDL_Rect* dest,void *data)
         temp->dest.y=dest->y;
         temp->dest.w=dest->w;
         temp->dest.h=dest->h;
-        temp->type=item;
         temp->data=data;
         temp->next=NULL;
         SDL_StackSetFocus(temp);

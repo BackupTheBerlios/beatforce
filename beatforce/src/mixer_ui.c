@@ -146,8 +146,6 @@ int MIXERUI_Redraw(void *w)
     volume= 100.0 - volume;
     SDL_WidgetPropertiesOf(mw->MainVolume   ,SET_CUR_VALUE,(double) volume);
 
-
-    
     SDL_WidgetPropertiesOf(mw->Fader,GET_STATE,&state);    
     if(state != SLIDER_DRAG)
     {
@@ -171,14 +169,16 @@ static void MIXERUI_AutoFadeButtonClicked(void *data)
 
 static void MIXERUI_FaderChanged(void *data)
 {
-    SDL_Slider *slider=(SDL_Slider *)data;
+    SDL_Widget *widget=(SDL_Widget*)data;
+    SDL_Slider *slider=(SDL_Slider *)widget;
     MIXER_SetFaderValue(slider->CurrentValue);
 }
 
 void MIXERUI_MainVolumeChanged(void *data)
 {
     MixerWidgets *w=(MixerWidgets *)data;
-    SDL_Slider *slider=(SDL_Slider *)w->MainVolume;
+    SDL_Widget *widget=(SDL_Widget *)w->MainVolume;
+    SDL_Slider *slider=(SDL_Slider *)widget;
     int volume;
 
     volume=slider->MaxValue - slider->CurrentValue;

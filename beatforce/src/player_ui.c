@@ -607,8 +607,9 @@ static void PLAYERUI_PlayButton(void *data)
 void UI_ProgressBarClicked(void *playerdata)
 {
     PlayerDisplay *Player= (PlayerDisplay*)playerdata;
+    SDL_Widget *ProgressBar=(SDL_Widget*)UI_Players[Player->PlayerNr].SongProgress;
 
-    int time=((SDL_ProgressBar*)UI_Players[Player->PlayerNr].SongProgress)->CurrentValue;
+    int time=((SDL_ProgressBar*)ProgressBar)->CurrentValue;
 
     PLAYER_SetTimePlayed(Player->PlayerNr,time/100);
 }

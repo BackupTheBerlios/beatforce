@@ -264,6 +264,7 @@ int oss_set_volume(Private * P, float volume)
     {
 	printf ("OSS: error setting volume for pcm %d: %s\n", vol, strerror(err));
     }
+    return 0;
 
 }
 

@@ -38,40 +38,44 @@ void SDL_EditSetCallback(void *widget,int event,void *function,void *data);
 void SDL_EditCallback(void *widget,int event);
 
 
-void* SDL_EditCreate(SDL_Rect* rect)
+SDL_Widget *SDL_EditCreate(SDL_Rect* rect)
 {
-    SDL_Edit *edit;
+    SDL_Widget *Widget;
+    SDL_Edit   *Edit;
 
-    edit=(SDL_Edit*)malloc(sizeof(SDL_Edit));
 
-    edit->rect.x  = rect->x;
-    edit->rect.y  = rect->y;
-    edit->rect.w  = rect->w;
-    edit->rect.h  = rect->h;
+    Edit=(SDL_Edit*)malloc(sizeof(SDL_Edit));
+    Widget=(SDL_Widget*)Edit;
 
-    edit->Caption = (char*)malloc(1024);
-    memset(edit->Caption,0,1024);
+    Widget->Type    = SDL_EDIT;
+    Widget->Rect.x  = rect->x;
+    Widget->Rect.y  = rect->y;
+    Widget->Rect.w  = rect->w;
+    Widget->Rect.h  = rect->h;
 
-    edit->Font    = NULL;
-    edit->Redraw  = 1;
-    edit->Shift   = 0;
+    Edit->Caption = (char*)malloc(1024);
+    memset(Edit->Caption,0,1024);
 
-    edit->Focus   = 0;
-    edit->bgcolor = 0xfffff7;
-    edit->fgcolor = 0x000000;
+    Edit->Font    = NULL;
+    Edit->Redraw  = 1;
+    Edit->Shift   = 0;
+
+    Edit->Focus   = 0;
+    Edit->bgcolor = 0xfffff7;
+    Edit->fgcolor = 0x000000;
 
     /* Reset the callback functions */
-    edit->AnyKeyPressCallback = NULL;
-    edit->ReturnPressCallback = NULL;
-    edit->AnyKeyData    = NULL;
-    edit->ReturnKeyData = NULL;
+    Edit->AnyKeyPressCallback = NULL;
+    Edit->ReturnPressCallback = NULL;
+    Edit->AnyKeyData    = NULL;
+    Edit->ReturnKeyData = NULL;
 
-    return edit;
+    return (SDL_Widget*)Edit;
 }
 
-void  SDL_EditDraw(void *edit,SDL_Surface *dest)
+void  SDL_EditDraw(SDL_Widget *widget,SDL_Surface *dest)
 {
-    SDL_Edit *Edit=(SDL_Edit*)edit;
+    SDL_Edit *Edit=(SDL_Edit*)widget;
     SDL_Rect cursor;
     SDL_Rect StringPos;
     int StringWidth;
@@ -85,16 +89,25 @@ void  SDL_EditDraw(void *edit,SDL_Surface *dest)
 
     SDL_FontSetColor(Edit->Font,Edit->fgcolor);
     
-    SDL_FillRect(dest,&Edit->rect,Edit->bgcolor);
+    SDL_FillRect(dest,&widget->Rect,BLACK);
+    {
+        SDL_Rect r;
+        r.x = widget->Rect.x+1;
+        r.y = widget->Rect.y+1;
+        r.w = widget->Rect.w-2;
+        r.h = widget->Rect.h-2;
+
+        SDL_FillRect(dest,&r,Edit->bgcolor);
+    }
     
-    StringPos.y = Edit->rect.y + ((Edit->rect.h - SDL_FontGetHeight(Edit->Font))/2);
-    StringPos.x = Edit->rect.x;
-    StringPos.w = Edit->rect.w;
-    StringPos.h = Edit->rect.h;
+    StringPos.y = widget->Rect.y + ((widget->Rect.h - SDL_FontGetHeight(Edit->Font))/2);
+    StringPos.x = widget->Rect.x;
+    StringPos.w = widget->Rect.w;
+    StringPos.h = widget->Rect.h;
     
     StringWidth=SDL_FontGetStringWidth(Edit->Font,Edit->Caption);
     
-    if(StringWidth <= Edit->rect.w )
+    if(StringWidth <= widget->Rect.w )
     {
         SDL_FontDrawStringRect(dest,Edit->Font,Edit->Caption,&StringPos);
     }
@@ -102,7 +115,7 @@ void  SDL_EditDraw(void *edit,SDL_Surface *dest)
     {
         caption=Edit->Caption;
 
-        while(SDL_FontGetStringWidth(Edit->Font,caption) > Edit->rect.w)
+        while(SDL_FontGetStringWidth(Edit->Font,caption) > widget->Rect.w)
             caption++;
 
         SDL_FontDrawStringRect(dest,Edit->Font,caption,&StringPos);
@@ -110,13 +123,13 @@ void  SDL_EditDraw(void *edit,SDL_Surface *dest)
     
     /* draw cursor */
     
-    if(SDL_WidgetHasFocus(edit) || Edit->Focus)
+    if(SDL_WidgetHasFocus(widget) || Edit->Focus)
     {
         StringWidth=SDL_FontGetStringWidth(Edit->Font,Edit->Caption);
-        if(StringWidth > Edit->rect.w)
-            cursor.x = Edit->rect.x + Edit->rect.w - 2;
+        if(StringWidth > widget->Rect.w)
+            cursor.x = widget->Rect.x + widget->Rect.w - 2;
         else
-            cursor.x = Edit->rect.x + SDL_FontGetStringWidth(Edit->Font,Edit->Caption)+2;
+            cursor.x = widget->Rect.x + SDL_FontGetStringWidth(Edit->Font,Edit->Caption)+2;
         cursor.y = StringPos.y;
         cursor.w = 1;
         cursor.h = SDL_FontGetHeight(Edit->Font);
@@ -125,9 +138,9 @@ void  SDL_EditDraw(void *edit,SDL_Surface *dest)
     
 }
 
-int SDL_EditProperties(void *edit,int feature,va_list list)
+int SDL_EditProperties(SDL_Widget *widget,int feature,va_list list)
 {
-    SDL_Edit *Edit=(SDL_Edit*)edit;
+    SDL_Edit *Edit=(SDL_Edit*)widget;
 
     switch(feature)
     {
@@ -151,7 +164,7 @@ int SDL_EditProperties(void *edit,int feature,va_list list)
         int event=va_arg(list,int);
         void *p    = va_arg(list,void*);
         void *data = va_arg(list,void*);
-        SDL_EditSetCallback(edit,event,p,data);
+        SDL_EditSetCallback(widget,event,p,data);
         break;
     }
     case GET_CAPTION:
@@ -167,12 +180,12 @@ int SDL_EditProperties(void *edit,int feature,va_list list)
     return 1;
 }
 
-void SDL_EditEventHandler(void *edit,SDL_Event *event)
+void SDL_EditEventHandler(SDL_Widget *widget,SDL_Event *event)
 {
-    SDL_Edit *Edit=(SDL_Edit*)edit;
+    SDL_Edit *Edit=(SDL_Edit*)widget;
     char key;
 
-    if(!SDL_WidgetHasFocus(edit) && !Edit->Focus)
+    if(!SDL_WidgetHasFocus(widget) && !Edit->Focus)
         return;
     
     switch(event->type) 

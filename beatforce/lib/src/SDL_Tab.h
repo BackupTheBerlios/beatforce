@@ -46,10 +46,10 @@ typedef struct SDL_TabImage
 
 typedef struct SDL_Tab
 {
+    SDL_Widget        Widget;
     SDL_TabImage      *normal;
     SDL_TabImage      *highlighted;
 
-    SDL_Rect          *rect;
     SDL_TabList       *tabs;
     SDL_TabList       *hl;
 
@@ -76,10 +76,10 @@ typedef struct SDL_Tab
 
 
 
-void *SDL_TabCreate(SDL_Rect *rect);
-void SDL_TabDraw(void *data,SDL_Surface *dest);
-int SDL_TabProperties(void *tab,int feature,va_list list);
-void SDL_TabEventHandler(void * tab,SDL_Event *event);
+SDL_Widget *SDL_TabCreate(SDL_Rect *rect);
+void SDL_TabDraw(SDL_Widget *data,SDL_Surface *dest);
+int SDL_TabProperties(SDL_Widget *tab,int feature,va_list list);
+void SDL_TabEventHandler(SDL_Widget* tab,SDL_Event *event);
 
 #endif //__SDL_TAB_H
 

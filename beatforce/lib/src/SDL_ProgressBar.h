@@ -24,8 +24,8 @@
 
 typedef struct SDL_ProgressBar
 {
-    SDL_Font *Font;
-    SDL_Rect rect;
+    SDL_Widget  Widget;
+    SDL_Font   *Font;
     
     Uint32  color1;
     Uint32  color2;
@@ -58,9 +58,9 @@ typedef struct SDL_ProgressBar
 #define PROGRESSBAR_DRAG   4
 
 // prototypes
-void* SDL_ProgressBarCreate(SDL_Rect *rect);
-void  SDL_ProgressBarDraw(void *progressbar,SDL_Surface *dest);
-void  SDL_ProgressBarEventHandler(void * progressbar,SDL_Event *event);
-int   SDL_ProgressBarProperties(void *progressbar,int feature,va_list list);
+SDL_Widget* SDL_ProgressBarCreate(SDL_Rect *rect);
+void        SDL_ProgressBarDraw(SDL_Widget *widget,SDL_Surface *dest);
+void        SDL_ProgressBarEventHandler(SDL_Widget *widget,SDL_Event *event);
+int         SDL_ProgressBarProperties(SDL_Widget *widget,int feature,va_list list);
 
 

@@ -38,36 +38,39 @@ const struct S_Widget_FunctionList SDL_Label_FunctionList =
 };
 
 
-void* SDL_LabelCreate(SDL_Rect* rect)
+SDL_Widget* SDL_LabelCreate(SDL_Rect* rect)
 {
-    SDL_Label *label;
+    SDL_Widget *Widget;
+    SDL_Label  *Label;
 
-    label=(SDL_Label*)malloc(sizeof(SDL_Label));
+    Label=(SDL_Label*)malloc(sizeof(SDL_Label));
+    
+    Widget=(SDL_Widget*)Label;
+    Widget->Type    = SDL_LABEL;
+    Widget->Rect.x  = rect->x;
+    Widget->Rect.y  = rect->y;
+    Widget->Rect.w  = rect->w;
+    Widget->Rect.h  = rect->h;
 
-    label->rect.x  = rect->x;
-    label->rect.y  = rect->y;
-    label->rect.w  = rect->w;
-    label->rect.h  = rect->h;
+    Label->Caption = NULL;
+    Label->Font    = NULL;
 
-    label->Caption = NULL;
-    label->Font    = NULL;
+    Label->fgcolor = 0x000000;
+    Label->bgcolor = TRANSPARANT;
+    Label->offset   = 0;
+    Label->increase = 1;
 
-    label->fgcolor = 0x000000;
-    label->bgcolor = TRANSPARANT;
-    label->offset   = 0;
-    label->increase = 1;
+    Label->Pattern    = LABEL_BOUNCE;
+    Label->Redraw     = 1;
+    Label->Background = NULL;
 
-    label->Pattern    = LABEL_BOUNCE;
-    label->Redraw     = 1;
-    label->Background = NULL;
-
-    label->Visible    = 1;
-    return label;
+    Label->Visible    = 1;
+    return (SDL_Widget*)Label;
 }
 
-void SDL_LabelDraw(void *label,SDL_Surface *dest)
+void SDL_LabelDraw(SDL_Widget *widget,SDL_Surface *dest)
 {
-    SDL_Label *Label=(SDL_Label*)label;
+    SDL_Label *Label=(SDL_Label*)widget;
     char string[255];
     SDL_Rect DrawPosititon;
     
@@ -82,28 +85,28 @@ void SDL_LabelDraw(void *label,SDL_Surface *dest)
     {
         if(Label->Background == NULL)
         {
-            Label->Background = SDL_WidgetGetBackground(dest,&Label->rect);
+            Label->Background = SDL_WidgetGetBackground(dest,&widget->Rect);
         }
-        if(SDL_BlitSurface(Label->Background,NULL,dest,&Label->rect)<0)
+        if(SDL_BlitSurface(Label->Background,NULL,dest,&widget->Rect)<0)
             fprintf(stderr, "BlitSurface error: %s\n", SDL_GetError());
     }
     else
     {
-        SDL_FillRect(dest,&Label->rect,Label->bgcolor);
+        SDL_FillRect(dest,&widget->Rect,Label->bgcolor);
     }
 
     if(Label->Caption)
     {
         Label_CalculatePattern(Label,&DrawPosititon);
         
-        SDL_FontDrawStringLimited(dest,Label->Font,Label->Caption,&DrawPosititon,&Label->rect);
+        SDL_FontDrawStringLimited(dest,Label->Font,Label->Caption,&DrawPosititon,&widget->Rect);
     }
    
 }
 
-int SDL_LabelProperties(void *label,int feature,va_list list)
+int SDL_LabelProperties(SDL_Widget *widget,int feature,va_list list)
 {
-    SDL_Label *Label=(SDL_Label*)label;
+    SDL_Label *Label=(SDL_Label*)widget;
 
     switch(feature)
     {
@@ -131,7 +134,7 @@ int SDL_LabelProperties(void *label,int feature,va_list list)
     return 1;
 }
 
-void SDL_LabelEventHandler(void *label,SDL_Event *event)
+void SDL_LabelEventHandler(SDL_Widget *widget,SDL_Event *event)
 {
 
 
@@ -140,26 +143,27 @@ void SDL_LabelEventHandler(void *label,SDL_Event *event)
 
 static void Label_CalculatePattern(SDL_Label *Label,SDL_Rect *Rect)
 {
+    SDL_Widget *widget=(SDL_Widget*)Label;
     int StringWidth;
 
     /* Calculate the total size of the string in pixels */
     StringWidth=SDL_FontGetStringWidth(Label->Font,Label->Caption);
 
-    if(StringWidth > Label->rect.w)
+    if(StringWidth > widget->Rect.w)
     {
         switch(Label->Pattern)
         {
         case LABEL_NORMAL:
-            Rect->x = Label->rect.x;
-            Rect->y = Label->rect.y;
-            Rect->w = Label->rect.w;
-            Rect->h = Label->rect.h;
+            Rect->x = widget->Rect.x;
+            Rect->y = widget->Rect.y;
+            Rect->w = widget->Rect.w;
+            Rect->h = widget->Rect.h;
             break;
         case LABEL_BOUNCE:
-            Rect->x = Label->rect.x-Label->offset;
-            Rect->y = Label->rect.y;
-            Rect->w = Label->rect.w+Label->offset;
-            Rect->h = Label->rect.h;
+            Rect->x = widget->Rect.x - Label->offset;
+            Rect->y = widget->Rect.y;
+            Rect->w = widget->Rect.w + Label->offset;
+            Rect->h = widget->Rect.h;
             if(Label->increase == 1)
                 Label->offset++;
             else 
@@ -171,31 +175,31 @@ static void Label_CalculatePattern(SDL_Label *Label,SDL_Rect *Rect)
                 Label->increase=1;
             break;
         case LABEL_SCROLL_LEFT:
-            Rect->x = Label->rect.x-Label->offset;
-            Rect->y = Label->rect.y;
-            Rect->w = Label->rect.w+Label->offset;
-            Rect->h = Label->rect.h;
+            Rect->x = widget->Rect.x - Label->offset;
+            Rect->y = widget->Rect.y;
+            Rect->w = widget->Rect.w + Label->offset;
+            Rect->h = widget->Rect.h;
             Label->offset++;
-            if(StringWidth + Label->rect.w < Label->rect.w + Label->offset)
-            Label->offset = -Label->rect.w;
+            if(StringWidth + widget->Rect.w < widget->Rect.w + Label->offset)
+                Label->offset = -widget->Rect.w;
             break;
         case LABEL_SCROLL_RIGHT:
-            Rect->x = Label->rect.x - Label->offset;
-            Rect->y = Label->rect.y;
-            Rect->w = Label->rect.w + Label->offset;
-            Rect->h = Label->rect.h;
+            Rect->x = widget->Rect.x - Label->offset;
+            Rect->y = widget->Rect.y;
+            Rect->w = widget->Rect.w + Label->offset;
+            Rect->h = widget->Rect.h;
             Label->offset--;
-            if(Label->offset + Label->rect.w < 0)
+            if(Label->offset + widget->Rect.w < 0)
                 Label->offset = StringWidth;
             break;
         }
     }
     else
     {
-        Rect->x = Label->rect.x;
-        Rect->y = Label->rect.y;
-        Rect->w = Label->rect.w;
-        Rect->h = Label->rect.h;
+        Rect->x = widget->Rect.x;
+        Rect->y = widget->Rect.y;
+        Rect->w = widget->Rect.w;
+        Rect->h = widget->Rect.h;
     }
     
 

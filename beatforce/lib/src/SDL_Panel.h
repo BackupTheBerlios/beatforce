@@ -24,7 +24,7 @@
 
 typedef struct SDL_Panel
 {
-    SDL_Rect rect;
+    SDL_Widget Widget;
     SDL_Surface *Image;
 
     int Redraw;
@@ -37,9 +37,9 @@ typedef struct SDL_Panel
 
 
 // prototypes
-void*  SDL_PanelCreate(SDL_Rect *rect);
-void   SDL_PanelDraw(void *panel,SDL_Surface *dest);
-void   SDL_PanelHandler(void * panel,SDL_Event *event);
-int    SDL_PanelProperties(void *panel,int feature,va_list list);
-void   SDL_PanelEventHandler(void *panel,SDL_Event *event);
+SDL_Widget*  SDL_PanelCreate(SDL_Rect *rect);
+void         SDL_PanelDraw(SDL_Widget *widget,SDL_Surface *dest);
+void         SDL_PanelHandler(SDL_Widget *widget,SDL_Event *event);
+int          SDL_PanelProperties(SDL_Widget *widget,int feature,va_list list);
+void         SDL_PanelEventHandler(SDL_Widget *widget,SDL_Event *event);
 

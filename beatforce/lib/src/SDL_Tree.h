@@ -37,8 +37,8 @@ typedef struct TreeNode
 
 typedef struct SDL_Tree
 {
-    SDL_Font *Font;
-    SDL_Rect rect;
+    SDL_Widget Widget;
+    SDL_Font  *Font;
     
     Uint32  bgcolor;
     Uint32  fgcolor;
@@ -62,10 +62,10 @@ typedef struct SDL_Tree
 }SDL_Tree;
 
 
-void* SDL_TreeCreate(SDL_Rect *rect);
-void  SDL_TreeDraw(void *tree,SDL_Surface *dest);
-int   SDL_TreeProperties(void *tree,int feature,va_list list);
-void  SDL_TreeEventHandler(void *tree,SDL_Event *event);
+SDL_Widget* SDL_TreeCreate(SDL_Rect *rect);
+void        SDL_TreeDraw(SDL_Widget *widget,SDL_Surface *dest);
+int         SDL_TreeProperties(SDL_Widget *widget,int feature,va_list list);
+void        SDL_TreeEventHandler(SDL_Widget *widget,SDL_Event *event);
 
 void *SDL_TreeInsertItem(void *tree,void *root,char *string);
 

@@ -36,31 +36,36 @@ const struct S_Widget_FunctionList SDL_Button_FunctionList =
     SDL_ButtonClose
 };
 
-void* SDL_ButtonCreate(SDL_Rect* rect)
+SDL_Widget* SDL_ButtonCreate(SDL_Rect* rect)
 {    
     SDL_Button *newbutton;
+    SDL_Widget *widget;
 
     newbutton=(SDL_Button*)malloc(sizeof(SDL_Button));
+    
+    widget=(SDL_Widget*)newbutton;
+    widget->Type            = SDL_BUTTON;
+    widget->Rect.x          = rect->x;
+    widget->Rect.y          = rect->y;
+    widget->Rect.w          = rect->w;
+    widget->Rect.h          = rect->h;
+
+
     newbutton->disabled     = NULL; 
     newbutton->normal       = NULL;
     newbutton->highlighted  = NULL; 
     newbutton->pressed      = NULL; 
-    newbutton->rect.x       = rect->x;
-    newbutton->rect.y       = rect->y;
-    newbutton->rect.w       = rect->w;
-    newbutton->rect.h       = rect->h;
     newbutton->Clicked      = NULL;
     newbutton->ClickedData  = NULL;
     newbutton->Visible      = 1;
     newbutton->state        = SDL_BUTTON_UP;
     newbutton->next         = NULL;
-    return newbutton;
+    return (SDL_Widget*)newbutton;
 }
 
-void SDL_ButtonDraw(void *data,SDL_Surface *dest)
+void SDL_ButtonDraw(SDL_Widget *widget,SDL_Surface *dest)
 {
-    
-    SDL_Button  *button=(SDL_Button*)data;
+    SDL_Button  *button=(SDL_Button*)widget;
     SDL_Surface *drawbutton=NULL;
     SDL_Rect src;
 
@@ -71,11 +76,11 @@ void SDL_ButtonDraw(void *data,SDL_Surface *dest)
     {
         /* Draw a default button with no text inside */
         SDL_Rect new;
-        new.x = button->rect.x+2;
-        new.y = button->rect.y+2;
-        new.w = button->rect.w-4;
-        new.h = button->rect.h-4;
-        SDL_FillRect(dest,&button->rect,0x000000);
+        new.x = widget->Rect.x+2;
+        new.y = widget->Rect.y+2;
+        new.w = widget->Rect.w-4;
+        new.h = widget->Rect.h-4;
+        SDL_FillRect(dest,&widget->Rect,0x000000);
         SDL_FillRect(dest,&new,0xeeeeee);
         return;
     }
@@ -84,15 +89,15 @@ void SDL_ButtonDraw(void *data,SDL_Surface *dest)
         src.x=0;
         src.y=0;
 
-        if(button->rect.w == 0)
+        if(widget->Rect.w == 0)
             src.w=button->normal->w;
         else
-            src.w=button->rect.w;
+            src.w=widget->Rect.w;
 
-        if(button->rect.h == 0)
+        if(widget->Rect.h == 0)
             src.h=button->normal->h;
         else
-            src.h=button->rect.h;
+            src.h=widget->Rect.h;
 
     }
 
@@ -112,15 +117,15 @@ void SDL_ButtonDraw(void *data,SDL_Surface *dest)
     if(drawbutton == NULL)
         drawbutton=button->normal;
 
-    
-    if(SDL_BlitSurface(drawbutton,&src,dest,&button->rect)<0)
+
+    if(SDL_BlitSurface(drawbutton,&src,dest,&widget->Rect)<0)
         ;
             
 }
 
-int SDL_ButtonProperties(void *button,int feature,va_list list)
+int SDL_ButtonProperties(SDL_Widget *widget,int feature,va_list list)
 {
-    SDL_Button *Button=(SDL_Button*)button;
+    SDL_Button *Button=(SDL_Button*)widget;
 
     switch(feature)
     {
@@ -168,9 +173,9 @@ int SDL_ButtonProperties(void *button,int feature,va_list list)
     return 1;
 }
 
-void SDL_ButtonEventHandler(void * button,SDL_Event *event)
+void SDL_ButtonEventHandler(SDL_Widget *widget,SDL_Event *event)
 {
-    SDL_Button *Button=(SDL_Button*)button;
+    SDL_Button *Button=(SDL_Button*)widget;
 
     if(Button->Visible == 0)
         return;
@@ -178,7 +183,7 @@ void SDL_ButtonEventHandler(void * button,SDL_Event *event)
     switch(event->type)
     {
     case SDL_MOUSEMOTION:
-        if(SDL_WidgetIsInside(&Button->rect,event->motion.x,event->motion.y))
+        if(SDL_WidgetIsInside(&widget->Rect,event->motion.x,event->motion.y))
         {
             if(Button->state == SDL_BUTTON_UP)
                 Button->state = SDL_BUTTON_HIGHLIGHTED;
@@ -187,7 +192,7 @@ void SDL_ButtonEventHandler(void * button,SDL_Event *event)
             Button->state = SDL_BUTTON_UP;
         break;
     case SDL_MOUSEBUTTONDOWN:
-        if(SDL_WidgetIsInside(&Button->rect,event->motion.x,event->motion.y))
+        if(SDL_WidgetIsInside(&widget->Rect,event->motion.x,event->motion.y))
         {
             Button->state = SDL_BUTTON_DOWN;
             if(Button->Clicked)
@@ -197,7 +202,7 @@ void SDL_ButtonEventHandler(void * button,SDL_Event *event)
             Button->state = SDL_BUTTON_UP;
         break;
     case SDL_MOUSEBUTTONUP:
-        if(SDL_WidgetIsInside(&Button->rect,event->motion.x,event->motion.y))
+        if(SDL_WidgetIsInside(&widget->Rect,event->motion.x,event->motion.y))
             Button->state = SDL_BUTTON_HIGHLIGHTED;
         else
             Button->state = SDL_BUTTON_UP;
@@ -208,9 +213,9 @@ void SDL_ButtonEventHandler(void * button,SDL_Event *event)
 }
 
 
-void SDL_ButtonClose(void *button)
+void SDL_ButtonClose(SDL_Widget *widget)
 {
-    SDL_Button *Button=(SDL_Button*)button;
+    SDL_Button *Button=(SDL_Button*)widget;
 
 
     free(Button);

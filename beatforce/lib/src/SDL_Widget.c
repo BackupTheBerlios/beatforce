@@ -100,24 +100,14 @@ SDL_Widget* SDL_WidgetCreate(E_Widget_Type widget,int x,int y, int w, int h)
 SDL_Widget* SDL_WidgetCreateR(E_Widget_Type widget,SDL_Rect dest)
 {
     T_Widget_Create create;
-    void* widgetdata = NULL;
     SDL_Widget *NewWidget;
 
     if(WidgetTable[widget])
     {
         create=WidgetTable[widget]->create;
         
-        widgetdata=create(&dest);
+        NewWidget=create(&dest);
 
-        if(widgetdata == NULL)
-        {
-            printf("Error creating widget\n");
-            SDL_Quit();
-        }
-        NewWidget=malloc(sizeof(SDL_Widget));
-        memset(NewWidget,0,sizeof(SDL_Widget));
-        
-        NewWidget->widgetdata=widgetdata;
         SDL_AddToStack(widget,&dest,NewWidget);
         return NewWidget;
     }
@@ -137,9 +127,9 @@ int SDL_WidgetProperties(int feature,...)
     va_start(ap,feature);
     current_widget=SDL_StackGetLastItem();
 
-    properties=WidgetTable[current_widget->type]->properties;
     widget=(SDL_Widget*)current_widget->data;
-    properties(widget->widgetdata,feature,ap);
+    properties=WidgetTable[widget->Type]->properties;
+    properties(widget,feature,ap);
 
     return 1;
 }
@@ -148,26 +138,14 @@ int SDL_WidgetPropertiesOf(SDL_Widget *widget,int feature,...)
 {
     va_list ap;
     T_Widget_Properties properties;
-    Stack* current_widget;
-    SDL_Widget *www;
     int retval=0;
 
     va_start(ap,feature);
 
-    current_widget=SDL_StackGetStack(NULL);
-
-    while(current_widget)
+    if(widget)
     {
-        if(current_widget->data == widget)
-            break;
-
-        current_widget=current_widget->next;
-    }
-    if(current_widget)
-    {
-        properties=WidgetTable[current_widget->type]->properties;
-        www=(SDL_Widget*)current_widget->data;
-        retval=properties(www->widgetdata,feature,ap);
+        properties=WidgetTable[widget->Type]->properties;
+        retval=properties(widget,feature,ap);
     }
     else
     {
@@ -252,9 +230,9 @@ int SDL_DrawAllWidgets(SDL_Surface *screen)
     SDL_mutexP(MyMutex);
     while(current_widget)
     {
-        draw=WidgetTable[current_widget->type]->draw;
         widget=(SDL_Widget*)current_widget->data;
-        draw(widget->widgetdata,screen);
+        draw=WidgetTable[widget->Type]->draw;
+        draw(widget,screen);
         current_widget=current_widget->next;
     }
     SDL_Flip(screen);
@@ -280,16 +258,17 @@ void  SDL_WidgetEvent(SDL_Event *event)
     T_Widget_EventHandler eh;
     Stack* current_widget;
     Stack* focus_widget=NULL;
-    SDL_Widget *widget;
 
     switch(event->type)
     {
+
     case SDL_MOUSEBUTTONDOWN:
     {
         focus_widget=SDL_StackGetStack(NULL);
         
         while(focus_widget)
         {
+            SDL_Widget *w=(SDL_Widget*)focus_widget;
             if(SDL_WidgetIsInside(&focus_widget->dest,event->motion.x,event->motion.y))
             {
                 SDL_StackSetFocus(focus_widget);
@@ -308,12 +287,11 @@ void  SDL_WidgetEvent(SDL_Event *event)
 
     while(current_widget)
     {
-        
-        eh=WidgetTable[current_widget->type]->eventhandler;
+        SDL_Widget *w=(SDL_Widget*)current_widget->data;
+        eh=WidgetTable[w->Type]->eventhandler;
         if(eh)
         {
-            widget=(SDL_Widget*)current_widget->data;
-            eh(widget->widgetdata,event);
+            eh(w,event);
         }
         current_widget=current_widget->next;
     }
@@ -324,12 +302,14 @@ void  SDL_WidgetEvent(SDL_Event *event)
 int SDL_WidgetHasFocus(void *widget)
 {
     Stack* current_widget;
+    SDL_Widget *w;
 
     current_widget=SDL_StackGetFocus();
 
     if(current_widget != NULL)
     {
-        if(widget==current_widget->data)
+        w=(SDL_Widget*)current_widget->data;
+        if(widget == w)
             return 1;
     }
     return 0;
@@ -354,11 +334,11 @@ int SDL_WidgetForceRedraw(SDL_Surface *surface)
     
     while(current_widget)
     {
-        properties=WidgetTable[current_widget->type]->properties;
+        widget=(SDL_Widget*)current_widget->data;
+        properties=WidgetTable[widget->Type]->properties;
         if(properties)
         {
-            widget=(SDL_Widget*)current_widget->data;
-            properties(widget->widgetdata,FORCE_REDRAW,NULL);
+            properties(widget,FORCE_REDRAW,NULL);
         }
         current_widget=current_widget->next;
     }

@@ -27,7 +27,7 @@
 
 typedef struct SDL_Table
 {
-    SDL_Rect            rect;
+    SDL_Widget          Widget;
     SDL_Font            *font;
     char                *caption;    
     int                 *Selected;
@@ -86,9 +86,9 @@ typedef struct SDL_Table
 }SDL_Table;
 
 
-void* SDL_TableCreate(SDL_Rect* rect);
-void  SDL_TableDraw (void *table,SDL_Surface *dest);
-int  SDL_TableProperties(void *table,int feature,va_list list);
+SDL_Widget* SDL_TableCreate(SDL_Rect* rect);
+void        SDL_TableDraw (SDL_Widget *widget,SDL_Surface *dest);
+int         SDL_TableProperties(SDL_Widget *widget,int feature,va_list list);
 
 /*
   Currently implemented properties:
@@ -122,5 +122,5 @@ int  SDL_TableProperties(void *table,int feature,va_list list);
 */
 
 
-void  SDL_TableEventHandler(void *table,SDL_Event *event);
+void  SDL_TableEventHandler(SDL_Widget *widget,SDL_Event *event);
 
