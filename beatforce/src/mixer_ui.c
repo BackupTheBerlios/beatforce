@@ -99,7 +99,7 @@ void* MIXERUI_CreateWindow(ThemeMixer *tm)
             SDL_WidgetPropertiesOf(w->MainVolume,SET_BUTTON_IMAGE,IMG_Load(Slider->button));
             SDL_WidgetPropertiesOf(w->MainVolume,SET_MAX_VALUE,100);
             SDL_WidgetPropertiesOf(w->MainVolume,SET_MIN_VALUE,0);
-            SDL_WidgetPropertiesOf(w->MainVolume,SET_NORMAL_STEP_SIZE,1.0);
+            SDL_WidgetPropertiesOf(w->MainVolume,SET_NORMAL_STEP_SIZE,1);
             SDL_SignalConnect(w->MainVolume,"value-changed",MIXERUI_MainVolumeChanged,w);
             break;
         case SLIDER_FADER:
@@ -111,7 +111,7 @@ void* MIXERUI_CreateWindow(ThemeMixer *tm)
             MIXER_GetFaderValue (&val);
             SDL_WidgetPropertiesOf(w->Fader,SET_MAX_VALUE,1000);
             SDL_WidgetPropertiesOf(w->Fader,SET_MIN_VALUE,0);
-            SDL_WidgetPropertiesOf(w->Fader,SET_CUR_VALUE,(double)val);
+            SDL_WidgetPropertiesOf(w->Fader,SET_CUR_VALUE,val);
             SDL_WidgetPropertiesOf(w->Fader,SET_NORMAL_STEP_SIZE,100);
             break;
         }
@@ -150,8 +150,8 @@ int MIXERUI_Redraw(void *w)
         AUDIOOUTPUT_GetMainVolume(&volume);    
         
         SDL_WidgetPropertiesOf(mw->MainVolumeIndicator,SET_CUR_VALUE,(double) volume);
-        volume= 100.0 - volume;
-        SDL_WidgetPropertiesOf(mw->MainVolume   ,SET_CUR_VALUE,(double) volume);
+        volume= 100 - volume;
+        SDL_WidgetPropertiesOf(mw->MainVolume   ,SET_CUR_VALUE, volume);
     }
     if(mw->Fader)
     {

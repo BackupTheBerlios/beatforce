@@ -60,7 +60,6 @@ void eventhandler(SDL_Table *table)
     if(e)
     {
         PLAYER_Load(0,e);
-//    PLAYLIST_AddEntry(0,e);
         PLAYER_Play(0);
     }
 }

@@ -456,6 +456,7 @@ int AUDIOOUTPUT_GetVolumeLevel(int channel,int *left,int *right)
 /* interface to mixer */
 int AUDIOOUTPUT_SetVolume(int c, float db)
 {
+    printf("TRACE(AUDIOOUTPUT_SetVolume); %f\n",db);
     if (c >= OUTPUT_N_CHANNELS || c < 0)
         return 0;
     
@@ -558,26 +559,19 @@ static void AUDIOOUTPUT_Crossfade()
             value = 500;
         }
         
-        if (value >= 500)
-            ch1 = 0.50;
-        else
-            ch1 = (double)value/1000;
+        ch1 = (double)((double)value/1000);
         
-        if (value <= 500)
-            ch0 = 0.50;
-        else
-            ch0 = 1.00 - (double)(value/1000);
+        ch0 = 1.00 - (double)((double)value/1000);
         
         if (ch0 != 0)
         {
-            ch0 = pow (10,0.05 * (double) ((ch0 * 2 - 1) * 30)) * _TO_ATT (ch[0]->fader_dB);
+            ch0 = pow (10,0.05 * (double) ((ch0 * 2 - 1) * 10)) * _TO_ATT (ch[0]->fader_dB);
         }
         
         if (ch1 != 0)
         {
-            ch1 = pow (10,0.05 * (double) ((ch1 * 2 - 1) * 30)) * _TO_ATT (ch[1]->fader_dB);
+            ch1 = pow (10,0.05 * (double) ((ch1 * 2 - 1) * 10)) * _TO_ATT (ch[1]->fader_dB);
         }
-
         for (sample = 0; sample < OUTPUT_BUFFER_SIZE_SAMPLES (audiocfg); sample++)
         {
             double ch0_tmp = 0;
