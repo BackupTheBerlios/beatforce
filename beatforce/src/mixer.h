@@ -62,4 +62,8 @@ int MIXER_SetFaderValue (double value);
 int MIXER_DoFade(int autofade, int instant);
 int MIXER_SetCallback(void *callback);
 
+int MIXER_DecreaseMainVolume();
+int MIXER_IncreaseMainVolume();
+
+
 #endif

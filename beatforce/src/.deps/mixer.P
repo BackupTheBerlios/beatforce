@@ -21,7 +21,7 @@ mixer.o: mixer.c ../config.h /usr/include/stdlib.h \
  /usr/include/bits/mathdef.h /usr/include/bits/mathcalls.h \
  /usr/include/bits/mathinline.h audio_output.h types.h ringbuffer.h \
  /usr/local/include/vrb.h output_plugin.h configfile.h llist.h osa.h \
- mixer.h err.h player.h input_plugin.h songdb.h debug.h
+ output.h mixer.h err.h player.h input_plugin.h songdb.h debug.h
 mixer.c :
 ../config.h :
 /usr/include/stdlib.h :
@@ -73,6 +73,7 @@ output_plugin.h :
 configfile.h :
 llist.h :
 osa.h :
+output.h :
 mixer.h :
 err.h :
 player.h :

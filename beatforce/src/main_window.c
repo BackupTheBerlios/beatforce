@@ -27,11 +27,14 @@
 #include "playlist_ui.h"
 #include "mixer_ui.h"
 
-#include "songdb.h"
-#include "player.h"
-#include "osa.h"
-
 #include "config.h"
+#include "mixer.h"
+#include "osa.h"
+#include "player.h"
+#include "songdb.h"
+
+
+
 
 #include "wndmgr.h"
 #include "search_window.h"
@@ -48,11 +51,20 @@ int control_state;
 int mainwindow_EventHandler(SDL_Event event);
 int mainwindow_NotifyHandler();
 SDL_Surface *mainwindow_CreateWindow();
+int mainwindow_HandleKeys(unsigned int key);
 
 SDL_Surface *MainWindow;
 void *timewidget;
 
 Window MAINWINDOW={ mainwindow_EventHandler , mainwindow_NotifyHandler };
+
+#define BF_CONTROL         0xf000
+#define BF_QUIT            SDLK_ESCAPE
+#define BF_SEARCH          SDLK_j
+#define BF_NEXTSONG        SDLK_b
+#define BF_MAINVOLUMEDOWN  SDLK_PERIOD
+#define BF_MAINVOLUMEUP    SDLK_SLASH
+
 
 void MAINWINDOW_Init()
 {
@@ -82,6 +94,12 @@ SDL_Surface *mainwindow_CreateWindow()
 
     SDL_WidgetCreate(SDL_PANEL,0,0,1024,685);
     SDL_WidgetProperties(SET_NORMAL_IMAGE,THEME_DIR"/beatforce/sbackground.bmp");
+    
+    SDL_WidgetCreate(SDL_PANEL,0,230,1024,3);
+    SDL_WidgetProperties(SET_NORMAL_IMAGE,THEME_DIR"/beatforce/seperator.bmp");
+
+    SDL_WidgetCreate(SDL_PANEL,0,30,1024,3);
+    SDL_WidgetProperties(SET_NORMAL_IMAGE,THEME_DIR"/beatforce/seperator.bmp");
 
     timewidget=SDL_WidgetCreate(SDL_LABEL,4,4,65,22);
     SDL_WidgetProperties(SET_BG_COLOR,BLACK);
@@ -112,53 +130,23 @@ SDL_Surface *mainwindow_CreateWindow()
 
 int mainwindow_EventHandler(SDL_Event event)
 {
+    unsigned int key = 0;
     switch(event.type)
     {
     case SDL_KEYDOWN:
         switch( event.key.keysym.sym ) 
         {
+
         case SDLK_RCTRL:
         case SDLK_LCTRL:
             control_state=1;
             break;
 
-        case SDLK_j:
-            if(control_state == 0)// && !SONGDBUI_IsRenaming())
-            {
-                SEARCHWINDOW_Open();
-                return 1; //Don't give this event to widgets
-            }
-            break;
-
-        case SDLK_k:
-            if(control_state)
-            {
-                printf("Control k pressed\n");
-            }
-            break;
-
-        case SDLK_b:
-            if(control_state == 0)
-            {
-                
-                
-            }
-            break;
-
-        case SDLK_c:
-            if(control_state == 0)
-            {
-                PLAYER_Pause (0);
-                PLAYER_Pause (1);
-            }
-            break;
-
-        case SDLK_ESCAPE:
-            WNDMGR_Exit();
-            break;
-                
-        
         default:
+            key=event.key.keysym.sym;
+            if(control_state)
+                key |= BF_CONTROL;
+            mainwindow_HandleKeys(key);
             break;
             
         }
@@ -179,7 +167,35 @@ int mainwindow_EventHandler(SDL_Event event)
     return 0;
 }
 
+int mainwindow_HandleKeys(unsigned int key)
+{
+    switch(key)
+    {
+    case BF_QUIT:
+        WNDMGR_Exit();
+        break;
+        
+    case BF_SEARCH:
+        SEARCHWINDOW_Open();
+        break;
+        
+    case BF_MAINVOLUMEUP:
+        MIXER_IncreaseMainVolume();
+        break;
 
+    case BF_MAINVOLUMEDOWN:
+        MIXER_DecreaseMainVolume();
+        break;
+
+    case BF_NEXTSONG:
+        break;
+
+    }
+
+    return 1;
+
+
+}
 
 int mainwindow_NotifyHandler()
 {
@@ -188,6 +204,8 @@ int mainwindow_NotifyHandler()
     OSA_GetTime(&hour,&min);
     sprintf(time,"%02d:%02d",hour,min);
     SDL_WidgetPropertiesOf(timewidget,SET_CAPTION,time);
+
+    MIXERUI_Redraw();
     PLAYERUI_Redraw();
     return 1;
 }

@@ -39,6 +39,7 @@
 #include "audio_output.h"
 #include "configfile.h"
 #include "osa.h"
+#include "output.h"
 #include "mixer.h"
 #include "err.h"
 #include "player.h"
@@ -70,8 +71,6 @@ int curr_playing;
 
 int update_timer;
 
-void (*fadercallback)(double newval);
-
 int beat_fallof_timer[2];
 int beat_fallof_time = 100;
 
@@ -87,8 +86,6 @@ int MIXER_Init ()
     /*if (mixer_read_config () != 0)
         mixer_write_config ();*/
 
-    fadercallback=NULL;
-    
     cfader->value = 0;
     cfader->timer = 0;
     cfader->from_player = 0;
@@ -111,7 +108,6 @@ int mixer_finalize ()
 
 int MIXER_SetCallback(void *callback)
 {
-    fadercallback=callback;
     return 1;
 }
 
@@ -281,11 +277,6 @@ int mixer_FadeTimeout (void* ptr)
 
         return 0;
     }
-
-    /* User callback can be user for drawing */
-    if(fadercallback)
-        fadercallback(cfader->value); 
-   
     if(cfader->value == 1.000)
         return 0;
 
@@ -405,7 +396,27 @@ int MIXER_SetFaderValue (double value)
     return 0;
 }
 
+int MIXER_DecreaseMainVolume()
+{
+    int db=0;
+    AUDIOOUTPUT_GetMainVolume(&db);
+    db-=5;
+    if(db < 0)
+        db=0;
+    AUDIOOUTPUT_SetMainVolume(db);
+    return 1;
+}
 
+int MIXER_IncreaseMainVolume()
+{
+    int db=0;
+    AUDIOOUTPUT_GetMainVolume(&db);
+    db+=5;
+    if(db > 100)
+        db=100;
+    AUDIOOUTPUT_SetMainVolume(db);
+    return 1;
+}
 
 /*
  * Config stuff ...

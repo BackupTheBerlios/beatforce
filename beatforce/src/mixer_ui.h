@@ -21,6 +21,6 @@
 #define __MIXER_UI_H__
 
 void MIXERUI_CreateWindow();
-
+void MIXERUI_Redraw();
 
 #endif __MIXER_UI_H__

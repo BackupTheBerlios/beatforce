@@ -35,6 +35,7 @@
 
 static void Tab_AddArrows(SDL_Tab *tab);
 static void Tab_AddTab(SDL_Tab *tab,char *string);
+static void Tab_RemoveTab(SDL_Tab *tab);
 static void Tab_Recalculate(SDL_Tab *tab);
 static int  Tab_DrawTabWithCaption(SDL_Surface *dest,SDL_Tab *tab,
                                    SDL_TabList * tl, int high);
@@ -134,8 +135,12 @@ void SDL_TabProperties(void *tab,int feature,va_list list)
         Tab->font=va_arg(list,SDL_Font*);
         break;
 
-    case ADD_TAB:
+    case TAB_ADD:
         Tab_AddTab((SDL_Tab *)tab,va_arg(list,char*));
+        break;
+
+    case TAB_REMOVE:
+        Tab_RemoveTab((SDL_Tab *)tab);
         break;
 
     case SET_BG_COLOR:
@@ -501,7 +506,11 @@ static void Tab_Recalculate(SDL_Tab *tab)
         tab->startx = 0;
 }
 
+static void Tab_RemoveTab(SDL_Tab *tab)
+{
 
+
+}
 
 
 /*

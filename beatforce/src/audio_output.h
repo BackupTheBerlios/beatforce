@@ -128,6 +128,7 @@ struct OutChannel
 
     int volumeleft; /* for volume */
     int volumeright;
+    
 
 };
 
@@ -144,6 +145,7 @@ struct OutGroup
     int clipping_count;
 
     float fader_percent;
+    int mainvolume;
 
     OutputDevice *dev;
     void *handle;
@@ -171,8 +173,8 @@ long output_get_time (int);
 /* interface to mixer */
 int output_set_volume (int, float);
 
-int output_set_main_volume(float);
-int output_get_main_volume(float *);
+int AUDIOOUTPUT_SetMainVolume(int value);
+int AUDIOOUTPUT_GetMainVolume(int *value);
 int output_get_volume (int, float *);
 int output_set_group (int, int, int);
 int output_mute (int, int);

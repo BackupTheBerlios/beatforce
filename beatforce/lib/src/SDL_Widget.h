@@ -72,7 +72,8 @@ typedef enum E_Widget_Properties
     FORCE_REDRAW,
     GET_CUR_VALUE,       // float *
 
-    ADD_TAB,             ////cchar * with caption  tab specific can only be started with loaded font
+    TAB_ADD,             ////cchar * with caption  tab specific can only be started with loaded font
+    TAB_REMOVE,
     SET_STATE_EDIT
     
 }E_Widget_Properties;

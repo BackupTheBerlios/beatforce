@@ -83,8 +83,8 @@ void printid(char *id,int line,char *message);
 #endif
 
 #if MODULE_ID == OUTPUT
-#define TRACE TRACE_OFF
-#define DEBUG DEBUG_OFF
+#define TRACE TRACE_ON
+#define DEBUG DEBUG_ON
 #endif
 
 #if MODULE_ID == PLAYER

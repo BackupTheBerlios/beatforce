@@ -40,7 +40,7 @@
 #include "output_plugin.h"
 #include "plugin.h"
 
-#define MODULE_ID output
+#define MODULE_ID OUTPUT
 #include "debug.h"
 
 
@@ -161,8 +161,7 @@ output_plugin_close (struct OutGroup *grp)
 
 }
 
-int
-output_plugin_write (struct OutGroup *grp, void *buffer, int size)
+int OUTPUT_PluginWrite (struct OutGroup *grp, void *buffer, int size)
 {
     int err;
 //    char* buffe=(char*)buffer;
@@ -217,6 +216,7 @@ output_plugin_get_volume (struct OutGroup *grp)
 {
     int err;
 
+    TRACE("OUTPUT_PluginGetVolume enter");
     if(grp == NULL)
         return ERROR_INVALID_ARG;
 
@@ -234,6 +234,7 @@ output_plugin_get_volume (struct OutGroup *grp)
     {
         printf("Unable to get volume: error 0x%x\n", -err);
     }
+    TRACE("OUTPUT_PluginGetVolume leave");
     return err;
 }
 
@@ -256,10 +257,10 @@ output_plugin_set_volume (struct OutGroup *grp)
         return ERROR_NOT_SUPPORTED;
     }
 
-    err = grp->dev->op->set_volume (grp->dev->priv, grp->fader_percent);
+    err = grp->dev->op->set_volume (grp->dev->priv, grp->mainvolume);
     if (err)
     {
-        printf("Unable to set volume: error 0x%x\n", -err);
+        ERROR("Unable to set volume: error %d", -err);
     }
     return err;
 }

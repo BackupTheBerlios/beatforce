@@ -260,6 +260,7 @@ void  SDL_WidgetEvent(SDL_Event *event)
 
 int SDL_WidgetEventCallback(void *function,E_Widget_Event event)
 {
+
     T_Widget_SetCallback  setcallback;
     Stack* current_widget;
 
@@ -272,6 +273,7 @@ int SDL_WidgetEventCallback(void *function,E_Widget_Event event)
     else
         printf("No callback handler implemented for this widget\n");
     SDL_WidgetUNLOCK();
+
     return 1;
 
 

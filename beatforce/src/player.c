@@ -105,14 +105,16 @@ player_finalize (int player_nr)
     return 0;
 }
 
-int player_get_song(int player_nr,long *songid)
+int PLAYER_GetSong(int player_nr,long *songid)
 {
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
-    if (p == NULL)
-        return -1;
+
+    if (p == NULL || songid == NULL)
+        return 0;
     
     if(songid)
         *songid=p->playing_id;
+
     return 1;
 }
 

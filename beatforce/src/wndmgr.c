@@ -1,5 +1,5 @@
 /*
-  Beatforce/ Main user interface
+  Beatforce/ Window manager
 
   one line to give the program's name and an idea of what it does.
   Copyright (C) 2003 John Beuving (john.beuving@home.nl)
@@ -53,7 +53,7 @@ SDL_Font *DigitsFont;
 
 /* global variables */
 int gEventsAllowed;
-
+int windowswitch;
 
 /* Local prototypes */
 int wndmgr_Redraw(void *data);
@@ -93,12 +93,13 @@ void WNDMGR_Init()
 //  LargeBoldFont=SDL_FontInit(THEME_DIR"/beatforce/arial12.bdf");
 //    LargeBoldFont=SDL_FontInit("./res/cour10.bdf");
     DigitsFont=SDL_FontInit(THEME_DIR"/beatforce/digits.fnt");
-    
+    windowswitch=0;
 }
 
 void WNDMGR_Open(Window *window)
 {
     CurWindow=window;
+    windowswitch=1;
 }
 
 
@@ -106,7 +107,7 @@ int WNDMGR_Main(void * data)
 {
     SDL_Event test_event;
     int timer;
-    int retval=0;
+
     
     WNDMGR_Running = 1;
     gEventsAllowed = 1;
@@ -120,7 +121,7 @@ int WNDMGR_Main(void * data)
         while(SDL_PollEvent(&test_event)) 
         {
             if(gEventsAllowed)
-                retval=CurWindow->EventHandler(test_event);
+                CurWindow->EventHandler(test_event);
 
             switch(test_event.type) 
             {
@@ -130,10 +131,10 @@ int WNDMGR_Main(void * data)
             default:
                 break;
             }
-            if(retval==0)
-                SDL_WidgetEvent(&test_event);
+            if(windowswitch)
+                windowswitch=0;
             else
-                retval=0;
+                SDL_WidgetEvent(&test_event);
         }   
         SDL_Delay(25); /* To reduce CPU load */
     }

@@ -514,17 +514,17 @@ int output_set_volume (int c, float db)
     return 0;
 }
 
-int output_set_main_volume(float db)
+int AUDIOOUTPUT_SetMainVolume(int value)
 {
-    group[0]->fader_percent = db;
+    group[0]->mainvolume = value;
     output_plugin_set_volume(group[0]);
     return 1;
 }
 
-int output_get_main_volume(float* db)
+int AUDIOOUTPUT_GetMainVolume(int *value)
 {
-    output_plugin_get_volume(group[0]);
-    *db = group[0]->fader_percent;
+//    output_plugin_get_volume(group[0]);
+    *value = group[0]->mainvolume;
     return 1;
 }
 
@@ -820,7 +820,7 @@ output_loop (void *arg)
                 printf ("Audio Convert error: %d\n", err);
 
             err = OUTPUT_BUFFER_SIZE_SAMPLES (audiocfg) * 2;
-            err = output_plugin_write (group[0], group[0]->out_buffer, err);
+            err = OUTPUT_PluginWrite (group[0], group[0]->out_buffer, err);
         }
 
     }/* for(;;) */

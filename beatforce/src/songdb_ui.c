@@ -105,7 +105,7 @@ void SONGDBUI_CreateWindow()
         int i;
         for(i=0;i<songdbcfg->Tabs;i++)
         {
-            SDL_WidgetProperties(ADD_TAB,songdbcfg->TabTitle[i]);
+            SDL_WidgetProperties(TAB_ADD,songdbcfg->TabTitle[i]);
             if(songdbcfg->TabString[i])
             {
                 BFList *mp3;
@@ -194,10 +194,6 @@ void UI_SongdbRenameClicked(void *data)
 
 void UI_SongdbAddTabClicked(void *data)
 {
-    int i;
-    printf("Adding tab %d\n",songdbcfg->Tabs);
-    for(i=0;i<songdbcfg->Tabs;i++)
-        printf("songdbcfg %s\n",songdbcfg->TabTitle[i]);
     songdbcfg->Tabs++;
     songdbcfg->TabString = (char**)realloc( songdbcfg->TabString, songdbcfg->Tabs * sizeof(char*));
     songdbcfg->TabTitle  = realloc( songdbcfg->TabTitle , songdbcfg->Tabs * sizeof(char*));
@@ -207,10 +203,9 @@ void UI_SongdbAddTabClicked(void *data)
     memset(songdbcfg->TabTitle[songdbcfg->Tabs - 1],0,255);
     memset(songdbcfg->TabString[songdbcfg->Tabs - 1],0,255);
 
-    for(i=0;i<songdbcfg->Tabs;i++)
-        printf("2:songdbcfg %s\n",songdbcfg->TabTitle[i]);
-    
-    SDL_WidgetPropertiesOf(tabwidget,ADD_TAB,NULL);
+   
+    /* Add an empty tab */
+    SDL_WidgetPropertiesOf(tabwidget,TAB_ADD,NULL);
 }
 
 void songdbui_RemoveTab(void *data)
