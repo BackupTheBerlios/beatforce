@@ -46,11 +46,12 @@ SDL_Widget* SDL_LabelCreate(SDL_Rect* rect)
     Label=(SDL_Label*)malloc(sizeof(SDL_Label));
     
     Widget=(SDL_Widget*)Label;
-    Widget->Type    = SDL_LABEL;
-    Widget->Rect.x  = rect->x;
-    Widget->Rect.y  = rect->y;
-    Widget->Rect.w  = rect->w;
-    Widget->Rect.h  = rect->h;
+    Widget->Type      = SDL_LABEL;
+    Widget->Rect.x    = rect->x;
+    Widget->Rect.y    = rect->y;
+    Widget->Rect.w    = rect->w;
+    Widget->Rect.h    = rect->h;
+    Widget->Focusable = 0;
 
     Label->Caption = NULL;
     Label->Font    = NULL;

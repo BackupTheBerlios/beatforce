@@ -18,5 +18,13 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-int SDL_WidgetIsInside(SDL_Rect *rect,int x, int y);
+#ifndef __SDL_WIDTOOL_H__
+#define __SDL_WIDTOOL_H__
+
+#include "SDL_Widget.h"
+
+int SDL_WidgetIsInside(SDL_Widget *widget,int x, int y);
 SDL_Surface* SDL_WidgetGetBackground(SDL_Surface *surface,SDL_Rect *srcrect);
+
+
+#endif /* __SDL_WIDTOOL_H__ */

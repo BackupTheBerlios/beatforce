@@ -42,18 +42,21 @@ SDL_Widget* SDL_PanelCreate(SDL_Rect* rect)
     panel=(SDL_Panel*) malloc(sizeof(SDL_Panel));
     widget=(SDL_Widget*)panel;
 
-    widget->Type    = SDL_PANEL;
-    widget->Rect.x  = rect->x;
-    widget->Rect.y  = rect->y;
-    widget->Rect.w  = rect->w;
-    widget->Rect.h  = rect->h;
+    widget->Type      = SDL_PANEL;
+    widget->Rect.x    = rect->x;
+    widget->Rect.y    = rect->y;
+    widget->Rect.w    = rect->w;
+    widget->Rect.h    = rect->h;
+    widget->Focusable = 0;
+    
+
 
     panel->color  = 0xfffff7;
     panel->Redraw = 1;
     panel->Image  = NULL;
 
     panel->Visible = 1;
-    return panel;
+    return (SDL_Widget*)panel;
 }
 
 void SDL_PanelDraw(SDL_Widget *widget,SDL_Surface *dest)

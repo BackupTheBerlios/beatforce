@@ -65,7 +65,6 @@ typedef struct PlayerDisplayNormal
 
 typedef struct PlayerDisplayInfo
 {
-
    SDL_Widget *EditTitle;
 }PlayerDisplayInfo;
 

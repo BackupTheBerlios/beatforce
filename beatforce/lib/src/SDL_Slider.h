@@ -23,7 +23,7 @@
 #define __SDL_SLIDER_H__
 
 #include "SDL_Widget.h"
-
+#include "SDL_WidTool.h"
 
 #define SLIDER_IDLE      0x00
 #define SLIDER_DRAG      0x01

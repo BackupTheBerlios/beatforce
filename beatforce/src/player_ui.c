@@ -154,20 +154,27 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
         case BUTTON_PLAY:
             /* Create the play button */
             UI_Players[nr].Normal.ButtonPlay=SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
-            SDL_WidgetProperties(SET_NORMAL_IMAGE,   IMG_Load(Button->normal));
-            SDL_WidgetProperties(SET_HIGHLIGHT_IMAGE,IMG_Load(Button->highlighted));
-            SDL_WidgetProperties(SET_PRESSED_IMAGE,  IMG_Load(Button->pressed));
-            SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,PLAYERUI_PlayButton,&UI_Players[nr]);
-            break;
-        case BUTTON_PAUSE:
-            /* Create the pause button */
-            UI_Players[nr].Normal.ButtonPause=SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
+
             if(Button->normal)
                 SDL_WidgetProperties(SET_NORMAL_IMAGE,   IMG_Load(Button->normal));
             if(Button->highlighted)
                 SDL_WidgetProperties(SET_HIGHLIGHT_IMAGE,IMG_Load(Button->highlighted));
             if(Button->pressed)
                 SDL_WidgetProperties(SET_PRESSED_IMAGE,  IMG_Load(Button->pressed));
+
+            SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,PLAYERUI_PlayButton,&UI_Players[nr]);
+            break;
+        case BUTTON_PAUSE:
+            /* Create the pause button */
+            UI_Players[nr].Normal.ButtonPause=SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
+
+            if(Button->normal)
+                SDL_WidgetProperties(SET_NORMAL_IMAGE,   IMG_Load(Button->normal));
+            if(Button->highlighted)
+                SDL_WidgetProperties(SET_HIGHLIGHT_IMAGE,IMG_Load(Button->highlighted));
+            if(Button->pressed)
+                SDL_WidgetProperties(SET_PRESSED_IMAGE,  IMG_Load(Button->pressed));
+
             SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,PLAYERUI_PlayButton,&UI_Players[nr]);
             SDL_WidgetProperties(SET_VISIBLE,0);
             break;
@@ -279,36 +286,11 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
         SDL_WidgetProperties(SET_NORMAL_STEP_SIZE,0.1);
         SDL_WidgetProperties(SET_CALLBACK,SDL_CHANGED,PLAYERUI_SetSpeed,&UI_Players[nr]);
     }
-#if 0    
-    if(pt->Edit)
-    {
-        UI_Players[nr].Info.EditTitle=SDL_WidgetCreateR(SDL_EDIT,pt->Edit->Rect);
-        SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
-        SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_RETURN,PLAYERUI_EditTitleReturn,&UI_Players[nr]);
-    }
-#endif
-    
     UI_Players[nr].State = PLAYERUI_STATE_NORMAL;
 }
 
 void PLAYERUI_Redraw()
 {
-#if 0
-    /* Automaticly load a song when no player is playing */
-    if(PLAYER_IsPlaying(0) == 0 &&
-       PLAYER_IsPlaying(1) == 0 &&
-       PLAYLIST_GetSong(0,0))
-    {
-        PLAYER_SetSong(0,0);
-        PLAYER_Play(0);
-        SONGDBUI_Play(0);
-    }
-#endif
-
-    
-
-
-
     PLAYERUI_UpdateArtist(0);
     PLAYERUI_UpdateArtist(1);
 

@@ -270,6 +270,25 @@ int PLAYER_SetSong (int player_nr, int no)
     return 1;
 }
 
+int PLAYER_Load(int player_nr,struct SongDBEntry *e)
+{
+    struct PlayerPrivate *p;
+
+    p = PLAYER_GetData(player_nr);
+    if(p==NULL || e==NULL)
+        return 0;
+
+    INPUT_GetTag(p->ip_plugins,e->filename,e);
+
+    p->e = e;
+    if(!player_load (player_nr))
+    {
+        return 0;
+    }
+
+    return 1;
+}
+
 /* loads a song set by playing_id */
 int player_load (int player_nr)
 {

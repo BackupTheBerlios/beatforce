@@ -22,6 +22,7 @@
 #include <SDL/SDL.h>
 #include "SDL_Button.h"
 #include "SDL_Widget.h"
+#include "SDL_WidTool.h"
 
 #include <stdlib.h>
 #include <stdarg.h>
@@ -49,7 +50,7 @@ SDL_Widget* SDL_ButtonCreate(SDL_Rect* rect)
     widget->Rect.y          = rect->y;
     widget->Rect.w          = rect->w;
     widget->Rect.h          = rect->h;
-
+    widget->Focusable       = 0;
 
     newbutton->disabled     = NULL; 
     newbutton->normal       = NULL;
@@ -183,7 +184,7 @@ int SDL_ButtonEventHandler(SDL_Widget *widget,SDL_Event *event)
     switch(event->type)
     {
     case SDL_MOUSEMOTION:
-        if(SDL_WidgetIsInside(&widget->Rect,event->motion.x,event->motion.y))
+        if(SDL_WidgetIsInside(widget,event->motion.x,event->motion.y))
         {
             if(Button->state == SDL_BUTTON_UP)
                 Button->state = SDL_BUTTON_HIGHLIGHTED;
@@ -192,7 +193,7 @@ int SDL_ButtonEventHandler(SDL_Widget *widget,SDL_Event *event)
             Button->state = SDL_BUTTON_UP;
         break;
     case SDL_MOUSEBUTTONDOWN:
-        if(SDL_WidgetIsInside(&widget->Rect,event->motion.x,event->motion.y))
+        if(SDL_WidgetIsInside(widget,event->motion.x,event->motion.y))
         {
             Button->state = SDL_BUTTON_DOWN;
             if(Button->Clicked)
@@ -202,7 +203,7 @@ int SDL_ButtonEventHandler(SDL_Widget *widget,SDL_Event *event)
             Button->state = SDL_BUTTON_UP;
         break;
     case SDL_MOUSEBUTTONUP:
-        if(SDL_WidgetIsInside(&widget->Rect,event->motion.x,event->motion.y))
+        if(SDL_WidgetIsInside(widget,event->motion.x,event->motion.y))
             Button->state = SDL_BUTTON_HIGHLIGHTED;
         else
             Button->state = SDL_BUTTON_UP;

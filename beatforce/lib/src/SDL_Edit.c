@@ -47,12 +47,13 @@ SDL_Widget *SDL_EditCreate(SDL_Rect* rect)
     Edit=(SDL_Edit*)malloc(sizeof(SDL_Edit));
     Widget=(SDL_Widget*)Edit;
 
-    Widget->Type    = SDL_EDIT;
-    Widget->Rect.x  = rect->x;
-    Widget->Rect.y  = rect->y;
-    Widget->Rect.w  = rect->w;
-    Widget->Rect.h  = rect->h;
-
+    Widget->Type      = SDL_EDIT;
+    Widget->Rect.x    = rect->x;
+    Widget->Rect.y    = rect->y;
+    Widget->Rect.w    = rect->w;
+    Widget->Rect.h    = rect->h;
+    Widget->Focusable = 1;
+    
     Edit->Caption = (char*)malloc(1024);
     memset(Edit->Caption,0,1024);
 
@@ -123,7 +124,7 @@ void  SDL_EditDraw(SDL_Widget *widget,SDL_Surface *dest)
     
     if(SDL_WidgetHasFocus(widget))
     {
-        StringWidth=SDL_FontGetStringWidth(Edit->Font,Edit->Caption);
+        StringWidth = SDL_FontGetStringWidth(Edit->Font,Edit->Caption);
         if(StringWidth > widget->Rect.w)
             cursor.x = widget->Rect.x + widget->Rect.w - 2;
         else

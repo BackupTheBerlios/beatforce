@@ -18,7 +18,7 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 #include <SDL/SDL.h>
-
+#include "SDL_Widget.h"
 
 SDL_Surface* SDL_WidgetGetBackground(SDL_Surface *dest,SDL_Rect *srcrect)
 {
@@ -56,15 +56,15 @@ SDL_Surface* SDL_WidgetGetBackground(SDL_Surface *dest,SDL_Rect *srcrect)
 
 }
 
-int SDL_WidgetIsInside(SDL_Rect *rect,int x, int y)
+int SDL_WidgetIsInside(SDL_Widget *widget,int x, int y)
 {
-    if(rect && x > rect->x)
+    if( x > widget->Rect.x)
     {
-        if(y > rect->y)
+        if(y > widget->Rect.y)
         {
-            if(x < (rect->x + rect->w))
+            if(x < (widget->Rect.x + widget->Rect.w))
             {
-                if(y < (rect->y + rect->h))
+                if(y < (widget->Rect.y + widget->Rect.h))
                 {
                     return 1;
                 }

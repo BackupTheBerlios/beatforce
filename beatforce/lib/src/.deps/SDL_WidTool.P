@@ -18,7 +18,8 @@ SDL_WidTool.o: SDL_WidTool.c /usr/include/SDL/SDL.h \
  /usr/include/SDL/SDL_active.h /usr/include/SDL/SDL_keyboard.h \
  /usr/include/SDL/SDL_keysym.h /usr/include/SDL/SDL_mouse.h \
  /usr/include/SDL/SDL_video.h /usr/include/SDL/SDL_mutex.h \
- /usr/include/SDL/SDL_quit.h /usr/include/SDL/SDL_version.h
+ /usr/include/SDL/SDL_quit.h /usr/include/SDL/SDL_version.h \
+ SDL_Widget.h /usr/include/SDL/SDL_image.h
 SDL_WidTool.c :
 /usr/include/SDL/SDL.h :
 /usr/include/SDL/SDL_main.h :
@@ -58,3 +59,5 @@ SDL_WidTool.c :
 /usr/include/SDL/SDL_mutex.h :
 /usr/include/SDL/SDL_quit.h :
 /usr/include/SDL/SDL_version.h :
+SDL_Widget.h :
+/usr/include/SDL/SDL_image.h :

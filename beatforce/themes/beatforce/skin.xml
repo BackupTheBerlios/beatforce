@@ -52,7 +52,6 @@
      <button x="273" y="34" normal="info.bmp" action="INFO"/>
      <button x="167" y="176" 
 	normal="playonly_green.bmp"
-	highlight="playonly_green_highlight.bmp"
         pressed="playonly_green_pressed.bmp"
         action="PLAY"/>
 
@@ -85,7 +84,6 @@
 
      <button x="767" y="176" 
        normal="playonly_green.bmp"
-       highlight="playonly_green_highlight.bmp"
        pressed="playonly_green_pressed.bmp"
        action="PLAY"/>
        

@@ -22,12 +22,13 @@
 #ifndef __SONGDB_UI_H__
 #define __SONGDB_UI_H__
 
+#include "SDL_Widget.h"
 #include "theme.h"
 
 typedef struct SongdbWidgets
 {
-    void *SongArchive;
-    void *Tabs;
+    SDL_Widget *SongArchive;
+    SDL_Widget *Tabs;
 
 }SongdbWidgets;
 
@@ -35,4 +36,5 @@ void  SONGDBUI_Redraw(void *w);
 void* SONGDBUI_CreateWindow(ThemeSongdb *ts);
 
 void SONGDBUI_Play(int player_nr);
+
 #endif /* __SONGDB_UI_H__ */

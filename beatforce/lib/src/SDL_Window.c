@@ -31,6 +31,8 @@ typedef struct WindowList
     struct WindowList *Prev;
 }WindowList;
 
+unsigned int SDL_WidgetRedraw(unsigned int interval,void *data);
+
 SDL_Surface *screen;
 SDL_Window *CurWindow;
 
@@ -139,7 +141,7 @@ void SDL_StoreWidget(SDL_Widget *widget)
         CreateOnStack->WidgetList->next=NULL;
 
         /* Set the focus to the new widget if edit widget */
-        if(widget->Type == SDL_EDIT && SDL_StackGetFocus() == NULL)
+        if(widget->Focusable && SDL_StackGetFocus() == NULL)
             SDL_StackSetFocus(widget);
     }
     else
@@ -156,7 +158,7 @@ void SDL_StoreWidget(SDL_Widget *widget)
         temp->Widget=widget;
         temp->next=NULL;
 
-        if(widget->Type == SDL_EDIT && SDL_StackGetFocus() == NULL)
+        if(widget->Focusable && SDL_StackGetFocus() == NULL)
             SDL_StackSetFocus(widget);
     }
 

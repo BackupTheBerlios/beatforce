@@ -24,6 +24,7 @@
 
 #include "SDL_Widget.h"
 #include "SDL_Window.h"
+#include "SDL_WidTool.h"
 
 T_Widget_EventHandler user_eventhandler;
 int StackLock;
@@ -36,6 +37,7 @@ int fadew;
 int fadeh;
 int fadeon;
 static SDL_mutex *MyMutex;
+
 
 void EnableFade()
 {
@@ -268,9 +270,9 @@ int SDL_WidgetEvent(SDL_Event *event)
         while(focus_widget)
         {
             SDL_Widget *w=(SDL_Widget*)focus_widget->Widget;
-            if(SDL_WidgetIsInside(&w->Rect,event->motion.x,event->motion.y))
+            if(SDL_WidgetIsInside(w,event->motion.x,event->motion.y))
             {
-                if(focus_widget->Widget->Type == SDL_EDIT)
+                if(focus_widget->Widget->Focusable)
                 {
                     SDL_StackSetFocus(focus_widget->Widget);
                 }
@@ -290,7 +292,7 @@ int SDL_WidgetEvent(SDL_Event *event)
         {
             SDL_Widget     *FocusWidget;
             SDL_WidgetList *WidgetList;
-            SDL_Widget     *FirstEditWidget=NULL;
+            SDL_Widget     *FirstFocusWidget=NULL;
             int store=0;
 
             WidgetList=SDL_StackGetStack(NULL);
@@ -300,7 +302,7 @@ int SDL_WidgetEvent(SDL_Event *event)
             {
                 if(FocusWidget == NULL)
                 {
-                    if(WidgetList->Widget->Type == SDL_EDIT)
+                    if(WidgetList->Widget->Focusable)
                     {
                         SDL_StackSetFocus(WidgetList->Widget);
                         break;
@@ -308,11 +310,10 @@ int SDL_WidgetEvent(SDL_Event *event)
                 }
                 else
                 {
-                    if(WidgetList->Widget->Type == SDL_EDIT &&
-                       FirstEditWidget == NULL)
-                        FirstEditWidget=WidgetList->Widget;
+                    if(WidgetList->Widget->Focusable && FirstFocusWidget == NULL)
+                        FirstFocusWidget=WidgetList->Widget;
 
-                    if(store && WidgetList->Widget->Type == SDL_EDIT)
+                    if(store && WidgetList->Widget->Focusable)
                     {
                         SDL_StackSetFocus(WidgetList->Widget);
                         break;
@@ -320,13 +321,12 @@ int SDL_WidgetEvent(SDL_Event *event)
                     if(WidgetList->Widget == FocusWidget)
                         store=1;
 
-
                 }
                 WidgetList = WidgetList->next;
             
             }
             if(WidgetList == NULL)
-                SDL_StackSetFocus(FirstEditWidget);
+                SDL_StackSetFocus(FirstFocusWidget);
             
         }   
         break;
@@ -347,7 +347,6 @@ int SDL_WidgetEvent(SDL_Event *event)
         {
             if(eh(Widget,event))
             {
-
                 retval=1;
             }
         }

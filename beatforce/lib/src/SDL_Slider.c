@@ -46,11 +46,12 @@ SDL_Widget* SDL_SliderCreate(SDL_Rect* rect)
     slider = (SDL_Slider*) malloc (sizeof(SDL_Slider));
     widget = (SDL_Widget*) slider;
     
-    widget->Type =  SDL_SLIDER;
-    widget->Rect.x=rect->x;
-    widget->Rect.y=rect->y;
-    widget->Rect.w=rect->w;
-    widget->Rect.h=rect->h;
+    widget->Type      = SDL_SLIDER;
+    widget->Rect.x    = rect->x;
+    widget->Rect.y    = rect->y;
+    widget->Rect.w    = rect->w;
+    widget->Rect.h    = rect->h;
+    widget->Focusable = 0;
 
     if(rect->w > rect->h)
         slider->orientation = HORIZONTAL;
@@ -262,7 +263,7 @@ int SDL_SliderEventHandler(SDL_Widget *widget,SDL_Event *event)
     switch(event->type)
     {
     case SDL_MOUSEBUTTONDOWN:
-        if(Slider->SliderButton && SDL_WidgetIsInside(&widget->Rect,event->motion.x,event->motion.y))
+        if(Slider->SliderButton && SDL_WidgetIsInside(widget,event->motion.x,event->motion.y))
         {
             int motion;
 

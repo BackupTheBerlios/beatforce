@@ -51,12 +51,13 @@ SDL_Widget* SDL_TableCreate(SDL_Rect* rect)
     SDL_Widget *Widget;
 
     Table =(SDL_Table*)malloc(sizeof(SDL_Table));
-    Widget   =(SDL_Widget*)Table;
-    Widget->Type = SDL_TABLE;
-    Widget->Rect.x  = rect->x;
-    Widget->Rect.y  = rect->y;
-    Widget->Rect.w  = rect->w;
-    Widget->Rect.h  = rect->h;
+    Widget            = (SDL_Widget*)Table;
+    Widget->Type      = SDL_TABLE;
+    Widget->Rect.x    = rect->x;
+    Widget->Rect.y    = rect->y;
+    Widget->Rect.w    = rect->w;
+    Widget->Rect.h    = rect->h;
+    Widget->Focusable = 1;
 
     Table->fgcolor           = BLACK;
     Table->bgcolor           = 0x00000f;
@@ -75,7 +76,7 @@ SDL_Widget* SDL_TableCreate(SDL_Rect* rect)
     //data retreival function
     Table->Table_GetString   = NULL;
 
-   // event function
+    // event function
     Table->Clicked           = NULL;
     Table->ClickedData       = NULL;
 
@@ -156,12 +157,19 @@ void SDL_TableDraw(SDL_Widget *widget,SDL_Surface *dest)
     {
         if(Table->bgcolor ==  TRANSPARANT)
         {
-           if(SDL_BlitSurface(Table->Background,NULL,dest,&widget->Rect)<0)
-               ;
+            if(SDL_BlitSurface(Table->Background,NULL,dest,&widget->Rect)<0)
+                ;
         }
         else
         {
-            SDL_FillRect(dest,&widget->Rect,Table->bgcolor);
+            SDL_Rect r;
+//            SDL_FillRect(dest,&widget->Rect,BLACK);
+            
+            r.x = widget->Rect.x+3;
+            r.y = widget->Rect.y+3;
+            r.w = widget->Rect.w-6;
+            r.h = widget->Rect.h-6;
+            //            SDL_FillRect(dest,&r,Table->bgcolor);
         }
 
         for(row=0;row<Table->VisibleRows;row++)
@@ -271,36 +279,36 @@ int SDL_TableProperties(SDL_Widget *widget,int feature,va_list list)
         Table->Table_GetString=va_arg(list,void*);
         break;
     case SET_CALLBACK:
+    {
+        int event=va_arg(list,int);
+        if(event == SDL_CLICKED)
         {
-            int event=va_arg(list,int);
-            if(event== SDL_CLICKED)
-            {
-                Table->Clicked=va_arg(list,void*);
-                Table->ClickedData=va_arg(list,void*);
-            }
-            else if(event == SDL_KEYDOWN_RETURN)
-            {
-                //for the edit/rename widget
-                Table->OnReturn = va_arg(list,void*);
-            }
+            Table->Clicked     = va_arg(list,void*);
+            Table->ClickedData = va_arg(list,void*);
         }
-        break;
+        else if(event == SDL_KEYDOWN_RETURN)
+        {
+            //for the edit/rename widget
+            Table->OnReturn = va_arg(list,void*);
+        }
+    }
+    break;
     case GET_CAPTION:
         sprintf(va_arg(list,char*),"%s",Table->editcaption);
         break;
     case GET_SELECTED:
-        {
-            int *c;
-            int **d=va_arg(list,int**);
-            if(d)
-                *d=Table->Selected;
+    {
+        int *c;
+        int **d=va_arg(list,int**);
+        if(d)
+            *d=Table->Selected;
 
-            c=va_arg(list,int*);
-            if(c)
-                *c=Table->SelectedCount;
+        c=va_arg(list,int*);
+        if(c)
+            *c=Table->SelectedCount;
             
-        }
-        break;
+    }
+    break;
     case SET_HIGHLIGHTED:
         Table->ActiveEntry=va_arg(list,int);
         if(Table->Scrollbar)
@@ -310,15 +318,15 @@ int SDL_TableProperties(SDL_Widget *widget,int feature,va_list list)
         }
         break;
     case CLEAR_SELECTED:
+    {
+        if(Table->Selected)
         {
-            if(Table->Selected)
-            {
-                free(Table->Selected);
-                Table->Selected=NULL;
-                Table->SelectedCount=0;
-            }
+            free(Table->Selected);
+            Table->Selected=NULL;
+            Table->SelectedCount=0;
         }
-        break;
+    }
+    break;
     case SET_SELECTION_MODE:
         Table->SelectMode = va_arg(list,int);
         
@@ -337,39 +345,38 @@ int SDL_TableProperties(SDL_Widget *widget,int feature,va_list list)
         Table->ScrollbarImage = va_arg(list,SDL_Surface*);
         break;
     case SET_STATE_EDIT:
+    {
+        if(Table->edit == NULL)
         {
-            if(Table->edit == NULL)
-            {
-                int row    = va_arg(list,int);
-                int column = va_arg(list,int);
-                char label[255];
-                SDL_Rect Dims;
+            int row    = va_arg(list,int);
+            int column = va_arg(list,int);
+            char label[255];
+            SDL_Rect Dims;
                 
-                /* Internal count starts at 0 */
-                column--;
-                if(Table->Table_GetString) 
-                 {
-                    Table->Table_GetString(row,column,(char*)&label);
+            /* Internal count starts at 0 */
+            column--;
+            if(Table->Table_GetString) 
+            {
+                Table->Table_GetString(row,column,(char*)&label);
                  
-                    if(strlen(label))
-                    {
-                        Dims.w = Table->ColumnWidths[column];
-                        Dims.x = widget->Rect.x;
-                        Dims.y = widget->Rect.y+Table->RowHeight * row;
-                        Dims.h = Table->RowHeight;
+                if(strlen(label))
+                {
+                    Dims.w = Table->ColumnWidths[column];
+                    Dims.x = widget->Rect.x;
+                    Dims.y = widget->Rect.y+Table->RowHeight * row;
+                    Dims.h = Table->RowHeight;
 
-                        Table->edit=(SDL_Edit*)SDL_WidgetCreateR(SDL_EDIT,Dims);
-                        SDL_WidgetProperties(SET_FONT,Table->font);
-                        SDL_WidgetProperties(SET_ALWAYS_FOCUS,1);
-                        SDL_WidgetProperties(SET_BG_COLOR,Table->bgcolor);
-                        SDL_WidgetProperties(SET_FG_COLOR,BLACK);
-                        SDL_WidgetProperties(SET_CAPTION,label);
-                        SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_RETURN,Table_EditReturnKeyPressed,Table);
-                    }
-                 }
+                    Table->edit=(SDL_Edit*)SDL_WidgetCreateR(SDL_EDIT,Dims);
+                    SDL_WidgetProperties(SET_FONT,Table->font);
+                    SDL_WidgetProperties(SET_BG_COLOR,Table->bgcolor);
+                    SDL_WidgetProperties(SET_FG_COLOR,BLACK);
+                    SDL_WidgetProperties(SET_CAPTION,label);
+                    SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_RETURN,Table_EditReturnKeyPressed,Table);
+                }
             }
         }
-        break;
+    }
+    break;
     }
     return 1;
 }
@@ -386,7 +393,7 @@ int SDL_TableEventHandler(SDL_Widget *widget,SDL_Event *event)
     switch(event->type)
     {
     case SDL_MOUSEMOTION:
-        if(SDL_WidgetIsInside(&widget->Rect,event->motion.x,event->motion.y))
+        if(SDL_WidgetIsInside(widget,event->motion.x,event->motion.y))
         {
             if(event->motion.x > (widget->Rect.x + widget->Rect.w - Table->ScrollbarWidth))
             {
@@ -420,7 +427,7 @@ int SDL_TableEventHandler(SDL_Widget *widget,SDL_Event *event)
         }
         break;
     case SDL_MOUSEBUTTONDOWN:
-        if(SDL_WidgetIsInside(&widget->Rect,event->motion.x,event->motion.y))
+        if(SDL_WidgetIsInside(widget,event->motion.x,event->motion.y))
         {
             if(event->button.button == 1 || event->button.button == 3)
             {
@@ -478,21 +485,40 @@ int SDL_TableEventHandler(SDL_Widget *widget,SDL_Event *event)
         switch( event->key.keysym.sym ) 
         {
         case SDLK_DOWN:
-            if(Table->Scrollbar)
+            if(SDL_WidgetHasFocus(widget))
             {
-                double row;
-                SDL_WidgetPropertiesOf(Table->Scrollbar,GET_CUR_VALUE,&row);
-                row+=1.0;
-                SDL_WidgetPropertiesOf(Table->Scrollbar,SET_CUR_VALUE,row);
+                if(Table->HighlightedRow < 0)
+                    Table->HighlightedRow = 0;
+                else
+                {
+                    if(Table->HighlightedRow >=  Table->VisibleRows -1)
+                    {
+                        Table->HighlightedRow = Table->VisibleRows -1;
+                        Table->FirstVisibleRow++;
+                        SDL_WidgetPropertiesOf(Table->Scrollbar,SET_CUR_VALUE,(double)Table->FirstVisibleRow);
+                    }
+                    else
+                    {
+                        Table->HighlightedRow++;
+                    }
+                }
             }
             break;
         case SDLK_UP:
-            if(Table->Scrollbar)
+            if(SDL_WidgetHasFocus(widget))
             {
-                double row;
-                SDL_WidgetPropertiesOf(Table->Scrollbar,GET_CUR_VALUE,&row);
-                row-=1.0;
-                SDL_WidgetPropertiesOf(Table->Scrollbar,SET_CUR_VALUE,row);
+                if(Table->HighlightedRow < 0)
+                    Table->HighlightedRow = 0;
+                else
+                {
+                    if(Table->HighlightedRow > 0)
+                        Table->HighlightedRow--;
+                    else
+                    {
+                        Table->FirstVisibleRow--;
+                        SDL_WidgetPropertiesOf(Table->Scrollbar,SET_CUR_VALUE,(double)Table->FirstVisibleRow);
+                    }
+                }
             }
             break;
         case SDLK_PAGEUP:
@@ -512,6 +538,10 @@ int SDL_TableEventHandler(SDL_Widget *widget,SDL_Event *event)
                 row+=10.0;
                 SDL_WidgetPropertiesOf(Table->Scrollbar,SET_CUR_VALUE,row);
             }
+            break;
+        case SDLK_RETURN:
+            if(Table->OnReturn)
+                Table->OnReturn(Table);
             break;
         default:
             break;
@@ -552,7 +582,7 @@ static void SDL_TableAttachScrollbar(SDL_Table *Table)
             SDL_WidgetProperties(STOREBACKGROUND,0);
 //            SDL_WidgetProperties(SET_CUR_VALUE,(double)(Table->Rows - Table->VisibleRows));
         }
-   }
+    }
 }
 
 
@@ -590,12 +620,12 @@ static void SDL_TableDrawRow(SDL_Surface *dest,SDL_Table *Table,int row)
         if(Table->bgcolor == TRANSPARANT)
         {
             la.x = 0;
-            la.y = RowDims.y;
+            la.y = RowDims.y + 45;
             la.w = RowDims.w;
             la.h = RowDims.h;
 
-//  if(SDL_BlitSurface(Table->Background,&la,dest,&RowDims)<0)
-      //              fprintf(stderr, "BlitSurface error: %s\n", SDL_GetError());
+            if(SDL_BlitSurface(Table->Background,&la,dest,&RowDims)<0)
+                fprintf(stderr, "BlitSurface error: %s\n", SDL_GetError());
         }
         else
             SDL_FillRect(dest,&RowDims,Table->bgcolor);
@@ -623,7 +653,7 @@ static void SDL_TableDrawRow(SDL_Surface *dest,SDL_Table *Table,int row)
             la.w = Table->ColumnWidths[column] - 2;
             la.h = RowDims.h - 2;
 
-       //     SDL_FillRect(dest,&la,SDL_MapRGB(dest->format,155,155,155));
+            //     SDL_FillRect(dest,&la,SDL_MapRGB(dest->format,155,155,155));
 
             if(strlen(string))
             {

@@ -22,6 +22,7 @@
 #include <malloc.h>
 
 #include "SDL_Widget.h"
+#include "SDL_WidTool.h"
 #include "SDL_ProgressBar.h"
 
 
@@ -188,13 +189,13 @@ int  SDL_ProgressBarProperties(SDL_Widget *widget,int feature,va_list list)
 
 int SDL_ProgressBarEventHandler(SDL_Widget *widget, SDL_Event *event)
 {
-    int handled;
+
     SDL_ProgressBar *ProgressBar=(SDL_ProgressBar*)widget;
     
     switch(event->type)
     {
     case SDL_MOUSEBUTTONDOWN:
-        if(SDL_WidgetIsInside(&widget->Rect,event->motion.x,event->motion.y))
+        if(SDL_WidgetIsInside(widget,event->motion.x,event->motion.y))
         {
             if(ProgressBar->Orientation == HORIZONTAL)
             {
@@ -216,7 +217,7 @@ int SDL_ProgressBarEventHandler(SDL_Widget *widget, SDL_Event *event)
         break;
     case SDL_MOUSEBUTTONUP:
         if(ProgressBar->State == PROGRESSBAR_DRAG ||
-           SDL_WidgetIsInside(&widget->Rect,event->motion.x,event->motion.y))
+           SDL_WidgetIsInside(widget,event->motion.x,event->motion.y))
         {
             if(ProgressBar->Orientation == VERTICAL)
             {

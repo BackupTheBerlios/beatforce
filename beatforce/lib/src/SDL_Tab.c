@@ -24,6 +24,7 @@
 #include <string.h>
 
 #include "SDL_Widget.h"
+#include "SDL_WidTool.h"
 #include "SDL_Tab.h"
 
 #define TAB_DEFAULTHEIGHT    16
@@ -186,7 +187,6 @@ int SDL_TabProperties(SDL_Widget *widget,int feature,va_list list)
                                                   widget->Rect.y + Tab->hl->rect->y,
                                                   Tab->hl->rect->w,Tab->hl->rect->h);
             SDL_WidgetProperties(SET_FONT,Tab->font);
-            SDL_WidgetProperties(SET_ALWAYS_FOCUS,1);
             SDL_WidgetProperties(SET_BG_COLOR,Tab->bgcolor);
             SDL_WidgetProperties(SET_FG_COLOR,Tab->fgcolor);
             SDL_WidgetProperties(SET_CAPTION,Tab->hl->caption);
@@ -210,16 +210,16 @@ int SDL_TabEventHandler(SDL_Widget* widget,SDL_Event *event)
     case SDL_MOUSEMOTION:
         break;
     case SDL_MOUSEBUTTONDOWN:
-        if(SDL_WidgetIsInside(&widget->Rect,event->motion.x,event->motion.y))
+        if(SDL_WidgetIsInside(widget,event->motion.x,event->motion.y))
         {
             if(event->button.button == 1)
             {
                 /* Don't handle events when clicked on one of the arrows */
-                if(Tab->ArrowLeft && SDL_WidgetIsInside(&Tab->ArrowLeft->Widget.Rect,event->motion.x,event->motion.y))
-                    return;
+                if(Tab->ArrowLeft && SDL_WidgetIsInside(&Tab->ArrowLeft->Widget,event->motion.x,event->motion.y))
+                    return 0;
             
-                if(Tab->ArrowRight && SDL_WidgetIsInside(&Tab->ArrowRight->Widget.Rect,event->motion.x,event->motion.y))
-                    return;
+                if(Tab->ArrowRight && SDL_WidgetIsInside(&Tab->ArrowRight->Widget,event->motion.x,event->motion.y))
+                    return 0;
 
                 while(tl && event->motion.x > (tl->rect->x + widget->Rect.x - Tab->startx) && 
                       event->motion.x > (widget->Rect.x + tl->rect->x + tl->rect->w - Tab->startx))

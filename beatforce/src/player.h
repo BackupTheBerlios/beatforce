@@ -89,6 +89,7 @@ int PLAYER_IsPlaying(int);
 
 int PLAYER_GetPlayingEntry(int player_nr,struct SongDBEntry **e);
 int PLAYER_SetSong(int player_nr, int no);
+int PLAYER_Load(int player_nr,struct SongDBEntry *e);
 
 int PLAYER_SetTimePlayed(int player_nr,long seconds);
 int PLAYER_SetSpeed(int player_nr,double speed);

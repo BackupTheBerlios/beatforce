@@ -19,7 +19,7 @@ SDL_Button.o: SDL_Button.c /usr/include/SDL/SDL.h \
  /usr/include/SDL/SDL_keysym.h /usr/include/SDL/SDL_mouse.h \
  /usr/include/SDL/SDL_video.h /usr/include/SDL/SDL_mutex.h \
  /usr/include/SDL/SDL_quit.h /usr/include/SDL/SDL_version.h \
- SDL_Button.h SDL_Widget.h /usr/include/SDL/SDL_image.h \
+ SDL_Button.h SDL_Widget.h /usr/include/SDL/SDL_image.h SDL_WidTool.h \
  /usr/include/stdlib.h /usr/include/sys/types.h /usr/include/time.h \
  /usr/include/endian.h /usr/include/bits/endian.h \
  /usr/include/sys/select.h /usr/include/bits/select.h \
@@ -67,6 +67,7 @@ SDL_Button.c :
 SDL_Button.h :
 SDL_Widget.h :
 /usr/include/SDL/SDL_image.h :
+SDL_WidTool.h :
 /usr/include/stdlib.h :
 /usr/include/sys/types.h :
 /usr/include/time.h :

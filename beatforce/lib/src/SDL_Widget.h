@@ -70,7 +70,6 @@ typedef enum E_Widget_Properties
     SET_LINE_IMAGE,
     SET_BUTTON_IMAGE,
     SET_NORMAL_STEP_SIZE,
-    SET_ALWAYS_FOCUS,
     
     FORCE_REDRAW,
     GET_CUR_VALUE,       // float *
@@ -121,6 +120,7 @@ typedef struct SDL_Widget
 {
     SDL_Rect      Rect;
     E_Widget_Type Type;
+    int           Focusable;
 }SDL_Widget;
 
 /**
@@ -196,7 +196,6 @@ int   SDL_WidgetPropertiesOf(SDL_Widget* widget, int feature,...);
 int   SDL_DrawAllWidgets(SDL_Surface *screen);
 int   SDL_WidgetEventCallback(void *function,E_Widget_Event event);
 int   SDL_WidgetEvent(SDL_Event *event);
-int   SDL_WidgetIsInside(SDL_Rect *rect,int x, int y);
 int   SDL_WidgetHasFocus(SDL_Widget *widget);
 int   SDL_WidgetLoseFocus();
 

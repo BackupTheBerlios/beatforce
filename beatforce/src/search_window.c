@@ -104,7 +104,6 @@ static SDL_Surface *SEARCHWINDOW_Create()
 
     editwidget=SDL_WidgetCreate(SDL_EDIT,312,20,400,25);
     SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
-    SDL_WidgetProperties(SET_ALWAYS_FOCUS,1);
     SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_ANY,SEARCHWINDOW_Search);
     SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_RETURN,searchwindow_Play);
 

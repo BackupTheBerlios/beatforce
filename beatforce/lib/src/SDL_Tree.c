@@ -219,8 +219,11 @@ int SDL_TreeProperties(SDL_Widget *widget,int feature,va_list list)
     case SET_CALLBACK:
     {
         int t=va_arg(list,int);
-        Tree->Clicked=va_arg(list,void*);
-        Tree->ClickedData=va_arg(list,void*);
+        if(t >= 0)
+        {
+            Tree->Clicked=va_arg(list,void*);
+            Tree->ClickedData=va_arg(list,void*);
+        }
     }
     break;
     }
@@ -234,7 +237,7 @@ int SDL_TreeEventHandler(SDL_Widget *widget,SDL_Event *event)
     switch(event->type)
     {
     case SDL_MOUSEBUTTONDOWN:
-        if(SDL_WidgetIsInside(&widget->Rect,event->motion.x,event->motion.y))
+        if(SDL_WidgetIsInside(widget,event->motion.x,event->motion.y))
         {
             if(event->button.button == 1)
             {

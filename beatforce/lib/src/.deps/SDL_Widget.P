@@ -19,7 +19,7 @@ SDL_Widget.o: SDL_Widget.c /usr/include/malloc.h \
  /usr/include/SDL/SDL_keysym.h /usr/include/SDL/SDL_mouse.h \
  /usr/include/SDL/SDL_video.h /usr/include/SDL/SDL_mutex.h \
  /usr/include/SDL/SDL_quit.h /usr/include/SDL/SDL_version.h \
- /usr/include/SDL/SDL_image.h SDL_Window.h
+ /usr/include/SDL/SDL_image.h SDL_Window.h SDL_WidTool.h
 SDL_Widget.c :
 /usr/include/malloc.h :
 /usr/include/features.h :
@@ -63,3 +63,4 @@ SDL_Widget.h :
 /usr/include/SDL/SDL_version.h :
 /usr/include/SDL/SDL_image.h :
 SDL_Window.h :
+SDL_WidTool.h :

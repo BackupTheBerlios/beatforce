@@ -24,11 +24,7 @@
 #include <malloc.h>
 
 #include "config.h"
-#include "wndmgr.h"
-#include "SDL_Widget.h"
-#include "SDL_Font.h"
-#include "SDL_Table.h"
-#include "SDL_Tab.h"
+#include "SDLTk.h"
 #include "songdb.h"
 #include "songdb_ui.h"
 #include "player.h"
@@ -67,6 +63,21 @@ void eventhandler(SDL_Table *table)
     PLAYLIST_AddEntry(0,e);
 }
 
+void testplay(SDL_Table *table)
+{
+    struct SongDBEntry * e;
+
+    /* Get the current playlist entry */
+    e = SONGDB_GetEntryID(table->HighlightedRow + table->FirstVisibleRow);
+    
+    if(PLAYER_IsPlaying(0))
+        PLAYER_Pause(0);
+
+    if(PLAYER_Load(0,e))
+        PLAYER_Play(0);
+    
+}
+
 void *SONGDBUI_CreateWindow(ThemeSongdb *ts)
 {
     ThemeButton   *Button = NULL;
@@ -90,11 +101,10 @@ void *SONGDBUI_CreateWindow(ThemeSongdb *ts)
         SDL_WidgetProperties(COLUMN_WIDTH, 2, 290 );
         SDL_WidgetProperties(COLUMN_WIDTH, 3, 60  );
         SDL_WidgetProperties(SET_FG_COLOR,WHITE);
-//        SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
-//        SDL_WidgetProperties(SET_BG_COLOR,TRANSPARANT);
         SDL_WidgetProperties(ROWS,SONGDB_GetNoOfEntries());
         SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION,songdbstring);
         SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,eventhandler,sw->SongArchive);
+        SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_RETURN,testplay,sw->SongArchive);
         SDL_WidgetProperties(SET_IMAGE,IMG_Load(THEME_DIR"/beatforce/tablescrollbar.bmp"));
 
         /* Craete the tab section below the table*/
