@@ -116,7 +116,7 @@ int WNDMGR_Main()
     WNDMGR_Running = 1;
     gEventsAllowed = 1;
 
-    timer=OSA_StartTimer(75,WNDMGR_Redraw,NULL);
+    timer=OSA_StartTimer(1,WNDMGR_Redraw,NULL);
 
     while(WNDMGR_Running)
     {
@@ -156,7 +156,7 @@ int WNDMGR_Redraw(void *data)
         CurWindow->NotifyRedraw(CurWindow);
 
     SDL_DrawAllWidgets(screen);
-    return 75; //redraw every 50ms 
+    return 60; //redraw every 50ms 
 }
 
 /* disable sending events to the event handler of the current window

@@ -236,6 +236,7 @@ int SDL_DrawAllWidgets(SDL_Surface *screen)
 //        draw(current_widget->data,active_surface);
 
         draw(current_widget->data,screen);
+        
 
         current_widget=current_widget->next;
     }
@@ -243,9 +244,7 @@ int SDL_DrawAllWidgets(SDL_Surface *screen)
         
     //   SDL_BlitSurface(active_surface,NULL,screen,NULL);
 ///    SDL_BlitSurface(last_surface,&src,screen,&dest);
-        
-    SDL_UpdateRect(screen,0,0,0,0);
-    
+    SDL_UpdateRect(screen,0,0,0,0);        
     
     if(previous!=active_surface)
         previous=active_surface;

@@ -162,17 +162,20 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
         case BUTTON_PLAY:
             /* Create the play button */
             UI_Players[nr].ButtonPlay=SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
-            SDL_WidgetProperties(SET_NORMAL_IMAGE,   Button->normal);
-            SDL_WidgetProperties(SET_HIGHLIGHT_IMAGE,Button->highlighted);
-            SDL_WidgetProperties(SET_PRESSED_IMAGE,  Button->pressed);
+            SDL_WidgetProperties(SET_NORMAL_IMAGE,   IMG_Load(Button->normal));
+            SDL_WidgetProperties(SET_HIGHLIGHT_IMAGE,IMG_Load(Button->highlighted));
+            SDL_WidgetProperties(SET_PRESSED_IMAGE,  IMG_Load(Button->pressed));
             SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,PLAYERUI_PlayButton,&UI_Players[nr]);
             break;
         case BUTTON_PAUSE:
             /* Create the pause button */
             UI_Players[nr].ButtonPause=SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
-            SDL_WidgetProperties(SET_NORMAL_IMAGE,   Button->normal);
-            SDL_WidgetProperties(SET_HIGHLIGHT_IMAGE,Button->highlighted);
-            SDL_WidgetProperties(SET_PRESSED_IMAGE,  Button->pressed);
+            if(Button->normal)
+                SDL_WidgetProperties(SET_NORMAL_IMAGE,   IMG_Load(Button->normal));
+            if(Button->highlighted)
+                SDL_WidgetProperties(SET_HIGHLIGHT_IMAGE,IMG_Load(Button->highlighted));
+            if(Button->pressed)
+                SDL_WidgetProperties(SET_PRESSED_IMAGE,  IMG_Load(Button->pressed));
             SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,PLAYERUI_PlayButton,&UI_Players[nr]);
             SDL_WidgetProperties(SET_VISIBLE,0);
             break;

@@ -141,7 +141,6 @@ int AUDIOOUTPUT_Init (AudioConfig * audio_cfg)
         err = output_plugin_init (group[i], audiocfg, i);
         if (err == ERROR_NO_OUTPUT_SELECTED)
         {
-           
             continue;
         }
         else if (err)
