@@ -74,11 +74,17 @@ int parsesubgroup(xmlDocPtr doc, xmlNodePtr cur)
     xmlChar *key;
     long time;
     struct SongDBEntry *e;
-
+    struct SongDBSubgroup *sg;
 
     key = xmlGetProp(cur, "name");
     if(key)
         SONGDB_AddSubgroup(MainGroup,key);
+    
+    sg=SONGDB_GetSubgroup();
+    /* Go the the last added subgroup */
+    while(sg->next)
+        sg=sg->next;
+
     cur = cur->xmlChildrenNode;
     while(cur != NULL)
     {
@@ -86,12 +92,14 @@ int parsesubgroup(xmlDocPtr doc, xmlNodePtr cur)
         {
             key = xmlGetProp(cur, "filename");
             if(key)
-                SONGDB_AddFileToSubgroup(subcount,key);
+            {
+                SONGDB_AddFileToSubgroup(sg,key);
+            }
             key = xmlGetProp(cur, "time");
             if(key)
             {
                 time= atol(key);
-                SONGDB_SetActiveSubgroup(subcount);
+                SONGDB_SetActiveSubgroup(sg);
                 e=SONGDB_GetEntryID(SONGDB_GetNoOfEntries()-1);
                 if(e)
                     e->time=time;
@@ -116,7 +124,7 @@ int SONGDB_Init (SongDBConfig * our_cfg)
 
     SONGDB_LoadXMLDatabase();
 
-    MainGroup->Changed = 1;
+    MainGroup->Changed  = 1;
     MainGroup->Active   = MainGroup->Subgroup;
     
     return 1;
@@ -139,15 +147,21 @@ int SONGDB_AddSubgroup(struct SongDBGroup *group,char *title)
     return 1;
 }
 
+/* 
+ * Return the active group 
+ */
 SongDBGroup *SONGDB_GetActiveGroup()
 {
     return MainGroup;
 }
 
-int SONGDB_RenameSubgroup(int which, char *title)
+int SONGDB_GetSubgroupCount()
 {
-    SongDBSubgroup *sg=SONGDB_GetSubgroup(which);
+    return MainGroup->SubgroupCount;
+}
 
+int SONGDB_RenameSubgroup(struct SongDBSubgroup *sg, char *title)
+{
     if(sg)
     {
         if(sg->Name)
@@ -161,7 +175,7 @@ int SONGDB_RenameSubgroup(int which, char *title)
 
 }
 
-int SONGDB_RemoveSubgroup(int which)
+int SONGDB_RemoveSubgroup(struct SongDBSubgroup *sg)
 {
     int count=0;
     SongDBSubgroup *list;
@@ -170,7 +184,7 @@ int SONGDB_RemoveSubgroup(int which)
 
     while(list)
     {
-        if(count==which)
+        if(list==sg)
         {
             if(list->prev == NULL && list->next)
             {
@@ -190,8 +204,8 @@ int SONGDB_RemoveSubgroup(int which)
 
             free(list->Name);
             free(list);
-            return 1;
             MainGroup->Changed=1;
+            return 1;
         }
         
         list=list->next;
@@ -200,33 +214,43 @@ int SONGDB_RemoveSubgroup(int which)
     return 0;
 }
 
-struct SongDBSubgroup *SONGDB_GetSubgroup(int which)
+int SONGDB_RemovePlaylistEntry(struct SongDBSubgroup *sg,struct SongDBEntry *e)
 {
-    int count=0;
-    struct SongDBSubgroup *list;
-    if(count < 0)
-        return NULL;
+    struct SongDBEntry *list,*prev;
 
-    list=MainGroup->Subgroup;
-
-    while(list)
+    if(sg->Playlist)
     {
-        if(count==which)
-            return list;
-        
-        list=list->next;
-        count++;
+        list=sg->Playlist;
+        prev=NULL;
+        while(list)
+        {
+            if(list==e)
+            {
+                if(prev)
+                    prev->next=list->next;
+                else
+                    sg->Playlist=list->next;
+               
+                sg->Songcount--;
+                return 1;
+            }
+            prev=list;
+            list=list->next;
+            
+        }
     }
-    return NULL;
+    return 0;
+}
+struct SongDBSubgroup *SONGDB_GetSubgroup()
+{
+    return MainGroup->Subgroup;
 }
 
 
 
-int SONGDB_AddFileToSubgroup(int which,char *filename)
+int SONGDB_AddFileToSubgroup(struct SongDBSubgroup *sg,char *filename)
 {
-    struct SongDBSubgroup *sg;
 
-    sg=SONGDB_GetSubgroup(which);
     if(sg)
     {
         struct SongDBEntry *e;
@@ -382,10 +406,8 @@ struct SongDBEntry *SONGDB_GetEntryID(long id)
     return NULL;
 }
 
-int SONGDB_SetActiveSubgroup(int which)
+int SONGDB_SetActiveSubgroup(struct SongDBSubgroup *sg)
 {
-    struct SongDBSubgroup *sg;
-    sg=SONGDB_GetSubgroup(which);
     if(sg)
         MainGroup->Active=sg;
     else
@@ -412,6 +434,7 @@ static int SONGDB_JumpToFileMatch(char* song, char * keys[], int nw)
     return 1;
 }
 
+/* Jump to file function */
 void SONGDB_FindEntry(char *search_string)
 {
     char *ptr;

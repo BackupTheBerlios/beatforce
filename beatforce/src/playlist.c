@@ -53,7 +53,6 @@ int PLAYLIST_Init (int player_nr)
     no_of_entries=0;
     playlist[0]=NULL;
     playlist[1]=NULL;
-
     return 0;
 }
 
@@ -97,7 +96,7 @@ void PLAYLIST_SetEntry(int player_nr, struct SongDBEntry *e)
     struct PlEntry *pe;
     struct PlEntry *newlist = playlist[0];
 
-    TRACE("PLAYLIST_SetEntry %d",player_nr);
+    TRACE("PLAYLIST_SetEntry player:%d filename: %s",player_nr,e->filename);
 
     if (e == NULL)
     {
@@ -130,8 +129,6 @@ int PLAYLIST_Remove(int player_nr,long songdb_id)
 {
     struct PlEntry *newlist = playlist[0];
     struct PlEntry *pe = NULL;
-
-    printf("PLAYLIST_Remove songsb %ld\n",songdb_id);
 
     while(newlist)
     {

@@ -121,11 +121,20 @@ void SONGDBUI_CreateWindow(ThemeSongdb *ts)
 static void SONGDBUI_ChangeDatabase()
 {
     SDL_Tab *t;
-    
+    int count;
+    struct SongDBSubgroup *sg;
+
     t=(SDL_Tab *)tabwidget;
     if(t && t->hl)
     {
-        SONGDB_SetActiveSubgroup(t->hl->index);
+        count=t->hl->index;
+        sg=SONGDB_GetSubgroup();
+        while(count)
+        {
+            sg=sg->next;
+            count--;
+        }
+        SONGDB_SetActiveSubgroup(sg);
     }
     SDL_WidgetPropertiesOf(table,ROWS,SONGDB_GetNoOfEntries());
     
@@ -139,7 +148,7 @@ void SONGDBUI_Redraw()
     
     if(SONGDB_GroupChanged())
     {
-        sg=SONGDB_GetSubgroup(0);
+        sg=SONGDB_GetSubgroup();
         
         while(SDL_WidgetPropertiesOf(tabwidget,TAB_REMOVE,NULL))
         {

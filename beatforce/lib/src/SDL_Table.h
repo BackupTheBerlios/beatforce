@@ -25,20 +25,13 @@
 #include "SDL_Font.h"
 #include "SDL_Edit.h"
 
-typedef struct SDL_TableRow
-{
-    int index;
-    struct SDL_TableRow *next;
-    struct SDL_TableRow *prev;
-
-}SDL_TableRow;
-
 typedef struct SDL_Table
 {
     SDL_Rect            rect;
-    SDL_TableRow        *selected;
     SDL_Font            *font;
     char                *caption;    
+    int                 *Selected;
+    int                 SelectedCount;
     
     //colors
     Uint32   bgcolor;

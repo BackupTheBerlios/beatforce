@@ -81,7 +81,7 @@ STRIP = @STRIP@
 THEME_DIR = @THEME_DIR@
 VERSION = @VERSION@
 
-SUBDIRS = oss 
+SUBDIRS = oss raw
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../../config.h
 CONFIG_CLEAN_FILES = 

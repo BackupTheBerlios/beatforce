@@ -73,14 +73,6 @@ struct SongDBEntry
     struct SongDBEntry *next;
 };
 
-typedef struct SongDBTest
-{
-    int index;
-    struct SongDBTest *next;
-    struct SongDBTest *prev;
-
-}SongDBTest;
-
 typedef struct SongDBGroup
 {
     char *Name;
@@ -121,16 +113,17 @@ void SONGDB_FindEntry(char *search_string);
 /* Group related functions */
 int SONGDB_GroupChanged();
 SongDBGroup *SONGDB_GetActiveGroup();
-int SONGDB_SetActiveSubgroup(int which);
+int SONGDB_SetActiveSubgroup(struct SongDBSubgroup *sg);
 
 
 /* Subgroup modifiers */
 int SONGDB_AddSubgroup(struct SongDBGroup *group,char *title);
-int SONGDB_RemoveSubgroup(int which);
-int SONGDB_RenameSubgroup(int which, char *title);
-struct SongDBSubgroup *SONGDB_GetSubgroup(int which);
+int SONGDB_RemoveSubgroup(struct SongDBSubgroup *sg);
+int SONGDB_RenameSubgroup(struct SongDBSubgroup *sg, char *title);
+int SONGDB_RemovePlaylistEntry(struct SongDBSubgroup *sg,struct SongDBEntry *e);
+struct SongDBSubgroup *SONGDB_GetSubgroup();
 int SONGDB_SubgroupCount();
-int SONGDB_AddFileToSubgroup(int which,char *filename);
-int SONGDB_SetActiveSubgroup(int which);
+int SONGDB_AddFileToSubgroup(struct SongDBSubgroup *sg,char *filename);
 struct SongDBSubgroup *SONGDB_GetActiveSubgroup();
+int SONGDB_GetSubgroupCount();
 #endif

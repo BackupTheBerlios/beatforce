@@ -41,6 +41,9 @@ typedef struct PlayerDisplay
 {
     int PlayerNr;
 
+    void *ButtonPause;
+    void *ButtonPlay;
+    
     void *TimeElapsed;
     void *TimeRemaining;
 

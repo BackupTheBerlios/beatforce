@@ -81,7 +81,7 @@ STRIP = strip
 THEME_DIR = /usr/share/beatforce/themes
 VERSION = 0.1.0
 
-SUBDIRS = oss 
+SUBDIRS = oss raw
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../../config.h
 CONFIG_CLEAN_FILES = 

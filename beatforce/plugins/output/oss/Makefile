@@ -99,10 +99,10 @@ LTLIBRARIES =  $(lib_LTLIBRARIES)
 DEFS = -DHAVE_CONFIG_H -I. -I$(srcdir) -I../../..
 CPPFLAGS = 
 LDFLAGS = 
-LIBS = -lfftw3 -lSDL_image  -lmad -L/usr/local/lib
+LIBS = -lfftw3 -lSDL_image  -lmad -L/usr/lib
 liboss_la_LIBADD = 
 liboss_la_OBJECTS =  oss.lo
-CFLAGS = -g -O2 -I/usr/local/include -DHAVE_MP3
+CFLAGS = -g -O2 -I/usr/include -DHAVE_MP3
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)

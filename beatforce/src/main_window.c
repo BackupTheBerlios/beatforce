@@ -43,7 +43,7 @@
 #include "search_window.h"
 
 int control_state;
-int mainwindow_EventHandler(SDL_Event event);
+static int MAINWINDOW_EventHandler(SDL_Event event);
 int mainwindow_NotifyHandler();
 SDL_Surface *mainwindow_CreateWindow();
 int mainwindow_HandleKeys(unsigned int key);
@@ -51,7 +51,7 @@ int mainwindow_HandleKeys(unsigned int key);
 SDL_Surface *MainWindow;
 void *timewidget;
 
-Window MAINWINDOW={ mainwindow_EventHandler , mainwindow_NotifyHandler };
+Window MAINWINDOW={ MAINWINDOW_EventHandler , mainwindow_NotifyHandler };
 
 #define BF_CONTROL         0xf000
 #define BF_QUIT            SDLK_ESCAPE
@@ -118,13 +118,13 @@ SDL_Surface *mainwindow_CreateWindow()
     PLAYERUI_CreateWindow(0,mw->Player[0]);
     PLAYERUI_CreateWindow(1,mw->Player[1]);
     MIXERUI_CreateWindow(mw->Mixer);
-
+    
     return MainWindow;
 }
 
 
 
-int mainwindow_EventHandler(SDL_Event event)
+static int MAINWINDOW_EventHandler(SDL_Event event)
 {
     unsigned int key = 0;
     switch(event.type)
@@ -191,7 +191,7 @@ int mainwindow_HandleKeys(unsigned int key)
         }
         else
         {
-            printf("No next song inplaylist\n");
+            PLAYLIST_SetEntry(0,SONGDB_GetEntryID(0));
         }
         break;
 
@@ -206,6 +206,7 @@ int mainwindow_NotifyHandler()
 {
     char time[6];
     int min=0,hour=0;
+
     OSA_GetTime(&hour,&min);
     sprintf(time,"%02d:%02d",hour,min);
     SDL_WidgetPropertiesOf(timewidget,SET_CAPTION,time);
@@ -216,3 +217,6 @@ int mainwindow_NotifyHandler()
 
     return 1;
 }
+
+
+

@@ -52,7 +52,7 @@
         pressed="playonly_green_pressed.bmp"
         action="PLAY"/>
 
-     <button x="167" y="167"
+     <button x="167" y="176"
         normal="pauseonly_green.bmp"
         action="PAUSE"/>   
 
@@ -84,6 +84,10 @@
        highlight="playonly_green_highlight.bmp"
        pressed="playonly_green_pressed.bmp"
        action="PLAY"/>
+       
+     <button x="167" y="176"
+        normal="pauseonly_green.bmp"
+        action="PAUSE"/>   
 
      <text x="619" y="90" w="105" h="22" font="digits" fgcolor="0xf0f0f0" display="TIME_ELAPSED"/>
      <text x="775" y="90" w="105" h="22"  font="digits"  fgcolor="0xf0f0f0" display="TIME_REMAINING"/>

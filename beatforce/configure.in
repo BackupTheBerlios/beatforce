@@ -80,6 +80,7 @@ plugins/input/Makefile
 plugins/input/mp3-mad/Makefile
 plugins/output/Makefile
 plugins/output/oss/Makefile
+plugins/output/raw/Makefile
 src/Makefile
 themes/Makefile
 ])

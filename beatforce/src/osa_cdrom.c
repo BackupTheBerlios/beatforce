@@ -1,4 +1,3 @@
-
 #if 0
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -7,7 +6,6 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <unistd.h>
-
 #endif
 
 typedef struct TOC {	/* structure of table of contents (cdrom) */

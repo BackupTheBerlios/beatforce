@@ -100,7 +100,7 @@ CPPFLAGS =
 LDFLAGS = 
 libbeatforcemp3mad_la_LIBADD = 
 libbeatforcemp3mad_la_OBJECTS =  mp3.lo osa.lo debug.lo llist.lo
-CFLAGS = -g -O2 -I/usr/local/include -DHAVE_MP3
+CFLAGS = -g -O2 -I/usr/include -DHAVE_MP3
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)

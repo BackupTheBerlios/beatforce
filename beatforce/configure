@@ -5872,7 +5872,7 @@ then
  echo "configure: warning: Mad libs not found... disabling mp3 support" 1>&2
 else
  MADDIR=${maddir}
- LIBS="$LIBS -lmad -L$MADDIR/lib"
+  LIBS="$LIBS -lmad -L$MADDIR/lib"
  CFLAGS="$CFLAGS -I$MADDIR/include -DHAVE_MP3"
 fi
 
@@ -6006,6 +6006,7 @@ plugins/input/Makefile
 plugins/input/mp3-mad/Makefile
 plugins/output/Makefile
 plugins/output/oss/Makefile
+plugins/output/raw/Makefile
 src/Makefile
 themes/Makefile
  config.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
@@ -6131,6 +6132,7 @@ plugins/input/Makefile
 plugins/input/mp3-mad/Makefile
 plugins/output/Makefile
 plugins/output/oss/Makefile
+plugins/output/raw/Makefile
 src/Makefile
 themes/Makefile
 "}

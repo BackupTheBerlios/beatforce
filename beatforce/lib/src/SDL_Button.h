@@ -38,6 +38,7 @@ typedef struct SDL_Button
     SDL_Surface      *pressed;
     SDL_Rect         rect;
     SDL_ButtonStates state;
+    int              Visible;
 
     void (*Clicked)(void* data);
     void *ClickedData;

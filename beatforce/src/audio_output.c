@@ -555,6 +555,7 @@ output_get_bpm (int c)
     return ch[c]->bpm;
 }
 
+
 /*  Internal function which calculates the volume
  *  of the channel (left and right) 
  */
@@ -1063,6 +1064,8 @@ convert_buffer (AFormat afmt, int nch,
 
     return length;
 }
+
+
 
 
 #endif /* ifdef OUTPUT_SIZE_32 */

@@ -407,8 +407,8 @@ static void SDL_SliderCurrentValue(SDL_Slider *Slider)
             if(Slider->pixeloffset > (Slider->rect.h - Slider->SliderButton->h))
                 Slider->pixeloffset = (Slider->rect.h - Slider->SliderButton->h);
 
-            Slider->CurrentValue = ((Slider->MaxValue -Slider->MinValue)* Slider->pixeloffset) 
-                / (Slider->rect.h - Slider->SliderButton->h);
+            Slider->CurrentValue = (double)((Slider->MaxValue -Slider->MinValue)* Slider->pixeloffset) 
+                / (double)(Slider->rect.h - Slider->SliderButton->h);
         }
     }
 }

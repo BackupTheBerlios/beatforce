@@ -88,7 +88,8 @@ void* SDL_TableCreate(SDL_Rect* rect)
 
     newtable->edit              = NULL;
    
-    newtable->selected          = NULL;
+    newtable->Selected          = NULL;
+    newtable->SelectedCount     = 0;
     newtable->Selectable        = 0;
     newtable->FirstVisibleRow   = 0;
     newtable->HighlightedRow    = -1;
@@ -216,7 +217,12 @@ int SDL_TableProperties(void *table,int feature,va_list list)
         break;
         
     case ROWS:
-        Table->Rows=va_arg(list,int);
+    {
+        long newrows=va_arg(list,int);
+        if(newrows == Table->Rows)
+            return 0;
+        else
+            Table->Rows=newrows;
 
         if(Table->Rows > Table->VisibleRows && Table->Scrollbar)
         {
@@ -234,8 +240,8 @@ int SDL_TableProperties(void *table,int feature,va_list list)
 //                SDL_WidgetClose(Table->Scrollbar);
             }
         }
-        Table->TableInitialDraw=1;
         break;      
+    }
     case SET_FONT:
         Table->font=va_arg(list,SDL_Font*);
         break;
@@ -262,17 +268,24 @@ int SDL_TableProperties(void *table,int feature,va_list list)
         break;
     case GET_SELECTED:
         {
-            SDL_TableRow **d=va_arg(list,SDL_TableRow**);
+            int *c;
+            int **d=va_arg(list,int**);
             if(d)
-                *d=Table->selected;
+                *d=Table->Selected;
+
+            c=va_arg(list,int*);
+            if(c)
+                *c=Table->SelectedCount;
+            
         }
         break;
     case CLEAR_SELECTED:
         {
-            if(Table->selected)
+            if(Table->Selected)
             {
-                free(Table->selected);
-                Table->selected=NULL;
+                free(Table->Selected);
+                Table->Selected=NULL;
+                Table->SelectedCount=0;
             }
         }
         break;
@@ -519,79 +532,70 @@ static void SDL_TableDrawRow(SDL_Surface *dest,SDL_Table *Table,int row)
 }
 
 
+static void t(SDL_Table *table)
+{
+    int i;
+    int j=0;
+
+    for(i=0;i<table->SelectedCount;i++)
+    {
+        if(table->Selected[i]==-1)
+        {
+            for(j=i;j<table->SelectedCount;j++)
+                table->Selected[j]=table->Selected[j+1];
+            break;
+        }
+    }
+    table->SelectedCount--;
+    table->Selected=realloc(table->Selected,table->SelectedCount*sizeof(int));
+
+}
+
+
 
 static void SDL_TableAddSelected(SDL_Table *table)
 {
-    if(table->selected == NULL)
-    {
-        table->selected=(SDL_TableRow *)malloc(sizeof(SDL_TableRow));
-        memset(table->selected,0,sizeof(SDL_TableRow));
+    int i=0;
 
-        table->selected->index = table->CurrentRow;
+    if(table->Selected == NULL)
+    {
+        table->Selected = malloc(sizeof(int*));
+        table->Selected[0] = table->CurrentRow;
+        table->SelectedCount = 1;
     }
     else
     {
-        SDL_TableRow *last;
-
-        last=table->selected;
-
-        while(last)
+        for(i=0;i<table->SelectedCount;i++)
         {
-            if(last->index == table->CurrentRow)
+            if(table->Selected[i] == table->CurrentRow)
             {
-                if(last->prev)
-                {
-                    if(last->prev)
-                        last->prev->next = last->next;
-                    if(last->next)
-                        last->next->prev = last->prev;
-                    free(last);
-                }
-                else
-                {
-                    /* Removed the root node */
-                    if(last->next)
-                    {
-                        last->next->prev = NULL;
-                        table->selected  = last->next;
-                        free(last);
-                    }
-                    else
-                    {
-                        free(table->selected);
-                        table->selected=NULL;
-                    }
-                }
+                table->Selected[i]=-1;
+                t(table);
                 return;
             }
-            last=last->next;
         }
 
-        last=table->selected;
-        while(last->next)
-            last=last->next;
-        
-
-        last->next=(SDL_TableRow *)malloc(sizeof(SDL_TableRow));
-        memset(last->next,0,sizeof(SDL_TableRow));
-
-        last->next->index = table->CurrentRow;
-        last->next->prev=last;
+        if(table->SelectedCount < table->Selectable || table->Selectable < 0)
+        {
+            table->SelectedCount++;
+            table->Selected=realloc(table->Selected,table->SelectedCount*sizeof(int*));
+            table->Selected[table->SelectedCount-1]=table->CurrentRow;
+        }
+        else if (table->Selectable == 1)
+        {
+            table->Selected[0]=table->CurrentRow;
+        }
     }
 }
 
 
 static int SDL_TableIsRowSelected(SDL_Table *Table,int row)
 {
-    SDL_TableRow *Rows=NULL;
-    
-    Rows=Table->selected;
-    while(Rows)
+    int i;
+    for(i=0;i<Table->SelectedCount;i++)
     {
-        if(Rows->index == (row + Table->FirstVisibleRow))
+        if(Table->Selected[i] == (row + Table->FirstVisibleRow))
             return 1;
-
-        Rows=Rows->next;
     }
     return 0;
 }

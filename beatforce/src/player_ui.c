@@ -90,13 +90,26 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
 
     while(Button)
     {
-        /* Create the play/pause button */
-        SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
-        SDL_WidgetProperties(SET_NORMAL_IMAGE,   Button->normal);
-        SDL_WidgetProperties(SET_HIGHLIGHT_IMAGE,Button->highlighted);
-        SDL_WidgetProperties(SET_PRESSED_IMAGE,  Button->pressed);
-        SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,PLAYERUI_PlayButton,&UI_Players[nr]);
-        
+        switch(Button->action)
+        {
+        case BUTTON_PLAY:
+            /* Create the play button */
+            UI_Players[nr].ButtonPlay=SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
+            SDL_WidgetProperties(SET_NORMAL_IMAGE,   Button->normal);
+            SDL_WidgetProperties(SET_HIGHLIGHT_IMAGE,Button->highlighted);
+            SDL_WidgetProperties(SET_PRESSED_IMAGE,  Button->pressed);
+            SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,PLAYERUI_PlayButton,&UI_Players[nr]);
+            break;
+        case BUTTON_PAUSE:
+            /* Create the pause button */
+            UI_Players[nr].ButtonPause=SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
+            SDL_WidgetProperties(SET_NORMAL_IMAGE,   Button->normal);
+            SDL_WidgetProperties(SET_HIGHLIGHT_IMAGE,Button->highlighted);
+            SDL_WidgetProperties(SET_PRESSED_IMAGE,  Button->pressed);
+            SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,PLAYERUI_PlayButton,&UI_Players[nr]);
+            SDL_WidgetProperties(SET_VISIBLE,0);
+            break;
+        }
         Button=Button->next;
     }
    
@@ -231,6 +244,31 @@ void PLAYERUI_Redraw()
 
     PLAYERUI_UpdateState(0);
     PLAYERUI_UpdateState(1);
+
+    if(PLAYER_IsPlaying(0))
+    {
+        SDL_WidgetPropertiesOf(UI_Players[0].ButtonPlay,SET_VISIBLE,0);
+        SDL_WidgetPropertiesOf(UI_Players[0].ButtonPause,SET_VISIBLE,1);
+    }    
+    else
+    {
+        SDL_WidgetPropertiesOf(UI_Players[0].ButtonPlay,SET_VISIBLE,1);
+        SDL_WidgetPropertiesOf(UI_Players[0].ButtonPause,SET_VISIBLE,0);
+    }
+
+    if(UI_Players[1].ButtonPause)
+    {
+        if(PLAYER_IsPlaying(1))
+        {
+            SDL_WidgetPropertiesOf(UI_Players[1].ButtonPlay,SET_VISIBLE,0);
+            SDL_WidgetPropertiesOf(UI_Players[1].ButtonPause,SET_VISIBLE,1);
+        }
+        else
+        {
+            SDL_WidgetPropertiesOf(UI_Players[1].ButtonPlay,SET_VISIBLE,1);
+            SDL_WidgetPropertiesOf(UI_Players[1].ButtonPause,SET_VISIBLE,0);
+        }
+    }
 
     if(SDL_WidgetHasFocus(UI_Players[0].EditTitle) ||
        SDL_WidgetHasFocus(UI_Players[0].EditTitle))
@@ -460,7 +498,12 @@ static void PLAYERUI_PlayButton(void *data)
     TRACE("playerui_PlayButton %d",current->PlayerNr);    
 
     if(PLAYER_IsPlaying(current->PlayerNr))
+    {
+        SDL_WidgetPropertiesOf(UI_Players[0].ButtonPlay,SET_VISIBLE,1);
+        SDL_WidgetPropertiesOf(UI_Players[0].ButtonPause,SET_VISIBLE,0);
+        printf("Player is playing %d\n",current->PlayerNr);
         PLAYER_Pause (current->PlayerNr);
+    }
     else
         PLAYER_Play  (current->PlayerNr);
 }

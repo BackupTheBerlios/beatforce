@@ -53,8 +53,6 @@ int change;
 
 char directory[255];
 
-
-
 /* Local function prototypes */
 SDL_Surface *Window_CreateFileWindow();
 int FILEWINDOW_EventHandler(SDL_Event event);
@@ -70,11 +68,14 @@ static void FILEWINDOW_AddSelected(void *data);
 
 /* for table */
 static void FILEWINDOW_DirectoryClicked(void *data);
+static void FILEWINDOW_SubgroupClicked(void *data);
 static void FILEWINDOW_RenameSubgroupFinished();
 
 /* local data retreival functions for tables */
 static void FILEWINDOW_GetDirectories(int row,int column,char *string);
 static void FILEWINDOW_GetFilesInSubgroup(int row,int column,char *string);
+
+static void FILEWINDOW_GetSelectedSubgroup(struct SongDBSubgroup **sel_sg);
 
 Window gFILEWINDOW={ FILEWINDOW_EventHandler };
 
@@ -101,83 +102,122 @@ void FILEWINDOW_Open()
     {
         SDL_WidgetUseSurface(FileWindow);
     }
+    SDL_WidgetPropertiesOf(TableSubgroup,ROWS, SONGDB_GetSubgroupCount());
     WNDMGR_Open(&gFILEWINDOW);
 }
 
 static void FILEWINDOW_RenameSubgroupFinished()
 {
-    SDL_TableRow *row=NULL;
     char newlabel[255];
-    SDL_WidgetPropertiesOf(TableSubgroup,GET_SELECTED,&row);
-    if(row)
+    struct SongDBSubgroup *sg;
+
+    FILEWINDOW_GetSelectedSubgroup(&sg);
+    if(sg)
     {
         SDL_WidgetPropertiesOf(TableSubgroup,GET_CAPTION,newlabel);
-        SONGDB_RenameSubgroup(row->index,newlabel);
-        SDL_WidgetPropertiesOf(TableSubgroup,CLEAR_SELECTED,0);
+        SONGDB_RenameSubgroup(sg,newlabel);
     }
 } 
 
 static void FILEWINDOW_RenameSubgroup(void *data)
 {
-    SDL_TableRow *row;
-    
-
-    SDL_WidgetPropertiesOf(TableSubgroup,GET_SELECTED,&row);
+    int *row;
+   
+    SDL_WidgetPropertiesOf(TableSubgroup,GET_SELECTED,&row,NULL);
     if(row)
     {
-        SDL_WidgetPropertiesOf(TableSubgroup,SET_STATE_EDIT,row->index,1);
+        SDL_WidgetPropertiesOf(TableSubgroup,SET_STATE_EDIT,row[0],1);
     }
 }
 
 static void FILEWINDOW_AddSubgroup(void *data)
 {
+
+    TRACE("FILEWINDOW_RemoveSubgroup");
     SONGDB_AddSubgroup(SONGDB_GetActiveGroup(),"<new>");
-    SDL_WidgetPropertiesOf(TableSubgroup,ROWS, 100);
+    SDL_WidgetPropertiesOf(TableSubgroup,ROWS, SONGDB_GetSubgroupCount());
 }
 
 static void FILEWINDOW_RemoveSubgroup(void *data)
 {
-    SDL_TableRow *row;
+    struct SongDBSubgroup *list;
+    int *row;
+    int count;
     
-    SDL_WidgetPropertiesOf(TableSubgroup,GET_SELECTED,&row);
+    TRACE("FILEWINDOW_RemoveSubgroup");
+    SDL_WidgetPropertiesOf(TableSubgroup,GET_SELECTED,&row,NULL);
+
     if(row)
     {
-        SONGDB_RemoveSubgroup(row->index);
-        SDL_WidgetPropertiesOf(TableSubgroup,CLEAR_SELECTED,0);
+        count=row[0];
+        list=SONGDB_GetSubgroup();
+        while(list && count >= 0)
+        {
+            if(count==0)
+            {
+                SONGDB_RemoveSubgroup(list);
+                SDL_WidgetPropertiesOf(TableSubgroup,CLEAR_SELECTED,0);
+                SDL_WidgetPropertiesOf(TableSubgroup,ROWS,SONGDB_GetSubgroupCount());
+                return;
+            }
+            list=list->next;
+            count--;
+        }
     }
-    SDL_WidgetPropertiesOf(TableSubgroup,ROWS,100);
+}
+
+static void FILEWINDOW_GetSelectedSubgroup(struct SongDBSubgroup **sel_sg)
+{
+    struct SongDBSubgroup *sg;
+    int *lSubgroup;
+    int count;
+
+    if(sel_sg)
+    {
+        SDL_WidgetPropertiesOf(TableSubgroup,GET_SELECTED,&lSubgroup,NULL);
+        if(lSubgroup)
+        {
+            sg=SONGDB_GetSubgroup();
+            count=lSubgroup[0];
+            while(count)
+            {
+                sg=sg->next;
+                count--;
+            }
+            *sel_sg=sg;
+        }
+        else
+        {
+            *sel_sg=NULL;
+        }
+    }
 }
 
 static void FILEWINDOW_AddSelected(void *data)
 {
-    SDL_TableRow *row;
-    SDL_TableRow *lSubgroup;
-    char string[255];
-
+    struct SongDBSubgroup *sg;
+    int *SelectedFiles;
+    int SelectedCount,i;
+    char filename[255];
+    
     TRACE("FILEWINDOW_AddSelected");
-    memset(string,0,255);
+    memset(filename,0,255);
 
-    SDL_WidgetPropertiesOf(TableFilesInDirectory,GET_SELECTED,&row);
-    if(row)
+    FILEWINDOW_GetSelectedSubgroup(&sg);
+
+    if(sg)
     {
-        while(row)
+        SDL_WidgetPropertiesOf(TableFilesInDirectory,GET_SELECTED,&SelectedFiles,&SelectedCount);
+        for(i=0;i<SelectedCount;i++)
         {
-            
-            FILEWINDOW_GetFilesInDirectory(row->index,0,string);
-            if(strlen(string))
+            FILEWINDOW_GetFilesInDirectory(SelectedFiles[i],0,filename);
+            if(strlen(filename))
             {
-                SDL_WidgetPropertiesOf(TableSubgroup,GET_SELECTED,&lSubgroup);
-                if(lSubgroup)
-                {
-                    SONGDB_AddFileToSubgroup(lSubgroup->index,string);
-////                    return;
-                }
-//                else
-//                    ERROR("No subgroup selected");
+                SONGDB_AddFileToSubgroup(sg,filename);
             }
-            row=row->next;
         }
         SDL_WidgetPropertiesOf(TableFilesInDirectory,CLEAR_SELECTED,0);
+        SDL_WidgetPropertiesOf(TableFilesInSubgroup,ROWS,sg->Songcount);
     }
     else
     {
@@ -187,18 +227,16 @@ static void FILEWINDOW_AddSelected(void *data)
 
 static void FILEWINDOW_AddAll(void *data)
 {
+    struct SongDBSubgroup *sg;
     BFList *l;
-    SDL_TableRow *lSubgroup;
-    
-    TRACE("FILEWINDOW_AddAll");
 
-    SDL_WidgetPropertiesOf(TableSubgroup,GET_SELECTED,&lSubgroup);
-    if(lSubgroup)
+    FILEWINDOW_GetSelectedSubgroup(&sg);
+    if(sg)
     {
         l=files;
         while(l)
         {   
-            SONGDB_AddFileToSubgroup(lSubgroup->index,(char*)l->data);
+            SONGDB_AddFileToSubgroup(sg,(char*)l->data);
             l=l->next;
         }
     }
@@ -304,15 +342,26 @@ static void FILEWINDOW_GetDirectories(int row,int column,char *string)
     }
 }
 
+/* 
+ *  Table callback function for the subgroups of th active 
+ *  group. 
+ */
 void FILEWINDOW_GetSubgroup(int row,int column,char *string)
 {
-    SongDBSubgroup *sg=SONGDB_GetSubgroup(row);
-
-    if(sg)
-         sprintf(string,"%s",sg->Name);
-    
+    struct SongDBSubgroup *list;
+    list=SONGDB_GetSubgroup();
+    while(list && row >= 0)
+    {
+        if(row==0)
+            sprintf(string,"%s",list->Name);
+       list=list->next;
+       row--;
+    }
 }
 
+/*
+ * Table callback function for the files in the selected directory
+ */
 void FILEWINDOW_GetFilesInDirectory(int row,int column,char *string)
 {
     int count=0;
@@ -328,6 +377,14 @@ void FILEWINDOW_GetFilesInDirectory(int row,int column,char *string)
         count++;
     }
   
+}
+static void FILEWINDOW_SubgroupClicked(void *data)
+{
+    struct SongDBSubgroup *sg;
+
+    FILEWINDOW_GetSelectedSubgroup(&sg);
+    if(sg)
+        SDL_WidgetPropertiesOf(TableFilesInSubgroup,ROWS,sg->Songcount);
 }
 
 static void FILEWINDOW_DirectoryClicked(void *data)
@@ -376,35 +433,43 @@ static void FILEWINDOW_DirectoryClicked(void *data)
     files=OSA_FindFiles(directory,".mp3",0);
     
     SDL_WidgetPropertiesOf(t,ROWS,nw2);
+
+    /* Correct the rowcount for the files in directory table (for scrollbar) */
+    SDL_WidgetPropertiesOf(TableFilesInDirectory,ROWS,LLIST_NoOfEntries(files));
     
 }
 
 void FILEWINDOW_DeleteSelected(void *data)
 {
-    struct SongDBSubgroup *list;
-    SDL_TableRow *lSubgroup;
-    SDL_TableRow *row;
-    char string[255];
+    struct SongDBSubgroup *sg;
+    int SelectedCount;
+    int *row;
+    struct SongDBEntry    *Playlist;
+    int song,i;
     
-    SDL_WidgetPropertiesOf(TableSubgroup,GET_SELECTED,&lSubgroup);
-    if(lSubgroup)
-    {
-        list=SONGDB_GetSubgroup(lSubgroup->index);
-    }
-    else
-    {
-//        ERROR("No subgroup selected");
-        return;
-    }
+    FILEWINDOW_GetSelectedSubgroup(&sg);
 
-    SDL_WidgetPropertiesOf(TableFilesInDirectory,GET_SELECTED,&row);
-    if(row)    
+    if(sg)
     {
-        while(row)
+        SDL_WidgetPropertiesOf(TableFilesInSubgroup,GET_SELECTED,&row,&SelectedCount);
+        if(row)    
         {
-            FILEWINDOW_GetFilesInDirectory(row->index,0,string);
-//            SONGDB_RemoveFileFrom(row->index,string);
-            row=row->next;
+            for(i=0;i<SelectedCount;i++)
+            {
+                Playlist=sg->Playlist;
+                song=row[i];                
+                while(Playlist)
+                {
+                    if(song==0)
+                    {
+                        SONGDB_RemovePlaylistEntry(sg,Playlist);
+                        break;
+                    }
+                     
+                    song--;
+                    Playlist=Playlist->next;
+                }
+            }
         }
     }
 }
@@ -413,30 +478,22 @@ void FILEWINDOW_GetFilesInSubgroup(int row,int column,char *string)
 {
     struct SongDBSubgroup *list;
     struct SongDBEntry    *Playlist;
-    SDL_TableRow *lSubgroup;
     int count=0;
-
-    SDL_WidgetPropertiesOf(TableSubgroup,GET_SELECTED,&lSubgroup);
-    if(lSubgroup)
+    
+    FILEWINDOW_GetSelectedSubgroup(&list);
+    if(list)
     {
-        list=SONGDB_GetSubgroup(lSubgroup->index);
         Playlist=list->Playlist;
-    }
-    else
-    {
-//        ERROR("No subgroup selected");
-        return;
-    }
-
-    while(Playlist)
-    {
-        if(count == row)
+        while(Playlist)
         {
-            sprintf(string,"%s",Playlist->filename);
-            break;
+            if(count == row)
+            {
+                sprintf(string,"%s",Playlist->filename);
+                break;
+            }
+            Playlist=Playlist->next;
+            count++;
         }
-        Playlist=Playlist->next;
-        count++;
     }
   
   
@@ -536,11 +593,11 @@ SDL_Surface *Window_CreateFileWindow()
             SDL_WidgetProperties(SET_VISIBLE_COLUMNS, 1);
             SDL_WidgetProperties(SET_VISIBLE_ROWS, 19);
             SDL_WidgetProperties(COLUMN_WIDTH,1,Table->Rect.w);
-            SDL_WidgetProperties(ROWS, 30);
             SDL_WidgetProperties(SET_SELECTABLE,1);
             SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
             SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
             SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION,FILEWINDOW_GetSubgroup);
+            SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,FILEWINDOW_SubgroupClicked,NULL);
             SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_RETURN,FILEWINDOW_RenameSubgroupFinished,NULL);
             break;
         case CONTENTS_FILESINDIRECTORY:
@@ -550,7 +607,7 @@ SDL_Surface *Window_CreateFileWindow()
             SDL_WidgetProperties(COLUMN_WIDTH,1,Table->Rect.w);
             SDL_WidgetProperties(ROWS,LLIST_NoOfEntries(files));
             SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
-            SDL_WidgetProperties(SET_SELECTABLE,1);
+            SDL_WidgetProperties(SET_SELECTABLE,-1);
             SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION,FILEWINDOW_GetFilesInDirectory);
             SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
             break;

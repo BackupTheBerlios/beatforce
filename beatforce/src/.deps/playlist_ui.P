@@ -25,7 +25,7 @@ playlist_ui.o: playlist_ui.c /usr/include/stdio.h \
  /usr/include/SDL/SDL_version.h /usr/include/SDL/SDL_image.h \
  ../lib/src/SDL_Table.h ../lib/src/SDL_Font.h ../lib/src/SDL_Edit.h \
  songdb.h configfile.h llist.h playlist.h player.h input_plugin.h \
- theme.h
+ theme.h debug.h
 playlist_ui.c :
 /usr/include/stdio.h :
 /usr/include/features.h :
@@ -83,3 +83,4 @@ playlist.h :
 player.h :
 input_plugin.h :
 theme.h :
+debug.h :

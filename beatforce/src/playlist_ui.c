@@ -34,7 +34,8 @@
 
 int previous;
 
-
+#define MODULE_ID PLAYLIST_UI
+#include "debug.h"
 
 void playliststring(long row,int column,char *dest)
 {

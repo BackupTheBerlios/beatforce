@@ -98,7 +98,7 @@ PROGRAMS =  $(bin_PROGRAMS)
 DEFS = -DHAVE_CONFIG_H -I. -I$(srcdir) -I..
 CPPFLAGS = 
 LDFLAGS = 
-LIBS = -lfftw3 -lSDL_image  -lmad -L/usr/local/lib
+LIBS = -lfftw3 -lSDL_image  -lmad -L/usr/lib
 beatforce_OBJECTS =  main.$(OBJEXT) configfile.$(OBJEXT) \
 plugin.$(OBJEXT) osa.$(OBJEXT) osa_cdrom.$(OBJEXT) llist.$(OBJEXT) \
 mixer.$(OBJEXT) input.$(OBJEXT) output.$(OBJEXT) playlist.$(OBJEXT) \
@@ -109,7 +109,7 @@ mixer_ui.$(OBJEXT) file_window.$(OBJEXT) main_window.$(OBJEXT) \
 search_window.$(OBJEXT)
 beatforce_DEPENDENCIES = 
 beatforce_LDFLAGS = 
-CFLAGS = -g -O2 -I/usr/local/include -DHAVE_MP3
+CFLAGS = -g -O2 -I/usr/include -DHAVE_MP3
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)

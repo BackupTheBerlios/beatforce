@@ -79,7 +79,8 @@ typedef enum E_Widget_Properties
     TAB_ADD,             ////cchar * with caption  tab specific can only be started with loaded font
     TAB_REMOVE,
     
-    SET_STATE_EDIT
+    SET_STATE_EDIT,
+    SET_VISIBLE
     
 }E_Widget_Properties;
 

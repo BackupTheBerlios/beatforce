@@ -172,7 +172,7 @@ int OUTPUT_PluginWrite (struct OutGroup *grp, void *buffer, int size)
     err = grp->dev->op->write (grp->dev->priv, buffer, size);
     if (err < 0)
     {
-        printf("Unable to write output: error 0x%x\n", -err);
+//        printf("Unable to write output: error 0x%x\n", -err);
     }
     else if (err < size)
     {
@@ -248,7 +248,7 @@ OUTPUT_PluginSetVolume (struct OutGroup *grp)
 
     if (grp->dev->op->set_volume == NULL)
     {
-        printf("Not supported\n");
+        DEBUG("SetVolume not supported by outputplugin");
         return ERROR_NOT_SUPPORTED;
     }
 

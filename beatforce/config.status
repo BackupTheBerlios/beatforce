@@ -37,6 +37,7 @@ plugins/input/Makefile
 plugins/input/mp3-mad/Makefile
 plugins/output/Makefile
 plugins/output/oss/Makefile
+plugins/output/raw/Makefile
 src/Makefile
 themes/Makefile
  config.h conftest*; exit 1' 1 2 15
@@ -48,13 +49,13 @@ sed 's/%@/@@/; s/@%/@@/; s/%g$/@g/; /@g$/s/[\\&%]/\\&/g;
 
 s%@DATADIRNAME@%share%g
 s%@SHELL@%/bin/sh%g
-s%@CFLAGS@%-g -O2 -I/usr/local/include -DHAVE_MP3%g
+s%@CFLAGS@%-g -O2 -I/usr/include -DHAVE_MP3%g
 s%@CPPFLAGS@%%g
 s%@CXXFLAGS@%%g
 s%@FFLAGS@%%g
 s%@DEFS@%-DHAVE_CONFIG_H%g
 s%@LDFLAGS@%%g
-s%@LIBS@%-lfftw3 -lSDL_image  -lmad -L/usr/local/lib%g
+s%@LIBS@%-lfftw3 -lSDL_image  -lmad -L/usr/lib%g
 s%@exec_prefix@%${prefix}%g
 s%@prefix@%/usr%g
 s%@program_transform_name@%s,x,x,%g
@@ -154,6 +155,7 @@ plugins/input/Makefile
 plugins/input/mp3-mad/Makefile
 plugins/output/Makefile
 plugins/output/oss/Makefile
+plugins/output/raw/Makefile
 src/Makefile
 themes/Makefile
 "}

@@ -283,8 +283,6 @@ void player_set_song (int player_nr, int no)
             printf ("no more songs\n");
 
     }
-//    else
-//        playlist_do_renumber (p->PlayerWindow);
     TRACE("PLAYER_SetSong <- %d",player_nr);
 
 }

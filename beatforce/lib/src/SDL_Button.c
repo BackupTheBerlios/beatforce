@@ -51,6 +51,7 @@ void* SDL_ButtonCreate(SDL_Rect* rect)
     newbutton->rect.h=rect->h;
     newbutton->Clicked      = NULL;
     newbutton->ClickedData  = NULL;
+    newbutton->Visible      = 1;
     newbutton->state = SDL_BUTTON_UP;
     newbutton->next  = NULL;
     return newbutton;
@@ -62,6 +63,9 @@ void SDL_ButtonDraw(void *data,SDL_Surface *dest)
     SDL_Button  *button=(SDL_Button*)data;
     SDL_Surface *drawbutton=NULL;
     SDL_Rect src;
+
+    if(button->Visible == 0)
+        return;
 
     if(button->normal==NULL)
     {
@@ -107,8 +111,6 @@ void SDL_ButtonDraw(void *data,SDL_Surface *dest)
     if(SDL_BlitSurface(drawbutton,&src,dest,&button->rect)<0)
         fprintf(stderr, "BlitSurface error: %s\n", SDL_GetError());
             
-    SDL_UpdateRect(dest, button->rect.x,button->rect.y,
-                         button->rect.w,button->rect.h);
 }
 
 int SDL_ButtonProperties(void *button,int feature,va_list list)
@@ -161,6 +163,11 @@ int SDL_ButtonProperties(void *button,int feature,va_list list)
         }
         break;
     }
+    case SET_VISIBLE:
+    {
+        but->Visible=va_arg(list,int);
+        break;
+    }
     }
     return 1;
 }
@@ -168,6 +175,9 @@ int SDL_ButtonProperties(void *button,int feature,va_list list)
 void SDL_ButtonEventHandler(void * button,SDL_Event *event)
 {
     SDL_Button *but=(SDL_Button*)button;
+
+    if(but->Visible == 0)
+        return;
 
     switch(event->type)
     {

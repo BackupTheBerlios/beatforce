@@ -1,2 +1,2 @@
 
-SUBDIRS = oss 
+SUBDIRS = oss raw
