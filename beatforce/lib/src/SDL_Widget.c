@@ -167,7 +167,6 @@ int SDL_WidgetClose(void *widget)
     Stack *current_widget,*prev;
     current_widget=SDL_StackGetStack();
     prev=NULL;
-    printf("SDL_WidgetClose\n");
 
     while(current_widget)
     {

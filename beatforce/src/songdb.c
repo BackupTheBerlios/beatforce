@@ -451,6 +451,39 @@ static int SONGDB_JumpToFileMatch(char* song, char * keys[], int nw)
     return 1;
 }
 
+int SONGDB_FindSubgroup(struct SongDBEntry *e)
+{
+    struct SongDBSubgroup *Subgroup = NULL;
+    struct SongDBEntry *Playlist = NULL;
+    int count=0;
+
+    if(e==NULL)
+    {
+        printf("Cannot search\n");
+        return 0;
+    }
+        
+
+    Subgroup=MainGroup->Subgroup;
+
+    while(Subgroup)
+    {
+        Playlist=Subgroup->Playlist;
+
+        while(Playlist)
+        {
+            if(Playlist == e)
+                return count;
+            
+            Playlist=Playlist->next;
+        }
+        count++;
+        Subgroup=Subgroup->next;
+    }
+
+}
+
+
 /* Jump to file function */
 void SONGDB_FindEntry(char *search_string)
 {

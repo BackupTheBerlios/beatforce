@@ -36,6 +36,7 @@
 #include "file_window.h"
 
 #include "wndmgr.h"
+#include "SDL_Widget.h"
 
 ConfigFile     *cfgfile;
 AudioConfig    *audiocfg;

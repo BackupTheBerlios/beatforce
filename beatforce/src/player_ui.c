@@ -32,6 +32,7 @@
 #include "audio_output.h"
 #include "theme.h"
 #include "wndmgr.h"
+#include "songdb_ui.h"
 
 #include "SDL_Font.h"
 #include "SDL_Slider.h"
@@ -328,7 +329,7 @@ static void PLAYERUI_UpdateTime(int player)
     timeleft = PLAYER_GetTimeLeft(player);
     time     = PLAYER_GetTimePlayed(player);
     totaltime= PLAYER_GetTimeTotal(player);
-    
+
     /* Time elapsed */
     if(totaltime)
     {
@@ -341,6 +342,7 @@ static void PLAYERUI_UpdateTime(int player)
     {
         sprintf(string,"--:--.--");
     }
+
 
     SDL_WidgetPropertiesOf(UI_Players[player].SongProgress,GET_STATE,&state);
     if(state == PROGRESSBAR_DRAG)
@@ -414,13 +416,10 @@ static void PLAYERUI_UpdateTime(int player)
 #endif
                 id=rand()%SONGDB_GetNoOfEntries();
                 e=SONGDB_GetEntryID(id);
-                PLAYLIST_SetEntry(!player,e);
+                PLAYLIST_AddEntry(!player,e);
                 player_set_song(!player,0);  /* when set_entry is excecuted we only have 1 item thus 0 */
                 MIXER_DoFade(1,0);
                 SONGDBUI_Play(!player);
-                totaltime = 0;
-                timeleft  = 0;
-                time      = 0;
             }
             
         }
@@ -430,8 +429,8 @@ static void PLAYERUI_UpdateTime(int player)
     {
         if(state == PROGRESSBAR_NORMAL)
         {
-            SDL_WidgetPropertiesOf(UI_Players[player].SongProgress,SET_MAX_VALUE,totaltime/10);
             SDL_WidgetPropertiesOf(UI_Players[player].SongProgress,SET_CUR_VALUE,(double)(time/10));
+            SDL_WidgetPropertiesOf(UI_Players[player].SongProgress,SET_MAX_VALUE,totaltime/10);
         }
     }
 }

@@ -52,6 +52,7 @@ static void SONGDBUI_ChangeGroupClicked(void *data);
 
 static void SONGDBUI_ChangeDatabase();
 static int SONGDBUI_GetHighlightedTab();
+static int SONGDBUI_SetHighlightedTab(int which);
 
 void songdbstring(long row,int column,char *dest);
 void *table;
@@ -65,7 +66,7 @@ void eventhandler(SDL_Table *table)
 
     /* Get the current playlist entry */
     e = SONGDB_GetEntryID(table->CurrentRow);
-    PLAYLIST_SetEntry(0,e);
+    PLAYLIST_AddEntry(0,e);
 }
 
 void SONGDBUI_CreateWindow(ThemeSongdb *ts)
@@ -144,7 +145,6 @@ static void SONGDBUI_ChangeDatabase()
         SONGDB_SetActiveSubgroup(sg);
     }
     SDL_WidgetPropertiesOf(table,ROWS,SONGDB_GetNoOfEntries());
-
     
 }
 
@@ -174,15 +174,17 @@ void SONGDBUI_Play(int player_nr)
 {
     int tab;
     struct SongDBEntry *e;
-
     tab=SONGDBUI_GetHighlightedTab();
 
     if(tab>=0)
     {
         PLAYER_GetPlayingEntry(player_nr,&e);
+        tab=SONGDB_FindSubgroup(e);
         activesong[0]=tab;
         activesong[1]=e->id;
+        SONGDBUI_SetHighlightedTab(tab);
         SDL_WidgetPropertiesOf(table,SET_HIGHLIGHTED,e->id);    
+        SONGDBUI_ChangeDatabase();
     }
 }
        
@@ -197,6 +199,26 @@ static int SONGDBUI_GetHighlightedTab()
     }
     return -1;
 
+}
+
+static int SONGDBUI_SetHighlightedTab(int which)
+{
+    SDL_Tab *t;
+    SDL_TabList *tl;
+    t=(SDL_Tab *)tabwidget;
+    tl=t->tabs;
+
+    while(tl)
+    {
+        if(which == 0)
+        {
+            t->hl=tl;
+            return 1;
+        }
+        which--;
+        tl=tl->next;
+    }
+    return 0;
 }
 
 static void SONGDBUI_ChangeGroupClicked(void *data)

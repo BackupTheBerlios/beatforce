@@ -235,7 +235,7 @@ int SDL_TableProperties(void *table,int feature,va_list list)
         else
             Table->Rows=newrows;
 
-        if(Table->Rows > Table->VisibleRows && Table->Scrollbar)
+        if((Table->Rows > Table->VisibleRows) && Table->Scrollbar)
         {
             SDL_WidgetPropertiesOf(Table->Scrollbar,SET_CUR_VALUE,0.0);
             SDL_WidgetPropertiesOf(Table->Scrollbar,SET_MAX_VALUE,(int)(Table->Rows - Table->VisibleRows));
@@ -248,7 +248,8 @@ int SDL_TableProperties(void *table,int feature,va_list list)
                 SDL_WidgetPropertiesOf(Table->Scrollbar,SET_CUR_VALUE,0);
                 SDL_WidgetPropertiesOf(Table->Scrollbar,SET_MAX_VALUE,Table->Rows);
                 Table->FirstVisibleRow = 0;
-//                SDL_WidgetClose(Table->Scrollbar);
+                SDL_WidgetClose(Table->Scrollbar);
+                Table->Scrollbar=NULL;
             }
         }
         break;      
@@ -296,7 +297,7 @@ int SDL_TableProperties(void *table,int feature,va_list list)
         Table->ActiveEntry=va_arg(list,int);
         if(Table->Scrollbar)
         {
-            row=(double)Table->ActiveEntry;
+            row=(double)Table->ActiveEntry - (Table->VisibleRows/2);
             SDL_WidgetPropertiesOf(Table->Scrollbar,SET_CUR_VALUE,row);
         }
         break;

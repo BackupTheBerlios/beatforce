@@ -116,7 +116,7 @@ int SONGDB_GroupChanged();
 SongDBGroup *SONGDB_GetActiveGroup();
 int SONGDB_SetActiveSubgroup(struct SongDBSubgroup *sg);
 
-
+int SONGDB_FindSubgroup(struct SongDBEntry *e);
 /* Subgroup modifiers */
 int SONGDB_AddSubgroup(struct SongDBGroup *group,char *title);
 int SONGDB_RemoveSubgroup(struct SongDBSubgroup *sg);

@@ -193,7 +193,7 @@ int mainwindow_HandleKeys(unsigned int key)
         }
         else
         {
-            PLAYLIST_SetEntry(0,SONGDB_GetEntryID(0));
+            PLAYLIST_AddEntry(0,SONGDB_GetEntryID(0));
         }
         break;
 

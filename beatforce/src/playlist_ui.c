@@ -77,6 +77,15 @@ void playliststring(long row,int column,char *dest)
 void playlisteventhandler(SDL_Table *table,SDL_Event *event)
 {
     int player=0;// is playing ?
+    struct PlEntry *pl;
+
+    if(event->button.button == 3) //remove fromw aitlist right mousebutton down
+    {
+        pl=PLAYLIST_GetSong(PLAYER1,table->CurrentRow);
+        if(pl && pl->e)
+            PLAYLIST_Remove(PLAYER1,pl->e);
+        return;
+    }
 
     if(PLAYER_IsPlaying(0))
         player=1;
@@ -95,8 +104,7 @@ void playlisteventhandler(SDL_Table *table,SDL_Event *event)
     {
         if(event->button.button == 1)//play now left mosuebutton down
             player_set_song(player,table->CurrentRow);
-        else if(event->button.button == 3) //remove fromw aitlist right mousebutton down
-            PLAYLIST_Remove(PLAYER1,table->CurrentRow);
+        
     }
 }
 

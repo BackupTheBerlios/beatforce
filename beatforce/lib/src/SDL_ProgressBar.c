@@ -125,9 +125,15 @@ int  SDL_ProgressBarProperties(void *progressbar,int feature,va_list list)
             return 0;
         ProgressBar->CurrentValue = val; 
         if(ProgressBar->Orientation == VERTICAL)
-            ProgressBar->CurrentLine  = (val * ProgressBar->rect.h) / (ProgressBar->MaxValue - ProgressBar->MinValue); 
+        {
+            ProgressBar->CurrentLine  = (val * ProgressBar->rect.h) / 
+                (ProgressBar->MaxValue - ProgressBar->MinValue); 
+        }
         else
-            ProgressBar->CurrentLine  = (val * ProgressBar->rect.w) / (ProgressBar->MaxValue - ProgressBar->MinValue); 
+        {
+            ProgressBar->CurrentLine  = (val * ProgressBar->rect.w) 
+                / (ProgressBar->MaxValue - ProgressBar->MinValue); 
+        }
         ProgressBar->Redraw       = 1;
         break;
     case SET_CALLBACK:

@@ -58,7 +58,6 @@ int PLAYLIST_Init (int player_nr)
 
 int PLAYLIST_GetNoOfEntries(int player_nr)
 {
-//    TRACE("PLAYLIST_GetNoOfEntries");
     return no_of_entries;
 }
 
@@ -91,7 +90,7 @@ int gt(void *d)
     return 0;
 }
 
-void PLAYLIST_SetEntry(int player_nr, struct SongDBEntry *e)
+void PLAYLIST_AddEntry(int player_nr, struct SongDBEntry *e)
 {
     struct PlEntry *pe;
     struct PlEntry *newlist = playlist[0];
@@ -124,33 +123,39 @@ void PLAYLIST_SetEntry(int player_nr, struct SongDBEntry *e)
 
 }
 
-int PLAYLIST_Remove(int player_nr,long songdb_id)
+int PLAYLIST_Remove(int player_nr,struct SongDBEntry *e)
 {
     struct PlEntry *newlist = playlist[0];
-    struct PlEntry *pe = NULL;
+    struct PlEntry *previous = NULL;
+    if(e == NULL)
+        return 0;
 
     while(newlist)
     {
-        if(newlist->e && newlist->e->id == songdb_id)
+        if(newlist->e == e)
         {
-            if(pe)
-                pe->next=newlist->next;
+            if(previous)
+            {
+                previous->next=newlist->next;
+                if(newlist->next)
+                    newlist=newlist->next;
+            }
             else
             {
                 if(newlist->next)
-                    newlist=newlist->next;
+                    playlist[0]=newlist->next;
                 else
-                    newlist=NULL;
+                {
+                    playlist_FreeEntry(playlist[0]);
+                    playlist[0]=NULL;
+                }
             }
-//            playlist_FreeEntry(newlist);
             no_of_entries--;
             break;
         }
-        pe=newlist;
+        previous=newlist;
         newlist=newlist->next;
     }
-
-    playlist[0]=newlist;
     return 1;
 }
 

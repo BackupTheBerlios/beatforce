@@ -152,7 +152,7 @@ int PLAYER_Play(int player_nr)
     {
         if(INPUT_Play (p->current_plugin))
         {
-            PLAYLIST_Remove(player_nr,p->songdb_id);
+            PLAYLIST_Remove(player_nr,p->e);
             p->State = PLAYER_PLAY;
         }
         else

@@ -673,6 +673,7 @@ mp3_play_loop (void *param)
 	if (private->eof)
 	{
             mp3_if.input_eof (private->ch_id);
+            SDL_Delay(30);
 	}
 
 	while (!private->eof)
@@ -863,7 +864,6 @@ mp3_play_loop (void *param)
 	{
             private->eof = 1;
             mp3_if.input_eof (private->ch_id);
-            private->going=0;
 	}
     }
 

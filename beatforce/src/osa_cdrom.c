@@ -90,6 +90,7 @@ int OSACDROM_Init()
     int i;
     
     /* Find out how many CD-ROM drives are connected to the system */
+//    printf("No Of drives %d\n",SDL_CDNumDrives());
     for ( i=0; i<SDL_CDNumDrives(); ++i ) 
     {
         OSACDROM_TestDrive(SDL_CDName(i));
@@ -188,8 +189,8 @@ int OSACDROM_TestDrive(char *dev)
     {
         char trackname[255];
         SONGDB_AddSubgroup(MainGroup,dev);
-        sg=SONGDB_GetSubgroup();
 
+        sg=SONGDB_GetSubgroup();
         /* Go the the last added subgroup */
         while(sg->next)
             sg=sg->next;

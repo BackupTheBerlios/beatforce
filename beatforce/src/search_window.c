@@ -183,7 +183,7 @@ void searchwindow_PlayClicked(void *data)
                 player=0;
         }
         
-        PLAYLIST_SetEntry(player,e);
+        PLAYLIST_AddEntry(player,e);
         player_set_song(player,0);  // when set_entry is excecuted we only have 1 item thus 0
         
         if(autofade == 1)
@@ -235,7 +235,7 @@ void searchwindow_Play(void *data)
         }
 
         /* Add the song to the bottom of the playlist */
-        PLAYLIST_SetEntry(player,e);
+        PLAYLIST_AddEntry(player,e);
         
 #if 0
         player_set_song(player,0);  // when set_entry is excecuted we only have 1 item thus 0
