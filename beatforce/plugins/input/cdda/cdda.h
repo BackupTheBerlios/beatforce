@@ -2,7 +2,7 @@
    BeatForce plugin
    cdda.h - cdda decoding thread reads audio data from cdrom
    
-   Copyright (c) 2004, John Beuving (john.beuving@home.nl)
+   Copyright (c) 2004, John Beuving (john.beuving@beatforce.org)
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public Licensse as published by
@@ -86,7 +86,7 @@ cddaPrivate;
 int CDDA_Init (Private **, int);
 int cdda_cleanup (Private *);
 int cdda_about (Private *);
-int cdda_is_our_file (Private *, char *);
+int cdda_is_our_file (char *filename);
 
 int cdda_get_tag (Private *, char *, struct SongDBEntry *);
 int cdda_get_add_info (Private *, char *, struct SongAddInfo *);

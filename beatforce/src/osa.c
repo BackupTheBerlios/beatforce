@@ -48,6 +48,7 @@ static char configdir[255];
 void OSA_Init()
 {
     int i=0;
+    TRACE("OSA_Init");
     for(i=0;i<NO_OF_THREADS;i++)
         threads[i] = NULL;
     for(i=0;i<NO_OF_TIMERS;i++)
@@ -194,18 +195,18 @@ BFList *OSA_FindFiles(char *dir,char *extension,int recursive)
 }
 
 
-void *OSA_LoadLibrary(char *filename)
+void *OSA_LibraryLoad(char *filename)
 {
     return dlopen(filename,RTLD_NOW | RTLD_GLOBAL);
 }
 
-void *OSA_GetFunctionAddress(void *h,char *function)
+void *OSA_LibraryGetSym(void *h,char *function)
 {
     return dlsym (h, function);
 
 }
 
-void OSA_CloseLibrary(void *h)
+void OSA_LibraryClose(void *h)
 {
     dlclose (h);
 }
@@ -215,7 +216,7 @@ char *OSA_GetError()
     return dlerror();
 }
 
-unsigned int OSA_StartTimer(unsigned int interval,void *function,void *data)
+unsigned int OSA_TimerStart(unsigned int interval,void *function,void *data)
 {
     int i;
     for(i=0;i<NO_OF_TIMERS;i++)
@@ -229,7 +230,7 @@ unsigned int OSA_StartTimer(unsigned int interval,void *function,void *data)
     return NO_OF_TIMERS;
 }
 
-void OSA_RemoveTimer(unsigned int timer)
+void OSA_TimerRemove(unsigned int timer)
 {
     if(timers[timer]!=0)
     {
@@ -239,7 +240,7 @@ void OSA_RemoveTimer(unsigned int timer)
 }
 
 
-int OSA_CreateThread(int (*fn)(void *), void *data)
+int OSA_ThreadCreate(int (*fn)(void *), void *data)
 {
     int i;
 
@@ -254,7 +255,7 @@ int OSA_CreateThread(int (*fn)(void *), void *data)
     return NO_OF_THREADS;
 }
 
-void OSA_RemoveThread(int thread)
+void OSA_ThreadWait(int thread)
 {
     if(thread > NO_OF_THREADS)
     {
@@ -285,7 +286,7 @@ char *OSA_SearchFilename(char *filepath)
     
 }
 
-int OSA_GetTime(int *hours,int *minutes)
+int OSA_TimeGet(int *hours,int *minutes)
 {
   time_t rawtime;
   struct tm * timeinfo;
@@ -311,3 +312,15 @@ void OSA_Sleep(int us)
     tv.tv_usec = us;
     select(1,NULL,NULL,NULL,&tv);
 }
+
+
+int OSA_FileExists(char *filename)
+{
+    struct stat s;
+
+    if(stat(filename,&s) < 0)
+        return 0;
+    else
+        return 1;
+}
+    

@@ -24,11 +24,8 @@
 
 typedef struct Sample
 {
-    InputPluginData *l;
-    char *buffer;
-    unsigned long size;
+    InputDevice *Input;
     char *filename;
-    int channel;
     int playing;
 }Sample;
 

@@ -1,17 +1,16 @@
+
+- Improve performance
+- Improve waitlist functionality
+- Add filter/effect functionality (ladspa)
+- Add info button functionality (edit mp3 tags)
 - Add pitch functionality
 - Add cue functionality
 - Add equalizer
 - Improve sampler
-- Improve waitlist functionality
-- Add info button functionality (edit mp3 tags)
-- Improve performance
 - Look at special character support for filenames/songdb
 - Add BPM detection
-- Add filter/effect functionality (ladspa)
 - Improve ALSA output
 - Improve SDLTk
 - Add multiple fader types
 - Improve CD player functionality
-
-- Change Make system to SCONS
-- Use also gtk or QT as UI
+- Allow unlimited number of players

@@ -206,7 +206,7 @@ void SDL_TabMouseButtonDownCB(SDL_Widget *widget,SDL_Event *event)
                 Tab->hl=tl;
                     
                 SDL_SignalEmit(widget,"switch-tab");
-                SDL_WidgetDraw(widget,&widget->Rect);
+                SDL_WidgetRedrawEvent(widget);
             }
         }
         if(event->button.button == 4)

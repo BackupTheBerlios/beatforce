@@ -196,12 +196,12 @@ int SDL_WidgetSetFocus(SDL_Widget *widget);
 
 int SDL_WidgetNeedsRedraw();
 int SDL_WidgetClose(SDL_Widget *widget);
-void SDL_WidgetSetParent(SDL_Surface *surface,SDL_Widget *widget);
+
 
 void SDL_WidgetHide(SDL_Widget *widget);
 void SDL_WidgetShow(SDL_Widget *widget);
 void SDL_WidgetRedrawEvent(SDL_Widget *widget);
-void SDL_WidgetDraw(SDL_Widget *widget,SDL_Rect *Rect);
+void SDL_WidgetResize(SDL_Widget *widget,int w,int h);
 #endif //__SDL_WIDGET_H
 
 

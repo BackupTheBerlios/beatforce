@@ -34,6 +34,7 @@
 #include <time.h>
 #include <ctype.h>
 
+#include "event.h"
 #include "songdb.h"
 #include "player.h"
 #include "osa.h"
@@ -61,9 +62,10 @@ void songdb_FreeEntry (struct SongDBEntry *e);
 
 /* prototypes ued for searching */
 static int SONGDB_JumpToFileMatch(char* song, char * keys[], int nw);
-int SONGDB_AddSubgroup(struct SongDBGroup *group,char *title);
+int SONGDB_SubgroupAdd(struct SongDBGroup *group,char *title);
 struct SongDBSubgroup *songdb_AddSubgroup(struct SongDBSubgroup *sg,char *title);
 
+struct SongDBSubgroup *Playlist;
 
 static int SONGDB_LoadXMLDatabase(); /* Load entire database from xml file */
 static int SONGDB_SaveXMLDatabase(); /* Save entire database to xml file */
@@ -80,7 +82,7 @@ int parsesubgroup(xmlDocPtr doc, xmlNodePtr cur)
 
     key = xmlGetProp(cur, "name");
     if(key)
-        SONGDB_AddSubgroup(MainGroup,key);
+        SONGDB_SubgroupAdd(MainGroup,key);
     
     sg=SONGDB_GetSubgroupList();
     /* Go the the last added subgroup */
@@ -117,8 +119,10 @@ int parsesubgroup(xmlDocPtr doc, xmlNodePtr cur)
 
 int SONGDB_Init ()
 {
+    TRACE("SONGDB_Init");
     MainGroup=malloc(sizeof(SongDBGroup));
     memset(MainGroup,0,sizeof(SongDBGroup));
+    
 
     search_results = NULL;
     n_search_results = 0;
@@ -126,8 +130,8 @@ int SONGDB_Init ()
 
     srand(time(NULL));
     SONGDB_LoadXMLDatabase();
-
-    MainGroup->Changed  = 1;
+    Playlist = NULL;
+    
     MainGroup->Active   = MainGroup->Subgroup;
     
     return 1;
@@ -135,6 +139,7 @@ int SONGDB_Init ()
 
 int SONGDB_Exit()
 {
+    TRACE("SONGDB_Exit");
     return SONGDB_SaveXMLDatabase();
 }
 
@@ -144,13 +149,97 @@ int SONGDB_SubgroupSetVolatile(struct SongDBSubgroup *subgroup)
     return 1;
 }
 
-int SONGDB_AddSubgroup(struct SongDBGroup *group,char *title)
+int SONGDB_Add(char *file)
+{
+    char *ext;
+
+    ext = strrchr(file,'.');
+    if(ext == NULL)
+    {
+        struct SongDBSubgroup *s;
+        char *name;
+        BFList *files;
+        
+        if(file[strlen(file)-1] == '/')
+            file[strlen(file)-1] = 0;
+
+        name=strrchr(file,'/');
+        if(name)
+        {
+            name++;
+
+            files=OSA_FindFiles(file,".mp3",0);
+
+            if(files)
+            {
+                SONGDB_SubgroupAdd(MainGroup,name);
+                s=SONGDB_GetSubgroupList(MainGroup);
+                while(s->next)
+                    s=s->next;
+                
+                while(files)
+                {
+                    SONGDB_AddFileToSubgroup(s,(char*)files->data);
+                    files=files->next;
+                }
+            }
+        }
+
+    }
+    else
+    {
+        if(!strcmp(ext,".m3u"))
+        {
+            FILE *fp;
+            char *line;
+            
+            fp=fopen(file,"r");
+            
+          
+            line=malloc(1024);
+            while(fgets(line,1000,fp))
+            {
+                line[strlen(line)-1]=0;
+
+                if(line[0] == '#')
+                {
+                    if(!strncmp(line,"#EXTM3U",7))
+                       continue;
+                       
+                    if(!strncmp(line,"#EXTINF:",8))
+                    {
+                        printf(">%s<\n",line);
+                    }
+                }
+                else
+                {
+                    if(Playlist == NULL)
+                    {
+                        
+                    }
+                    else
+                    {
+                        
+                    }
+                    
+                }
+            }
+            fclose(fp);
+
+
+            free(line);
+        }
+    }
+    return 1;
+}
+
+int SONGDB_SubgroupAdd(struct SongDBGroup *group,char *title)
 {
     if(title == NULL)
         return 0;
 
     group->Subgroup=songdb_AddSubgroup(group->Subgroup,title);
-    group->Changed=1;
+    EVENT_PostEvent(EVENT_SONGDB_GROUP_CHANGED,0);
     group->SubgroupCount ++;
     return 1;
 }
@@ -176,7 +265,7 @@ int SONGDB_RenameSubgroup(struct SongDBSubgroup *sg, char *title)
             free(sg->Name);
 
         sg->Name=strdup(title);
-        MainGroup->Changed=1;
+        EVENT_PostEvent(EVENT_SONGDB_GROUP_CHANGED,0);
         return 1;
     }
     return 0;
@@ -212,7 +301,7 @@ int SONGDB_RemoveSubgroup(struct SongDBSubgroup *sg)
 
             free(list->Name);
             free(list);
-            MainGroup->Changed=1;
+            EVENT_PostEvent(EVENT_SONGDB_GROUP_CHANGED,0);
             return 1;
         }
         
@@ -222,7 +311,7 @@ int SONGDB_RemoveSubgroup(struct SongDBSubgroup *sg)
     return 0;
 }
 
-int SONGDB_RemovePlaylistEntry(struct SongDBSubgroup *sg,struct SongDBEntry *e)
+int SONGDB_RemoveEntry(struct SongDBSubgroup *sg,struct SongDBEntry *e)
 {
     struct SongDBEntry *list,*prev;
 
@@ -252,6 +341,7 @@ int SONGDB_RemovePlaylistEntry(struct SongDBSubgroup *sg,struct SongDBEntry *e)
     }
     return 0;
 }
+
 struct SongDBSubgroup *SONGDB_GetSubgroupList()
 {
     return MainGroup->Subgroup;
@@ -266,13 +356,8 @@ int SONGDB_AddFileToSubgroup(struct SongDBSubgroup *sg,char *filename)
         struct SongDBEntry *e;
         struct SongDBEntry *Playlist;
         
-        if(PLAYER_GetData(0) ==  NULL)
-        {
-            ERROR("No player registred yet");
-            return 0;
-        }
-        
-        if (INPUT_WhoseFile (PLAYER_GetData(0)->ip_plugins, filename) != NULL)
+      
+//        if (INPUT_WhoseFile (PLAYER_GetData(0)->ip_plugins, filename) != NULL)
         {
             e = SONGDB_AllocEntry ();
             
@@ -284,7 +369,7 @@ int SONGDB_AddFileToSubgroup(struct SongDBSubgroup *sg,char *filename)
                 
                 /* If this is a cd try to get the tag immediatly */
                 if(sg->Volatile)
-                    INPUT_GetTag(PLAYER_GetData(0)->ip_plugins, filename,e);
+                    INPUT_GetTag(filename,e);
 
                 /* Add the created entry to the active database */
                 if(sg->Playlist == NULL)
@@ -298,24 +383,14 @@ int SONGDB_AddFileToSubgroup(struct SongDBSubgroup *sg,char *filename)
                 }
             }
         }
-        else
+        //      else
         {
-            ERROR("No plugin for this file");
-            return 0;
+//            ERROR("No plugin for this file");
+//            return 0;
         }
     }
     return 1;
 }
-
-int SONGDB_GroupChanged()
-{
-    int retval;
-    
-    retval = MainGroup->Changed;
-    MainGroup->Changed = 0;
-    return retval;
-}
-
 
 struct SongDBSubgroup *songdb_AddSubgroup(struct SongDBSubgroup *sg,char *title)
 {
@@ -444,12 +519,6 @@ int SONGDB_SetActiveSubgroup(struct SongDBSubgroup *sg)
     
     return 1;
 }
-
-struct SongDBSubgroup *SONGDB_GetActiveSubgroup()
-{
-    return MainGroup->Active;
-}
-
 
 static int SONGDB_JumpToFileMatch(char* song, char * keys[], int nw)
 {
@@ -599,14 +668,15 @@ static int SONGDB_LoadXMLDatabase()
 
     LIBXML_TEST_VERSION;
     xmlKeepBlanksDefault(0);
-   
-    
+
+    TRACE("SONGDB_LoadXMLDatabase");
     /*
      * build an XML tree from a the file;
      */
     dir=OSA_GetConfigDir();
     sprintf(filename,"%s/music.xml",dir);
-    doc = xmlParseFile(filename);
+    if(OSA_FileExists(filename))
+        doc = xmlParseFile(filename);
     if (doc == NULL) 
         return 0;
     

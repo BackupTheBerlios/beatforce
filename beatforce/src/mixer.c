@@ -1,6 +1,6 @@
 /*
    BeatForce
-   mixer.c	- mixer interface - real mixing takes place in audio_output.c !!
+   mixer.c   - mixer interface - real mixing takes place in audio_output.c !!
    
    Copyright (c) 2003-2004, John Beuving (john.beuving@beatforce.org)
 
@@ -32,7 +32,7 @@
 #include <time.h>
 #include <math.h>
 
-
+#include "audio_channel.h"
 #include "audio_output.h"
 #include "configfile.h"
 #include "osa.h"
@@ -80,8 +80,6 @@ int MIXER_Init ()
 
     mutex_unlock (fader_mutex);
 
-
-
     return 0;
 }
 
@@ -94,7 +92,7 @@ int MIXER_Finalize ()
 
 int MIXER_Mute (int ch, int mute)
 {
-    return AUDIOOUTPUT_Mute (ch, mute);
+    return AUDIOCHANNEL_Mute (ch, mute);
 }
 
 int MIXER_MuteGroup (int group, int mute)
@@ -110,7 +108,7 @@ int MIXER_MuteGroup (int group, int mute)
 int MIXER_dB (int ch, float dB)
 {
     TRACE("MIXER_dB");
-    return AUDIOOUTPUT_SetVolume(ch, dB);
+    return AUDIOCHANNEL_SetVolume(ch, dB);
 }
 
 int MIXER_DoFade(int autofade, int instant)
@@ -143,7 +141,7 @@ int MIXER_DoFade(int autofade, int instant)
     else
         to = 1;
     
-    cfader->to_player = to;
+    cfader->to_player   = to;
     cfader->from_player = from;
 
     if (instant)
@@ -153,7 +151,6 @@ int MIXER_DoFade(int autofade, int instant)
         {
             PLAYER_Play (to);
         }
-
     }
     else
     {
@@ -170,8 +167,7 @@ int MIXER_DoFade(int autofade, int instant)
                 if(cfader->fade_time == 0)
                     cfader->fade_time = MIXER_DEFAULT_CF_FadeTime *10;
 
-                cfader->timer = OSA_StartTimer(1, MIXER_FadeTimeout, NULL);
-
+                cfader->timer = OSA_TimerStart(1, MIXER_FadeTimeout, NULL);
             }
         }
         else
@@ -214,7 +210,6 @@ static int MIXER_FadeTimeout ()
         end=1;
     }
     MIXER_SetFaderValue (cfader->value);
-
 
     if (end)
     {

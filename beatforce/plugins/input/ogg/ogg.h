@@ -112,7 +112,7 @@ int ogg_init (Private **, int);
 int ogg_cleanup (Private *);
 int ogg_about (Private *);
 int ogg_configure (Private *,struct SongDBEntry *);
-int ogg_is_our_file (Private *, char *);
+int ogg_is_our_file (char *);
 
 int ogg_get_tag (Private *, char *, struct SongDBEntry *);
 int ogg_get_add_info (Private *, char *, struct SongAddInfo *);

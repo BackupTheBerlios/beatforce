@@ -2,7 +2,7 @@
    BeatForce plugin
    cdda.c - audio cd to beatforce reader
    
-   Copyright (c) 2003, John Beuving (john.beuving@home.nl)
+   Copyright (c) 2003-2004, John Beuving (john.beuving@beatforce.org)
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public Licensse as published by
@@ -181,7 +181,7 @@ CDDA_Init(Private ** p, int ch_id)
 int cdda_configure(Private *p,struct SongDBEntry *e)
 {
 
-
+    return 1;
 }
 
 int
@@ -200,11 +200,11 @@ cdda_cleanup (Private * p)
 }
 
 int
-cdda_is_our_file (Private * h, char *filename)
+cdda_is_our_file (char *filename)
 {
     char *ext;
 
-    if (h == NULL || filename == NULL)
+    if (filename == NULL)
         return FALSE;
 
     ext = strrchr (filename, '.');
@@ -373,9 +373,8 @@ cdda_load_file (Private * h, char *filename)
     if (h == NULL || filename == NULL)
         return ERROR_INVALID_ARG;
   
-    if (cdda_is_our_file (h, filename) != TRUE)
+    if (cdda_is_our_file (filename) != TRUE)
     {
-
 	return ERROR_UNKNOWN_FILE;
     }
     

@@ -92,12 +92,14 @@ SDL_Window *gFILEWINDOW;
 
 void FILEWINDOW_Init()
 {
+    TRACE("FILEWINDOW_Init");
     gFILEWINDOW   = NULL;
     subgroupsongs = NULL;
 }
 
 void FILEWINDOW_Open()
 {
+    TRACE("FILEWINDOW_Open");
     if(gFILEWINDOW == NULL)
     {
         Window_CreateFileWindow();
@@ -183,7 +185,7 @@ static void FILEWINDOW_DirectoryClicked(void *data)
 static void FILEWINDOW_RenameSubgroup(void *data)
 {
     int *row;
-   
+    TRACE("FILEWINDOW_RenameSubgroup");
     SDL_WidgetPropertiesOf(TableSubgroup,GET_SELECTED,&row,NULL);
     if(row)
     {
@@ -197,7 +199,7 @@ static void FILEWINDOW_AddSubgroup(void *data)
     new[0]=malloc(255);
     sprintf(new[0],"<new>");
     TRACE("FILEWINDOW_AddSubgroup");
-    SONGDB_AddSubgroup(SONGDB_GetActiveGroup(),"<new>");
+    SONGDB_SubgroupAdd(SONGDB_GetActiveGroup(),"<new>");
     SDL_TableAddRow(TableSubgroup,new);
     SDL_WidgetRedrawEvent(TableSubgroup);
     free(new[0]);
@@ -393,7 +395,7 @@ void FILEWINDOW_DeleteSelected(void *data)
                 {
                     if(song==0)
                     {
-                        SONGDB_RemovePlaylistEntry(sg,Playlist);
+                        SONGDB_RemoveEntry(sg,Playlist);
                         break;
                     }
                      
@@ -453,7 +455,7 @@ void Window_CreateFileWindow()
     Button = fw->Button;
     Table  = fw->Table;
 
-    gFILEWINDOW = SDL_WindowNew(0,0,1024,685);
+    gFILEWINDOW = SDL_WindowNew(fw->x,fw->y,fw->w,fw->h);
 
 
     while(Image)

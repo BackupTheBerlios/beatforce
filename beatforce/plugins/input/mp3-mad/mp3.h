@@ -156,7 +156,7 @@ int mp3_init (Private **, int);
 int mp3_cleanup (Private *);
 int mp3_about (Private *);
 int mp3_configure (Private *,struct SongDBEntry *);
-int mp3_is_our_file (Private *, char *);
+int mp3_is_our_file (char *);
 
 int mp3_get_tag (Private *, char *, struct SongDBEntry *);
 int mp3_get_add_info (Private *, char *, struct SongAddInfo *);

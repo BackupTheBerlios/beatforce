@@ -28,24 +28,23 @@
 #include "input_plugin.h"
 #include "types.h"
 
-BFList *INPUT_Init (int channel, BFList * plugin_list);
+typedef struct InputDevice
+{
+    InputPluginData *PluginData;
+    int Channel;
+}InputDevice;
 
 
-InputPluginData *INPUT_WhoseFile (BFList *, char *);
+struct InputDevice *INPUT_Open();
+int  INPUT_Close(InputDevice *Input);
+int  INPUT_CloseFile(InputDevice *Input);
+long INPUT_GetTime(InputDevice *Input);
+int  INPUT_GetTag(char *filename, struct SongDBEntry *e);
+int  INPUT_LoadFile(InputDevice *Input,char *filename);
+int  INPUT_Pause (InputDevice *Input);
+int  INPUT_Play (InputDevice *Input);
+int  INPUT_Seek (InputDevice *Input, long time);
 
-int INPUT_GetTag(BFList *input_list,char *filename, struct SongDBEntry *e);
-int input_get_add_info (char *, struct SongAddInfo *);
 
 
-int INPUT_LoadFile (InputPluginData *Plugin,char *filename);
-int INPUT_CloseFile (InputPluginData *Plugin);
-
-int INPUT_Play (InputPluginData *Plugin);
-int INPUT_Pause (InputPluginData *Plugin);
-int INPUT_Seek (InputPluginData *Plugin, long time);
-
-long INPUT_GetTime (InputPluginData *Plugin);
-
-int INPUT_EOF(int);
-int INPUT_SetInputInterface(InputPluginData *Plugin,InputInterface *iif);
-#endif
+#endif /* __INPUT_H__ */

@@ -60,8 +60,8 @@ ThemeFileWindow   *XML_ParseFilewindow(xmlDocPtr doc, xmlNodePtr cur);
 ThemeConfigWindow *XML_ParseConfigwindow(xmlDocPtr doc, xmlNodePtr cur);
 
 /* Mainwindow group parser */
-ThemePlayer   *XML_ParsePlayer(xmlDocPtr doc, xmlNodePtr cur);
-ThemePlaylist *XML_ParsePlaylist(xmlDocPtr doc, xmlNodePtr cur);
+ThemePlayer   *XML_ParsePlayer(ThemePlayer *player,xmlDocPtr doc, xmlNodePtr cur);
+ThemePlaylist *XML_ParsePlaylist(ThemePlaylist *playlist,xmlDocPtr doc, xmlNodePtr cur);
 ThemeClock    *XML_ParseClock(xmlDocPtr doc, xmlNodePtr cur);
 ThemeMixer    *XML_ParseMixer(xmlDocPtr doc, xmlNodePtr cur);
 ThemeSongdb   *XML_ParseSongdb(xmlDocPtr doc, xmlNodePtr cur);
@@ -117,6 +117,7 @@ int THEME_Load(char *theme)
     xmlChar *key;
     ThemeConfig *current;
 
+    TRACE("THEME_Load");
     current=(ThemeConfig*)malloc(sizeof(ThemeConfig));
     memset(current,0,sizeof(ThemeConfig));
 
@@ -138,7 +139,7 @@ int THEME_Load(char *theme)
         cur = xmlDocGetRootElement(doc);
         if (cur == NULL) 
         {
-            fprintf(stderr,"empty document\n");
+            ERROR("empty document");
             xmlFreeDoc(doc);
             return 0;
         }
@@ -146,7 +147,7 @@ int THEME_Load(char *theme)
         /* CHeck the root node */
         if (xmlStrcmp(cur->name, (const xmlChar *) "Beatforce")) 
         {
-            fprintf(stderr,"document of the wrong type, root node != Helping");
+            ERROR("document of the wrong type, root node != Beatforce");
             xmlFreeDoc(doc);
             return 0;
         }
@@ -225,6 +226,7 @@ int THEME_Init()
     BFList *dir=NULL;
     int NoOfThemes=0;
 
+    TRACE("THEME_Init");
     ThemeList = NULL;
 
     dir=OSA_FindDirectories(THEME_DIR);
@@ -233,7 +235,6 @@ int THEME_Init()
         ERROR("Couldn't list directories in %s",THEME_DIR);
         return 0;
     }
-
 
     while(dir)
     {
@@ -251,7 +252,10 @@ int THEME_Init()
         dir=dir->next;
     }
     if(NoOfThemes == 0)
+    {
+        ERROR("No themes found");
         return 0;
+    }
     if(NoOfThemes == 1)
         return THEME_Load(ThemeList->data);
     else
@@ -328,7 +332,6 @@ ThemeConfigWindow *XML_ParseConfigwindow(xmlDocPtr doc, xmlNodePtr cur)
 
     if(cur)
     {
-
         configwindow=malloc(sizeof(ThemeConfigWindow));
         memset(configwindow,0,sizeof(ThemeConfigWindow));
 
@@ -353,14 +356,19 @@ ThemeFileWindow *XML_ParseFilewindow(xmlDocPtr doc, xmlNodePtr cur)
     ThemeFileWindow *filewindow;
 
     filewindow=NULL;
+
+    filewindow=malloc(sizeof(ThemeFileWindow));
+    memset(filewindow,0,sizeof(ThemeFileWindow));
+
+    StorePropertyAsShort(cur,"x",&filewindow->x);
+    StorePropertyAsShort(cur,"y",&filewindow->y);
+    StorePropertyAsShort(cur,"w",&filewindow->w);
+    StorePropertyAsShort(cur,"h",&filewindow->h);
+    
     cur = cur->xmlChildrenNode;
 
     if(cur)
     {
-
-        filewindow=malloc(sizeof(ThemeFileWindow));
-        memset(filewindow,0,sizeof(ThemeFileWindow));
-
         while (cur != NULL) 
         {
             if ((!xmlStrcmp(cur->name, (const xmlChar *)"clock"))) 
@@ -443,11 +451,7 @@ ThemeMainWindow *XML_ParseMainwindow(xmlDocPtr doc, xmlNodePtr cur)
             }
             if ((!xmlStrcmp(cur->name, (const xmlChar *)"player"))) 
             {
-                int id;
-                StorePropertyAsInt(cur,"id",&id);
-                if(id == 0 || id ==1)
-                    mainwindow->Player[id]=XML_ParsePlayer(doc,cur);
-
+                mainwindow->Player=XML_ParsePlayer(mainwindow->Player,doc,cur);
             }
             if ((!xmlStrcmp(cur->name, (const xmlChar *)"songdb"))) 
             {
@@ -455,7 +459,7 @@ ThemeMainWindow *XML_ParseMainwindow(xmlDocPtr doc, xmlNodePtr cur)
             }
             if ((!xmlStrcmp(cur->name, (const xmlChar *)"playlist"))) 
             {
-                mainwindow->Playlist=XML_ParsePlaylist(doc,cur);
+                mainwindow->Playlist=XML_ParsePlaylist(mainwindow->Playlist,doc,cur);
             }
             if ((!xmlStrcmp(cur->name, (const xmlChar *)"mixer"))) 
             {
@@ -624,8 +628,8 @@ ThemeButton *XML_ParseButton(ThemeButton *button,xmlDocPtr doc, xmlNodePtr cur)
                 button->action=BUTTON_PAUSE;
             if(!strcmp(action,"RESET_FADER"))
                 button->action=BUTTON_RESET_FADER;
-            if(!strcmp(action,"CHANGE_DIR"))
-                button->action=BUTTON_CHANGE_DIR;
+            if(!strcmp(action,"EDIT_GROUP"))
+                button->action=BUTTON_EDIT_GROUP;
             if(!strcmp(action,"REMOVE"))
                 button->action=BUTTON_REMOVE;
             if(!strcmp(action,"ADD"))
@@ -674,8 +678,8 @@ ThemeButton *XML_ParseButton(ThemeButton *button,xmlDocPtr doc, xmlNodePtr cur)
                 last->next->action=BUTTON_PAUSE;
             if(!strcmp(action,"RESET_FADER"))
                 last->next->action=BUTTON_RESET_FADER;
-            if(!strcmp(action,"CHANGE_DIR"))
-                last->next->action=BUTTON_CHANGE_DIR;
+            if(!strcmp(action,"EDIT_GROUP"))
+                last->next->action=BUTTON_EDIT_GROUP;
             if(!strcmp(action,"REMOVE"))
                 last->next->action=BUTTON_REMOVE;
             if(!strcmp(action,"ADD"))
@@ -982,50 +986,63 @@ ThemeMixer *XML_ParseMixer(xmlDocPtr doc, xmlNodePtr cur)
 }
 
 
-ThemePlayer *XML_ParsePlayer(xmlDocPtr doc, xmlNodePtr cur)
+ThemePlayer *XML_ParsePlayer(ThemePlayer *player,xmlDocPtr doc, xmlNodePtr cur)
 {
-    ThemePlayer *player;
-    player=NULL;
+    ThemePlayer *pPlayer;
+    pPlayer=NULL;
 
     cur = cur->xmlChildrenNode;
 
     if(cur)
     {
 
-        player=malloc(sizeof(ThemePlayer));
-        memset(player,0,sizeof(ThemePlayer));
+        pPlayer=malloc(sizeof(ThemePlayer));
+        memset(pPlayer,0,sizeof(ThemePlayer));
 
         while (cur != NULL) 
         {
             if ((!xmlStrcmp(cur->name, (const xmlChar *)"image"))) 
             {
-                player->Image=XML_ParseImage(player->Image,doc,cur);
+                pPlayer->Image=XML_ParseImage(pPlayer->Image,doc,cur);
             }
             if ((!xmlStrcmp(cur->name, (const xmlChar *)"button")))
             {
-                player->Button=XML_ParseButton(player->Button,doc,cur);
+                pPlayer->Button=XML_ParseButton(pPlayer->Button,doc,cur);
             }
             if ((!xmlStrcmp(cur->name, (const xmlChar *)"text")))
             {
-                player->Text=XML_ParseText(player->Text,doc,cur);
+                pPlayer->Text=XML_ParseText(pPlayer->Text,doc,cur);
             }
             if ((!xmlStrcmp(cur->name, (const xmlChar *)"volumebar")))
             {
-                player->VolumeBar=XML_ParseVolumeBar(player->VolumeBar,doc,cur);
+                pPlayer->VolumeBar=XML_ParseVolumeBar(pPlayer->VolumeBar,doc,cur);
             }
             if ((!xmlStrcmp(cur->name, (const xmlChar *)"progressbar")))
             {
-                player->ProgressBar=XML_ParseProgressBar(doc,cur);
+                pPlayer->ProgressBar=XML_ParseProgressBar(doc,cur);
             }
             if ((!xmlStrcmp(cur->name, (const xmlChar *)"slider")))
             {
-                player->Slider=XML_ParseSlider(player->Slider,doc,cur);
+                pPlayer->Slider=XML_ParseSlider(pPlayer->Slider,doc,cur);
             }
             if ((!xmlStrcmp(cur->name, (const xmlChar *)"edit")))
             {
-                player->Edit=XML_ParseEdit(player->Edit,doc,cur);
+                pPlayer->Edit=XML_ParseEdit(pPlayer->Edit,doc,cur);
             }
             cur=cur->next;
+        }
+        
+        if(player == NULL)
+        {
+            player=pPlayer;
+        }
+        else
+        {
+            ThemePlayer *last;
+            last=player;
+            while(last->Next)
+                last=last->Next;
+            last->Next=pPlayer;
         }
     }
     else
@@ -1119,13 +1136,17 @@ ThemeSongdb *XML_ParseSongdb(xmlDocPtr doc, xmlNodePtr cur)
 
         while (cur != NULL) 
         {
-            if ((!xmlStrcmp(cur->name, (const xmlChar *)"table"))) 
-            {
-                songdb->Table=XML_ParseTable(songdb->Table,doc,cur);
-            }
             if((!xmlStrcmp(cur->name, (const xmlChar *)"button"))) 
             {
                 songdb->Button=XML_ParseButton(songdb->Button,doc,cur);
+            }
+            if ((!xmlStrcmp(cur->name, (const xmlChar *)"image"))) 
+            {
+                songdb->Image=XML_ParseImage(songdb->Image,doc,cur);
+            }
+            if ((!xmlStrcmp(cur->name, (const xmlChar *)"table"))) 
+            {
+                songdb->Table=XML_ParseTable(songdb->Table,doc,cur);
             }
             cur=cur->next;
         }
@@ -1137,25 +1158,43 @@ ThemeSongdb *XML_ParseSongdb(xmlDocPtr doc, xmlNodePtr cur)
     return songdb;
 }
 
-ThemePlaylist *XML_ParsePlaylist(xmlDocPtr doc, xmlNodePtr cur)
+ThemePlaylist *XML_ParsePlaylist(ThemePlaylist *playlist,xmlDocPtr doc, xmlNodePtr cur)
 {
-    ThemePlaylist *playlist;
-    playlist=NULL;
+    ThemePlaylist *pPlaylist;
+    pPlaylist=NULL;
 
     cur = cur->xmlChildrenNode;
 
     if(cur)
     {
-        playlist=malloc(sizeof(ThemePlaylist));
-        memset(playlist,0,sizeof(ThemePlaylist));
+        pPlaylist=malloc(sizeof(ThemePlaylist));
+        memset(pPlaylist,0,sizeof(ThemePlaylist));
 
         while (cur != NULL) 
         {
+            if ((!xmlStrcmp(cur->name, (const xmlChar *)"image"))) 
+            {
+                pPlaylist->Image=XML_ParseImage(pPlaylist->Image,doc,cur);
+            }
             if ((!xmlStrcmp(cur->name, (const xmlChar *)"table"))) 
             {
-                playlist->Table=XML_ParseTable(playlist->Table,doc,cur);
+                pPlaylist->Table=XML_ParseTable(pPlaylist->Table,doc,cur);
             }
             cur=cur->next;
+        }
+
+        if(playlist == NULL)
+        {
+            playlist=pPlaylist;
+        }
+        else
+        {
+            ThemePlaylist *last;
+            last=playlist;
+            while(last->Next)
+                last=last->Next;
+
+            last->Next=pPlaylist;
         }
     }
     else

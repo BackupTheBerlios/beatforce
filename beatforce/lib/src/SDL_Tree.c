@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@beatforce.org)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -91,7 +91,6 @@ void SDL_TreeDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
     int row=0;
     int n=0;
 
-   
     if(Tree->bgcolor != TRANSPARANT)
     {
         SDL_FillRect(dest,&widget->Rect,Tree->bgcolor);
@@ -289,7 +288,7 @@ int SDL_TreeEventHandler(SDL_Widget *widget,SDL_Event *event)
                 SDL_TreeCollapse(Tree->Tree,row);
                 Tree->Selected=SDL_TreeGetItem(Tree->Tree,&row);
                 SDL_SignalEmit(widget,"clicked");
-                SDL_WidgetDraw(widget,&widget->Rect);
+                SDL_WidgetRedrawEvent(widget);
             }
             if(event->button.button == 4) /* mousehweel down */
             {
@@ -299,7 +298,7 @@ int SDL_TreeEventHandler(SDL_Widget *widget,SDL_Event *event)
                     row=SDL_ScrollbarGetCurrentValue(Tree->Scrollbar);
                     row-=1;
                     SDL_ScrollbarSetCurrentValue(Tree->Scrollbar,row);
-                    SDL_WidgetDraw(widget,&widget->Rect);
+                    SDL_WidgetRedrawEvent(widget);
                 }
 
             }
@@ -311,7 +310,7 @@ int SDL_TreeEventHandler(SDL_Widget *widget,SDL_Event *event)
                     row=SDL_ScrollbarGetCurrentValue(Tree->Scrollbar);
                     row+=1;
                     SDL_ScrollbarSetCurrentValue(Tree->Scrollbar,row);
-                    SDL_WidgetDraw(widget,&widget->Rect);
+                    SDL_WidgetRedrawEvent(widget);
                 }
             }
             

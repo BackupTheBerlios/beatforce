@@ -185,7 +185,7 @@ void SDL_ToggleButtonMouseButtonDownCB(SDL_Widget *widget,SDL_Event *event)
     {
         Button->State = SDL_BUTTON_DOWN;
         SDL_SignalEmit(widget,"clicked");
-        SDL_WidgetDraw(widget,&widget->Rect);
+        SDL_WidgetRedrawEvent(widget);
     }
     else
         Button->State = SDL_BUTTON_UP;        
@@ -203,7 +203,7 @@ int SDL_ToggleButtonEventHandler(SDL_Widget *widget,SDL_Event *event)
             if(Button->State == SDL_BUTTON_UP)
             {
                 Button->State = SDL_BUTTON_HIGHLIGHTED;
-                SDL_WidgetDraw(widget,&widget->Rect);
+                SDL_WidgetRedrawEvent(widget);
             }
         }
         else
@@ -214,7 +214,7 @@ int SDL_ToggleButtonEventHandler(SDL_Widget *widget,SDL_Event *event)
         if(SDL_WidgetIsInside(widget,event->motion.x,event->motion.y))
         {
             Button->State = SDL_BUTTON_HIGHLIGHTED;
-            SDL_WidgetDraw(widget,&widget->Rect);
+            SDL_WidgetRedrawEvent(widget);
         }
         else
             Button->State = SDL_BUTTON_UP;

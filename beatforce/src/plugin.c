@@ -78,6 +78,7 @@ int PLUGIN_Init(int type)
 
 BFList *PLUGIN_GetList (int type)
 {
+    TRACE("PLUGIN_GetList %d",type);
     switch (type)
     {
     case PLUGIN_TYPE_INPUT:
@@ -108,7 +109,7 @@ int PLUGIN_Cleanup()
         if(e)
         {
             if(e->handle)
-                OSA_CloseLibrary(e->handle);
+                OSA_LibraryClose(e->handle);
 
             if(e->filename)
                 free(e->filename);
@@ -127,12 +128,12 @@ PLUGIN_AddPlugin(char * filename, int type, BFList ** plugins)
     void *(*gpo) (void);
     
     TRACE("PLUGIN_AddPlugin %s",filename);
-    if ((h = OSA_LoadLibrary(filename)) != NULL)
+    if ((h = OSA_LibraryLoad(filename)) != NULL)
     {
         switch(type)
         {
         case PLUGIN_TYPE_INPUT:
-            if ((gpi = OSA_GetFunctionAddress(h, "get_input_info")) != NULL)
+            if ((gpi = OSA_LibraryGetSym(h, "get_input_info")) != NULL)
             {
                 InputPlugin *p;
                 
@@ -145,7 +146,7 @@ PLUGIN_AddPlugin(char * filename, int type, BFList ** plugins)
             }
             break;
         case PLUGIN_TYPE_OUTPUT:
-            if ((gpo = OSA_GetFunctionAddress (h, "get_output_info")) != NULL)
+            if ((gpo = OSA_LibraryGetSym(h, "get_output_info")) != NULL)
             {
                 OutputPlugin *p;
                 
@@ -159,18 +160,18 @@ PLUGIN_AddPlugin(char * filename, int type, BFList ** plugins)
             }
             break;
         case PLUGIN_TYPE_EFFECT:
-            if (OSA_GetFunctionAddress (h, "ladspa_descriptor") != NULL)
+            if (OSA_LibraryGetSym (h, "ladspa_descriptor") != NULL)
             {
                 EffectPlugin *p;
                 /* Error in delay plugin : skip it*/
                 if(strstr(filename,"delay"))
                 {
-                    OSA_CloseLibrary(h);
+                    OSA_LibraryClose(h);
                     break;
                 }
                 p=malloc(sizeof(EffectPlugin));
                 memset(p,0,sizeof(EffectPlugin));
-                p->dis  = OSA_GetFunctionAddress (h, "ladspa_descriptor");
+                p->dis  = OSA_LibraryGetSym(h, "ladspa_descriptor");
                 p->handle = h;
                 p->filename = (char*)strdup (filename);
                 

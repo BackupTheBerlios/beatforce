@@ -41,21 +41,11 @@
 #include "debug.h"
 
 
-int OUTPUT_DevInit(AudioConfig * cfg)
-{
-    TRACE("OUTPUT_DevInit");
-
-    /* Nothing for now */
-    if(cfg == NULL)
-        return 0;
-    return 1;
-}
-
-int
-OUTPUT_PluginInit(struct OutGroup *grp, AudioConfig * cfg, int i)
+int OUTPUT_PluginInit(struct OutGroup *grp, AudioConfig * cfg, int i)
 {
     BFList *list, *next;
 
+    TRACE("OUTPUT_PluginInit");
     if(grp == NULL || cfg == NULL)
     {
         return 0;
@@ -108,6 +98,7 @@ OUTPUT_PluginOpen (struct OutGroup *grp, AudioConfig * cfg, int i, int ch,
 {
     int err;
 
+    TRACE("OUTPUT_PluginOpen");
     if(grp == NULL || cfg == NULL)
     {
         ERROR("Invalid arguments");
@@ -141,6 +132,7 @@ int OUTPUT_PluginClose(struct OutGroup *grp)
 {
     int err;
 
+    TRACE("OUTPUT_PluginClose");
     if(grp == NULL)
     {
         ERROR("Invalid arguments");
@@ -163,6 +155,8 @@ int OUTPUT_PluginClose(struct OutGroup *grp)
 int OUTPUT_PluginWrite (struct OutGroup *grp, void *buffer, int size)
 {
     int err;
+    TRACE("OUTPUT_PluginWrite");
+
 //    char* buffe=(char*)buffer;
 
     if(grp == NULL)
@@ -194,6 +188,7 @@ OUTPUT_PluginPause (struct OutGroup *grp, int pause)
 {
     int err;
 
+    TRACE("OUTPUT_PluginPause");
     if(grp == NULL || grp->dev == NULL)
         return 0;
 
@@ -245,6 +240,7 @@ OUTPUT_PluginSetVolume (struct OutGroup *grp)
 {
     int err=0;
 
+    TRACE("OUTPUT_PluginSetVolume");
     if(grp == NULL || grp->dev == NULL)
     {
         ERROR("Invalid arguments");
@@ -271,6 +267,7 @@ OUTPUT_PluginCleanup(struct OutGroup *grp)
 {
     int err;
 
+    TRACE("OUTPUT_PluginCleanup");
     if(grp == NULL || grp->dev == NULL)
     {
         ERROR("OUTPUT_PluginCleanup: Invalid arguments (grp == NULL)");

@@ -32,34 +32,21 @@
 #include "input.h"
 #include "plugin.h"
 #include "sampler.h"
+#include "audio_channel.h"
 #include "audio_output.h"
 #include "osa.h"
 
 #define MODULE_ID SAMPLER
 #include "debug.h"
 
-BFList *SamplerPlugins[10];
 
 Sample samples[10];
-
-int SAMPLER_Write (int c, void* buf, int len);
-
-InputInterface sampler_if = 
-{
-    AUDIOOUTPUT_Open,
-    SAMPLER_Write,
-    AUDIOOUTPUT_Pause,
-    AUDIOOUTPUT_BufferFree,
-    AUDIOOUTPUT_GetTime,
-    AUDIOOUTPUT_Close,
-    INPUT_EOF
-};
 
 int SAMPLER_Init()
 {
     int i=0;
     TRACE("SAMPLER_Init");
-#if 0
+
     samples[0].filename=strdup("/home/beuving/test.mp3");
     samples[1].filename=strdup("/home/beuving/test.ogg");
     samples[2].filename=strdup("/home/beuving/test.ogg");
@@ -70,81 +57,36 @@ int SAMPLER_Init()
     samples[7].filename=strdup("/home/beuving/test.ogg");
     samples[8].filename=strdup("/home/beuving/test.ogg");
     samples[9].filename=strdup("/home/beuving/test.ogg");
-#endif
-
-    for(i=0;i<10;i++)
-        SamplerPlugins[i] = INPUT_Init (i+2, PLUGIN_GetList(PLUGIN_TYPE_INPUT));
 
     for(i=1;i<10;i++)
     {
+        samples[i].Input=INPUT_Open();
+        samples[i].playing=0;
         if(samples[i].filename)
-        {
-            samples[i].buffer=malloc(4000000);
-            samples[i].size=0;
-            samples[i].l = INPUT_WhoseFile (SamplerPlugins[i],samples[i].filename);
-            samples[i].channel=i+2;
-            samples[i].playing=0;
-
-            INPUT_SetInputInterface(samples[i].l,&sampler_if);
-            INPUT_LoadFile(samples[i].l,samples[i].filename);
-               
-        }
+            INPUT_LoadFile(samples[i].Input,samples[i].filename);
     }
-    
-    return 1;
-}
-
-
-int play(void *data)
-{
-    unsigned long teller=0;
-    int maxb=40000;
-    int written;
-    Sample *d=(Sample*)data;
-
-    d->playing=1;
-    AUDIOOUTPUT_Close(d->channel);
-    AUDIOOUTPUT_Open(d->channel,FMT_S16_NE,44100,2, &maxb);
-
-    AUDIOOUTPUT_Pause (d->channel,0);
-
-    while(teller < d->size && d->playing)
-    {
-        while(AUDIOOUTPUT_BufferFree(d->channel) < 10000)
-            OSA_Sleep(10);
-            written=AUDIOOUTPUT_Write(d->channel,d->buffer+teller,10000);
-           
-        teller+=written;
-    }
-    AUDIOOUTPUT_Close(d->channel);
-    d->playing=0;
     return 1;
 }
 
 int SAMPLER_Play(int s)
 {
+    TRACE("SAMPLER_Play %d",s);
     if(s> 0 && s < 10)
     {
         if(samples[s].playing == 0)
-           OSA_CreateThread(play,&samples[s]);
+        {
+            INPUT_Play(samples[s].Input);
+            samples[s].playing=1;
+        }
         else
+        {
+            INPUT_Pause(samples[s].Input);
             samples[s].playing=0;
-           
-    }
-    return 1;
-}
-
-int SAMPLER_Write (int c, void* buf, int len)
-{
-    if((len + samples[c-2].size) < 4000000)
-    {
-        memcpy((samples[c-2].buffer+samples[c-2].size),buf,len);
-        samples[c-2].size += len;
+        }
     }
     else
     {
-        INPUT_Pause(samples[c-2].l);
-        INPUT_CloseFile(samples[c-2].l);
+        return 0;
     }
     return 1;
 }

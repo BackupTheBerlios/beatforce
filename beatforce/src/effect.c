@@ -86,7 +86,7 @@ int EFFECT_Play()
     LADSPA_PortRangeHintDescriptor hint;
     LADSPA_Data amplitude;
 
-    Channel=AUDIOOUTPUT_GetChannelByID(0);
+    Channel = AUDIOOUTPUT_GetChannelByID(0);
 //    int max_bytes=20000;
 
 //    return 0;

@@ -1,6 +1,6 @@
 /*
    BeatForce
-   input.c	-  audio input, input plugins, ...
+   input.c	-  audio input, resposible for creating audio channels
    
    Copyright (c) 2003-2004, John Beuving (john.beuving@beatforce.org)
 
@@ -30,236 +30,107 @@
 #include <errno.h>
 #include <time.h>
 
+#include "audio_output.h"
+#include "input.h"
 #include "songdb.h"
 #include "llist.h"
 #include "input_plugin.h"
 #include "err.h"
 #include "types.h"
 #include "player.h"
-#include "plugin.h"
-#include "interface.h" 
+
 
 #define MODULE_ID INPUT
 #include "debug.h"
 
-
-/* 
-   INPUT_Init; initialises all input plugins for use with an audio channel
-   
-   input:
-   channel - the channel which can be used for audio output 
-   plugin_list - list of plugins of the type InputPlugin
-
-   output:
-   returns a linked list of type InputPluginData
-*/
-BFList *INPUT_Init (int channel, BFList * plugin_list)
+struct InputDevice *INPUT_Open()
 {
-    BFList *ip_plugins = NULL;
-    InputPluginData *ipd;
-    BFList *next;
+    struct InputDevice *Input;
+    struct OutChannel *Channel;
 
-    TRACE("INPUT_Init enter %d",channel);
-    if (plugin_list == NULL)
-    {
-        ERROR("INPUT_Init (channel %d): plugin_list == NULL",channel);
-        return NULL;
-    }
-    next = plugin_list;
-    if(next==NULL)
-    {
-        ERROR("No plugins available");
-        return 0;
-    }
-    while (next)
-    {
-        ipd = malloc (INPUT_PLUGIN_DATA_LEN);
-        if (ipd == NULL)
-            return NULL;
-
-        memset (ipd, 0, INPUT_PLUGIN_DATA_LEN);
-        
-        ipd->ip = (InputPlugin *) next->data;
-
-        ipd->ip->init (&ipd->priv, channel);
-        
-        /* Init the plugin with the default write/read function */
-        ipd->ip->set_api(ipd->priv,&beatforce_if);
-
-        ip_plugins = LLIST_Append(ip_plugins, (void*) ipd);
-        
-        next = next->next;
-    }
-    if(ip_plugins == NULL)
-        exit(1);
+    TRACE("INPUT_Open");
+    Channel = AUDIOCHANNEL_New();
+    AUDIOOUTPUT_ChannelRegister(Channel);
     
-    return ip_plugins;
-}
+    Input=(InputDevice*)malloc(sizeof(InputDevice));
 
-
-InputPluginData *
-INPUT_WhoseFile(BFList *input_plugins, char *filename)
-{
-    InputPluginData *ipd;
-    BFList *next;
-
-    TRACE("INPUT_WhoseFile %s",filename);
-    if (filename == NULL)
-    {
-        return NULL;
-    }
-
-    next = input_plugins;
-  
-    if(next==NULL)
-    {
-        ERROR("No plugins loaded");
-        exit(1);
-    }
-    while (next)
-    {
-        ipd = (InputPluginData *) next->data;
-        if(ipd->ip->is_our_file)
-        {
-            //          printf("Is our file %s\n",ipd->ip->filename);
-            if (ipd->ip->is_our_file(ipd->priv, filename) == TRUE)
-            {
-                return next->data;
-            }
-        }
-        else
-        {
-            ERROR("No function implemented");
-            return NULL;
-        }
-        next = next->next;
-    }
-
-    ERROR("Unknown File format: %s\n", filename);
-
-    return NULL;
-}
-
-int INPUT_GetTag(BFList *input_list,char *filename, struct SongDBEntry *e)
-{
-    InputPluginData *l;
-
-    TRACE("INPUT_GetTag enter %s",filename);
+    Input->Channel     = Channel->id;
+    Input->PluginData  = NULL;
     
-    l = INPUT_WhoseFile(input_list, e->filename);
-    if (l == NULL)
-    {
-        ERROR("No File format registred");
-        return -10;
-    }
-    return l->ip->get_tag (l->priv, filename, e);
+    return Input;
 }
 
-int input_get_add_info (char *filename, struct SongAddInfo *info)
+int INPUT_Close(InputDevice *Input)
 {
-    InputPluginData *l;
-    
-    l = INPUT_WhoseFile (PLUGIN_GetList(PLUGIN_TYPE_INPUT), filename);
-    if (l == NULL)
-    {
-        ERROR("Not supported");
-        return 0;
-    }
-    
-    return l->ip->get_add_info (l->priv, filename, info);
+    TRACE("INPUT_Close");
+    free(Input);
+    return 1;
 }
 
-int INPUT_WriteTag(char *filename,struct SongDBEntry *e)
-{
-    InputPluginData *l;
- 
-    TRACE("INPUT_WriteTag enter %s",filename);
-    
-    l = INPUT_WhoseFile(PLUGIN_GetList(PLUGIN_TYPE_INPUT), e->filename);
-    if (l == NULL)
-        return -10;
-
-    return l->ip->write_tag (l->priv, filename, e);
-
-
-}
-
-int INPUT_LoadFile (InputPluginData *Plugin,char *filename)
-{
-    TRACE("INPUT_LoadFile %s",filename);
-    if(Plugin == NULL || filename == NULL)
-    {
-        ERROR("Invalid parameters");
-        return 0;
-    }
-    return Plugin->ip->load_file (Plugin->priv, filename);
-}
-
-int
-INPUT_CloseFile(InputPluginData *Plugin)
+int INPUT_CloseFile(InputDevice *Input)
 {
     TRACE("INPUT_CloseFile");
-
-    if (Plugin == NULL)
-    {
-        ERROR("Invalid parameter");
-        return 0;
-    }
-
-    return Plugin->ip->close_file (Plugin->priv);
+    return INPUTPLUGIN_Close(Input->PluginData);
 }
 
-int INPUT_Play (InputPluginData * Plugin)
+int INPUT_GetTag(char *filename, struct SongDBEntry *e)
 {
-    if (Plugin == NULL)
+    InputPlugin     *Plugin;
+    InputPluginData *PluginData;
+#if 0
+    TRACE("INPUT_GetTag %s",filename);
+    Plugin = INPUTPLUGIN_WhoseFile(filename);
+    if(Plugin == NULL)
         return 0;
-    
-    return Plugin->ip->play (Plugin->priv);
+
+    PluginData = INPUTPLUGIN_Init(Plugin,-1);
+
+    INPUTPLUGIN_GetTag(PluginData,filename,e);
+
+    INPUTPLUGIN_Close(PluginData);
+#endif
+    return 1;
 }
 
-int INPUT_Pause (InputPluginData* Plugin)
+int INPUT_LoadFile(InputDevice *Input,char *filename)
 {
-    if (Plugin == NULL)
+    InputPlugin     *Plugin;
+    InputPluginData *PluginData;
+
+    printf("load file\n");
+    TRACE("INPUT_LoadFile %s",filename);
+    Plugin=INPUTPLUGIN_WhoseFile(filename);
+    if(Plugin == NULL)
         return 0;
 
-    return Plugin->ip->pause (Plugin->priv);
+    PluginData=INPUTPLUGIN_Init(Plugin,Input->Channel);
+
+    Input->PluginData = PluginData;
+
+
+    return INPUTPLUGIN_LoadFile(PluginData,filename);
 }
 
-int INPUT_Seek (InputPluginData* Plugin, long msecs)
+int INPUT_Pause (InputDevice *Input)
 {
-    if (Plugin == NULL)
-        return 0;
-
-    return Plugin->ip->seek (Plugin->priv, msecs);
+    TRACE("INPUT_Pause");
+    return INPUTPLUGIN_Pause(Input->PluginData);
 }
 
-long INPUT_GetTime(InputPluginData *Plugin)
+int INPUT_Play (InputDevice *Input)
 {
-    long time;
-    if (Plugin == NULL)
-    {
-        ERROR("No file loaded");
-        return 0;
-    }
-    time=Plugin->ip->get_time (Plugin->priv);
-    if(time < 0)
-        return 0;
-    else
-        return time;
+    TRACE("INPUT_Play");
+    return INPUTPLUGIN_Play(Input->PluginData);
 }
 
-int INPUT_EOF(int ch_id)
+long INPUT_GetTime(InputDevice *Input)
 {
-    printf("End of file\n");
-    return PLAYER_EOF(ch_id);
+///    TRACE("INPUT_GetTime");
+    return INPUTPLUGIN_GetTime(Input->PluginData);
 }
 
-int INPUT_SetInputInterface(InputPluginData *Plugin,InputInterface *iif)
+int INPUT_Seek (InputDevice *Input, long time)
 {
-    if(iif == NULL)
-        return 0;
-    else
-        return Plugin->ip->set_api(Plugin->priv,iif);
-    
-    
+    TRACE("INPUT_Seek");
+    return INPUTPLUGIN_Seek(Input->PluginData,time);
 }

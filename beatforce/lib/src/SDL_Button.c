@@ -187,7 +187,7 @@ void SDL_ButtonMouseButtonDownCB(SDL_Widget *widget,SDL_Event *event)
     {
         Button->State = SDL_BUTTON_DOWN;
         SDL_SignalEmit(widget,"clicked");
-        SDL_WidgetDraw(widget,&widget->Rect);
+        SDL_WidgetRedrawEvent(widget);
     }
     else
         Button->State = SDL_BUTTON_UP;        
@@ -207,7 +207,7 @@ int SDL_ButtonEventHandler(SDL_Widget *widget,SDL_Event *event)
                 Button->State = SDL_BUTTON_HIGHLIGHTED;
                 if(Button->highlighted != NULL)
                 {
-                    SDL_WidgetDraw(widget,&widget->Rect);
+                    SDL_WidgetRedrawEvent(widget);
                 }
             }
         }
@@ -218,14 +218,21 @@ int SDL_ButtonEventHandler(SDL_Widget *widget,SDL_Event *event)
     case SDL_MOUSEBUTTONUP:
         if(SDL_WidgetIsInside(widget,event->motion.x,event->motion.y))
         {
-            Button->State = SDL_BUTTON_HIGHLIGHTED;
             if(Button->highlighted != NULL)
             {
-                SDL_WidgetDraw(widget,&widget->Rect);
+                Button->State = SDL_BUTTON_HIGHLIGHTED;
             }
+            else
+            {
+                Button->State = SDL_BUTTON_UP;
+            }
+            SDL_WidgetRedrawEvent(widget);
         }
         else
+        {
             Button->State = SDL_BUTTON_UP;
+            SDL_WidgetRedrawEvent(widget);
+        }
         break;
     default:
         break;

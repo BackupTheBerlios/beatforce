@@ -21,19 +21,20 @@
 #define __INTERFACE_H__
 
 #include "types.h"
+#include "audio_channel.h"
 #include "audio_output.h"
 #include "input.h"
 
 
 InputInterface beatforce_if = 
 {
-    AUDIOOUTPUT_Open,
-    AUDIOOUTPUT_Write,
-    AUDIOOUTPUT_Pause,
-    AUDIOOUTPUT_BufferFree,
-    AUDIOOUTPUT_GetTime,
-    AUDIOOUTPUT_Close,
-    INPUT_EOF
+    AUDIOCHANNEL_Open,
+    AUDIOCHANNEL_Write,
+    AUDIOCHANNEL_Pause,
+    AUDIOCHANNEL_BufferFree,
+    AUDIOCHANNEL_GetTimePlayed,
+    AUDIOCHANNEL_Close,
+    INPUTPLUGIN_EOF
 };
 
 #endif /* __INTERFACE_H__ */

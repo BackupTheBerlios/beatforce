@@ -30,7 +30,7 @@
 #include "playlist.h"
 #include "osa.h"
 #include "input.h"
-#include  "config.h"
+#include "config.h"
 
 #define MODULE_ID PLAYLIST
 #include "debug.h"
@@ -43,13 +43,11 @@ void playlist_FreeEntry (struct PlEntry *pe);
 
 long no_of_entries;
 long curr_unique;
-static struct SongDBEntry *test;
 
 
 int PLAYLIST_Init (int player_nr)
 {
     TRACE("PLAYLIST_Init");
-
     curr_unique    = 0;
     no_of_entries  = 0;
     playlist[0]=NULL;
@@ -87,14 +85,6 @@ struct PlEntry *PLAYLIST_GetSong (int player_nr, int no)
     return pe;
 }
 
-int gt(void *d)
-{
-    struct PlayerPrivate *p = PLAYER_GetData(1);
-    if(p)
-        INPUT_GetTag(p->ip_plugins,test->filename,test);
-    return 0;
-}
-
 void PLAYLIST_AddEntry(int player_nr, struct SongDBEntry *e)
 {
     struct PlEntry *pe;
@@ -108,8 +98,7 @@ void PLAYLIST_AddEntry(int player_nr, struct SongDBEntry *e)
     TRACE("PLAYLIST_SetEntry player:%d filename: %s",player_nr,e->filename);
     pe = playlist_AllocEntry(e);
     
-    test=e;
-    OSA_CreateThread(gt,NULL);
+    INPUT_GetTag(e->filename,e);
 
     no_of_entries++;
 
@@ -132,6 +121,9 @@ int PLAYLIST_Remove(int player_nr,struct SongDBEntry *e)
 {
     struct PlEntry *newlist = playlist[0];
     struct PlEntry *previous = NULL;
+
+    TRACE("PLAYLIST_Remove");
+
     if(e == NULL)
         return 0;
 

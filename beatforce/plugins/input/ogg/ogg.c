@@ -215,11 +215,11 @@ ogg_cleanup (Private * p)
 }
 
 int
-ogg_is_our_file (Private * h, char *filename)
+ogg_is_our_file (char *filename)
 {
     char *ext;
 
-    if (h == NULL || filename == NULL)
+    if (filename == NULL)
         return FALSE;
 
     ext = strrchr (filename, '.');
@@ -312,7 +312,7 @@ ogg_load_file (Private * h, char *filename)
         return 0;
     }
 
-    if (ogg_is_our_file (h, filename) != TRUE)
+    if (ogg_is_our_file (filename) != TRUE)
     {
         ERROR("unknown file");
     	return 0;

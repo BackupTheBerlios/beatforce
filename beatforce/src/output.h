@@ -25,8 +25,6 @@
 
 #include "audio_output.h"
 
-int OUTPUT_DevInit (AudioConfig *);
-
 int OUTPUT_PluginInit(struct OutGroup *, AudioConfig *, int);
 int OUTPUT_PluginOpen (struct OutGroup *, AudioConfig *, int, int, long, int);
 int OUTPUT_PluginClose (struct OutGroup *);

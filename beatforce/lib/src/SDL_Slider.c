@@ -301,7 +301,7 @@ int SDL_SliderEventHandler(SDL_Widget *widget,SDL_Event *event)
         SDL_SignalEmit(widget,"value-changed");
         // Run event handler if available (SDL_CHANGED event)
         Slider->changed=0;
-        SDL_WidgetDraw(widget,&widget->Rect);
+        SDL_WidgetRedrawEvent(widget);
     }
     return 0;
 }

@@ -32,7 +32,7 @@
 typedef enum
 {
     TABLE_MODE_NONE,       /* No selection possible             */
-    TABLE_MODE_SINGLE,     /* Only one is selected              */
+    TABLE_MODE_SINGLE,     /* Only one can be selected          */
     TABLE_MODE_MULTIPLE    /* Multiple entries can be selected  */
 }E_TableMode;
 
@@ -160,8 +160,6 @@ void SDL_TableAddRow(SDL_Widget *Widget,char *Titles[]); /* Add a row to the end
 void SDL_TableDeleteRow(SDL_Widget *Widget,int row);
 void SDL_TableDeleteAllRows(SDL_Widget *widget);
 SDL_TableCell *SDL_TableGetCell(SDL_Widget *widget,int row,int column);
-
-void SDL_TableSetSelected(SDL_Widget *table,int row);
 
 int SDL_TableSetColumnTitle(SDL_Widget *widget,int column, char *title);
 void SDL_TableSetEditable(SDL_Widget *widget,int value);

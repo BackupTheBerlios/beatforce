@@ -3,6 +3,7 @@
    input_plugin.h  -  input plugin defs
    
    Copyright (c) 2002, Patrick Prasse (patrick.prasse@gmx.net)
+   Copyright (c) 2003-2004, John Beuving (john.beuving@beatforce.org)
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public Licensse as published by
@@ -23,8 +24,10 @@
 #ifndef __INPUT_PLUGIN_H__
 #define __INPUT_PLUGIN_H__
 
-#include "types.h"
+#include "llist.h"
 #include "songdb.h"
+#include "types.h"
+
 /*
  * INFO: A input plugin can be instaciated multiple times by calling init more than once.
  *		 Therefore all private data of the input plugin has to be stored in  void * !
@@ -41,7 +44,7 @@ typedef struct
     int (*about) (void);          /* Show the about box */
     int (*configure) (struct SongDBEntry *e);  /* Set the configuration parameters bitrate/samplerate */
 
-    int (*is_our_file) (void *, char *filename);       /* Return 1 if the plugin can handle the file */
+    int (*is_our_file) (char *filename);       /* Return 1 if the plugin can handle the file */
 
     int (*get_tag) (void *, char *filename, struct SongDBEntry * e);   /* get artist, title, ... */
     int (*get_add_info) (void *, char *filename, struct SongAddInfo * e);      /* get add. info (bitrate,...) */
@@ -64,23 +67,33 @@ typedef struct
 
     int (*cleanup) (void *);
     int (*set_api) (void *,InputInterface *api);
-    
 }
 InputPlugin;
 
-#define IPLUGIN( list )   ((InputPluginData*)list->data)
 
 typedef struct
 {
-
-    InputPlugin *ip;
-
-    void *priv;
-
-}
-InputPluginData;
-
-#define INPUT_PLUGIN_DATA_LEN		(sizeof(InputPluginData))
+    InputPlugin *Plugin;     /* Pointer to the library */
+    void *priv;              /* Private data structure */
+}InputPluginData;
 
 
+InputPluginData *INPUTPLUGIN_Init (InputPlugin *Plugin,int channel);
+InputPlugin     *INPUTPLUGIN_WhoseFile(char *);
+
+int INPUTPLUGIN_LoadFile (InputPluginData *Plugin,char *filename);
+int INPUTPLUGIN_Close(InputPluginData *Plugin);
+
+
+int INPUTPLUGIN_Play (InputPluginData *Plugin);
+int INPUTPLUGIN_Pause (InputPluginData *Plugin);
+int INPUTPLUGIN_Seek (InputPluginData *Plugin, long time);
+
+int INPUTPLUGIN_GetTag(InputPluginData *Plugin,char *filename, struct SongDBEntry *e);
+long INPUTPLUGIN_GetTime (InputPluginData *Plugin);
+
+int INPUTPLUGIN_EOF(int);
+int INPUTPLUGIN_SetInputInterface(InputPluginData *Plugin,InputInterface *iif);
+
+int INPUTPLUGIN_WriteTag(InputPluginData *l,char *filename,struct SongDBEntry *e);
 #endif

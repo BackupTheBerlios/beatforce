@@ -51,6 +51,7 @@ void songdbstring(long row,int column,char *dest);
 
 static int activesong[2];
 SongdbWidgets *Widgets;
+SDL_Widget *notebook;
 
 void eventhandler(SDL_Table *table)
 {
@@ -97,22 +98,33 @@ void SONGDB_ChangeDatabase(SDL_Widget *widget)
 
 void *SONGDBUI_CreateWindow(ThemeSongdb *ts)
 {
-    ThemeButton   *Button = NULL;
+    ThemeButton       *Button = NULL;
+    ThemeImage        *Image = NULL;
     SongdbWidgets *sw;
 
     if(ts == NULL)
         return NULL;
 
     sw=malloc(sizeof(SongdbWidgets));
+
     Button=ts->Button;
+    Image =ts->Image;
     Widgets=sw;
-    SONGDB_Init ();
+
+    while(Image)
+    {
+        SDL_Widget *image;
+        notebook=image=SDL_WidgetCreate(SDL_PANEL,Image->x,Image->y,Image->w,Image->h);
+        SDL_PanelSetImage(image,IMG_Load(Image->filename));
+        SDL_WidgetShow(image);
+        Image=Image->next;
+    }
 
     if(ts)
     {
         /* Create the notebook/tab section below the table*/
         sw->Tabs=SDL_WidgetCreate(SDL_TAB,ts->Table->x-1,ts->Table->y,
-                                  ts->Table->w+2,18+ts->Table->h);
+                                           ts->Table->w+2,18+ts->Table->h);
         SDL_WidgetPropertiesOf(sw->Tabs,SET_FONT,SDL_FontGet("normal"));
         SDL_WidgetPropertiesOf(sw->Tabs,SET_BG_COLOR,0x93c0d5);
 
@@ -120,13 +132,13 @@ void *SONGDBUI_CreateWindow(ThemeSongdb *ts)
         SDL_WidgetShow(sw->Tabs);
     }
 
-    /* Create buttons which change the tabs */
+    /* Create buttons which changes the notebook */
     while(Button)
     {
         switch(Button->action)
         {
             SDL_Widget *w;
-        case BUTTON_CHANGE_DIR:
+        case BUTTON_EDIT_GROUP:
             w=SDL_WidgetCreate(SDL_BUTTON,Button->x,Button->y,Button->w,Button->h);
             SDL_WidgetPropertiesOf(w,SET_NORMAL_IMAGE,IMG_Load(Button->normal));
             SDL_WidgetPropertiesOf(w,SET_PRESSED_IMAGE,IMG_Load(Button->pressed));
@@ -139,18 +151,19 @@ void *SONGDBUI_CreateWindow(ThemeSongdb *ts)
     activesong[0]=-1;
     activesong[1]=-1;
     EVENT_Connect(EVENT_PLAYER_PLAY,SONGDBUI_PlayCallback,NULL);
+//    EVENT_Connect(EVENT_SONGDB_GROUP_CHANGED,SONGDBUI_GroupChanged,Widgets);
+    SONGDBUI_GroupChanged(NULL);
     return sw;
 }
 
-void SONGDBUI_Redraw(void *w)
+void SONGDBUI_GroupChanged(void *w)
 {
-    SongdbWidgets *widgets=(SongdbWidgets*)w;
+    SongdbWidgets *widgets=(SongdbWidgets*)Widgets;
     SongDBSubgroup *sg;
     ThemeConfig *TC=THEME_GetActive();
     ThemeSongdb *ts=TC->MainWindow->Songdb;
     SDL_Widget *table;
 
-    if(SONGDB_GroupChanged())
     {
         sg=SONGDB_GetSubgroupList();
 

@@ -68,7 +68,6 @@ void MAINWINDOW_Open()
     {
         MAINWINDOW_CreateWindow();
     }
-
     SDL_WindowOpen(MAINWINDOW);
 }
 
@@ -79,11 +78,14 @@ void configopen(void *d)
 
 static void MAINWINDOW_CreateWindow()
 {
-    ThemeConfig       *tc = THEME_GetActive();
-    ThemeMainWindow   *mw = NULL;
+    ThemeConfig       *tc    = THEME_GetActive();
+    ThemeMainWindow   *mw    = NULL;
     ThemeImage        *Image = NULL;
-    ThemeScreen       *s=tc->Screen;
-    ThemeFont         *f=tc->Font;
+    ThemeScreen       *s     = tc->Screen;
+    ThemeFont         *f     = tc->Font;
+    ThemePlayer       *players;
+    ThemePlaylist     *playlist;
+    int player_id=0;
     
     widgets=malloc(sizeof(MainwindowWidgets));
 
@@ -118,16 +120,26 @@ static void MAINWINDOW_CreateWindow()
 
     widgets->Clock=CLOCK_Create(mw->Clock);
 
-    widgets->Playlist = PLAYLISTUI_CreateWindow(mw->Playlist);
+  
+    players=mw->Player;
+    while(players)
+    {
+        PLAYERUI_CreateWindow(player_id,players);
+        player_id++;
+        players=players->Next;
+    }
 
-    PLAYERUI_CreateWindow(0,mw->Player[0]);
-    PLAYERUI_CreateWindow(1,mw->Player[1]);
-
+    playlist=mw->Playlist;
+    while(playlist)
+    {
+        widgets->Playlist = PLAYLISTUI_CreateWindow(playlist);
+        playlist=playlist->Next;
+    }
     
     widgets->Mixer  = MIXERUI_CreateWindow(mw->Mixer);
     widgets->Songdb = SONGDBUI_CreateWindow(mw->Songdb);    
 
-    OSA_StartTimer(10,MAINWINDOW_RedrawTimeout,NULL);
+    OSA_TimerStart(10,MAINWINDOW_RedrawTimeout,NULL);
 
     MAINWINDOW->TransferData = widgets;
     MAINWINDOW->EventHandler = MAINWINDOW_EventHandler;
@@ -241,7 +253,6 @@ static int MAINWINDOW_RedrawTimeout()
     CLOCK_Redraw(widgets->Clock);
     MIXERUI_Redraw(widgets->Mixer);
     PLAYERUI_Redraw();
-    SONGDBUI_Redraw(widgets->Songdb);
     PLAYLISTUI_Redraw(widgets->Playlist);
     return 60;
 }

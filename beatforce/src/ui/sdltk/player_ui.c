@@ -22,6 +22,8 @@
 #include <memory.h> 
 #include <stdlib.h>
 
+#include "audio_channel.h"
+#include "audio_output.h"
 #include "config.h"
 #include "event.h"
 #include "osa.h"
@@ -29,7 +31,6 @@
 #include "mixer.h"
 #include "playlist.h"
 #include "player_ui.h"
-#include "audio_output.h"
 #include "theme.h"
 #include "wndmgr.h"
 #include "songdb_ui.h"
@@ -154,10 +155,9 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
             if(Button->pressed)
                 SDL_WidgetPropertiesOf(UI_Players[nr].Normal.ButtonInfo,
                                      SET_PRESSED_IMAGE,  IMG_Load(Button->pressed));
-#if 0
-            SDL_SignalConnect(UI_Players[nr].Normal.ButtonInfo,"clicked",PLAYERUI_HidePlayer,&UI_Players[nr]);
-#endif
-            
+
+//            SDL_SignalConnect(UI_Players[nr].Normal.ButtonInfo,"clicked",PLAYERUI_HidePlayer,&UI_Players[nr]);
+            SDL_WidgetShow(UI_Players[nr].Normal.ButtonInfo);
         }
         Button=Button->next;
     }
@@ -491,7 +491,7 @@ static void PLAYERUI_UpdateVolume(int player)
     int left=0,right=0;
     double vol;
     
-    AUDIOOUTPUT_GetVolumeLevel(player,&left,&right);
+    AUDIOCHANNEL_GetVolumeLevel(player,&left,&right);
     vol= (double)left;
     SDL_VolumeBarSetCurrentValue(UI_Players[player].Normal.VolumeLeft,vol);
     vol= (double)right;

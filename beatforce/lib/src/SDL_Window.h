@@ -27,6 +27,12 @@
 
 #define SDLTK_WIDGET_EVENT SDL_USEREVENT
 
+#define SDLTK_WIDGET_HIDE     1
+#define SDLTK_WIDGET_MOVE     2
+#define SDLTK_WIDGET_SHOW     3
+#define SDLTK_WIDGET_REDRAW   4
+#define SDLTK_WIDGET_RESIZE   5
+#define SDLTK_WINDOW_REDRAW   6
 
 /* Widget list for a specific surface */
 typedef struct SDL_WidgetList
@@ -80,15 +86,13 @@ int SDLTK_Main();
 
 
 
-//SDL_Surface* SDL_GetSurfaceStack();
-//SDL_WidgetList *SDL_StackGetSurfaceStack(SDL_Window *window);
 int SDL_WidgetActive(SDL_Widget *widget);
 SDL_WidgetList *SDL_WindowGetWidgetList();
+/* Adds a widget to a window, this is done after 
+   creating of the widgets */
+void SDL_WindowAddWidget(SDL_Widget *widget);
 
-void SDL_StoreWidget(SDL_Widget *widget);
-void SDL_StackSetFocus(SDL_Widget *focus_widget);
-SDL_Widget *SDL_StackGetFocus();
-
-void SDL_WidgetDraw(SDL_Widget *widget,SDL_Rect *Rect);
+void SDL_WindowSetFocusWidget(SDL_Widget *focus_widget);
+SDL_Widget *SDL_WindowGetFocusWidget();
 
 #endif /* __SDL_WINDOW_H__ */

@@ -17,11 +17,12 @@
 #define PACKAGE "beatforce"
 
 /* Version number of package */
-#define VERSION "0.2.0"
+#define VERSION "0.2.1"
 
 /* Plugin dir */
 #define PLUGIN_DIR "/usr/share/beatforce/plugins"
 
 /* Theme dir */
 #define THEME_DIR "/usr/share/beatforce/themes"
+//#define THEME_DIR "/home/user/swcbeuvi/home/t/beatforce/themes"
 

@@ -49,7 +49,7 @@ void playsample(void *s)
 
 void playsample2(void *s)
 {
-    SAMPLER_Play(1);
+//    SAMPLER_Play(1);
 }
 
 void* MIXERUI_CreateWindow(ThemeMixer *tm)
@@ -148,7 +148,6 @@ int MIXERUI_Redraw(void *w)
 
     mw=(MixerWidgets*)w;
 
-
     if(mw->MainVolumeIndicator && mw->MainVolume )
     {
         AUDIOOUTPUT_GetMainVolume(&volume);    
@@ -173,10 +172,11 @@ int MIXERUI_Redraw(void *w)
 }
 
 /* Internal callback functions */
-
 static void MIXERUI_AutoFadeButtonClicked(void *data)
 {
-    SDL_WidgetMove((SDL_Widget*)data,100,100);
+//    SDL_Widget *w=(SDL_Widget*)data;
+/*    SDL_WidgetMove((SDL_Widget*)data,w->Rect.x+5,w->Rect.y+5); */
+//    SDL_WidgetResize(image,50,50);
     if(!MIXER_FadeInProgress())
         MIXER_DoFade(1,0);  //param 1 is autofade param2 is instant
 }

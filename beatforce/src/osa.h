@@ -31,25 +31,27 @@ BFList *OSA_FindFiles(char *dir,char *extension,int recursive);
 BFList *OSA_FindDirectories(char *dir);
 
 // shared library functions
-void   *OSA_LoadLibrary(char *filename);
-void   *OSA_GetFunctionAddress(void *h,char *function);
-void    OSA_CloseLibrary(void *h);
+void   *OSA_LibraryLoad(char *filename);
+void   *OSA_LibraryGetSym(void *h,char *function);
+void    OSA_LibraryClose(void *h);
 
+// file functions
+int OSA_FileExists(char *filename);
 
 // timer functions
-unsigned int OSA_StartTimer(unsigned int interval,void *function,void *data);
-void         OSA_RemoveTimer(unsigned int timer);
+unsigned int OSA_TimerStart(unsigned int interval,void *function,void *data);
+void         OSA_TimerRemove(unsigned int timer);
 
 //thread functions
-int OSA_CreateThread(int (*fn)(void *), void *data);
-void OSA_RemoveThread(int thread);
+int OSA_ThreadCreate(int (*fn)(void *), void *data);
+void OSA_ThreadWait(int thread);
 
 
 //File functions (string)
 char *OSA_SearchFilename(char *filepath);
 
 //time function
-int OSA_GetTime(int *hours,int *minutes);
+int OSA_TimeGet(int *hours,int *minutes);
 
 
 void OSA_Sleep(int us);

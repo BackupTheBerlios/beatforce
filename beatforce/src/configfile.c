@@ -75,6 +75,7 @@ CONFIGFILE_New (void)
 
 AudioConfig *CONFIGFILE_GetCurrentAudioConfig()
 {
+    TRACE("CONFIGFILE_GetCurrentAudioConfig");
     if(gBeatforceConfig && gBeatforceConfig->Audio)
         return gBeatforceConfig->Audio;
     return NULL;
@@ -212,6 +213,7 @@ CONFIGFILE_OpenDefaultFile(void)
 {
     BeatforceConfig *ret;
     
+    TRACE("CONFIGFILE_OpenDefaultFile");
     ret = CONFIGFILE_OpenFile(CONFIGFILE_GetDefaultFilename());
 
     if (!ret)
@@ -229,7 +231,7 @@ CONFIGFILE_WriteFile (BeatforceConfig * cfg, char * filename)
     xmlNodePtr audio;
     char buff[256];
 
-
+    TRACE("CONFIGFILE_WriteFile");
     LIBXML_TEST_VERSION;
 
     /* 

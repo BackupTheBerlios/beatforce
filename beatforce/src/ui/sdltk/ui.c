@@ -22,7 +22,6 @@
 
 int UI_Init()
 {
-    SDL_WidgetInit();
     WNDMGR_Init(); 
     return 1;
 }

@@ -171,7 +171,7 @@ int SDL_ProgressBarEventHandler(SDL_Widget *widget, SDL_Event *event)
                 ProgressBar->State=PROGRESSBAR_DRAG;
                 ProgressBar->CurrentLine = event->motion.x - widget->Rect.x;
                 ProgressBar_CurrentValue(ProgressBar);
-                SDL_WidgetDraw(widget,&widget->Rect);
+                SDL_WidgetRedrawEvent(widget);
             }
         }
         break;
@@ -182,7 +182,7 @@ int SDL_ProgressBarEventHandler(SDL_Widget *widget, SDL_Event *event)
             {
                 ProgressBar->CurrentLine = event->motion.x - widget->Rect.x;
                 ProgressBar_CurrentValue(ProgressBar);
-                SDL_WidgetDraw(widget,&widget->Rect);
+                SDL_WidgetRedrawEvent(widget);
             }
         }
         break;
@@ -194,13 +194,13 @@ int SDL_ProgressBarEventHandler(SDL_Widget *widget, SDL_Event *event)
             {
                 ProgressBar->CurrentLine = event->motion.y - widget->Rect.y;
                 ProgressBar_CurrentValue(ProgressBar);
-                SDL_WidgetDraw(widget,&widget->Rect);
+                SDL_WidgetRedrawEvent(widget);
             }
             else if(ProgressBar->Orientation == HORIZONTAL)
             {
                 ProgressBar->CurrentLine = event->motion.x - widget->Rect.x;
                 ProgressBar_CurrentValue(ProgressBar);
-                SDL_WidgetDraw(widget,&widget->Rect);
+                SDL_WidgetRedrawEvent(widget);
             }
             ProgressBar->State=PROGRESSBAR_NORMAL;
             SDL_SignalEmit(widget,"clicked");

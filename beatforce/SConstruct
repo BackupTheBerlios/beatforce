@@ -17,7 +17,9 @@ Help("""
             'scons debug' to build the debug version.
       """)
 
-#env.SConscript(['plugins/SConscript'])
+
+env.SConscript(['plugins/SConscript'])
+
 env.SConscript(['src/SConscript'])      
 env.SConscript(['src/test/SConscript'])      
 env.SConscript(['themes/SConscript'])

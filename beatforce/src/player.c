@@ -30,12 +30,12 @@
 #include <time.h>
 #include <math.h>
 
+#include "audio_channel.h"
 #include "event.h"
 #include "osa.h"
 #include "player.h"
 #include "err.h"
 #include "playlist.h"
-#include "plugin.h"
 #include "mixer.h"
 #include "input.h"
 #include "output.h"
@@ -43,15 +43,14 @@
 #define MODULE_ID PLAYER
 #include "debug.h"
 
-struct PlayerPrivate *playerdata[3];
+struct PlayerPrivate *playerdata[6];
 
 int player_load (int);
 
 
-
 static void PLAYER_StorePlayerData(int player_nr, struct PlayerPrivate *p)
 {
-    if(player_nr > 2 || player_nr < 0)
+    if(player_nr > 6 || player_nr < 0)
         printf("Wrong player_nr\n");
 
     playerdata[player_nr]=p;
@@ -75,12 +74,9 @@ int PLAYER_Init(int player_nr)
     player->PlayerID = player_nr;
     player->State    = PLAYER_IDLE;
     player->e        = NULL;
-    player->channel  = AUDIOOUTPUT_ChannelNew();
+    player->Input    = INPUT_Open();
     
     PLAYER_StorePlayerData(player_nr,player);
-    
-    player->ip_plugins=INPUT_Init (player_nr, PLUGIN_GetList(PLUGIN_TYPE_INPUT));
-
     PLAYLIST_Init (player_nr);
     return 0;
 }
@@ -88,10 +84,13 @@ int PLAYER_Init(int player_nr)
 int PLAYER_Exit(int player_nr)
 {
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
+    
+    TRACE("PLAYER_Exit");
     if(p==NULL)
-        return -1;
+        return 0;
 
     PLAYER_Pause(player_nr);
+    INPUT_Close(p->Input);
     return 0;
 }
 
@@ -116,7 +115,6 @@ int PLAYER_EOF(int player_nr)
     p->eof = 1;
     p->State = PLAYER_PAUSE_EOF;
     return 0;
-  
 }
 
 void
@@ -150,7 +148,7 @@ int PLAYER_Play(int player_nr)
 
     if(p->e != NULL )
     {
-        if(INPUT_Play(p->current_plugin))
+        if(INPUT_Play(p->Input))
         {
             PLAYLIST_Remove(player_nr,p->e);
             p->State = PLAYER_PLAY;
@@ -183,7 +181,7 @@ int PLAYER_Pause(int player_nr)
         return 0;
     }
 
-    if(INPUT_Pause (p->current_plugin))
+    if(INPUT_Pause (p->Input))
     {
         p->State = PLAYER_PAUSE;
     }
@@ -247,7 +245,7 @@ int PLAYER_SetSong (int player_nr, int no)
     p->playlist_id     = no;
     
    
-    INPUT_GetTag(p->ip_plugins,pe->e->filename,pe->e);
+    INPUT_GetTag(pe->e->filename,pe->e);
     p->e         = pe->e;
     if(!player_load (player_nr))
     {
@@ -276,11 +274,15 @@ int PLAYER_Load(int player_nr,struct SongDBEntry *e)
 {
     struct PlayerPrivate *p;
 
+    TRACE("PLAYER_Load");
     p = PLAYER_GetData(player_nr);
     if(p==NULL || e==NULL)
+    {
+        ERROR("PLAYER_Load");
         return 0;
+    }
 
-    INPUT_GetTag(p->ip_plugins,e->filename,e);
+    INPUT_GetTag(e->filename,e);
 
     p->e = e;
     if(!player_load (player_nr))
@@ -295,8 +297,7 @@ int PLAYER_Load(int player_nr,struct SongDBEntry *e)
 int player_load (int player_nr)
 {
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
-    InputPluginData *l;
-
+ 
     TRACE("player_load enter");
     
     if (p == NULL || ( p->playlist_id == 0 && p->e == NULL))
@@ -305,19 +306,12 @@ int player_load (int player_nr)
         return 0;
     }
     
-    if(p->current_plugin == NULL ||INPUT_CloseFile(p->current_plugin))
+    if(1)//INPUT_CloseFile(p->Input))
     {
         p->State = PLAYER_PAUSE;
         if(p->e)
         {
-            l = INPUT_WhoseFile (PLAYER_GetData(player_nr)->ip_plugins, p->e->filename);
-            if (l == NULL)
-            {
-                printf("Impossible\n");
-                return 0;
-            }
-            PLAYER_GetData(player_nr)->current_plugin = l;
-            if(!INPUT_LoadFile (l, p->e->filename))
+            if(INPUT_LoadFile(p->Input,p->e->filename) == 0)
             {
                 ERROR("File not loaded %s",p->e->filename);
                 return 0;
@@ -426,9 +420,9 @@ long PLAYER_GetTimeTotal(int player_nr)
 long PLAYER_GetTimePlayed(int player_nr)
 {
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
-    if(p->current_plugin)
+    if(p->Input)
     {
-        return INPUT_GetTime (p->current_plugin);
+        return INPUT_GetTime(p->Input);
     }
     return 0;
 }
@@ -442,7 +436,7 @@ long PLAYER_GetTimeLeft(int player_nr)
     e=p->e;
     if(e)
     {
-        t = e->time - INPUT_GetTime(p->current_plugin);
+        t = e->time - INPUT_GetTime(p->Input);
     }
     return t;
 }
@@ -450,7 +444,7 @@ long PLAYER_GetTimeLeft(int player_nr)
 int PLAYER_SetTimePlayed(int player_nr,long seconds)
 {
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
-    INPUT_Seek(p->current_plugin, seconds*1000);
+    INPUT_Seek(p->Input, seconds*1000);
     return 0;
 }
 
@@ -487,8 +481,5 @@ int PLAYER_GetSamplerate(int player_nr)
 /* Speed is a vlaue from 0 to 500 */
 int PLAYER_SetSpeed(int player_nr,int speed)
 {
-    return AUDIOOUTPUT_SetSpeed(player_nr,speed);
+    return AUDIOCHANNEL_SetSpeed(player_nr,speed);
 }
-
-
-

@@ -26,12 +26,15 @@ int THEME_Init();
 enum
 {
     /*Main window */
+    BUTTON_CONFIG_WINDOW,
+    /*player*/
     BUTTON_PLAY=1, 
     BUTTON_PAUSE,
     BUTTON_INFO,
+    /*mixer*/
     BUTTON_RESET_FADER,
-    BUTTON_CHANGE_DIR,
-    BUTTON_CONFIG_WINDOW,
+    /*songdb*/
+    BUTTON_EDIT_GROUP,
 
     /*File window */
     BUTTON_RENAME,
@@ -70,7 +73,8 @@ enum
     TEXT_SONG_ARTIST,
     TEXT_SAMPLERATE,
     TEXT_PLAYER_STATE,
-    TEXT_BITRATE
+    TEXT_BITRATE,
+    TEXT_BPM
 }eTextDisplay;
 
 enum
@@ -192,7 +196,7 @@ typedef struct ThemeSlider
     struct ThemeSlider *next;
 }ThemeSlider;
 
-typedef struct
+typedef struct ThemePlayer
 {
     ThemeEdit        *Edit;
     ThemeText        *Text;
@@ -201,17 +205,23 @@ typedef struct
     ThemeVolumeBar   *VolumeBar;
     ThemeProgressBar *ProgressBar;
     ThemeSlider      *Slider;
+    
+    struct ThemePlayer *Next;
 }ThemePlayer;
 
-typedef struct 
+typedef struct ThemeSongdb
 {
-    ThemeTable *Table;
     ThemeButton *Button;
+    ThemeImage  *Image;
+    ThemeTable  *Table;
 }ThemeSongdb;
 
-typedef struct 
+typedef struct ThemePlaylist
 {
-    ThemeTable *Table;
+    ThemeImage    *Image;
+    ThemeTable    *Table;
+    
+    struct ThemePlaylist *Next;
 }ThemePlaylist;
 
 typedef struct ThemeClock
@@ -232,9 +242,9 @@ typedef struct ThemeMixer
 
 typedef struct 
 {
-    ThemeImage *Image;
-    ThemeClock *Clock;    
-    ThemePlayer *Player[2];
+    ThemeImage    *Image;
+    ThemeClock    *Clock;    
+    ThemePlayer   *Player;
     ThemeSongdb   *Songdb;
     ThemePlaylist *Playlist;
     ThemeMixer    *Mixer;
@@ -253,6 +263,7 @@ typedef struct ThemeSearchWindow
 
 typedef struct ThemeFileWindow
 {
+    short x,y,w,h;
     ThemeClock  *Clock;    
     ThemeTable  *Table;
     ThemeImage  *Image;

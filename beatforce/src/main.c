@@ -37,12 +37,18 @@
 #include "theme.h"
 #include "ui.h"
 
-void MAIN_ParseArgs(int argc,char **argv);
-void MAIN_SegfaultHandler(int sig);
+static void MAIN_ParseArgs(int argc,char **argv);
+static void MAIN_SegfaultHandler(int sig);
 
 int main(int argc, char *argv[])
 {
 
+    /* Create lists of all available plugins */
+    PLUGIN_Init (PLUGIN_TYPE_INPUT);
+    PLUGIN_Init (PLUGIN_TYPE_OUTPUT);
+    PLUGIN_Init (PLUGIN_TYPE_EFFECT);
+
+    SONGDB_Init();
     MAIN_ParseArgs(argc,argv);
 
     signal(SIGSEGV, MAIN_SegfaultHandler);
@@ -51,23 +57,16 @@ int main(int argc, char *argv[])
     EVENT_Init();
     CONFIGFILE_OpenDefaultFile();
     
-
     THEME_Init();     
-
     
     FILEWINDOW_Init();
 
     UI_Init(argc,argv);
 
-
-    /* Create lists of all available plugins */
-    PLUGIN_Init (PLUGIN_TYPE_INPUT);
-    PLUGIN_Init (PLUGIN_TYPE_OUTPUT);
-    PLUGIN_Init (PLUGIN_TYPE_EFFECT);
     AUDIOOUTPUT_Init ();
     EFFECT_Init();
     MIXER_Init  ();
-    SAMPLER_Init();
+//    SAMPLER_Init();
 
 //    OSACDROM_Init();
 
@@ -75,21 +74,32 @@ int main(int argc, char *argv[])
     MAINWINDOW_Open();
 
     /*beatforce UI*/
-
     UI_Main(); /* main loop */
 
 
     AUDIOOUTPUT_Cleanup();
 
-    SONGDB_Exit();
     EFFECT_Cleanup();
+
+    SONGDB_Exit();
+
     PLUGIN_Cleanup();
 
     return 1;
 
 }
 
-void MAIN_SegfaultHandler(int sig)
+static void MAIN_ParseArgs(int argc,char **argv)
+{
+    int i;
+
+    for(i=1;i<argc;i++)
+    {
+        SONGDB_Add(argv[i]);
+    }
+}
+
+static void MAIN_SegfaultHandler(int sig)
 {
     printf("\nSegmentation fault\n\n");
     printf("You've probably found a bug in beatforce\n");
@@ -98,34 +108,4 @@ void MAIN_SegfaultHandler(int sig)
 }
 
 
-void MAIN_ParseArgs(int argc,char **argv)
-{
-    int i;
-    char *ext;
 
-    for(i=1;i<argc;i++)
-    {
-        if(argv[i][0] == '/')
-        {
-            ext = strrchr(argv[i],'.');
-            if(ext == NULL)
-                printf("No extension, assuming directory\n");
-            else
-            {
-                if(!strcmp(ext,".m3u"))
-                {
-                    FILE *fp;
-                    char *line;
-                    fp=fopen(argv[i],"r");
-                    line=malloc(1024);
-                    fread(line,1024,1,fp);
-                    fclose(fp);
-                    printf("%s\n",line);
-                    free(line);
-                    
-                }
-            }
-        }
-    }
-
-}

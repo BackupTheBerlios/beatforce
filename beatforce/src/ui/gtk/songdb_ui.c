@@ -123,8 +123,6 @@ void *SONGDBUI_CreateWindow(void *ts)
 
     sw=malloc(sizeof(SongdbWidgets));
 
-    SONGDB_Init ();
-
     /* Create the notebook/tab section below the table*/
     sw->Tabs=gtk_notebook_new ();
     gtk_notebook_set_tab_pos (GTK_NOTEBOOK (sw->Tabs), GTK_POS_BOTTOM);

@@ -23,30 +23,33 @@
 #ifndef __DEBUG_H__
 #define __DEBUG_H__
 
-#define AUDIO_OUTPUT 1
-#define AUDIOCD      2
-#define CLOCK        3
-#define CONFIGFILE   4
-#define CONFIGWINDOW 5
-#define EFFECT       6
-#define FILEWINDOW   7
-#define INPUT        8
-#define MIXER        9 
-#define MP3          10
-#define OGG          11
-#define OSA          12
-#define OUTPUT       13
-#define PLAYER       14
-#define PLAYER_UI    15
-#define PLAYLIST     16
-#define PLAYLIST_UI  17
-#define PLUGIN       18
-#define RINGBUFFER   19
-#define SAMPLER      20
-#define SONGDB       21
-#define SONGDB_UI    22
-#define THEME        23
-#define WNDMGR       24
+#define AUDIO_CHANNEL 1
+#define AUDIO_OUTPUT  2
+#define AUDIOCD       3
+#define CLOCK         4
+#define CONFIGFILE    5
+#define CONFIGWINDOW  6
+#define EFFECT        7
+#define EVENT         8
+#define FILEWINDOW    9
+#define INPUT         10
+#define INPUTPLUGIN   11
+#define MIXER         12 
+#define MP3           13
+#define OGG           14
+#define OSA           15
+#define OUTPUT        16
+#define PLAYER        17
+#define PLAYER_UI     18
+#define PLAYLIST      19
+#define PLAYLIST_UI   20
+#define PLUGIN        21
+#define RINGBUFFER    22
+#define SAMPLER       23
+#define SONGDB        24
+#define SONGDB_UI     25
+#define THEME         26
+#define WNDMGR        27
 
 #define name(x) x
 #define module( x ) ( #x )
@@ -67,7 +70,13 @@ void printid(char *id,int line,char *message);
 #define DEBUG_ON printid(__FILE__,__LINE__,"DEBUG"),traceprintf
 
 #define TRACE_OFF noprint
+//#define TRACE_OFF TRACE_ON
 #define DEBUG_OFF noprint
+
+#if MODULE_ID == AUDIO_CHANNEL
+#define TRACE TRACE_OFF
+#define DEBUG DEBUG_OFF
+#endif
 
 #if MODULE_ID == AUDIO_OUTPUT
 #define TRACE TRACE_OFF
@@ -84,7 +93,7 @@ void printid(char *id,int line,char *message);
 #define DEBUG DEBUG_OFF
 #endif
 
-#if MODULE_ID == CONFIGWINDOW
+#if MODULE_ID == CONFIGFILE
 #define TRACE TRACE_ON
 #define DEBUG DEBUG_ON
 #endif
@@ -99,16 +108,24 @@ void printid(char *id,int line,char *message);
 #define DEBUG DEBUG_OFF
 #endif
 
+#if MODULE_ID == EVENT
+#define TRACE TRACE_OFF
+#define DEBUG DEBUG_OFF
+#endif
+
 #if MODULE_ID == FILEWINDOW
 #define TRACE TRACE_OFF
 #define DEBUG DEBUG_OFF
 #endif
 
 #if MODULE_ID == INPUT
-#undef TRACE
-#undef DEBUG
-#define TRACE TRACE_OFF
+#define TRACE TRACE_ON
 #define DEBUG DEBUG_OFF
+#endif
+
+#if MODULE_ID == INPUTPLUGIN
+#define TRACE TRACE_ON
+#define DEBUG DEBUG_ON
 #endif
 
 #if MODULE_ID == WNDMGR
@@ -142,7 +159,7 @@ void printid(char *id,int line,char *message);
 #endif
 
 #if MODULE_ID == PLAYER
-#define TRACE TRACE_OFF
+#define TRACE TRACE_ON
 #define DEBUG DEBUG_OFF
 #endif
 
@@ -162,8 +179,8 @@ void printid(char *id,int line,char *message);
 #endif
 
 #if MODULE_ID == PLUGIN
-#define TRACE TRACE_OFF
-#define DEBUG DEBUG_OFF
+#define TRACE TRACE_ON
+#define DEBUG DEBUG_ON
 #endif
 
 #if MODULE_ID == RINGBUFFER

@@ -195,7 +195,7 @@ void SDL_EditKeyDownCB(SDL_Widget *widget,SDL_Event *event)
                 if(Edit->CursorPosition >= 0)
                 {
                     strcpy(Edit->Caption+Edit->CursorPosition,Edit->Caption+Edit->CursorPosition+1);
-                    SDL_WidgetDraw(widget,&widget->Rect);
+                    SDL_WidgetRedrawEvent(widget);
                     SDL_SignalEmit(widget,"changed");
                 }
             }
@@ -206,28 +206,28 @@ void SDL_EditKeyDownCB(SDL_Widget *widget,SDL_Event *event)
                 {
                     Edit->CursorPosition--;
                     strcpy(Edit->Caption+Edit->CursorPosition,Edit->Caption+Edit->CursorPosition+1);
-                    SDL_WidgetDraw(widget,&widget->Rect);
+                    SDL_WidgetRedrawEvent(widget);
                     SDL_SignalEmit(widget,"changed");
                 }
             }
             break;
         case SDLK_HOME:
             Edit->CursorPosition = 0; 
-            SDL_WidgetDraw(widget,&widget->Rect);
+            SDL_WidgetRedrawEvent(widget);
             break;
         case SDLK_END:
             Edit->CursorPosition = strlen(Edit->Caption)+1; 
-            SDL_WidgetDraw(widget,&widget->Rect);
+            SDL_WidgetRedrawEvent(widget);
             break;
          case SDLK_LEFT:
              if(Edit->CursorPosition > 0)
                 Edit->CursorPosition--;
-             SDL_WidgetDraw(widget,&widget->Rect);
+             SDL_WidgetRedrawEvent(widget);
              break;
          case SDLK_RIGHT:
              if(Edit->CursorPosition < strlen(Edit->Caption))
-                Edit->CursorPosition++;
-             SDL_WidgetDraw(widget,&widget->Rect);
+                 Edit->CursorPosition++;
+             SDL_WidgetRedrawEvent(widget);
              break;
          case SDLK_RETURN:
              if(SDL_WidgetHasFocus(widget))
@@ -256,7 +256,7 @@ void SDL_EditKeyDownCB(SDL_Widget *widget,SDL_Event *event)
                     sprintf(Edit->Caption,"%s%s",Edit->Caption,tmp);
                 }
                 Edit->CursorPosition++;
-                SDL_WidgetDraw(widget,&widget->Rect);
+                SDL_WidgetRedrawEvent(widget);
                 SDL_SignalEmit(widget,"changed");
             }
             break;

@@ -76,7 +76,6 @@ struct SongDBEntry
 typedef struct SongDBGroup
 {
     char *Name;
-    int Changed;
     int SubgroupCount;
     struct SongDBSubgroup *Active;
     struct SongDBSubgroup *Subgroup;
@@ -101,10 +100,14 @@ typedef struct SongDBSubgroup
 #define SONGDB_ID_UNKNOWN	0xffffff00	/* id not specified in songdb_search */
 
 
+/* Initialize the songdb, load xml file */
 int SONGDB_Init ();
+
+/* save the songdb to xml file */
 int SONGDB_Exit();
 
-int SONGDB_FreeActiveList();
+
+void SONGDB_FreeActiveList();
 struct SongDBEntry *SONGDB_GetEntryID(long id);
 struct SongDBEntry *SONGDB_GetSearchEntry(long id);
 long SONGDB_GetNoOfEntries (void);
@@ -112,21 +115,22 @@ long SONGDB_GetNoOfSearchResults(void);
 void SONGDB_FindEntry(char *search_string);
 
 /* Group related functions */
-int SONGDB_GroupChanged();
 SongDBGroup *SONGDB_GetActiveGroup();
 int SONGDB_SetActiveSubgroup(struct SongDBSubgroup *sg);
-
 int SONGDB_FindSubgroup(struct SongDBEntry *e);
-/* Subgroup modifiers */
 
-int SONGDB_AddSubgroup(struct SongDBGroup *group,char *title);
+int SONGDB_Add(char *file);
+
+/* Subgroup modifiers */
+int SONGDB_SubgroupAdd(struct SongDBGroup *group,char *title);
 int SONGDB_RemoveSubgroup(struct SongDBSubgroup *sg);
 int SONGDB_RenameSubgroup(struct SongDBSubgroup *sg, char *title);
-int SONGDB_RemovePlaylistEntry(struct SongDBSubgroup *sg,struct SongDBEntry *e);
+
+int SONGDB_RemoveEntry(struct SongDBSubgroup *sg,struct SongDBEntry *e);
 struct SongDBSubgroup *SONGDB_GetSubgroupList();
 int SONGDB_SubgroupSetVolatile(struct SongDBSubgroup *subgroup);
 int SONGDB_SubgroupCount();
 int SONGDB_AddFileToSubgroup(struct SongDBSubgroup *sg,char *filename);
-struct SongDBSubgroup *SONGDB_GetActiveSubgroup();
 int SONGDB_GetSubgroupCount();
-#endif
+
+#endif /* __SONGDB_H__ */

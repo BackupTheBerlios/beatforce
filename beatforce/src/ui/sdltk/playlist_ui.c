@@ -21,9 +21,8 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "SDL_Widget.h"
-#include "SDL_Table.h"
-#include "SDL_Font.h"
+
+#include <SDLTk.h>
 
 #include "songdb.h"
 #include "playlist.h"
@@ -42,14 +41,25 @@
 static void PLAYLISTUI_GetEntry(long row,int column,char *dest);
 static void PLAYLISTUI_EntryClicked(SDL_Table *table,SDL_Event *event);
 #endif
-
 SDL_Widget* PLAYLISTUI_CreateWindow(ThemePlaylist *pl)
 {
     SDL_Widget *pui = NULL;
+    ThemeImage        *Image = NULL;
 
     TRACE("PLAYLISTUI_CreateWindow");
     if(pl == NULL)
         return pui;
+    
+    Image=pl->Image;
+
+    while(Image)
+    {
+        SDL_Widget *image;
+        image=SDL_WidgetCreate(SDL_PANEL,Image->x,Image->y,Image->w,Image->h);
+        SDL_PanelSetImage(image,IMG_Load(Image->filename));
+        SDL_WidgetShow(image);
+        Image=Image->next;
+    }
 
     if(pl)
     {
@@ -57,7 +67,7 @@ SDL_Widget* PLAYLISTUI_CreateWindow(ThemePlaylist *pl)
         SDL_WidgetPropertiesOf(pui,SET_VISIBLE_COLUMNS, 1);
         SDL_WidgetPropertiesOf(pui,SET_FG_COLOR,WHITE);
         SDL_WidgetPropertiesOf(pui,SET_FONT,SDL_FontGet("normal"));
-        //SDL_WidgetPropertiesOf(pui,SET_CALLBACK,SDL_CLICKED,PLAYLISTUI_EntryClicked,NULL);
+//        SDL_SignalConnect(pui,"select-row",PLAYLISTUI_EntryClicked,NULL);
     }
     return pui;
 }

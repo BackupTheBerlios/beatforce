@@ -62,7 +62,7 @@ SDL_Widget* SDL_TooltipCreate(SDL_Widget *parent, char *text)
     SDL_SignalConnect(parent,"mousemotion",SDL_TooltipMouseMotionCB,widget);
     SDL_SignalConnect(parent,"hide",SDL_TooltipHideCB,widget);
 
-    SDL_StoreWidget(widget);
+    SDL_WindowAddWidget(widget);
     return widget;
 }
 

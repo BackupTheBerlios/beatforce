@@ -41,8 +41,6 @@ int fadeh;
 int fadeon;
 static SDL_mutex *MyMutex;
 
-SDL_Rect r;
-
 void EnableFade()
 {
     fadey=0;
@@ -83,19 +81,6 @@ int SDL_WidgetInit()
     return 1;
 }
 
-void SDL_WidgetMove(SDL_Widget *widget,int x, int y)
-{
-    r.x = widget->Rect.x;
-    r.y = widget->Rect.y;
-    r.w = widget->Rect.w;
-    r.h = widget->Rect.h;
-
-    SDL_WidgetRedrawEvent(widget);
-    widget->Rect.x=x;
-    widget->Rect.y=y;
-    SDL_WidgetRedrawEvent(widget);
-}
-
 SDL_Widget* SDL_WidgetCreate(E_Widget_Type widget,int x,int y, int w, int h)
 {
     SDL_Rect dest;
@@ -121,7 +106,7 @@ SDL_Widget* SDL_WidgetCreateR(E_Widget_Type WidgetType,SDL_Rect dest)
             NewWidget=create(&dest);
 
             NewWidget->Visible = 0;
-            SDL_StoreWidget(NewWidget);
+            SDL_WindowAddWidget(NewWidget);
             return NewWidget;
         }
     }
@@ -281,7 +266,7 @@ int SDL_WidgetSetFocus(SDL_Widget *widget)
 {
     if(widget && widget->Focusable)
     {
-        SDL_StackSetFocus(widget);
+        SDL_WindowSetFocusWidget(widget);
         return 1;
     }
     return 0;
@@ -289,14 +274,14 @@ int SDL_WidgetSetFocus(SDL_Widget *widget)
 
 int SDL_WidgetHasFocus(SDL_Widget *widget)
 {
-    if(SDL_StackGetFocus() == widget)
+    if(SDL_WindowGetFocusWidget() == widget)
         return 1;
     return 0;
 }
 
 int SDL_WidgetLoseFocus()
 {
-    SDL_StackSetFocus(NULL);
+    SDL_WindowSetFocusWidget(NULL);
     return 1;
 }
 
@@ -308,9 +293,9 @@ void SDL_WidgetRedrawEvent(SDL_Widget *widget)
         return;
 
     event.type = SDLTK_WIDGET_EVENT;
-    event.user.code  = 4;
+    event.user.code  = SDLTK_WIDGET_REDRAW;
     event.user.data1 = widget;
-    event.user.data2 = &r;
+    event.user.data2 = 0;
     SDL_PushEvent(&event);
 }
 
@@ -322,7 +307,7 @@ void SDL_WidgetHide(SDL_Widget *widget)
         return;
 
     event.type = SDLTK_WIDGET_EVENT;
-    event.user.code = 1;
+    event.user.code = SDLTK_WIDGET_HIDE;
     event.user.data1 = widget;
     event.user.data2 = 0;
     SDL_PushEvent(&event);
@@ -337,12 +322,53 @@ void SDL_WidgetShow(SDL_Widget *widget)
         return;
     
     event.type = SDLTK_WIDGET_EVENT;
-    event.user.code = 2;
+    event.user.code = SDLTK_WIDGET_SHOW;
     event.user.data1 = widget;
     event.user.data2 = 0;
     SDL_PushEvent(&event);
 
 }
 
+void SDL_WidgetMove(SDL_Widget *widget,int x, int y)
+{
+    SDL_Event event;
+    SDL_Rect  *rect;
 
+    if(widget == NULL)
+        return;
+    
+    rect = malloc(sizeof(SDL_Rect));
+    
+    rect->x = x;
+    rect->y = y;
+    rect->w = widget->Rect.w;
+    rect->h = widget->Rect.h;
 
+    event.type = SDLTK_WIDGET_EVENT;
+    event.user.code = SDLTK_WIDGET_MOVE;
+    event.user.data1 = widget;
+    event.user.data2 = rect;
+    SDL_PushEvent(&event);
+}
+
+void SDL_WidgetResize(SDL_Widget *widget,int w,int h)
+{
+    SDL_Event event;
+    SDL_Rect  *rect;
+
+    if(widget == NULL)
+        return;
+    
+    rect = malloc(sizeof(SDL_Rect));
+    
+    rect->x = widget->Rect.x;
+    rect->y = widget->Rect.y;
+    rect->w = w;
+    rect->h = h;
+
+    event.type = SDLTK_WIDGET_EVENT;
+    event.user.code = SDLTK_WIDGET_RESIZE;
+    event.user.data1 = widget;
+    event.user.data2 = rect;
+    SDL_PushEvent(&event);
+}

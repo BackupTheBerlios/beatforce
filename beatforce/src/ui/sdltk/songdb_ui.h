@@ -30,7 +30,7 @@ typedef struct SongdbWidgets
     SDL_Widget *Tabs;
 }SongdbWidgets;
 
-void  SONGDBUI_Redraw(void *w);
+void SONGDBUI_GroupChanged(void *w);
 void* SONGDBUI_CreateWindow(ThemeSongdb *ts);
 
 

@@ -23,7 +23,7 @@
 #ifndef __PLAYER_H__
 #define __PLAYER_H__
 
-#include "input_plugin.h"
+#include "input.h"
 #include "llist.h"
 #include "songdb.h"
 
@@ -45,7 +45,6 @@ struct PlayerPrivate
 {
     int playlist_id;             /* no of song playing ( in playlist ) 0, if not in playlist */
 
-    int  channel;
     struct SongDBEntry *e;
     ePlayerState State;           /* State of the player */
     
@@ -57,8 +56,7 @@ struct PlayerPrivate
 
     int auto_remove;              /* auto remove played songs */
 
-    BFList *ip_plugins;            /* linked list of initialised input plugins */
-    InputPluginData *current_plugin;        /* pointer to current plugin in list */
+    InputDevice  *Input;
 
     int PlayerID;
         
@@ -75,10 +73,6 @@ int PLAYER_Init (int player_nr);
 int player_finalize (int);
 
 int PLAYER_EOF(int);
-
-
-int player_set_callback(void*);
-
 
 void player_rev  (int, int);
 void player_forw (int, int);

@@ -23,8 +23,9 @@
 #ifndef __EVENT_H__
 #define __EVENT_H__
 
-#define EVENT_PLAYER_PAUSE   8
-#define EVENT_PLAYER_PLAY    9
+#define EVENT_PLAYER_PAUSE          8
+#define EVENT_PLAYER_PLAY           9
+#define EVENT_SONGDB_GROUP_CHANGED  10
 
 void EVENT_Init();
 void EVENT_PostEvent(int event_id,int poster);

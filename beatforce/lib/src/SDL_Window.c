@@ -35,14 +35,11 @@ static SDL_Window *SDL_WindowGetTopVisibleWindow();
 static SDL_Window *SDL_WindowGetTopWindow();
 
 static void SDL_WindowAddToWindowList(SDL_Window *Window);
+static void SDL_WidgetDraw(SDL_Widget *widget,SDL_Rect *Rect);
 
 int ScreenWidth;
 int ScreenHeight;
 int ScreenBpp;
-
-#define SDLTK_WIDGET_HIDE     1
-#define SDLTK_WIDGET_SHOW     2
-#define SDLTK_WINDOW_REDRAW   3
 
 SDL_Surface     *VideoSurface;          /* Drawing is done to this surface of the video driver */ 
 SDL_WindowList  *WindowList;            /* List of Windows */
@@ -67,12 +64,24 @@ int SDL_WindowInit(SDL_Surface *surface,int width,int height,int bpp)
 SDL_Window *SDL_WindowNew(int x,int y,int width,int height)
 {
     SDL_Window *Window;
-    
+
     Window = malloc(sizeof(SDL_Window));
     memset(Window,0,sizeof(SDL_Window));
 
-    Window->Visible     = 0;
-    Window->FocusWidget = NULL;
+    Window->Dimensions.x = x;
+    Window->Dimensions.y = y;
+    if(width == 0)
+        Window->Dimensions.w = ScreenWidth - x;
+    else
+        Window->Dimensions.w = width;
+
+    if(height == 0)
+        Window->Dimensions.h = ScreenHeight - y;
+    else
+        Window->Dimensions.h = height;
+
+    Window->Visible      = 0;
+    Window->FocusWidget  = NULL;
 
     SDL_WindowAddToWindowList(Window);
 
@@ -167,7 +176,7 @@ int SDL_RectInside(const SDL_Rect *A, const SDL_Rect *B)
 }
 
 
-void SDL_StoreWidget(SDL_Widget *widget)
+void SDL_WindowAddWidget(SDL_Widget *widget)
 {
     SDL_WindowList *WindowListItem;
 
@@ -182,12 +191,16 @@ void SDL_StoreWidget(SDL_Widget *widget)
         WindowListItem->Window->WidgetList=malloc(sizeof(SDL_WidgetList));
         memset(WindowListItem->Window->WidgetList,0,sizeof(SDL_WidgetList));
 
+        /* Adjust the relative coordinates to absolute ones */
+        widget->Rect.x += WindowListItem->Window->Dimensions.x;
+        widget->Rect.y += WindowListItem->Window->Dimensions.y;
+
         WindowListItem->Window->WidgetList->Widget  = widget;
         WindowListItem->Window->WidgetList->Next    = NULL;
         WindowListItem->Window->WidgetList->Parent  = NULL;
 
         /* Set the focus to the new widget if edit widget */
-        if(widget->Focusable && SDL_StackGetFocus() == NULL)
+        if(widget->Focusable && SDL_WindowGetFocusWidget() == NULL)
         {
             WindowListItem->Window->FocusWidget=widget;
         }
@@ -204,10 +217,15 @@ void SDL_StoreWidget(SDL_Widget *widget)
         temp->Next=malloc(sizeof(SDL_WidgetList));
         memset(temp->Next,0,sizeof(SDL_WidgetList));
         temp=temp->Next;
+
+        /* Adjust the relative coordinates to absolute ones */
+        widget->Rect.x += WindowListItem->Window->Dimensions.x;
+        widget->Rect.y += WindowListItem->Window->Dimensions.y;
+
         temp->Widget=widget;
         temp->Next=NULL;
 
-        if(widget->Focusable && SDL_StackGetFocus() == NULL)
+        if(widget->Focusable && SDL_WindowGetFocusWidget() == NULL)
         {
             WindowListItem->Window->FocusWidget=widget;
         }
@@ -234,12 +252,12 @@ SDL_WidgetList *SDL_WindowGetWidgetList()
     }
 }
 
-void SDL_StackSetFocus(SDL_Widget *focus_widget)
+void SDL_WindowSetFocusWidget(SDL_Widget *focus_widget)
 {
     SDL_WindowGetTopVisibleWindow()->FocusWidget=focus_widget;
 }
 
-SDL_Widget *SDL_StackGetFocus()
+SDL_Widget *SDL_WindowGetFocusWidget()
 {
     return SDL_WindowGetTopVisibleWindow()->FocusWidget;
 }
@@ -306,16 +324,39 @@ int SDLTK_Main()
                         }
                     }
                     break;
+                case SDLTK_WIDGET_RESIZE:
+                case SDLTK_WIDGET_MOVE:
+                    widget = Event.user.data1;
+                    rect   = Event.user.data2;
+                    if(SDL_WidgetActive(widget))
+                    {
+                        SDL_Rect   r;
+
+                        r.x = widget->Rect.x;
+                        r.y = widget->Rect.y;
+                        r.w = widget->Rect.w;
+                        r.h = widget->Rect.h;
+                        
+                        widget->Rect.x = rect->x;
+                        widget->Rect.y = rect->y;
+                        widget->Rect.w = rect->w;
+                        widget->Rect.h = rect->h;
+                        SDL_WidgetDraw(widget,rect);
+                        SDL_WidgetDraw(widget,&r);
+                        free(rect);
+                    }
+                    break;
+
+                case SDLTK_WIDGET_REDRAW:
+                    widget = Event.user.data1;
+                    if(SDL_WidgetActive(widget))
+                        SDL_WidgetDraw(widget,&widget->Rect);
+                    break;
                 case SDLTK_WINDOW_REDRAW:
                     SDL_WindowRedraw();
                     break;
 
-                case 4:
-                    widget = Event.user.data1;
-                    rect   = Event.user.data2;
-                    if(SDL_WidgetActive(widget))
-                        SDL_WidgetDraw(widget,&widget->Rect);
-                    break;
+                
                 }
                 
             }
@@ -344,7 +385,7 @@ int SDLTK_Main()
                     {
                         if(focus_widget->Widget->Focusable)
                         {
-                            SDL_StackSetFocus(focus_widget->Widget);
+                            SDL_WindowSetFocusWidget(focus_widget->Widget);
                         }
                         // Bug found when there are overlapping widgets the focus is set to the wrong widget
 //                break;
@@ -366,7 +407,7 @@ int SDLTK_Main()
                     int store=0;
 
                     WidgetList=SDL_WindowGetWidgetList();
-                    FocusWidget=SDL_StackGetFocus();
+                    FocusWidget=SDL_WindowGetFocusWidget();
             
                     while(WidgetList)
                     {
@@ -374,7 +415,7 @@ int SDLTK_Main()
                         {
                             if(WidgetList->Widget->Focusable)
                             {
-                                SDL_StackSetFocus(WidgetList->Widget);
+                                SDL_WindowSetFocusWidget(WidgetList->Widget);
                                 break;
                             }
                         }
@@ -385,7 +426,7 @@ int SDLTK_Main()
 
                             if(store && WidgetList->Widget->Focusable)
                             {
-                                SDL_StackSetFocus(WidgetList->Widget);
+                                SDL_WindowSetFocusWidget(WidgetList->Widget);
                                 break;
                             }
                             if(WidgetList->Widget == FocusWidget)
@@ -397,7 +438,7 @@ int SDLTK_Main()
                     }
                     if(WidgetList == NULL)
                     {
-                        SDL_StackSetFocus(FirstFocusWidget);
+                        SDL_WindowSetFocusWidget(FirstFocusWidget);
                     }
             
                 }
@@ -492,14 +533,14 @@ static void SDL_WindowRedrawEvent()
 /* Redraw the entire top most visible window */
 static void SDL_WindowRedraw()
 {
-    SDL_Window *Win;
+    SDL_Window *Window;
 
-    Win=SDL_WindowGetTopVisibleWindow();
+    Window=SDL_WindowGetTopVisibleWindow();
         
-    Win->Visible = 1;
-    if(Win->NotifyRedraw)
+    Window->Visible = 1;
+    if(Window->NotifyRedraw)
     {
-        Win->NotifyRedraw(Win);
+        Window->NotifyRedraw(Window);
     }
     SDL_DrawAllWidgets(VideoSurface);
 }
@@ -524,7 +565,7 @@ int SDL_WidgetActive(SDL_Widget *widget)
     return 0;
 }
 
-void SDL_WidgetDraw(SDL_Widget *widget,SDL_Rect *Rect)
+static void SDL_WidgetDraw(SDL_Widget *widget,SDL_Rect *Rect)
 {
     SDL_WidgetList *temp;
     T_Widget_Draw  draw; /* Draw function prototype */
@@ -536,12 +577,12 @@ void SDL_WidgetDraw(SDL_Widget *widget,SDL_Rect *Rect)
     {
         if(temp->Widget->Visible)
         {
-            if(//(temp->Widget->Type == SDL_PANEL  ) &&
-                SDL_IntersectRect(Rect,&temp->Widget->Rect,&intersection))
+            /* If the redraw area is intersecting with the widget from 
+               the list redraw it */
+            if(SDL_IntersectRect(Rect,&temp->Widget->Rect,&intersection)) /* //(temp->Widget->Type == SDL_PANEL  ) && */
             {
                 draw=WidgetTable[temp->Widget->Type]->draw;
                 draw(temp->Widget,VideoSurface,&intersection);
-            
             }
             else if(SDL_RectInside(Rect,&temp->Widget->Rect))
             {

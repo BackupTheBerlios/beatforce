@@ -3,7 +3,6 @@
    mp3.c - mpeg layer 1/2/3 ouput plugin  using libmad
    
    Copyright (c) 2001, Patrick Prasse (patrick.prasse@gmx.net)
-   Copyright (c) 2001-2004, John Beuving (john.beuving@beatforce.org)
 
    Credits to Rob Leslie (rob@mars.org) who wrote the mad winamp plugin
    on which this plugin is based.
@@ -120,11 +119,11 @@ mp3_set_interface(Private *p,InputInterface *api)
 
 /*ch_id is equal to player_nr */
 int
-mp3_init (Private ** p, int ch_id)
+mp3_init (Private ** p,int ch_id)
 {
     mp3Private *mp3_priv;
 
-    TRACE("mp3_init enter: %d", ch_id);
+    TRACE("mp3_init enter: %d");
 
     if(p == NULL)
     {
@@ -178,12 +177,12 @@ mp3_init (Private ** p, int ch_id)
     memset (cfg, 0, sizeof (struct config));
     cfg->lengthcalc = 0;
 
-    mp3_priv->ch_id = ch_id;
     mp3_priv->magic = MP3MAD_MAGIC;
+
+    mp3_priv->ch_id = ch_id;
 
     //to be done
     mp3_priv->going     = 1;
-//    mp3_priv->decode_thread=OSA_CreateThread(mp3_play_loop, (void *)mp3_priv);
     *p = (Private *) mp3_priv;
 
     TRACE("mp3_init leave");
@@ -193,7 +192,8 @@ mp3_init (Private ** p, int ch_id)
 int mp3_configure(Private *p,struct SongDBEntry *e)
 {
 
-
+    
+    return 0;
 }
 
 int
@@ -213,23 +213,20 @@ mp3_cleanup (Private * p)
     return 0;
 }
 
-int
-mp3_is_our_file (Private * h, char *filename)
+int mp3_is_our_file (char *filename)
 {
     char *ext;
 
-    if (h == NULL || filename == NULL)
+    if (filename == NULL)
         return FALSE;
 
     ext = strrchr (filename, '.');
     if (ext)
-    {
-	if (!strcmp (ext, ".mp3") || !strcmp (ext, ".MP3") ||
-            !strcmp (ext, ".mpg") || !strcmp (ext, ".mpeg"))
+	if (!strcmp (ext, ".mp3") || !strcmp (ext, ".mp2")
+            || !strcmp (ext, ".mpg") || !strcmp (ext, ".mpeg"))
 	{
             return TRUE;
 	}
-    }
     return FALSE;
 }
 
@@ -558,7 +555,7 @@ mp3_load_file (Private * h, char *filename)
         return 0;
     }
 
-    if (mp3_is_our_file (h, filename) != TRUE)
+    if (mp3_is_our_file (filename) != TRUE)
     {
         ERROR("unknown file");
 	return 0;

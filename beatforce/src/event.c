@@ -21,6 +21,10 @@
 */
 
 #include <malloc.h>
+#include <string.h>
+
+#define MODULE_ID EVENT
+#include "debug.h" 
 
 typedef struct CallbackList
 {
@@ -40,6 +44,7 @@ struct SignalList *EventHandlerList;
 
 void EVENT_Init()
 {
+    TRACE("EVENT_Init");
     EventHandlerList = NULL;
 }
 
@@ -97,6 +102,25 @@ void EVENT_Connect(int event_id,void *callback,void *data)
             
             l->Next->callback = callback;
             l->Next->data     = data;
+        }
+        else
+        {
+            SignalList *l;
+            
+            l=EventHandlerList;
+
+            while(l->Next && l->Event != event_id)
+                l=l->Next;
+
+            l->Next = malloc(sizeof(SignalList));
+            memset(l->Next,0,sizeof(SignalList));
+            
+            l->Next->Event = event_id;
+            l->Next->CallList = malloc(sizeof(CallbackList));
+            memset(l->Next->CallList,0,sizeof(CallbackList));
+            
+            l->Next->CallList->callback = callback;
+            l->Next->CallList->data     = data;
         }
     }
 

@@ -52,7 +52,7 @@ void CLOCK_Redraw(SDL_Widget *clock)
     TRACE("CLOCK_Redraw");
     if(clock)
     {
-        OSA_GetTime(&hour,&min);
+        OSA_TimeGet(&hour,&min);
         sprintf(time,"%02d:%02d",hour,min);
         SDL_LabelSetText(clock,time);
     }

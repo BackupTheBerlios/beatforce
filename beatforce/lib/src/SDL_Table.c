@@ -307,10 +307,10 @@ int SDL_TableEventHandler(SDL_Widget *widget,SDL_Event *event)
                     r.y = widget->Rect.y;
                     r.w = widget->Rect.w - Table->ScrollbarWidth;
                     r.h = widget->Rect.h;
-                    SDL_WidgetDraw(widget,&r);
+                    SDL_WidgetRedrawEvent(Table->Scrollbar);
                 }
                 else
-                    SDL_WidgetDraw(widget,&widget->Rect);
+                    SDL_WidgetRedrawEvent(widget);
             }
         }
 
@@ -347,7 +347,7 @@ int SDL_TableEventHandler(SDL_Widget *widget,SDL_Event *event)
                     row=SDL_ScrollbarGetCurrentValue(Table->Scrollbar);
                     row--;
                     SDL_ScrollbarSetCurrentValue(Table->Scrollbar,row);
-                    SDL_WidgetDraw(widget,&widget->Rect);
+                    SDL_WidgetRedrawEvent(widget);
                 }
 
             }
@@ -359,7 +359,7 @@ int SDL_TableEventHandler(SDL_Widget *widget,SDL_Event *event)
                     row=SDL_ScrollbarGetCurrentValue(Table->Scrollbar);
                     row++;
                     SDL_ScrollbarSetCurrentValue(Table->Scrollbar,row);
-                    SDL_WidgetDraw(widget,&widget->Rect);
+                    SDL_WidgetRedrawEvent(widget);
                 }
             }
         }
@@ -388,7 +388,7 @@ int SDL_TableEventHandler(SDL_Widget *widget,SDL_Event *event)
                         Table->HighlightedRow++;
                     }
                 }
-                SDL_WidgetDraw(widget,&widget->Rect);
+                SDL_WidgetRedrawEvent(widget);
             }
             break;
         case SDLK_UP:
@@ -409,7 +409,7 @@ int SDL_TableEventHandler(SDL_Widget *widget,SDL_Event *event)
                         }
                     }
                 }
-                SDL_WidgetDraw(widget,&widget->Rect);
+                SDL_WidgetRedrawEvent(widget);
             }
             break;
         case SDLK_HOME:
@@ -418,7 +418,7 @@ int SDL_TableEventHandler(SDL_Widget *widget,SDL_Event *event)
                 Table->HighlightedRow  = 0;
                 Table->FirstVisibleRow = 0;
                 SDL_ScrollbarSetCurrentValue(Table->Scrollbar,Table->FirstVisibleRow);
-                SDL_WidgetDraw(widget,&widget->Rect);
+                SDL_WidgetRedrawEvent(widget);
             }
             break;
         case SDLK_END:
@@ -427,7 +427,7 @@ int SDL_TableEventHandler(SDL_Widget *widget,SDL_Event *event)
                 Table->HighlightedRow  = Table->VisibleRows - 1;
                 Table->FirstVisibleRow = Table->Rows - Table->VisibleRows - 1;
                 SDL_ScrollbarSetCurrentValue(Table->Scrollbar,Table->FirstVisibleRow);
-                SDL_WidgetDraw(widget,&widget->Rect);
+                SDL_WidgetRedrawEvent(widget);
             }
             break;
         case SDLK_PAGEUP:
@@ -437,7 +437,7 @@ int SDL_TableEventHandler(SDL_Widget *widget,SDL_Event *event)
                 row=SDL_ScrollbarGetCurrentValue(Table->Scrollbar);
                 row-=10;
                 SDL_ScrollbarSetCurrentValue(Table->Scrollbar,row);
-                SDL_WidgetDraw(widget,&widget->Rect);
+                SDL_WidgetRedrawEvent(widget);
             }
             break;
         case SDLK_PAGEDOWN:
@@ -447,7 +447,7 @@ int SDL_TableEventHandler(SDL_Widget *widget,SDL_Event *event)
                 row=SDL_ScrollbarGetCurrentValue(Table->Scrollbar);
                 row+=10;
                 SDL_ScrollbarSetCurrentValue(Table->Scrollbar,row);
-                SDL_WidgetDraw(widget,&widget->Rect);
+                SDL_WidgetRedrawEvent(widget);
             }
             break;
         case SDLK_RETURN:

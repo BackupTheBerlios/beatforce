@@ -192,7 +192,7 @@ int SDL_ScrollbarEventHandler(SDL_Widget *widget,SDL_Event *event)
 
     if(changed)
     {
-        SDL_WidgetDraw(widget,&widget->Rect);
+        SDL_WidgetRedrawEvent(widget);
         if(Scrollbar->Callback)
             Scrollbar->Callback(Scrollbar->CallbackWidget);
     }

@@ -23,17 +23,20 @@ if env['ui'] == 'sdltk':
                         'mixer.c',
                         'debug.c',
                         'osa.c',
+                        'audio_channel.c',
                         'audio_output.c',
                         'llist.c',
                         'ringbuffer.c',
                         'sampler.c',
                         'input.c',
+                        'input_plugin.c',
                         'output.c',
                         'plugin.c',
                         'theme.c',
                         'event.c',
                         'configfile.c'
                 ],
+#                        LIBS=['xml2','ui','sdltk','dl','SDL_image','SDL','X11','Xext','m','posix4'],
                         LIBS=['SDL','SDL_image','xml2','ui','sdltk','dl','m'],
                         LIBPATH=['../lib/src/','ui/sdltk'])      
 elif env['ui'] == 'gtk':

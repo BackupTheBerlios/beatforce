@@ -54,6 +54,7 @@ typedef signed short output_word;
 
 
 /* sub-groups in mask */
+#define GROUP_FADER     1
 #define GROUP_MASTER	2
 #define GROUP_MONITOR   4
 
@@ -63,59 +64,11 @@ typedef signed short output_word;
 #define CHANNEL_PreH		2
 #define CHANNEL_Sampler 	3
 
+#include "audio_channel.h"
 #include "ringbuffer.h"
 #include "output_plugin.h"
 #include "configfile.h"
 
-struct OutChannel
-{
-    int id;
-
-    output_word *buffer;
-    output_word *buffer2;
-
-    int buffer2_size;
-
-    struct OutRingBuffer *rb;
-
-    int Mute; /* boolean */
-    int Paused; /* boolean */
-    int Open;      /* boolean */
-
-    long bytes_written;
-
-    unsigned short mask;
-
-    AFormat aformat;
-    int n_ch;
-    int rate;
-
-    float bpm;
-    long beats;
-    float bpm_hist[OUTPUT_BPM_HIST];
-
-    unsigned char bands[OUTPUT_FFT_BANDS];
-    unsigned char bands_hist[OUTPUT_FFT_BANDS][OUTPUT_FFT_HIST];
-
-    float fader_dB;
-
-    int clipping;
-    int clipping_count;
-    int readdata;
-
-    int padding_count;
-
-    int detect_beat;
-    int display_fft;
-    
-    void* last_beat; /* Handle to timer */
-    long bpm_prescale;
-
-    float speed; /* Playback speed */
-
-    int volumeleft; /* for volume */
-    int volumeright;
-};
 
 typedef struct OutChannelList 
 {
@@ -146,6 +99,7 @@ struct OutGroup
 int AUDIOOUTPUT_Init ();
 int AUDIOOUTPUT_Cleanup (void);
 
+
 /* interface to input plugin */
 int AUDIOOUTPUT_Open (int, AFormat, int, int, int *);
 int AUDIOOUTPUT_SetSpeed(int channel, int speed);
@@ -159,7 +113,6 @@ long AUDIOOUTPUT_BufferFree(int c);
 int AUDIOOUTPUT_Pause (int c, int pause);
 int output_set_time (int, long);
 long AUDIOOUTPUT_GetTime(int channel);
-int AUDIOOUTPUT_ChannelNew();
 
 /* interface to mixer */
 int AUDIOOUTPUT_SetVolume(int, float);
@@ -175,7 +128,7 @@ int output_set_beatcount (int, int);
 double output_get_bpm (int);
 int AUDIOOUTPUT_GetVolumeLevel(int channel,int *left,int *right);
 struct OutChannel *AUDIOOUTPUT_GetChannelByID(int c);
-
+int AUDIOOUTPUT_ChannelRegister(struct OutChannel *channel);
 
 int do_fft (int, output_word *);
 
