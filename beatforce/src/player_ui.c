@@ -183,6 +183,16 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
 
 void PLAYERUI_Redraw()
 {
+    /* Automaticly load a song when no player is playing */
+    if(PLAYER_IsPlaying(0) == 0 &&
+       PLAYER_IsPlaying(1) == 0 &&
+       PLAYLIST_GetSong(0,0))
+    {
+        player_set_song(0,0);
+        PLAYER_Play(0);
+    }
+
+
     playerui_UpdateArtist(0);
     playerui_UpdateArtist(1);
 

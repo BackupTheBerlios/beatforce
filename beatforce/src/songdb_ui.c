@@ -128,22 +128,22 @@ void SONGDBUI_CreateWindow(ThemeSongdb *ts)
         {
         case CHANGE_DIR:
             //add dir to highlighted tab
-            SDL_WidgetCreate(SDL_BUTTON,30,610,20,20);
+            SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
             SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,UI_SongdbChangeDirClicked,NULL);        
             break;
         case RENAME:
             //rename highlighted tab
-            SDL_WidgetCreate(SDL_BUTTON,60,610,20,20);
+            SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
             SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,UI_SongdbRenameClicked,NULL);        
             break;
         case ADD:
             //add a empty tab button
-            SDL_WidgetCreate(SDL_BUTTON,90,610,20,20);
+            SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
             SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,UI_SongdbAddTabClicked,NULL);        
             break;
         case REMOVE:
             //remove the active tab
-            SDL_WidgetCreate(SDL_BUTTON,120,610,20,20);
+            SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
             SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,songdbui_RemoveTab,NULL);        
             break;
         }

@@ -232,15 +232,18 @@ void searchwindow_Play(void *data)
             if(player!=1)
                 player=0;
         }
-        
+
+        /* Add the song to the bottom of the playlist */
         PLAYLIST_SetEntry(player,e);
+        
+#if 0
         player_set_song(player,0);  // when set_entry is excecuted we only have 1 item thus 0
         
         if(autofade == 1)
             MIXER_DoFade(1,0);
         else
             PLAYER_Play(player);
-
+#endif
         /* and the search results */
         SONGDB_FindEntry("");
 

@@ -345,7 +345,6 @@ void player_set_song (int player_nr, int no)
 
     if (ent < no)
     {
-        printf("Were here\n");
         player_set_song (player_nr, 1);
         return;
     }
@@ -354,6 +353,7 @@ void player_set_song (int player_nr, int no)
     if(pe == NULL)
     {
         ERROR("Nothing loaded");
+        exit(1);
         return;
     }
     p->playlist_id     = no;
