@@ -153,6 +153,6 @@ int  SDL_TableEventHandler(SDL_Widget *widget,SDL_Event *event);
 
 
 /* Modification functions */
-void SDL_TableAddRow(SDL_Widget *Table,char *Titles[]);
+void SDL_TableAddRow(SDL_Widget *Table,char *Titles[]); /* Add a row to the end of the table */
 
 #endif /* __SDL_TABLE_H__ */

@@ -393,44 +393,22 @@ void SDL_WidgetDraw(SDL_Widget *widget,SDL_Rect *Rect)
 
     temp=ActiveScreen->WidgetList;
 
-    if(widget->Type == 3)
-    {
-        printf("SDL_WidgetDraw %d\n",widget->Type);
-        printf("Rect %d %d %d %d\n",Rect->x,Rect->y,Rect->w,Rect->h);
-    }
     while(temp)
     {
         if(temp->Widget->Type == SDL_PANEL && 
            SDL_IntersectRect(Rect,&temp->Widget->Rect,&intersection))
         {
-            if(widget->Type == 3)
-            {
-                printf("Orig %d %d %d %d\n",temp->Widget->Rect.x,temp->Widget->Rect.y,temp->Widget->Rect.w,
-                       temp->Widget->Rect.h);
-                printf("Panel Rect %d %d %d %d\n\n",intersection.x,intersection.y,intersection.w,
-                       intersection.h);
-            }
             draw=WidgetTable[temp->Widget->Type]->draw;
             draw(temp->Widget,screen,&intersection);
             
         }
         else if(SDL_RectInside(Rect,&temp->Widget->Rect))
         {
-            if(widget->Type == 3)
-            {
-                printf("Orig1 %d %d %d %d\n",temp->Widget->Rect.x,temp->Widget->Rect.y,temp->Widget->Rect.w,
-                       temp->Widget->Rect.h);
-            }
             draw=WidgetTable[temp->Widget->Type]->draw;
             draw(temp->Widget,screen,Rect);
         }
         else if(SDL_RectInside(&temp->Widget->Rect,Rect))
         {
-            if(widget->Type == 3)
-            {
-                printf("Orig2 %d %d %d %d\n",temp->Widget->Rect.x,temp->Widget->Rect.y,temp->Widget->Rect.w,
-                       temp->Widget->Rect.h);
-            }
             draw=WidgetTable[temp->Widget->Type]->draw;
             draw(temp->Widget,screen,Rect);
         }

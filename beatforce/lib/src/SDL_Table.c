@@ -222,6 +222,7 @@ int SDL_TableProperties(SDL_Widget *widget,int feature,va_list list)
 
                     Table->Column[i].Button = SDL_WidgetCreate(SDL_BUTTON,widget->Rect.x + x,
                                                                widget->Rect.y,Table->Column[i].Width,Table->ButtonHeight);
+                    SDL_ButtonSetLabel(Table->Column[i].Button,"column");
                 }
             }
         }

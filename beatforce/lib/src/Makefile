@@ -85,7 +85,7 @@ noinst_LIBRARIES = libSDLTk.a
 
 AM_CPPFLAGS = -Wall
 
-libSDLTk_a_SOURCES =   SDLTk.h                               SDL_Window.c       SDL_Window.h       SDL_Widget.c       SDL_Widget.h       SDL_WidTool.c      SDL_WidTool.h      SDL_Table.c        SDL_Table.h        SDL_Tab.c          SDL_Tab.h          SDL_Button.c       SDL_Button.h       SDL_Slider.c       SDL_Slider.h       SDL_Label.c        SDL_Label.h        SDL_Edit.c         SDL_Edit.h         SDL_Panel.c        SDL_Panel.h        SDL_VolumeBar.c    SDL_VolumeBar.h    SDL_ProgressBar.c  SDL_ProgressBar.h  SDL_Tree.c         SDL_Tree.h                                               SDL_Font.c         SDL_Font.h         SDL_FontFNT.c      SDL_FontFNT.h      SDL_FontBDF.c      SDL_FontBDF.h                                            SDL_Primitives.c   SDL_Primitives.h  
+libSDLTk_a_SOURCES =   SDLTk.h                               SDL_Window.c       SDL_Window.h       SDL_Widget.c       SDL_Widget.h       SDL_WidTool.c      SDL_WidTool.h      SDL_Table.c        SDL_Table.h        SDL_Tab.c          SDL_Tab.h          SDL_Button.c       SDL_Button.h       SDL_Slider.c       SDL_Slider.h       SDL_Label.c        SDL_Label.h        SDL_Edit.c         SDL_Edit.h         SDL_Panel.c        SDL_Panel.h        SDL_VolumeBar.c    SDL_VolumeBar.h    SDL_ProgressBar.c  SDL_ProgressBar.h  SDL_Tree.c         SDL_Tree.h                                               SDL_Font.c         SDL_Font.h         SDL_FontFNT.c      SDL_FontFNT.h      SDL_FontBDF.c      SDL_FontBDF.h      SDL_DefFont.c                                                               SDL_Primitives.c   SDL_Primitives.h  
 
 
 libSDLTk_a_LIBADD = 
@@ -105,7 +105,8 @@ SDL_WidTool.$(OBJEXT) SDL_Table.$(OBJEXT) SDL_Tab.$(OBJEXT) \
 SDL_Button.$(OBJEXT) SDL_Slider.$(OBJEXT) SDL_Label.$(OBJEXT) \
 SDL_Edit.$(OBJEXT) SDL_Panel.$(OBJEXT) SDL_VolumeBar.$(OBJEXT) \
 SDL_ProgressBar.$(OBJEXT) SDL_Tree.$(OBJEXT) SDL_Font.$(OBJEXT) \
-SDL_FontFNT.$(OBJEXT) SDL_FontBDF.$(OBJEXT) SDL_Primitives.$(OBJEXT)
+SDL_FontFNT.$(OBJEXT) SDL_FontBDF.$(OBJEXT) SDL_DefFont.$(OBJEXT) \
+SDL_Primitives.$(OBJEXT)
 AR = ar
 CFLAGS = -g -O2 -I/usr/include -DHAVE_MP3
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -119,12 +120,12 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = tar
 GZIP_ENV = --best
-DEP_FILES =  .deps/SDL_Button.P .deps/SDL_Edit.P .deps/SDL_Font.P \
-.deps/SDL_FontBDF.P .deps/SDL_FontFNT.P .deps/SDL_Label.P \
-.deps/SDL_Panel.P .deps/SDL_Primitives.P .deps/SDL_ProgressBar.P \
-.deps/SDL_Slider.P .deps/SDL_Tab.P .deps/SDL_Table.P .deps/SDL_Tree.P \
-.deps/SDL_VolumeBar.P .deps/SDL_WidTool.P .deps/SDL_Widget.P \
-.deps/SDL_Window.P
+DEP_FILES =  .deps/SDL_Button.P .deps/SDL_DefFont.P .deps/SDL_Edit.P \
+.deps/SDL_Font.P .deps/SDL_FontBDF.P .deps/SDL_FontFNT.P \
+.deps/SDL_Label.P .deps/SDL_Panel.P .deps/SDL_Primitives.P \
+.deps/SDL_ProgressBar.P .deps/SDL_Slider.P .deps/SDL_Tab.P \
+.deps/SDL_Table.P .deps/SDL_Tree.P .deps/SDL_VolumeBar.P \
+.deps/SDL_WidTool.P .deps/SDL_Widget.P .deps/SDL_Window.P
 SOURCES = $(libSDLTk_a_SOURCES)
 OBJECTS = $(libSDLTk_a_OBJECTS)
 

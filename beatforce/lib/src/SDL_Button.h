@@ -42,13 +42,13 @@ typedef struct SDL_Button
     SDL_Surface      *highlighted;
     SDL_Surface      *pressed;
     SDL_ButtonStates state;
-    int              Visible;
 
     void (*Clicked)(void* data);
     void *ClickedData;
-    char             *caption;
 
-    struct SDL_Button       *next;
+    SDL_Widget *Label;
+
+
 }SDL_Button;
 
 /*
@@ -62,6 +62,7 @@ int         SDL_ButtonProperties(SDL_Widget *widget,int feature,va_list list);
 int         SDL_ButtonEventHandler(SDL_Widget *widget,SDL_Event *event);
 void        SDL_ButtonClose(SDL_Widget *widget);
 
-
+/* Set a label to the button */
+void SDL_ButtonSetLabel(SDL_Widget *widget,char *title);
 
 #endif /* __BUTTON_H__ */

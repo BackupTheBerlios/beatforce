@@ -59,9 +59,9 @@ SDL_Widget* SDL_ButtonCreate(SDL_Rect* rect)
     newbutton->pressed      = NULL; 
     newbutton->Clicked      = NULL;
     newbutton->ClickedData  = NULL;
-    newbutton->Visible      = 1;
     newbutton->state        = SDL_BUTTON_UP;
-    newbutton->next         = NULL;
+    newbutton->Label        = NULL;
+   
     return (SDL_Widget*)newbutton;
 }
 
@@ -71,8 +71,14 @@ void SDL_ButtonDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
     SDL_Surface *drawbutton=NULL;
     SDL_Rect src;
 
-    if(button->Visible == 0)
-        return;
+
+    if(button->Label)
+    {
+        button->Label->Rect.x = button->Widget.Rect.x;
+        button->Label->Rect.y = button->Widget.Rect.y;
+        button->Label->Rect.w = button->Widget.Rect.w;
+        button->Label->Rect.h = button->Widget.Rect.h;
+    }
 
     if(button->normal==NULL)
     {
@@ -96,6 +102,8 @@ void SDL_ButtonDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
             src.h=widget->Rect.h;
 
     }
+
+
 
     switch(button->state)
     {
@@ -160,11 +168,6 @@ int SDL_ButtonProperties(SDL_Widget *widget,int feature,va_list list)
         }
         break;
     }
-    case SET_VISIBLE:
-    {
-        Button->Visible=va_arg(list,int);
-        break;
-    }
     }
     return 1;
 }
@@ -172,9 +175,6 @@ int SDL_ButtonProperties(SDL_Widget *widget,int feature,va_list list)
 int SDL_ButtonEventHandler(SDL_Widget *widget,SDL_Event *event)
 {
     SDL_Button *Button=(SDL_Button*)widget;
-
-    if(Button->Visible == 0)
-        return 0;
 
     switch(event->type)
     {
@@ -187,6 +187,7 @@ int SDL_ButtonEventHandler(SDL_Widget *widget,SDL_Event *event)
         }
         else
             Button->state = SDL_BUTTON_UP;
+        
         break;
     case SDL_MOUSEBUTTONDOWN:
         if(SDL_WidgetIsInside(widget,event->motion.x,event->motion.y))
@@ -224,15 +225,7 @@ void SDL_ButtonClose(SDL_Widget *widget)
     free(Button);
 }
 
-void drawline(SDL_Surface *screen,Uint32 color,int x,int y,int x2, int y2)
-{
-    SDL_Rect r;
-    r.x = x;
-    r.y = y;
-    r.w = x2 - x + 1;
-    r.h = y2 - y + 1;
-    SDL_FillRect(screen,&r,color);
-}
+
 
 static void SDL_ButtonPaint(SDL_Widget *Widget,SDL_Surface *screen)
 {
@@ -254,34 +247,45 @@ static void SDL_ButtonPaint(SDL_Widget *Widget,SDL_Surface *screen)
 //    if(Button->state == SDL_BUTTON_UP)
     {
         // normal
-        drawline (screen,0x404040,x, y + height - 1, x + width - 1, y + height - 1);
-        drawline (screen,0x404040,x + width - 1, y, x + width - 1, y + height - 1);
+        lineColor (screen,x, y + height - 1, x + width - 1, y + height - 1,0x404040ff);
+        lineColor (screen,x + width - 1, y, x + width - 1, y + height - 1,0x404040ff);
 
-        drawline (screen,0x808080,x + 1, y + height - 2, x + width - 2, y + height - 2);
-        drawline (screen,0x808080,x + width - 2, y + 1, x + width - 2, y + height - 2);
+        lineColor (screen,x + 1, y + height - 2, x + width - 2, y + height - 2,0x808080ff);
+        lineColor (screen,x + width - 2, y + 1, x + width - 2, y + height - 2,0x808080ff);
 
-        drawline (screen,0xffffff,x + 1, y + 1, x + width - 2, y + 1);
-        drawline (screen,0xffffff,x + 1, y + 1, x + 1, y + height - 2);
+        lineColor (screen,x + 1, y + 1, x + width - 2, y + 1,0xffffffff);
+        lineColor (screen,x + 1, y + 1, x + 1, y + height - 2,0xffffffff);
 
-        drawline (screen,0xd4d0c8,x, y, x + width - 1, y);
-        drawline (screen,0xd4d0c8,x, y, x, y + height - 1);       
+        lineColor (screen,x, y, x + width - 1, y,0xd4d0c8ff);
+        lineColor (screen,x, y, x, y + height - 1,0xd4d0c8ff);       
     }
     
     if(Button->state == SDL_BUTTON_DOWN)
     {
         // pressed
-        drawline (screen, 0xffffff,x, y + height - 1, x + width - 1, y + height - 1);
-        drawline (screen, 0xffffff,x + width - 1, y, x + width - 1, y + height - 1);
+        lineColor (screen,x, y + height - 1, x + width - 1, y + height - 1, 0xffffffff);
+        lineColor (screen,x + width - 1, y, x + width - 1, y + height - 1, 0xffffffff);
 
-        drawline (screen, 0xd4d0c8,x + 1, y + height - 2, x + width - 2, y + height - 2);
-        drawline (screen, 0xd4d0c8,x + width - 2, y + 1, x + width - 2, y + height - 2);
+        lineColor (screen,x + 1, y + height - 2, x + width - 2, y + height - 2, 0xd4d0c8ff);
+        lineColor (screen,x + width - 2, y + 1, x + width - 2, y + height - 2, 0xd4d0c8ff);
       
-        drawline (screen, 0x808080,x + 1, y + 1, x + width - 2, y + 1);
-        drawline (screen, 0x808080,x + 1, y + 1, x + 1, y + height - 2);
+        lineColor (screen,x + 1, y + 1, x + width - 2, y + 1, 0x808080ff);
+        lineColor (screen,x + 1, y + 1, x + 1, y + height - 2, 0x808080ff);
       
-        drawline (screen, 0x404040,x, y, x + width - 1, y);
-        drawline (screen, 0x404040,x, y, x, y + height - 1);
+        lineColor (screen,x, y, x + width - 1, y, 0x404040ff);
+        lineColor (screen,x, y, x, y + height - 1, 0x404040ff);
 
     }
 }
 
+void SDL_ButtonSetLabel(SDL_Widget *widget,char *title)
+{
+    SDL_Button *Button=(SDL_Button*)widget;
+    
+    if(Button->Label == NULL)
+        Button->Label=SDL_WidgetCreate(SDL_LABEL,widget->Rect.x,widget->Rect.y,
+                                                 widget->Rect.w,widget->Rect.h);
+
+    SDL_WidgetPropertiesOf(Button->Label,SET_CAPTION,title);
+
+}

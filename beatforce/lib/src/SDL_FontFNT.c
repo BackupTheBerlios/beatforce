@@ -197,6 +197,7 @@ void FNT_ReadFont(FILE *fp,SDL_Font *font)
    
     {
         int mallocsize=(int)fnt->font-118;
+       
         if(mallocsize > 0)
         {
             fnt->chartable = malloc(mallocsize+1);

@@ -23,6 +23,7 @@ libSDLTk_a_SOURCES = \
  SDL_Font.c         SDL_Font.h        \
  SDL_FontFNT.c      SDL_FontFNT.h     \
  SDL_FontBDF.c      SDL_FontBDF.h     \
+ SDL_DefFont.c                        \
                                       \
  SDL_Primitives.c   SDL_Primitives.h  
 
