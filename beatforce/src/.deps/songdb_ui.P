@@ -23,8 +23,8 @@ songdb_ui.o: songdb_ui.c /usr/include/stdio.h /usr/include/features.h \
  /usr/include/SDL/SDL_mutex.h /usr/include/SDL/SDL_quit.h \
  /usr/include/SDL/SDL_version.h ../lib/src/SDL_Widget.h \
  /usr/include/SDL/SDL_image.h ../lib/src/SDL_Font.h \
- ../lib/src/SDL_Table.h ../lib/src/SDL_Tab.h ../lib/src/SDL_Button.h \
- ../lib/src/SDL_Edit.h songdb.h configfile.h llist.h songdb_ui.h \
+ ../lib/src/SDL_Table.h ../lib/src/SDL_Edit.h ../lib/src/SDL_Tab.h \
+ ../lib/src/SDL_Button.h songdb.h configfile.h llist.h songdb_ui.h \
  theme.h player.h input_plugin.h playlist.h osa.h playlist_ui.h \
  player_ui.h file_window.h debug.h
 songdb_ui.c :
@@ -78,9 +78,9 @@ wndmgr.h :
 /usr/include/SDL/SDL_image.h :
 ../lib/src/SDL_Font.h :
 ../lib/src/SDL_Table.h :
+../lib/src/SDL_Edit.h :
 ../lib/src/SDL_Tab.h :
 ../lib/src/SDL_Button.h :
-../lib/src/SDL_Edit.h :
 songdb.h :
 configfile.h :
 llist.h :

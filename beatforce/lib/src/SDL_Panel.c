@@ -56,25 +56,32 @@ void* SDL_PanelCreate(SDL_Rect* rect)
 void SDL_PanelDraw(void *panel,SDL_Surface *dest)
 {
     SDL_Panel *Panel=(SDL_Panel*)panel;
+    SDL_Rect src;
+
+    src.x=0;
+    src.y=0;
+    if(Panel->rect.w == 0 && Panel->image)
+        src.w=Panel->image->w;
+    else
+        src.w=Panel->rect.w;
+    
+    if(Panel->rect.h == 0 && Panel->image)
+        src.h=Panel->image->h;
+    else
+        src.h=Panel->rect.h;
+    
     
     if(Panel->redraw || SDL_WidgetNeedsRedraw())
     {
         if(Panel->image)
         {
-            if(SDL_BlitSurface(Panel->image,NULL,dest,&Panel->rect)<0)
+            if(SDL_BlitSurface(Panel->image,&src,dest,&Panel->rect)<0)
                 fprintf(stderr, "BlitSurface error: %s\n", SDL_GetError());
         }
         else
         {
             SDL_FillRect(dest,&Panel->rect,Panel->color);
         }
-        
-        SDL_UpdateRect(dest,
-                       Panel->rect.x,
-                       Panel->rect.y,
-                       Panel->rect.w,
-                       Panel->rect.h);
-
         Panel->redraw=0;
     }
     

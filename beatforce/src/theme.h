@@ -28,42 +28,61 @@ SDL_Font *THEME_Font(char *fontid);
 
 enum
 {
-    PLAY=1,
-    PAUSE,
-    RESET_FADER,
-    CHANGE_DIR,
-    RENAME,
-    ADD,
-    REMOVE
+    /*Main window */
+    BUTTON_PLAY=1, 
+    BUTTON_PAUSE,
+    BUTTON_RESET_FADER,
+    BUTTON_CHANGE_DIR,
+
+    /*File window */
+    BUTTON_RENAME,
+    BUTTON_ADD,
+    BUTTON_REMOVE,
+    BUTTON_ADDSELECTED,
+    BUTTON_DELETESELECTED
 }eButtonAction;
 
 enum
 {
-    PITCH=1,
-    SPEED,
+    SLIDER_PITCH=1,
+    SLIDER_SPEED,
     
-    MAIN_VOLUME,
-    FADER
+    SLIDER_MAIN_VOLUME,
+    SLIDER_FADER
 }eSliderAction;
 
 
 enum
 {
-    TIME_ELAPSED = 1,
-    TIME_REMAINING,
-    SONG_TITLE,
-    SONG_ARTIST,
-    SAMPLERATE,
-    PLAYER_STATE,
-    BITRATE
+    TEXT_TIME_ELAPSED = 1,
+    TEXT_TIME_REMAINING,
+    TEXT_SONG_TITLE,
+    TEXT_SONG_ARTIST,
+    TEXT_SAMPLERATE,
+    TEXT_PLAYER_STATE,
+    TEXT_BITRATE
 }eTextDisplay;
 
 enum
 {
-    VOLUME_LEFT = 1,
-    VOLUME_RIGHT,
-    MAIN_INDICATION
+    VOLUMEBAR_VOLUME_LEFT = 1,
+    VOLUMEBAR_VOLUME_RIGHT,
+    VOLUMEBAR_MAIN_INDICATION
 }eVolumeBarDisplay;
+
+enum
+{
+    
+    LABEL_EMPTY
+}eLabelDisplay;
+
+enum
+{
+    CONTENTS_SUBGROUPS = 1,
+    CONTENTS_FILESINDIRECTORY,
+    CONTENTS_FILESINSUBGROUP,
+    CONTENTS_DIRECTORY
+}eTableContents;
 
 typedef struct ThemeFont
 {
@@ -116,12 +135,21 @@ typedef struct ThemeColumn
     struct ThemeColumn *next;
 }ThemeColumn;
 
-typedef struct
+typedef struct ThemeLabel
+{
+    SDL_Rect Rect;
+    int display;
+    struct ThemeLabel *next;
+}ThemeLabel;
+
+typedef struct ThemeTable
 {
     SDL_Rect Rect;
     int Rows;
     int Columns;
+    int contents;
     struct ThemeColumn *Column;
+    struct ThemeTable *next;
 }ThemeTable;
 
 typedef struct ThemeVolumeBar
@@ -156,7 +184,7 @@ typedef struct
 
 typedef struct 
 {
-    ThemeTable  *Table;
+    ThemeTable *Table;
     ThemeButton *Button;
 }ThemeSongdb;
 
@@ -198,7 +226,10 @@ typedef struct ThemeSearchWindow
 
 typedef struct ThemeFileWindow
 {
-    ThemeImage *Image;
+    ThemeTable  *Table;
+    ThemeImage  *Image;
+    ThemeText   *Text;
+    ThemeButton *Button;
 }ThemeFileWindow;
 
 typedef struct

@@ -78,7 +78,7 @@ typedef struct SDL_Tab
 
 void *SDL_TabCreate(SDL_Rect *rect);
 void SDL_TabDraw(void *data,SDL_Surface *dest);
-int  SDL_TabProperties(void *tab,int feature,va_list list);
+int SDL_TabProperties(void *tab,int feature,va_list list);
 void SDL_TabEventHandler(void * tab,SDL_Event *event);
 
 #endif //__SDL_TAB_H

@@ -65,7 +65,7 @@ void eventhandler(SDL_Table *table)
     struct SongDBEntry * e;
 
     /* Get the current playlist entry */
-    e = SONGDB_GetEntry(table->CurrentRow);
+    e = SONGDB_GetEntryID(table->CurrentRow);
     PLAYLIST_SetEntry(0,e);
 }
 
@@ -126,22 +126,25 @@ void SONGDBUI_CreateWindow(ThemeSongdb *ts)
     {
         switch(Button->action)
         {
-        case CHANGE_DIR:
+        case BUTTON_CHANGE_DIR:
             //add dir to highlighted tab
+            exit(1);
             SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
+            SDL_WidgetProperties(SET_NORMAL_IMAGE,Button->normal);
+            SDL_WidgetProperties(SET_PRESSED_IMAGE,Button->pressed);
             SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,UI_SongdbChangeDirClicked,NULL);        
             break;
-        case RENAME:
+        case BUTTON_RENAME:
             //rename highlighted tab
             SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
             SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,UI_SongdbRenameClicked,NULL);        
             break;
-        case ADD:
+        case BUTTON_ADD:
             //add a empty tab button
             SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
             SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,UI_SongdbAddTabClicked,NULL);        
             break;
-        case REMOVE:
+        case BUTTON_REMOVE:
             //remove the active tab
             SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
             SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,songdbui_RemoveTab,NULL);        
@@ -150,13 +153,6 @@ void SONGDBUI_CreateWindow(ThemeSongdb *ts)
         Button=Button->next;
 
     }
-
-
-
-
-
-
-    
 }
 
 void SONGDBUI_ChangeDatabase(char *string)
@@ -179,6 +175,26 @@ void SONGDBUI_ChangeDatabase(char *string)
     }
 }
 
+void SONGDBUI_Redraw()
+{
+        
+    SongDBSubgroup *sg=SONGDB_GetSubgroup(0);
+    
+
+
+    while(SDL_WidgetPropertiesOf(tabwidget,TAB_REMOVE,NULL))
+    {
+    }
+
+    while(sg)
+    {
+        SDL_WidgetPropertiesOf(tabwidget,TAB_ADD,sg->Name);
+        sg=sg->next;
+    }
+    
+
+
+}
 void UI_SongdbChangeDirClicked(void *data)
 {
     /* Will call void UI_SongdbChangeDatabase(char *string) when finished */
@@ -202,7 +218,6 @@ void UI_SongdbRenameFinished(void *data)
 
 void UI_SongdbRenameClicked(void *data)
 {
-    SDL_WidgetPropertiesOf(tabwidget,SET_STATE_EDIT,0);
     WNDMGR_DisableEventhandler();
 }
 
@@ -242,7 +257,7 @@ void songdbstring(long row,int column,char *dest)
     if(SONGDB_GetNoOfEntries()<row)
         return;
 
-    e = SONGDB_GetEntry(row);
+    e = SONGDB_GetEntryID(row);
 
     dest[0]='\0';
     if(e)

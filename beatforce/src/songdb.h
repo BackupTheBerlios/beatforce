@@ -71,6 +71,31 @@ struct SongDBEntry
     int played;			/* played ? */
 };
 
+typedef struct SongDBTest
+{
+    int index;
+    struct SongDBTest *next;
+    struct SongDBTest *prev;
+
+}SongDBTest;
+
+typedef struct SongDBGroup
+{
+    char *Name;
+    struct SongDBSubgroup *Subgroup;
+    struct SongDBGroup *next;
+    struct SongDBGroup *prev;
+}SongDBGroup;
+
+typedef struct SongDBSubgroup
+{
+    char *Name;
+    char *String;
+    struct SongDBEntry *Playlist;
+    struct SongDBEntry *List;
+    struct SongDBSubgroup *next;
+    struct SongDBSubgroup *prev;
+}SongDBSubgroup;
 
 #define SONG_ADD_INFO_LEN       sizeof( struct SongAddInfo )
 #define DBENTRY_PTR_LEN 	sizeof( struct SongDBEntry * )
@@ -79,16 +104,17 @@ struct SongDBEntry
 #define SONGDB_ID_UNKNOWN	0xffffff00	/* id not specified in songdb_search */
 
 int SONGDB_Init (SongDBConfig * our_cfg);
-int SONGDB_AddFile(char *filename);
-int SONGDB_AddToSubset(struct SongDBEntry *e);
-int SONGDB_AddToSongdb(struct SongDBEntry *e);
+int SONGDB_AddFilename(char *filename);
 int SONGDB_SetActiveList(int db);
 void SONGDB_FreeActiveList();
-struct SongDBEntry *SONGDB_GetEntry(long id);
-struct SongDBEntry *SONGDB_GetEntryID(unsigned long id);
+struct SongDBEntry *SONGDB_GetEntryID(long id);
 struct SongDBEntry *SONGDB_GetSearchEntry(long id);
 long SONGDB_GetNoOfEntries (void);
 long SONGDB_GetNoOfSearchResults(void);
 void SONGDB_FindEntry(char *search_string);
+
+/* Subgroup modifiers */
+int SONGDB_AddSubgroup(char *title);
+struct SongDBSubgroup *SONGDB_GetSubgroup(int which);
 
 #endif

@@ -98,48 +98,48 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
     {
         switch(Text->display)
         {
-        case TIME_ELAPSED:
+        case TEXT_TIME_ELAPSED:
             /* Time elapsed */
             UI_Players[nr].TimeElapsed=SDL_WidgetCreateR(SDL_LABEL,Text->Rect);
             SDL_WidgetProperties(SET_FONT,THEME_Font(Text->font));
             SDL_WidgetProperties(SET_FG_COLOR,Text->fgcolor);
             break;
 
-        case TIME_REMAINING:
+        case TEXT_TIME_REMAINING:
             /* Time remaining */
             UI_Players[nr].TimeRemaining=SDL_WidgetCreateR(SDL_LABEL,Text->Rect);
             SDL_WidgetProperties(SET_FONT,THEME_Font(Text->font));
             SDL_WidgetProperties(SET_FG_COLOR,Text->fgcolor);
             break;
 
-        case SONG_ARTIST:
+        case TEXT_SONG_ARTIST:
             /* Create the artist label */
             UI_Players[nr].Artist=SDL_WidgetCreateR(SDL_LABEL,Text->Rect);
             SDL_WidgetProperties(SET_FONT,THEME_Font(Text->font));
             SDL_WidgetProperties(SET_FG_COLOR,Text->fgcolor);
             break;
 
-        case SONG_TITLE:
+        case TEXT_SONG_TITLE:
             /* Create the title label */
             UI_Players[nr].Title=SDL_WidgetCreateR(SDL_LABEL,Text->Rect);
             SDL_WidgetProperties(SET_FONT,THEME_Font(Text->font));
             SDL_WidgetProperties(SET_FG_COLOR,Text->fgcolor);
             break;
 
-        case PLAYER_STATE:
+        case TEXT_PLAYER_STATE:
             /* Draw the state of the player  as a string */
             UI_Players[nr].State=SDL_WidgetCreateR(SDL_LABEL,Text->Rect);
             SDL_WidgetProperties(SET_FONT,THEME_Font(Text->font));
             SDL_WidgetProperties(SET_FG_COLOR,Text->fgcolor);
             break;
 
-        case SAMPLERATE:
+        case TEXT_SAMPLERATE:
             /* Create the samplerate label */
             UI_Players[nr].Samplerate=SDL_WidgetCreateR(SDL_LABEL,Text->Rect);
             SDL_WidgetProperties(SET_FONT,THEME_Font(Text->font));
             SDL_WidgetProperties(SET_FG_COLOR,Text->fgcolor);
             break;
-        case BITRATE:
+        case TEXT_BITRATE:
             /* Create the bitrate label */
             UI_Players[nr].Bitrate=SDL_WidgetCreateR(SDL_LABEL,Text->Rect);
             SDL_WidgetProperties(SET_FONT,THEME_Font(Text->font));
@@ -154,13 +154,13 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
     {
         switch(VolumeBar->display)
         {
-        case VOLUME_LEFT:
+        case VOLUMEBAR_VOLUME_LEFT:
             /* Create the volume bar widget */
             UI_Players[nr].VolumeLeft=SDL_WidgetCreateR(SDL_VOLUMEBAR,VolumeBar->Rect);
             SDL_WidgetProperties(SET_MAX_VALUE,127);
             SDL_WidgetProperties(SET_MIN_VALUE,0);
             break;
-        case VOLUME_RIGHT:
+        case VOLUMEBAR_VOLUME_RIGHT:
             UI_Players[nr].VolumeRight=SDL_WidgetCreateR(SDL_VOLUMEBAR,VolumeBar->Rect);
             SDL_WidgetProperties(SET_MAX_VALUE,127);
             SDL_WidgetProperties(SET_MIN_VALUE,0);
@@ -317,7 +317,7 @@ void playerui_UpdateTime(int player)
                 long id;
                 PLAYER_GetPlayingID(player,&id);
                 id++;
-                e=SONGDB_GetEntry(id);
+                e=SONGDB_GetEntryID(id);
                 PLAYLIST_SetEntry(!player,e);
                 player_set_song(!player,0);  /* when set_entry is excecuted we only have 1 item thus 0 */
                 MIXER_DoFade(1,0);

@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
+
 const struct S_Widget_FunctionList SDL_Button_FunctionList =
 {
     SDL_ButtonCreate,
@@ -60,11 +61,30 @@ void SDL_ButtonDraw(void *data,SDL_Surface *dest)
     
     SDL_Button  *button=(SDL_Button*)data;
     SDL_Surface *drawbutton=NULL;
+    SDL_Rect src;
 
     if(button->normal==NULL)
     {
+//        printf("SDL_Button: Can't draw without an image\n");
         SDL_FillRect(dest,&button->rect,0xfff000);
         return;
+    }
+    else
+    {
+
+        src.x=0;
+        src.y=0;
+
+        if(button->rect.w == 0)
+            src.w=button->normal->w;
+        else
+            src.w=button->rect.w;
+
+        if(button->rect.h == 0)
+            src.h=button->normal->h;
+        else
+            src.h=button->rect.h;
+
     }
 
     switch(button->state)
@@ -84,7 +104,7 @@ void SDL_ButtonDraw(void *data,SDL_Surface *dest)
         drawbutton=button->normal;
 
     
-    if(SDL_BlitSurface(drawbutton,NULL,dest,&button->rect)<0)
+    if(SDL_BlitSurface(drawbutton,&src,dest,&button->rect)<0)
         fprintf(stderr, "BlitSurface error: %s\n", SDL_GetError());
             
     SDL_UpdateRect(dest, button->rect.x,button->rect.y,
@@ -101,19 +121,28 @@ int SDL_ButtonProperties(void *button,int feature,va_list list)
     case SET_NORMAL_IMAGE:
         if(but->normal==NULL)
         {
-            but->normal = IMG_Load(va_arg(list,char*));
+            char *image=va_arg(list,char*);
+            
+            if(image)
+                but->normal = IMG_Load(image);
         }
         break;
     case SET_HIGHLIGHT_IMAGE:
         if(but->highlighted==NULL)
         {
-            but->highlighted=IMG_Load(va_arg(list,char*));
+            char *image=va_arg(list,char*);
+            
+            if(image)
+                but->highlighted=IMG_Load(image);
         }
         break;
     case SET_PRESSED_IMAGE:
         if(but->pressed==NULL)
         {
-            but->pressed=IMG_Load(va_arg(list,char*));
+            char *image=va_arg(list,char*);
+
+            if(image)
+                but->pressed=IMG_Load(image);
         }
         break;
     case SET_DISABLED_IMAGE:

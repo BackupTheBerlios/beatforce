@@ -17,7 +17,6 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-
 #include <SDL/SDL.h>
 #include <SDL_Table.h>
 #include <config.h>
@@ -31,9 +30,12 @@
 #include "songdb_ui.h"
 #include "llist.h"
 #include "theme.h"
+#include "songdb.h"
 
 void *fileedit;
 void *ttable;
+void *TableFilesInSubgroup;
+void *TableFilesInDirectory;
 void *wLabel1;
 void *wLabel2;
 
@@ -41,6 +43,8 @@ void *wLabel2;
 BFList *dirs;
 BFList *songs;
 BFList *localsongs;
+BFList *files;
+BFList *subgroupsongs;
 int change;
 
 char directory[255];
@@ -48,6 +52,7 @@ char directory[255];
 /* Local function prototypes */
 SDL_Surface *Window_CreateFileWindow();
 int FILEWINDOW_EventHandler(SDL_Event event);
+void FILEWINDOW_GetFilesInDirectory(int row,int column,char *string);
 
 /* Local callback functions */
 void FileWindow_DirSelectClicked(void *data);
@@ -57,11 +62,15 @@ void dirstring(long row,int column,char *dest);
 void filewindow_Search(void *data);
 Window FILEWINDOW={ FILEWINDOW_EventHandler };
 
+
+
 SDL_Surface *FileWindow;
+
 
 void FILEWINDOW_Init()
 {
     FileWindow = NULL;
+    subgroupsongs = NULL;
 }
 
 void FILEWINDOW_Open()
@@ -79,6 +88,123 @@ void FILEWINDOW_Open()
     WNDMGR_Open(&FILEWINDOW);
 }
 
+void renamefinished()
+{
+    SDL_TableRow *row;
+    char newlabel[255];
+    SDL_WidgetPropertiesOf(ttable,GET_SELECTED,&row);
+    if(row)
+    {
+        SDL_WidgetPropertiesOf(ttable,GET_CAPTION,newlabel);
+        SONGDB_RenameSubgroup(row->index,newlabel);
+        SDL_WidgetPropertiesOf(ttable,CLEAR_SELECTED,0);
+    }
+} 
+
+void renamecb(void *data)
+{
+    int i=0;
+    SDL_TableRow *row;
+
+    SDL_WidgetPropertiesOf(ttable,GET_SELECTED,&row);
+    if(row)
+    {
+        SDL_WidgetPropertiesOf(ttable,SET_STATE_EDIT,row->index,1);
+    }
+}
+
+void addcb(void *data)
+{
+    SONGDB_AddSubgroup("<new>");
+}
+
+void removecb(void *data)
+{
+    int i=0;
+    SDL_TableRow *row;
+
+    SDL_WidgetPropertiesOf(ttable,GET_SELECTED,&row);
+    if(row)
+    {
+        SONGDB_RemoveSubgroup(row->index);
+        SDL_WidgetPropertiesOf(ttable,CLEAR_SELECTED,0);
+    }
+}
+
+void addselected(void *data)
+{
+    int i=0;
+    SDL_TableRow *row;
+    char string[255];
+
+    memset(string,0,255);
+
+    SDL_WidgetPropertiesOf(TableFilesInDirectory,GET_SELECTED,&row);
+    if(row)
+    {
+        while(row)
+        {
+            FILEWINDOW_GetFilesInDirectory(row->index,0,string);
+            if(strlen(string))
+            {
+                subgroupsongs=LLIST_Append(subgroupsongs,strdup(string));
+            }
+
+            row=row->next;
+        }
+        SDL_WidgetPropertiesOf(TableFilesInDirectory,CLEAR_SELECTED,0);
+    }
+    else
+    {
+        printf("Nothing selected\n");
+    }
+}
+
+void FILEWINDOW_GetSubgroup(int row,int column,char *string)
+{
+    int count=0;
+    SongDBSubgroup *sg=SONGDB_GetSubgroup(row);
+
+    if(sg)
+         sprintf(string,"%s",sg->Name);
+    
+}
+
+void FILEWINDOW_GetFilesInDirectory(int row,int column,char *string)
+{
+    int count=0;
+    BFList *l;
+
+    l=files;
+    while(l)
+    {   
+        if(count == row)
+            sprintf(string,"%s",l->data);
+
+        l=l->next;
+        count++;
+    }
+  
+}
+
+void FILEWINDOW_GetFilesInSubgroup(int row,int column,char *string)
+{
+    int count=0;
+    BFList *l;
+
+    l=subgroupsongs;
+    while(l)
+    {   
+        if(count == row)
+            sprintf(string,"%s",l->data);
+
+        l=l->next;
+        count++;
+    }
+  
+}
+
+
 SDL_Surface *Window_CreateFileWindow()
 {
     SDL_Surface *FileWindow;
@@ -90,7 +216,12 @@ SDL_Surface *Window_CreateFileWindow()
     char label2[255];
     ThemeConfig *tc=THEME_GetActive();
     ThemeFileWindow *fw =NULL;
-    ThemeImage    *Image = NULL;
+    ThemeImage    *Image  = NULL;
+    ThemeButton   *Button = NULL;
+    ThemeTable    *Table  = NULL;
+
+    files=OSA_FindFiles("c:\\winnt\\system32\\",".dll",0);
+
     if(tc == NULL)
         return NULL;
 
@@ -98,9 +229,10 @@ SDL_Surface *Window_CreateFileWindow()
     
     if(fw == NULL)
         return NULL;
-    Image=fw->Image;
 
-
+    Image  = fw->Image;
+    Button = fw->Button;
+    Table  = fw->Table;
 
     FileWindow = SDL_CreateRGBSurface(SDL_SWSURFACE,1024,685,32,0xff0000,0x00ff00,0x0000ff,0x000000);
 
@@ -112,11 +244,93 @@ SDL_Surface *Window_CreateFileWindow()
         SDL_WidgetProperties(SET_NORMAL_IMAGE,Image->filename);
         Image=Image->next;
     }
-    
-    sprintf(directory,"/mnt/d");
+
+    while(Button)
+    {
+        switch(Button->action)
+        {
+        case BUTTON_RENAME:
+            //rename highlighted tab
+            SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
+            SDL_WidgetProperties(SET_NORMAL_IMAGE,Button->normal);
+            SDL_WidgetProperties(SET_PRESSED_IMAGE,Button->pressed);
+            SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,renamecb,NULL);        
+            break;
+        case BUTTON_ADD:
+            //add a empty tab button
+            SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
+            SDL_WidgetProperties(SET_NORMAL_IMAGE,Button->normal);
+            SDL_WidgetProperties(SET_PRESSED_IMAGE,Button->pressed);
+            SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,addcb,NULL);        
+            break;
+        case BUTTON_REMOVE:
+            //remove the selected subgroup
+            SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
+            SDL_WidgetProperties(SET_NORMAL_IMAGE,Button->normal);
+            SDL_WidgetProperties(SET_PRESSED_IMAGE,Button->pressed);
+            SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,removecb,NULL);        
+            break;
+        case BUTTON_ADDSELECTED:
+            /* add selected files to subgroup */
+            SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
+            SDL_WidgetProperties(SET_NORMAL_IMAGE,Button->normal);
+            SDL_WidgetProperties(SET_PRESSED_IMAGE,Button->pressed);
+            SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,addselected,NULL);        
+            break;
+        case BUTTON_DELETESELECTED:
+            SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
+            SDL_WidgetProperties(SET_NORMAL_IMAGE,Button->normal);
+            SDL_WidgetProperties(SET_PRESSED_IMAGE,Button->pressed);
+            break;
+
+        }
+        Button=Button->next;
+    }
+
+    while(Table)
+    {
+        switch(Table->contents)
+        {
+        case CONTENTS_SUBGROUPS:
+            /* table with the names of the subgroups */
+            ttable=SDL_WidgetCreateR(SDL_TABLE,Table->Rect);
+            SDL_WidgetProperties(SET_VISIBLE_COLUMNS, 1);
+            SDL_WidgetProperties(SET_VISIBLE_ROWS, 19);
+            SDL_WidgetProperties(COLUMN_WIDTH,1,Table->Rect.w);
+            SDL_WidgetProperties(ROWS, 10);
+            SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
+            SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
+            SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION,FILEWINDOW_GetSubgroup);
+            SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_RETURN,renamefinished,NULL);
+            break;
+        case CONTENTS_FILESINDIRECTORY:
+            TableFilesInDirectory=SDL_WidgetCreateR(SDL_TABLE,Table->Rect);
+            SDL_WidgetProperties(SET_VISIBLE_COLUMNS, 1);
+            SDL_WidgetProperties(SET_VISIBLE_ROWS, 190);
+            SDL_WidgetProperties(COLUMN_WIDTH,1,Table->Rect.w);
+            SDL_WidgetProperties(ROWS,LLIST_NoOfEntries(files));
+            SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
+            SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION,FILEWINDOW_GetFilesInDirectory);
+            SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
+            break;
+        case CONTENTS_FILESINSUBGROUP:
+            TableFilesInSubgroup=SDL_WidgetCreateR(SDL_TABLE,Table->Rect);
+            SDL_WidgetProperties(SET_VISIBLE_COLUMNS, 1);
+            SDL_WidgetProperties(SET_VISIBLE_ROWS, 190);
+            SDL_WidgetProperties(COLUMN_WIDTH,1,Table->Rect.w);
+            SDL_WidgetProperties(ROWS, 10);
+            SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
+            SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION,FILEWINDOW_GetFilesInSubgroup);
+            SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
+            break;
+        }
+        Table=Table->next;
+    }
+
+    sprintf(directory,"c:\\beatforce\\");
     
     change=0;
-    dirs=OSA_FindDirectories("/mnt/d/");
+    dirs=OSA_FindDirectories("C:\\beatforce\\");
     if(dirs)
     {
         tmp=dirs;
@@ -129,9 +343,10 @@ SDL_Surface *Window_CreateFileWindow()
     }
     songs=OSA_FindFiles("/mnt/d/",".mp3",1);
     songcount=LLIST_NoOfEntries(songs);
-    localsongs=OSA_FindFiles("/mnt/d/",".mp3",0);
+    //localsongs=OSA_FindFiles("/mnt/d/",".mp3",0);
     localcount=LLIST_NoOfEntries(localsongs);
     
+#if 0
     fileedit=SDL_WidgetCreate(SDL_EDIT,10,5,500,25);
     SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
     SDL_WidgetProperties(SET_ALWAYS_FOCUS,1);
@@ -144,7 +359,7 @@ SDL_Surface *Window_CreateFileWindow()
     SDL_WidgetProperties(ROWS,count);
     SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
     SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION,dirstring);
-    SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,dirselect,NULL);
+    SDL_WidgetEventCallback(dirselect,SDL_CLICKED);
 
     sprintf(label,"Songcount local dir %d",songcount);
     sprintf(label2,"Songcount all dirs  %d",localcount);
@@ -157,11 +372,13 @@ SDL_Surface *Window_CreateFileWindow()
     wLabel2=SDL_WidgetCreate(SDL_LABEL,10,470,450,23);
     SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
     SDL_WidgetProperties(SET_FG_COLOR,WHITE);
-    SDL_WidgetProperties(SET_CAPTION,label2);
+    SDL_WidgetProperties(SET_CAPTION,"Sub groups");
 
 
     SDL_WidgetCreate(SDL_BUTTON,20,500,40,40);
     SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,FileWindow_DirSelectClicked,NULL);
+#endif
+
 
     return FileWindow;
 
@@ -182,6 +399,7 @@ int FILEWINDOW_EventHandler(SDL_Event event)
         switch( event.key.keysym.sym ) 
         {
         case SDLK_ESCAPE:
+            SDL_WidgetPropertiesOf(ttable,CLEAR_SELECTED,0);
             WNDMGR_CloseWindow();
             break;
       

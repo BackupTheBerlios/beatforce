@@ -23,10 +23,11 @@
 
 #include "SDL_Widget.h"
 #include "SDL_Font.h"
+#include "SDL_Edit.h"
 
 typedef struct SDL_TableRow
 {
-    char **data;
+    int index;
     struct SDL_TableRow *next;
     struct SDL_TableRow *prev;
 
@@ -35,7 +36,7 @@ typedef struct SDL_TableRow
 typedef struct SDL_Table
 {
     SDL_Rect            rect;
-    SDL_TableRow        *rowdata;
+    SDL_TableRow        *selected;
     SDL_Font            *font;
     char                *caption;    
     
@@ -69,12 +70,16 @@ typedef struct SDL_Table
     //event handler functions
     void (*Clicked)(void*);
     void *ClickedData;
+    void (*OnReturn) ();
 
     //functions to retreive data
     char *(*Table_GetString)  (long row,int column,char* dest);
 
     SDL_Surface *Background;
 
+    SDL_Edit *edit;
+
+    char *editcaption;
     void* Scrollbar;
     int   ScrollbarWidth;
 

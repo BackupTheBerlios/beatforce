@@ -208,6 +208,7 @@ int mainwindow_NotifyHandler()
 
     MIXERUI_Redraw();
     PLAYERUI_Redraw();
+    SONGDBUI_Redraw();
 
     return 1;
 }

@@ -18,6 +18,8 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
+#ifndef __SDL_EDIT_H__
+#define __SDL_EDIT_H__
 
 #include "SDL_Widget.h"
 #include "SDL_Font.h"
@@ -51,3 +53,5 @@ void  SDL_EditHandler(void * edit,SDL_Event *event);
 void  SDL_EditProperties(void *edit,int feature,va_list list);
 void  SDL_EditEventHandler(void *edit,SDL_Event *event);
 
+
+#endif /* __SDL_EDIT_H__ */

@@ -20,6 +20,7 @@
 */
 #include <stdarg.h>
 #include <malloc.h>
+#include <string.h>
 
 #include <SDL/SDL.h>
 
@@ -31,6 +32,9 @@
 
 static void SDL_TableAttachScrollbar(SDL_Table *table);
 static void SDL_TableDrawRow(SDL_Surface *dest,SDL_Table *table,int row);
+static void SDL_TableAddSelected(SDL_Table *table);
+static int SDL_TableIsRowSelected(SDL_Table *Table,int row);
+static void Table_EditReturnKeyPressed(void *data);
 
 const struct S_Widget_FunctionList SDL_Table_FunctionList =
 {
@@ -82,10 +86,12 @@ void* SDL_TableCreate(SDL_Rect* rect)
     newtable->TableSelectionChanged       = 1;
     newtable->TableInitialDraw            = 1; 
 
+    newtable->edit              = NULL;
    
-    newtable->rowdata           = NULL;
+    newtable->selected          = NULL;
     newtable->FirstVisibleRow   = 0;
     newtable->HighlightedRow    = -1;
+    newtable->editcaption       = NULL;
     newtable->ActiveEntry       = -1;
     return newtable;
 }
@@ -143,8 +149,12 @@ void SDL_TableDraw(void *table,SDL_Surface *dest)
         {
             SDL_TableDrawRow(dest,Table,row);
         }
-        SDL_UpdateRect(dest,Table->rect.x,Table->rect.y,Table->rect.w-45,Table->rect.h);
+        //SDL_UpdateRect(dest,Table->rect.x,Table->rect.y,Table->rect.w-45,Table->rect.h);
         Table->TableInitialDraw = 0;
+    }
+    if(Table->edit)
+    {
+        SDL_WidgetPropertiesOf(Table->edit,FORCE_REDRAW,1);
     }
 }
 
@@ -239,7 +249,67 @@ int SDL_TableProperties(void *table,int feature,va_list list)
                 Table->Clicked=va_arg(list,void*);
                 Table->ClickedData=va_arg(list,void*);
             }
+            else if(event == SDL_KEYDOWN_RETURN)
+            {
+                //for the edit/rename widget
+                Table->OnReturn = va_arg(list,void*);
+            }
         }
+        break;
+    case GET_CAPTION:
+        sprintf(va_arg(list,char*),"%s",Table->editcaption);
+        break;
+    case GET_SELECTED:
+        {
+            SDL_TableRow **d=va_arg(list,SDL_TableRow**);
+            if(d)
+                *d=Table->selected;
+        }
+        break;
+    case CLEAR_SELECTED:
+        {
+            if(Table->selected)
+            {
+                free(Table->selected);
+                Table->selected=NULL;
+            }
+        }
+        break;
+    case SET_STATE_EDIT:
+        {
+            if(Table->edit == NULL)
+            {
+                int row    = va_arg(list,int);
+                int column = va_arg(list,int);
+                char label[255];
+                SDL_Rect Dims;
+                
+                /* Internal count starts at 0 */
+                column--;
+                if(Table->Table_GetString) 
+                 {
+                    Table->Table_GetString(row,column,(char*)&label);
+                 
+                    if(strlen(label))
+                    {
+                        Dims.w = Table->ColumnWidths[column];
+                        Dims.x = Table->rect.x;
+                        Dims.y = Table->rect.y+Table->RowHeight * row;
+                        Dims.h = Table->RowHeight;
+
+                        Table->edit=SDL_WidgetCreateR(SDL_EDIT,Dims);
+                        SDL_WidgetProperties(SET_FONT,Table->font);
+                        SDL_WidgetProperties(SET_ALWAYS_FOCUS,1);
+                        SDL_WidgetProperties(SET_BG_COLOR,Table->bgcolor);
+                        SDL_WidgetProperties(SET_FG_COLOR,BLACK);
+
+                        SDL_WidgetProperties(SET_CAPTION,label);
+                        SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_RETURN , Table_EditReturnKeyPressed , Table);
+                    }
+                 }
+            }
+        }
+        break;
     }
     return 1;
 }
@@ -247,6 +317,7 @@ int SDL_TableProperties(void *table,int feature,va_list list)
 void SDL_TableEventHandler(void *table,SDL_Event *event)
 {
     SDL_Table *Table=(SDL_Table*)table;
+    char string[255];
     int y;
     int i;
 
@@ -301,11 +372,24 @@ void SDL_TableEventHandler(void *table,SDL_Event *event)
                 {
                     Table->CurrentRow = Table->FirstVisibleRow + 
                         (event->motion.y - Table->rect.y) / Table->RowHeight;
-                    
+
+                    if(Table->Table_GetString) 
+                    {
+                        memset(string,0,255);
+                        Table->Table_GetString(Table->CurrentRow,0,(char*)&string);
+                     
+                        if(strlen(string))
+                        {
+                            /* Add to selected */
+                            SDL_TableAddSelected(Table);
+                        }
+                    }
+
                     if(Table->Clicked)
                         Table->Clicked(Table);
                 }
             }
+            
             if(event->button.button == 4) //mousehweel down
             {
                 double row;
@@ -387,6 +471,10 @@ static void SDL_TableDrawRow(SDL_Surface *dest,SDL_Table *Table,int row)
         SDL_FillRect(dest,&RowDims,SDL_MapRGB(dest->format,255,55,0));
         SDL_FontSetColor(Table->font,Table->fgcolor);
     }
+    else if(SDL_TableIsRowSelected(Table,row))
+    {
+        SDL_FillRect(dest,&RowDims,0x00ff00);
+    }
     else
     {
         if(Table->bgcolor == TRANSPARANT)
@@ -410,17 +498,16 @@ static void SDL_TableDrawRow(SDL_Surface *dest,SDL_Table *Table,int row)
         {
             Table->Table_GetString(row + Table->FirstVisibleRow,column,(char*)&string);
            
-            la.x = RowDims.x;
-            la.y = RowDims.y;
-            la.w = Table->ColumnWidths[column];
-            la.h = RowDims.h;
+            la.x = RowDims.x + 1;
+            la.y = RowDims.y + 1;
+            la.w = Table->ColumnWidths[column] - 2;
+            la.h = RowDims.h - 2;
 
-//            SDL_FillRect(dest,&la,SDL_MapRGB(dest->format,155,155,155));
+       //     SDL_FillRect(dest,&la,SDL_MapRGB(dest->format,155,155,155));
 
             if(strlen(string))
             {
-                SDL_FontDrawStringRect(dest,Table->font,string,&la);
-//                SDL_FontDrawStringRect(dest,Table->font,string,&RowDims);
+                SDL_FontDrawStringRect(dest,Table->font,string,&RowDims);
             }
             RowDims.x +=Table->ColumnWidths[column];
         }
@@ -429,3 +516,98 @@ static void SDL_TableDrawRow(SDL_Surface *dest,SDL_Table *Table,int row)
 }
 
 
+
+static void SDL_TableAddSelected(SDL_Table *table)
+{
+    if(table->selected == NULL)
+    {
+        table->selected=(SDL_TableRow *)malloc(sizeof(SDL_TableRow));
+        memset(table->selected,0,sizeof(SDL_TableRow));
+
+        table->selected->index = table->CurrentRow;
+    }
+    else
+    {
+        SDL_TableRow *last;
+
+        last=table->selected;
+
+        while(last)
+        {
+            if(last->index == table->CurrentRow)
+            {
+                if(last->prev)
+                {
+                    if(last->prev)
+                        last->prev->next = last->next;
+                    if(last->next)
+                        last->next->prev = last->prev;
+                    free(last);
+                }
+                else
+                {
+                    /* Removed the root node */
+                    if(last->next)
+                    {
+                        last->next->prev = NULL;
+                        table->selected  = last->next;
+                        free(last);
+                    }
+                    else
+                    {
+                        free(table->selected);
+                        table->selected=NULL;
+                    }
+                }
+                return;
+            }
+            last=last->next;
+        }
+
+        last=table->selected;
+        while(last->next)
+            last=last->next;
+        
+
+        last->next=(SDL_TableRow *)malloc(sizeof(SDL_TableRow));
+        memset(last->next,0,sizeof(SDL_TableRow));
+
+        last->next->index = table->CurrentRow;
+        last->next->prev=last;
+    }
+}
+
+
+static int SDL_TableIsRowSelected(SDL_Table *Table,int row)
+{
+    SDL_TableRow *Rows=NULL;
+    
+    Rows=Table->selected;
+    while(Rows)
+    {
+        if(Rows->index == (row + Table->FirstVisibleRow))
+            return 1;
+
+        Rows=Rows->next;
+    }
+    return 0;
+}
+
+static void Table_EditReturnKeyPressed(void *data)
+{
+    SDL_Table *Table=(SDL_Table*)data;
+    char string[255];
+
+    SDL_WidgetPropertiesOf(Table->edit,GET_CAPTION,&string);
+    SDL_WidgetClose(Table->edit);
+    Table->edit=NULL;
+
+    if(Table->editcaption)
+        free(Table->editcaption);
+    Table->editcaption = strdup(string);
+
+    if(Table->OnReturn)
+        Table->OnReturn();
+
+    
+}

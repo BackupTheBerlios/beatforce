@@ -132,6 +132,7 @@ int SDL_WidgetPropertiesOf(void *widget,int feature,...)
     va_list ap;
     T_Widget_Properties properties;
     Stack* current_widget;
+    int retval=0;
 
     SDL_WidgetLOCK();
     va_start(ap,feature);
@@ -147,14 +148,14 @@ int SDL_WidgetPropertiesOf(void *widget,int feature,...)
     if(current_widget)
     {
         properties=WidgetTable[current_widget->type]->properties;
-        properties(current_widget->data,feature,ap);
+        retval=properties(current_widget->data,feature,ap);
     }
     else
     {
 //        printf("SDL_WidgetPropertiesOf not found\n");
     }
     SDL_WidgetUNLOCK();
-    return 1;
+    return retval;
 }
 
 /*
@@ -209,29 +210,9 @@ int SDL_DrawAllWidgets(SDL_Surface *screen)
     if(previous != active_surface)
     {
         last_surface=previous;
-        //fadeon=1;
+        fadeon=1;
     }
 
-    if(fadeon)
-    {
-        
-        dest.w = 0;
-        dest.h = 0;
-        dest.x=fadex;
-        fadex+=5;
-        dest.y = fadey;
-        fadey+=5;
-        
-        src.x=fadex;
-        src.y=fadey;
-        src.w=fadew;
-        src.h=fadeh;
-        
-        fadeh-=10;
-        fadew-=10;
-    }
-    else
-    {
         dest.x=0;
         dest.y=0;
         dest.w=0;
@@ -244,7 +225,6 @@ int SDL_DrawAllWidgets(SDL_Surface *screen)
             src.w=active_surface->w;
             src.h=active_surface->h;
         }
-    }  
 
     SDL_WidgetLOCK();
     
@@ -267,8 +247,7 @@ int SDL_DrawAllWidgets(SDL_Surface *screen)
 
     
     SDL_BlitSurface(active_surface,NULL,screen,NULL);
-    
-    //SDL_BlitSurface(last_surface,&src,screen,&dest);
+//    SDL_BlitSurface(last_surface,&src,screen,&dest);
         
     SDL_UpdateRect(screen,0,0,0,0);
     if(previous!=active_surface)
@@ -320,6 +299,28 @@ void  SDL_WidgetEvent(SDL_Event *event)
     }
     
     SDL_WidgetUNLOCK();
+}
+
+
+int SDL_WidgetEventCallback(void *function,E_Widget_Event event)
+{
+
+    T_Widget_SetCallback  setcallback;
+    Stack* current_widget;
+
+    SDL_WidgetLOCK();
+    current_widget=SDL_StackGetLastItem();
+
+    setcallback=WidgetTable[current_widget->type]->setcallback;
+    if(setcallback != NULL)
+        setcallback(current_widget->data,function,event);
+    else
+        printf("No callback handler implemented for this widget\n");
+    SDL_WidgetUNLOCK();
+
+    return 1;
+
+
 }
 
 int SDL_WidgetHasFocus(void *widget)

@@ -129,7 +129,7 @@ int SDL_TabProperties(void *tab,int feature,va_list list)
 {
     SDL_Tab *Tab=(SDL_Tab*)tab;
     int retval=1;
-
+    
     switch(feature)
     {
     case SET_FONT:
@@ -515,7 +515,7 @@ static int Tab_RemoveTab(SDL_Tab *tab)
 {
     SDL_TabList *remove;
 
-    if(tab->NoOfTabs)
+    if(tab->NoOfTabs > 0)
     {
         remove=tab->hl;    
         tab->hl=tab->hl->prev;        
@@ -531,7 +531,7 @@ static int Tab_RemoveTab(SDL_Tab *tab)
             tab->tabs=remove->next; /* move the root node */
             tab->hl=tab->tabs;      /* highlight the first node */
         }
-        
+
         if(remove->caption)
             free(remove->caption);
         free(remove->rect);

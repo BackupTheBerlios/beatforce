@@ -83,7 +83,7 @@ void MIXERUI_CreateWindow(ThemeMixer *tm)
     {
         switch(Slider->action)
         {
-        case MAIN_VOLUME:
+        case SLIDER_MAIN_VOLUME:
             // Main volume 
             mainslider=SDL_WidgetCreateR(SDL_SLIDER,Slider->Rect);
             SDL_WidgetProperties(SET_BUTTON_IMAGE,Slider->button);
@@ -92,7 +92,7 @@ void MIXERUI_CreateWindow(ThemeMixer *tm)
             SDL_WidgetProperties(SET_NORMAL_STEP_SIZE,1.0);
             SDL_WidgetProperties(SET_CALLBACK,SDL_CHANGED,mixerui_MainVolumeChanged,mainslider);
             break;
-        case FADER:
+        case SLIDER_FADER:
             /* fade slider */
             slideroffader=SDL_WidgetCreateR(SDL_SLIDER,Slider->Rect);
             SDL_WidgetProperties(SET_CALLBACK,SDL_CHANGED,mixerui_FaderChanged,slideroffader);
@@ -110,7 +110,7 @@ void MIXERUI_CreateWindow(ThemeMixer *tm)
 
     while(Button)
     {
-        if(Button->action == RESET_FADER)
+        if(Button->action == BUTTON_RESET_FADER)
         {
             SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
             SDL_WidgetProperties(SET_NORMAL_IMAGE,"c:\\beatforce\\themes\\beatforce\\butje.bmp");

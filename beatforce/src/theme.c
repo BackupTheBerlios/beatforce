@@ -19,7 +19,7 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-*/
+ */
 
 
 #include <stdio.h>
@@ -54,6 +54,9 @@ ThemeSongdb *XML_ParseSongdb(xmlDocPtr doc, xmlNodePtr cur);
 /* Widget Parser */
 ThemeImage *XML_ParseImage(ThemeImage *image,xmlDocPtr doc, xmlNodePtr cur);
 ThemeFont *XML_ParseFont(xmlDocPtr doc, xmlNodePtr cur);
+ThemeText *XML_ParseText(ThemeText *text,xmlDocPtr doc, xmlNodePtr cur);
+ThemeButton *XML_ParseButton(ThemeButton *button,xmlDocPtr doc, xmlNodePtr cur);
+ThemeTable *XML_ParseTable(ThemeTable *pp,xmlDocPtr doc, xmlNodePtr cur);
 
 static ThemeConfig *active;
 
@@ -65,9 +68,22 @@ int THEME_Init()
 //    ConfigFile *themecfg;
     char themepath[255];
     xmlNodePtr cur;
+//    long size;
     xmlDocPtr doc=NULL;
+//    FILE *fp;
+    char *buffer;
     xmlChar *key;
 
+#if 0
+    fp=fopen("c:\\skin.xml","rb");
+    fseek(fp,0,SEEK_END);
+    size=ftell(fp);
+    fseek(fp,0,SEEK_SET);
+    buffer=malloc(sizeof(char)*(size+1));
+    memset(buffer,0,size+1);
+    fread(buffer,1,size,fp);
+    fclose(fp);
+#endif
 
     current=(ThemeConfig*)malloc(sizeof(ThemeConfig));
     memset(current,0,sizeof(ThemeConfig));
@@ -77,24 +93,18 @@ int THEME_Init()
         return 0;
 
     NoOfThemes=LLIST_NoOfEntries(dir);
-   
 //    if(NoOfThemes == 1)
     {
         /* use it */
-        sprintf(themepath,"%s/%s/skin.xml",THEME_DIR,"beatforce");
         LIBXML_TEST_VERSION
         xmlKeepBlanksDefault(0);
 
-
-        /*
+         /*
           * build an XML tree from a the file;
           */
-        doc = xmlParseFile(themepath);
+        doc = xmlParseFile(THEME_DIR"/beatforce/skin.xml");
         if (doc == NULL) 
-        {
-            ERROR("Unable to parse xml file");
             return 0;
-        }
             
         cur = xmlDocGetRootElement(doc);
         if (cur == NULL) 
@@ -252,6 +262,18 @@ ThemeFileWindow *XML_ParseFilewindow(xmlDocPtr doc, xmlNodePtr cur)
             if ((!xmlStrcmp(cur->name, (const xmlChar *)"image"))) 
             {
                 filewindow->Image=XML_ParseImage(filewindow->Image,doc,cur);
+            }
+            if ((!xmlStrcmp(cur->name, (const xmlChar *)"button"))) 
+            {
+                filewindow->Button=XML_ParseButton(filewindow->Button,doc,cur);
+            }
+            if ((!xmlStrcmp(cur->name, (const xmlChar *)"table"))) 
+            {
+                filewindow->Table=XML_ParseTable(filewindow->Table,doc,cur);
+            }
+            if ((!xmlStrcmp(cur->name, (const xmlChar *)"text"))) 
+            {
+                filewindow->Text=XML_ParseText(filewindow->Text,doc,cur);
             }
             cur=cur->next;
         }
@@ -437,6 +459,39 @@ ThemeImage *XML_ParseImage(ThemeImage *image,xmlDocPtr doc, xmlNodePtr cur)
     
 }
 
+ThemeLabel *XML_ParseLabel(ThemeLabel *label,xmlDocPtr doc, xmlNodePtr cur)
+{
+    if(label == NULL)
+    {
+        label=malloc(sizeof(ThemeLabel));
+        memset(label,0,sizeof(ThemeLabel));
+                    
+        StorePropertyAsShort(cur,"x",&label->Rect.x);
+        StorePropertyAsShort(cur,"y",&label->Rect.y);
+        StorePropertyAsShort(cur,"w",&label->Rect.w);
+        StorePropertyAsShort(cur,"h",&label->Rect.h);
+        
+    }
+    else
+    {
+        ThemeLabel *last;
+        last=label;
+        while(last->next)
+            last=last->next;
+
+        last->next=malloc(sizeof(ThemeLabel));
+        memset(last->next,0,sizeof(ThemeLabel));
+
+        StorePropertyAsShort(cur,"x",&last->next->Rect.x);
+        StorePropertyAsShort(cur,"y",&last->next->Rect.y);
+        StorePropertyAsShort(cur,"w",&last->next->Rect.w);
+        StorePropertyAsShort(cur,"h",&last->next->Rect.h);
+        
+    }
+    return label;
+}
+
+
 ThemeButton *XML_ParseButton(ThemeButton *button,xmlDocPtr doc, xmlNodePtr cur)
 {
     char *action;
@@ -457,19 +512,23 @@ ThemeButton *XML_ParseButton(ThemeButton *button,xmlDocPtr doc, xmlNodePtr cur)
         if(action)
         {
             if(!strcmp(action,"PLAY"))
-                button->action=PLAY;
+                button->action=BUTTON_PLAY;
             if(!strcmp(action,"PAUSE"))
-                button->action=PAUSE;
+                button->action=BUTTON_PAUSE;
             if(!strcmp(action,"RESET_FADER"))
-                button->action=RESET_FADER;
+                button->action=BUTTON_RESET_FADER;
             if(!strcmp(action,"CHANGE_DIR"))
-                button->action=CHANGE_DIR;
+                button->action=BUTTON_CHANGE_DIR;
             if(!strcmp(action,"REMOVE"))
-                button->action=REMOVE;
+                button->action=BUTTON_REMOVE;
             if(!strcmp(action,"ADD"))
-                button->action=ADD;
+                button->action=BUTTON_ADD;
             if(!strcmp(action,"RENAME"))
-                button->action=RENAME;
+                button->action=BUTTON_RENAME;
+            if(!strcmp(action,"ADDSELECTED"))
+                button->action=BUTTON_ADDSELECTED;
+            if(!strcmp(action,"DELETESELECTED"))
+                button->action=BUTTON_DELETESELECTED;
             free(action);
         }
 
@@ -499,19 +558,24 @@ ThemeButton *XML_ParseButton(ThemeButton *button,xmlDocPtr doc, xmlNodePtr cur)
         if(action)
         {
             if(!strcmp(action,"PLAY"))
-                last->next->action=PLAY;
+                last->next->action=BUTTON_PLAY;
             if(!strcmp(action,"PAUSE"))
-                last->next->action=PAUSE;
+                last->next->action=BUTTON_PAUSE;
             if(!strcmp(action,"RESET_FADER"))
-                last->next->action=RESET_FADER;
+                last->next->action=BUTTON_RESET_FADER;
             if(!strcmp(action,"CHANGE_DIR"))
-                last->next->action=CHANGE_DIR;
+                last->next->action=BUTTON_CHANGE_DIR;
             if(!strcmp(action,"REMOVE"))
-                last->next->action=REMOVE;
+                last->next->action=BUTTON_REMOVE;
             if(!strcmp(action,"ADD"))
-                last->next->action=ADD;
+                last->next->action=BUTTON_ADD;
             if(!strcmp(action,"RENAME"))
-                last->next->action=RENAME;
+                last->next->action=BUTTON_RENAME;
+            if(!strcmp(action,"ADDSELECTED"))
+                last->next->action=BUTTON_ADDSELECTED;
+            if(!strcmp(action,"DELETESELECTED"))
+                last->next->action=BUTTON_DELETESELECTED;
+
             free(action);
         }
 
@@ -540,17 +604,17 @@ ThemeText *XML_ParseText(ThemeText *text,xmlDocPtr doc, xmlNodePtr cur)
         if(display)
         {
             if(!strcmp(display,"TIME_ELAPSED"))
-                text->display=TIME_ELAPSED;
+                text->display=TEXT_TIME_ELAPSED;
             if(!strcmp(display,"TIME_REMAINING"))
-                text->display=TIME_REMAINING;
+                text->display=TEXT_TIME_REMAINING;
             if(!strcmp(display,"SONG_TITLE"))
-                text->display=SONG_TITLE;
+                text->display=TEXT_SONG_TITLE;
             if(!strcmp(display,"PLAYER_STATE"))
-                text->display=PLAYER_STATE;
+                text->display=TEXT_PLAYER_STATE;
             if(!strcmp(display,"SAMPLERATE"))
-                text->display=SAMPLERATE;
+                text->display=TEXT_SAMPLERATE;
             if(!strcmp(display,"BITRATE"))
-                text->display=BITRATE;
+                text->display=TEXT_BITRATE;
             free(display);
             display=NULL;
         }
@@ -587,19 +651,19 @@ ThemeText *XML_ParseText(ThemeText *text,xmlDocPtr doc, xmlNodePtr cur)
         if(display)
         {
             if(!strcmp(display,"TIME_ELAPSED"))
-                last->next->display=TIME_ELAPSED;
+                last->next->display=TEXT_TIME_ELAPSED;
             if(!strcmp(display,"TIME_REMAINING"))
-                last->next->display=TIME_REMAINING;
+                last->next->display=TEXT_TIME_REMAINING;
             if(!strcmp(display,"SONG_ARTIST"))
-                last->next->display=SONG_ARTIST;
+                last->next->display=TEXT_SONG_ARTIST;
             if(!strcmp(display,"SONG_TITLE"))
-                last->next->display=SONG_TITLE;
+                last->next->display=TEXT_SONG_TITLE;
             if(!strcmp(display,"PLAYER_STATE"))
-                last->next->display=PLAYER_STATE;
+                last->next->display=TEXT_PLAYER_STATE;
             if(!strcmp(display,"SAMPLERATE"))
-                last->next->display=SAMPLERATE;
+                last->next->display=TEXT_SAMPLERATE;
             if(!strcmp(display,"BITRATE"))
-                last->next->display=BITRATE;
+                last->next->display=TEXT_BITRATE;
 
             free(display);
         } 
@@ -635,9 +699,9 @@ ThemeVolumeBar *XML_ParseVolumeBar(ThemeVolumeBar *volumebar, xmlDocPtr doc,
         if(display) 
         {
             if(!strcmp(display,"VOLUME_LEFT"))
-                volumebar->display=VOLUME_LEFT;
+                volumebar->display=VOLUMEBAR_VOLUME_LEFT;
             if(!strcmp(display,"VOLUME_RIGHT"))
-                volumebar->display=VOLUME_RIGHT;
+                volumebar->display=VOLUMEBAR_VOLUME_RIGHT;
             free(display);
             display=NULL;
         }
@@ -666,9 +730,9 @@ ThemeVolumeBar *XML_ParseVolumeBar(ThemeVolumeBar *volumebar, xmlDocPtr doc,
         if(display)
         {
             if(!strcmp(display,"VOLUME_LEFT"))
-                last->next->display=VOLUME_LEFT;
+                last->next->display=VOLUMEBAR_VOLUME_LEFT;
             if(!strcmp(display,"VOLUME_RIGHT"))
-                last->next->display=VOLUME_RIGHT;
+                last->next->display=VOLUMEBAR_VOLUME_RIGHT;
             free(display);
             display=NULL;
         }
@@ -714,13 +778,13 @@ ThemeSlider *XML_ParseSlider(ThemeSlider *slider,xmlDocPtr doc, xmlNodePtr cur)
         if(action)
         {
             if(!strcmp(action,"MAIN_VOLUME"))
-                slider->action=MAIN_VOLUME;
+                slider->action=SLIDER_MAIN_VOLUME;
             if(!strcmp(action,"FADER"))
-                slider->action=FADER;
+                slider->action=SLIDER_FADER;
             if(!strcmp(action,"SPEED"))
-                slider->action=SPEED;
+                slider->action=SLIDER_SPEED;
             if(!strcmp(action,"PITCH"))
-                slider->action=PITCH;
+                slider->action=SLIDER_PITCH;
             free(action);
         }
 
@@ -747,13 +811,13 @@ ThemeSlider *XML_ParseSlider(ThemeSlider *slider,xmlDocPtr doc, xmlNodePtr cur)
         if(action)
         {
             if(!strcmp(action,"MAIN_VOLUME"))
-                last->next->action=MAIN_VOLUME;
+                last->next->action=SLIDER_MAIN_VOLUME;
             if(!strcmp(action,"FADER"))
-                last->next->action=FADER;
+                last->next->action=SLIDER_FADER;
             if(!strcmp(action,"SPEED"))
-                last->next->action=SPEED;
+                last->next->action=SLIDER_SPEED;
             if(!strcmp(action,"PITCH"))
-                last->next->action=PITCH;
+                last->next->action=SLIDER_PITCH;
             free(action);
         }
         StorePropertyAsShort(cur,"x",&last->next->Rect.x);
@@ -853,20 +917,67 @@ ThemePlayer *XML_ParsePlayer(xmlDocPtr doc, xmlNodePtr cur)
     return player;
 }
 
-ThemeTable *XML_ParseTable(xmlDocPtr doc, xmlNodePtr cur)
+ThemeTable *XML_ParseTable(ThemeTable *table,xmlDocPtr doc, xmlNodePtr cur)
 {
-    ThemeTable *table;
+    char *contents = NULL;
 
-    table=malloc(sizeof(ThemeTable));
-    memset(table,0,sizeof(ThemeTable));
+    if(table == NULL)
+    {
+        table=malloc(sizeof(ThemeTable));
+        memset(table,0,sizeof(ThemeTable));
 
-    StorePropertyAsShort(cur,"x",&table->Rect.x);
-    StorePropertyAsShort(cur,"y",&table->Rect.y);
-    StorePropertyAsShort(cur,"w",&table->Rect.w);
-    StorePropertyAsShort(cur,"h",&table->Rect.h);
+        StorePropertyAsShort(cur,"x",&table->Rect.x);
+        StorePropertyAsShort(cur,"y",&table->Rect.y);
+        StorePropertyAsShort(cur,"w",&table->Rect.w);
+        StorePropertyAsShort(cur,"h",&table->Rect.h);
 
-    StorePropertyAsInt(cur,"columns",&table->Columns);
-    StorePropertyAsInt(cur,"rows"   ,&table->Rows);
+        StorePropertyAsInt(cur,"columns",&table->Columns);
+        StorePropertyAsInt(cur,"rows"   ,&table->Rows);
+   
+        StorePropertyAsString(cur,"contents",&contents);
+        if(contents)
+        {
+            if(!strcmp(contents,"SUBGROUPS"))
+                table->contents=CONTENTS_SUBGROUPS;
+            if(!strcmp(contents,"FILESINDIRECTORY"))
+                table->contents=CONTENTS_FILESINDIRECTORY;
+            if(!strcmp(contents,"FILESINSUBGROUP"))
+                table->contents=CONTENTS_FILESINSUBGROUP;
+            free(contents);
+        }
+    }
+    else
+    {
+        ThemeTable *last;
+        last=table;
+        while(last->next)
+            last=last->next;
+    
+        last->next=malloc(sizeof(ThemeTable));
+        memset(last->next,0,sizeof(ThemeTable));
+
+        StorePropertyAsShort(cur,"x",&last->next->Rect.x);
+        StorePropertyAsShort(cur,"y",&last->next->Rect.y);
+        StorePropertyAsShort(cur,"w",&last->next->Rect.w);
+        StorePropertyAsShort(cur,"h",&last->next->Rect.h);
+
+        StorePropertyAsInt(cur,"columns",&last->next->Columns);
+        StorePropertyAsInt(cur,"rows"   ,&last->next->Rows);
+   
+        StorePropertyAsString(cur,"contents",&contents);
+        if(contents)
+        {
+            if(!strcmp(contents,"SUBGROUPS"))
+                last->next->contents=CONTENTS_SUBGROUPS;
+            if(!strcmp(contents,"FILESINDIRECTORY"))
+                last->next->contents=CONTENTS_FILESINDIRECTORY;
+            if(!strcmp(contents,"FILESINSUBGROUP"))
+                last->next->contents=CONTENTS_FILESINSUBGROUP;
+            free(contents);
+        }
+    }
+
+    
 
     return table;
 
@@ -888,7 +999,7 @@ ThemeSongdb *XML_ParseSongdb(xmlDocPtr doc, xmlNodePtr cur)
         {
             if ((!xmlStrcmp(cur->name, (const xmlChar *)"table"))) 
             {
-                songdb->Table=XML_ParseTable(doc,cur);
+                songdb->Table=XML_ParseTable(songdb->Table,doc,cur);
             }
             if((!xmlStrcmp(cur->name, (const xmlChar *)"button"))) 
             {
@@ -920,7 +1031,7 @@ ThemePlaylist *XML_ParsePlaylist(xmlDocPtr doc, xmlNodePtr cur)
         {
             if ((!xmlStrcmp(cur->name, (const xmlChar *)"table"))) 
             {
-                playlist->Table=XML_ParseTable(doc,cur);
+                playlist->Table=XML_ParseTable(playlist->Table,doc,cur);
             }
             cur=cur->next;
         }

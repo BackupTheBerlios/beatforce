@@ -22,9 +22,10 @@ search_window.o: search_window.c ../config.h /usr/include/string.h \
  /usr/include/SDL/SDL_video.h /usr/include/SDL/SDL_mutex.h \
  /usr/include/SDL/SDL_quit.h /usr/include/SDL/SDL_version.h \
  ../lib/src/SDL_Widget.h /usr/include/SDL/SDL_image.h \
- ../lib/src/SDL_Font.h ../lib/src/SDL_Table.h songdb_ui.h theme.h \
- player_ui.h mixer_ui.h songdb.h configfile.h llist.h player.h \
- input_plugin.h playlist.h mixer.h osa.h search_window.h wndmgr.h
+ ../lib/src/SDL_Font.h ../lib/src/SDL_Table.h ../lib/src/SDL_Edit.h \
+ songdb_ui.h theme.h player_ui.h mixer_ui.h songdb.h configfile.h \
+ llist.h player.h input_plugin.h playlist.h mixer.h osa.h \
+ search_window.h wndmgr.h
 search_window.c :
 ../config.h :
 /usr/include/string.h :
@@ -75,6 +76,7 @@ search_window.c :
 /usr/include/SDL/SDL_image.h :
 ../lib/src/SDL_Font.h :
 ../lib/src/SDL_Table.h :
+../lib/src/SDL_Edit.h :
 songdb_ui.h :
 theme.h :
 player_ui.h :

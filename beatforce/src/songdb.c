@@ -36,25 +36,19 @@
 #include "input.h"
 #include "playlist.h"
 
-#define MODULE_ID SONGDB
-#include "debug.h"
-
 #define NUMBER_OF 8
 
 /* master index */
-
-struct SongDBEntry **songdb; /* songdb containts all entries */
-
-struct SongDBEntry **subset[NUMBER_OF]; /* subset contains a part of songdb */
-unsigned long songcount;
+struct SongDBEntry **songdb[NUMBER_OF];
 long n_id[NUMBER_OF];
 int active;
+
+SongDBGroup *MainGroup;
 
 /* search return */
 struct SongDBEntry **search_results;
 long n_search_results;
 long n_index;
-long unid;
 
 SongDBConfig *songdbcfg;
 
@@ -62,25 +56,140 @@ SongDBConfig *songdbcfg;
 struct SongDBEntry *songdb_AllocEntry (void);
 void songdb_FreeEntry (struct SongDBEntry *e);
 int songdb_JumpToFileMatch(char* song, char * keys[], int nw);
+struct SongDBSubgroup *songdb_AddSubgroup(struct SongDBSubgroup *sg,char *title);
+
 
 int SONGDB_Init (SongDBConfig * our_cfg)
 {
     int i;
 
-    for(i=0;i<NUMBER_OF;i++)
-    {
-        subset[i] = NULL;
-        n_id[i]   = 0;
-    }
-    songcount=0;
+    MainGroup=malloc(sizeof(SongDBGroup));
+    memset(MainGroup,0,sizeof(SongDBGroup));
+
+    songdb[0] = NULL;
+    songdb[1] = NULL;
+    n_id[0]   = 0;
+    n_id[1]   = 0;
     active = 0;
     search_results = NULL;
     n_search_results = 0;
     n_index = 0;
-    unid=0;
+
     songdbcfg = our_cfg;
 
+    MainGroup->Name=strdup("All");
+    
+    for(i=0;i<songdbcfg->Tabs;i++)
+    {
+        MainGroup->Subgroup=songdb_AddSubgroup(MainGroup->Subgroup,songdbcfg->TabTitle[i]);
+    }
+    
     return 0;
+}
+
+int SONGDB_AddSubgroup(char *title)
+{
+    if(title == NULL)
+        return 0;
+    MainGroup->Subgroup=songdb_AddSubgroup(MainGroup->Subgroup,title);
+    return 1;
+}
+
+int SONGDB_RenameSubgroup(int which, char *title)
+{
+    SongDBSubgroup *sg=SONGDB_GetSubgroup(which);
+
+    if(sg)
+    {
+        if(sg->Name)
+            free(sg->Name);
+
+        sg->Name=strdup(title);
+        return 1;
+    }
+    return 0;
+
+}
+
+int SONGDB_RemoveSubgroup(int which)
+{
+    int count=0;
+    SongDBSubgroup *list;
+
+    list=MainGroup->Subgroup;
+
+    while(list)
+    {
+        if(count==which)
+        {
+            if(list->prev == NULL && list->next)
+            {
+                MainGroup->Subgroup = list->next;
+            }
+            else if (list->prev)
+            {
+                list->prev->next=list->next;
+            }
+            else
+            {
+                MainGroup->Subgroup = NULL;
+            }
+
+            if(list->next)
+                list->next->prev=list->prev;
+
+            free(list->Name);
+            free(list);
+            return 1;
+        }
+        
+        list=list->next;
+        count++;
+    }
+    return 0;
+}
+
+struct SongDBSubgroup *SONGDB_GetSubgroup(int which)
+{
+    int count=0;
+    struct SongDBSubgroup *list;
+    if(count < 0)
+        return NULL;
+
+    list=MainGroup->Subgroup;
+
+    while(list)
+    {
+        if(count==which)
+            return list;
+        
+        list=list->next;
+        count++;
+    }
+    return NULL;
+}
+
+struct SongDBSubgroup *songdb_AddSubgroup(struct SongDBSubgroup *sg,char *title)
+{
+    if(sg == NULL)
+    {
+        sg=malloc(sizeof(SongDBSubgroup));
+        memset(sg,0,sizeof(SongDBSubgroup));
+        sg->Name=strdup(title);
+    }
+    else
+    {
+        struct SongDBSubgroup *last;
+        last=sg;
+        while(last->next)
+            last=last->next;
+
+        last->next=malloc(sizeof(SongDBSubgroup));
+        memset(last->next,0,sizeof(SongDBSubgroup));
+        last->next->Name=strdup(title);
+        last->next->prev=last;
+    }
+    return sg;
 }
 
 struct SongDBEntry *songdb_AllocEntry (void)
@@ -100,10 +209,12 @@ struct SongDBEntry *songdb_AllocEntry (void)
 void SONGDB_FreeActiveList()
 {
     int i=0;
+    if(songdb[active] == NULL)
+        return;
     for(i=0; i < n_id[active]; i++)
     {
-        songdb_FreeEntry(subset[active][i]);
-        subset[active][i]=NULL;
+        songdb_FreeEntry(songdb[active][i]);
+        songdb[active][i]=NULL;
     }
     n_id[active]=0;
 
@@ -139,30 +250,18 @@ struct SongDBEntry *SONGDB_GetSearchEntry(long id)
     return search_results[id];
 }
 
-struct SongDBEntry *SONGDB_GetEntry(long id)
+struct SongDBEntry *SONGDB_GetEntryID(long id)
 {
     struct SongDBEntry *e = NULL;
-    
-//    TRACE("SONGDB_GetEntry %d",id);
 
     if (id >= n_id[active] || id == SONGDB_ID_UNKNOWN)
     {
-        //ERROR("Returning NULL %d %d",id,n_id[active]);
         return NULL;
     }
-    e = subset[active][id];
-    if (e != NULL)
-    {
+    e = songdb[active][id];
+    if (e != NULL && e->id == id)
         return e;
-    }
     return NULL;
-}
-
-struct SongDBEntry *SONGDB_GetEntryID(unsigned long id)
-{
-    if(id >= unid || id == SONGDB_ID_UNKNOWN)
-        return NULL;
-    return songdb[id];
 }
 
 
@@ -176,10 +275,10 @@ int SONGDB_AddFile(char *filename)
 {
     struct SongDBEntry *e;
 
-    TRACE("SONGDB_AddFile");
-    e = songdb_AllocEntry();
-    e->id = unid++;
+    e = songdb_AllocEntry ();
+
     e->filename = strdup (filename);
+    e->id       = n_id[active];
 
     if (input_whose_file (PLAYER_GetData(0)->ip_plugins, filename) != NULL)
     {
@@ -190,40 +289,18 @@ int SONGDB_AddFile(char *filename)
         //    if (e->time < 10)	
         //  return -1;
 
-        /* Add the created entry to the active subset database */
-        SONGDB_AddToSubset(e);
-        /* Add the entry also to the entire db */
-        SONGDB_AddToSongdb(e);
+        /* Add the created entry to the active database */
+        n_id[active]++;
+        songdb[active] = realloc (songdb[active], n_id[active] * DBENTRY_PTR_LEN);
+        if(songdb[active]==NULL)
+        {
+            printf("Realloc failed\n");
+        }
+        e->id = n_id[active] - 1;
+        songdb[active][e->id] = e;
         
     }
     return 0;
-}
-
-int SONGDB_AddToSubset(struct SongDBEntry *e)
-{
-    n_id[active]++;
-    subset[active] = realloc (subset[active], n_id[active] * DBENTRY_PTR_LEN);
-    if(subset[active]==NULL)
-    {
-        printf("Realloc failed\n");
-        return 0;
-    }
-    subset[active][n_id[active]-1] = e;
-    return 1;
-
-}
-
-int SONGDB_AddToSongdb(struct SongDBEntry *e)
-{
-    songcount++;
-    songdb = realloc(songdb,songcount * DBENTRY_PTR_LEN);
-    if(songdb == NULL)
-    {
-        printf("Realloc failed\n");
-        return 0;
-    }
-    songdb[songcount-1] = e;
-    return 1;
 }
 
 
@@ -236,7 +313,7 @@ songdb_do_list_add (struct SongDBEntry **entries, long id)
     struct SongDBEntry *e;
 
     if (entries == NULL)
-        entries = subset[0];
+        entries = songdb[0];
 
     empty = strdup ("");
 
@@ -333,7 +410,7 @@ void SONGDB_FindEntry(char *search_string)
     for(entry=0; entry < n_id[active]; entry++)
     {
         int match = 0; 
-        e = subset[active][entry];
+        e = songdb[active][entry];
         
         if (nw == 0   ||        /* No words yet */
             (nw == 1 && words[0][0] == '\0') || /* empty word */
