@@ -395,8 +395,6 @@ SDL_Surface *Window_CreateFileWindow()
     ThemeButton   *Button = NULL;
     ThemeTable    *Table  = NULL;
 
-    SONGDB_AddFileTo(0,"/home/beuving/track54.mp3");
-
     if(tc == NULL)
         return NULL;
 
@@ -601,23 +599,4 @@ void dirstring(long row,int column,char *dest)
     
 }
 
-
-void FileWindow_DirSelectClicked(void *data)
-{
-    BFList *mp3;
-    SONGDB_FreeActiveList();
-    mp3  = OSA_FindFiles(directory,".mp3",0);
-    
-    while(mp3)
-    {
-        SONGDB_AddFile((char*)mp3->data);
-        free(mp3->data);
-        mp3=mp3->next;
-    }
-    WNDMGR_CloseWindow(FileWindow);
-    SONGDBUI_ChangeDatabase(directory);
-    
-
-    
-}
 

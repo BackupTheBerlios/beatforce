@@ -39,12 +39,6 @@
 #define MODULE_ID SONGDB
 #include "debug.h"
 
-#define NUMBER_OF 8
-
-/* master index */
-struct SongDBEntry **songdb[NUMBER_OF];
-long n_id[NUMBER_OF];
-int active;
 
 SongDBGroup *MainGroup;
 
@@ -52,8 +46,6 @@ SongDBGroup *MainGroup;
 struct SongDBEntry **search_results;
 long n_search_results;
 long n_index;
-
-SongDBConfig *songdbcfg;
 
 /* local prototypes */
 struct SongDBEntry *songdb_AllocEntry (void);
@@ -67,16 +59,9 @@ int SONGDB_Init (SongDBConfig * our_cfg)
     MainGroup=malloc(sizeof(SongDBGroup));
     memset(MainGroup,0,sizeof(SongDBGroup));
 
-    songdb[0] = NULL;
-    songdb[1] = NULL;
-    n_id[0]   = 0;
-    n_id[1]   = 0;
-    active = 0;
     search_results = NULL;
     n_search_results = 0;
     n_index = 0;
-
-    songdbcfg = our_cfg;
 
     MainGroup->Name=strdup("All");
     MainGroup->Changed=1;
@@ -270,14 +255,14 @@ struct SongDBEntry *songdb_AllocEntry (void)
 void SONGDB_FreeActiveList()
 {
     int i=0;
-    if(songdb[active] == NULL)
+    if(MainGroup->Active == NULL)
         return;
-    for(i=0; i < n_id[active]; i++)
+    for(i=0; i < MainGroup->Active->Songcount; i++)
     {
-        songdb_FreeEntry(songdb[active][i]);
-        songdb[active][i]=NULL;
+        songdb_FreeEntry(MainGroup->Active->Playlist[i]);
+        MainGroup->Active->Playlist[i]=NULL;
     }
-    n_id[active]=0;
+    MainGroup->Active->Songcount=0;
 
 }
 
@@ -344,91 +329,6 @@ int SONGDB_SetActiveSubgroup(int which)
 struct SongDBSubgroup *SONGDB_GetActiveSubgroup()
 {
     return MainGroup->Active;
-}
-
-
-int SONGDB_AddFile(char *filename)
-{
-    struct SongDBEntry *e;
-
-    e = songdb_AllocEntry ();
-
-    e->filename = strdup (filename);
-    e->id       = n_id[active];
-
-    if (input_whose_file (PLAYER_GetData(0)->ip_plugins, filename) != NULL)
-    {
-
-//        input_get_tag (0, filename, e);
-
-	/* No valid song if time under 10 ms */
-        //    if (e->time < 10)	
-        //  return -1;
-
-        /* Add the created entry to the active database */
-        n_id[active]++;
-        songdb[active] = realloc (songdb[active], n_id[active] * DBENTRY_PTR_LEN);
-        if(songdb[active]==NULL)
-        {
-            printf("Realloc failed\n");
-        }
-        e->id = n_id[active] - 1;
-        songdb[active][e->id] = e;
-        
-    }
-    return 0;
-}
-
-
-int
-songdb_do_list_add (struct SongDBEntry **entries, long id)
-{
-    char *strings[9];
-    char buf[32];
-    char *empty;
-    struct SongDBEntry *e;
-
-    if (entries == NULL)
-        entries = songdb[0];
-
-    empty = strdup ("");
-
-    if (id >= n_id[active])
-        return -1;
-    if (entries[id] == NULL)
-        return -1;
-
-    e = entries[id];
-    if (e->id != id)
-    {
-        printf ("strange things are happening!!!\n");
-        return -1;
-    }
-
-    sprintf (buf, "%ld", e->id);
-    strings[0] = strdup (buf);
-
-    strings[1] = ((e->artist == NULL) ? (empty) : (e->artist));
-    strings[2] = ((e->title == NULL) ? (empty) : (e->title));
-    strings[3] = ((e->genre == NULL) ? (empty) : (e->genre));
-    strings[4] = ((e->year == NULL) ? (empty) : (e->year));
-
-    sprintf (buf, "%d:%02d", (int) (e->time / 60000),
-             (int) ((e->time % 60000) / 1000));
-    strings[5] = strdup (buf);
-
-    if (e->bpm <= 0)
-        strings[6] = empty;
-    else
-    {
-        sprintf (buf, "%3.1f", e->bpm);
-        strings[6] = strdup (buf);
-    }
-
-    strings[7] = ((e->played) ? ("P") : (empty));
-    strings[8] = NULL;
-
-    return 0;
 }
 
 
