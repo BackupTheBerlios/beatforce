@@ -33,6 +33,7 @@
 #include "SDL_ProgressBar.h"
 
 extern SDL_Font *LargeBoldFont;
+extern SDL_Font *SmallFont;
 extern SDL_Font *DigitsFont;
 
 PlayerDisplay UI_Players[2];
@@ -68,7 +69,7 @@ void PLAYERUI_CreateWindow(int nr, int x)
     SDL_WidgetProperties(SET_FG_COLOR,0xf0f0f0);
 
     /* Time remaining */
-    UI_Players[nr].TimeRemaining=SDL_WidgetCreate(SDL_LABEL,x+162,90,105,22);
+    UI_Players[nr].TimeRemaining=SDL_WidgetCreate(SDL_LABEL,x+165,90,105,22);
     SDL_WidgetProperties(SET_FONT,DigitsFont);
     SDL_WidgetProperties(SET_FG_COLOR,0xf0f0f0);
 
@@ -83,13 +84,13 @@ void PLAYERUI_CreateWindow(int nr, int x)
     SDL_WidgetProperties(SET_FG_COLOR,0xfffff7);
 
     /* Create the samplerate label */
-    UI_Players[nr].Samplerate=SDL_WidgetCreate(SDL_LABEL,x+120,90,44,14);
-    SDL_WidgetProperties(SET_FONT,LargeBoldFont);
+    UI_Players[nr].Samplerate=SDL_WidgetCreate(SDL_LABEL,x+99,85,68,14);
+    SDL_WidgetProperties(SET_FONT,SmallFont);
     SDL_WidgetProperties(SET_FG_COLOR,0xfffff7);
 
     /* Create the bitrate label */
-    UI_Players[nr].Bitrate=SDL_WidgetCreate(SDL_LABEL,x+120,104,44,14);
-    SDL_WidgetProperties(SET_FONT,LargeBoldFont);
+    UI_Players[nr].Bitrate=SDL_WidgetCreate(SDL_LABEL,x+100,94,64,14);
+    SDL_WidgetProperties(SET_FONT,SmallFont);
     SDL_WidgetProperties(SET_FG_COLOR,0xfffff7);
 
     /* Create the volume bar widget */
@@ -227,9 +228,9 @@ void UI_PlayerUpdateTimeLabel(void *data)
     }
     {
         char label[255];
-        sprintf(label,"%d",PLAYER_GetSamplerate(john->PlayerNr)/1000);
+        sprintf(label,"%d Smpls",PLAYER_GetSamplerate(john->PlayerNr));
         SDL_WidgetPropertiesOf(john->Samplerate,SET_CAPTION,label);
-        sprintf(label,"%d",PLAYER_GetBitrate(john->PlayerNr)/1000);
+        sprintf(label,"%d KBit",PLAYER_GetBitrate(john->PlayerNr)/1000);
         SDL_WidgetPropertiesOf(john->Bitrate,SET_CAPTION,label);
     }
         

@@ -61,7 +61,7 @@ void FONT_FNT_Read(char *filename,SDL_Font *font)
 
     if(fp == NULL)
     {
-        fprintf(stderr,"SDL_Font: Font file %s not found\n",filename);
+        fprintf(stderr,"SDL_Font: Font file >%s< not found\n",filename);
         return;
     }
 
