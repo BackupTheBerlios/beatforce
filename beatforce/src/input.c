@@ -50,7 +50,7 @@ int INPUT_Init (int player_nr, BFList * plugin_list)
     InputPluginData *ipd;
     BFList *next;
 
-    TRACE("input_init enter");
+    TRACE("INPUT_Init enter %d",player_nr);
     if (plugin_list == NULL)
     {
         ERROR("input_init: plugin_list == NULL");
@@ -117,12 +117,11 @@ input_whose_file (BFList *plugins, char *filename)
     return NULL;
 }
 
-int
-input_get_tag (int player_nr, char *filename, struct SongDBEntry *e)
+int INPUT_GetTag(int player_nr, char *filename, struct SongDBEntry *e)
 {
     InputPluginData *l;
 
-    printf("input_get_tag\n");
+    TRACE("INPUT_GetTag enter %s",filename);
     
     l = input_whose_file (object_get_data(player_nr)->ip_plugins, e->filename);
     if (l == NULL)
@@ -144,8 +143,7 @@ input_get_add_info (int player_nr, char *filename, struct SongAddInfo *info)
     return l->ip->get_add_info (l->priv, filename, info);
 }
 
-int
-input_load_file (int player_nr,struct SongDBEntry *e)
+int INPUT_LoadFile (int player_nr,struct SongDBEntry *e)
 {
     InputPluginData *l;
     
@@ -155,7 +153,7 @@ input_load_file (int player_nr,struct SongDBEntry *e)
         printf("Impossible\n");
         return -10;
     }
-    if(e->AddInfo->SampleRate != 44100)
+    if(e->AddInfo && e->AddInfo->SampleRate != 44100)
     {
         printf("Unable to play such a low bitrate\n");
     }

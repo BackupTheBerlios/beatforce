@@ -114,8 +114,10 @@ long PLAYER_GetTimeTotal(int player_nr);
 long PLAYER_GetTimeLeft(int player_nr);
 long PLAYER_GetTimePlayed(int player_nr);
 int PLAYER_SetTimePlayed(int player_nr,long seconds);
+int PLAYER_GetBitrate(int player_nr);
+int PLAYER_GetSamplerate(int player_nr);
 
-
+int PLAYER_SetSpeed(double speed);
 
 
 void PLAYER_Play(int player_nr);

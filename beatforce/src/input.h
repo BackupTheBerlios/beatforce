@@ -31,10 +31,10 @@ int INPUT_Init (int, BFList *);
 
 InputPluginData *input_whose_file (BFList *, char *);
 
-int input_get_tag (int, char *, struct SongDBEntry *);
+int INPUT_GetTag(int player_nr, char *filename, struct SongDBEntry *e);
 int input_get_add_info (int, char *, struct SongAddInfo *);
 
-int input_load_file (int, struct SongDBEntry *);
+int INPUT_LoadFile (int player_nr,struct SongDBEntry *e);
 int input_close_file (InputPluginData *);
 
 int INPUT_Play (InputPluginData *);

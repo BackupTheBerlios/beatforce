@@ -167,7 +167,7 @@ int SDL_FontGetStringWidth(SDL_Font* font,char *string)
     int length,width=0;
     int i;
 
-    if(font == NULL)// || font->font == NULL)
+    if(font == NULL || string == NULL)
         return 0;
 
     length=strlen(string);

@@ -44,10 +44,10 @@ void playliststring(long row,int column,char *dest)
     if(SONGDB_GetNoOfEntries()<row)
         return;
 
-    if(playlist_get_entries(PLAYER1) < row)
+    if(PLAYLIST_GetNoOfEntries(PLAYER1) < row)
         return;
         
-    pe = playlist_GetSong(PLAYER1,row);
+    pe = PLAYLIST_GetSong(PLAYER1,row);
 
     if(pe == NULL)
         return;

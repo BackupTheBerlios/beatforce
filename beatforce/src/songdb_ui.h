@@ -23,9 +23,7 @@
 #define __SONGDB_UI_H__
 
 void SONGDBUI_CreateWindow();
-void UI_SongdbCreateSearchWindow();
+void SONGDBUI_ChangeDatabase(char *string);
 
-void UI_SongdbChangeDatabase(char *string);
-char *songdbstring(long row,int column);
 
 #endif /* __SONGDB_UI_H__ */

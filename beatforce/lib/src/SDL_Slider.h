@@ -52,7 +52,8 @@ typedef struct SDL_Slider
     double NormalStepSize;
     
     //event handler functions
-    void (*SliderChangedCB)(void*);
+    void (*OnSliderChanged)(void*);
+    void (*OnSliderChangedData)(void*);
 
     SDL_Rect rect;  //dimensions of the widget area
 }SDL_Slider;
@@ -63,9 +64,6 @@ void* SDL_SliderCreate(SDL_Rect *rect);
 void SDL_SliderDraw(void *slider,SDL_Surface *dest);
 void SDL_SliderEventHandler (void * slider,SDL_Event *event);
 void SDL_SliderProperties(void *slider,int feature,va_list list);
-void SDL_SliderSetCallback  (void* slider,void *function,E_Widget_Event event);
-
-
 
 // internal enums
 enum

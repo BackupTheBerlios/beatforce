@@ -34,17 +34,13 @@
 
 
 #define output_magic_check(var,err)  {if(!(var)) return err;}
-//g_return_val_if_fail(var->magic==AUDIO_OUTPUT_MAGIC,err)
 
 #include "types.h"
-//#include <gnome.h>
 #ifdef OUTPUT_SIZE_32
-//typedef gint32 output_word;
 typedef signed int output_word;
 
 #else
 typedef signed short output_word;
-//typedef gint16 output_word;
 #endif
 
 
@@ -55,8 +51,6 @@ typedef signed short output_word;
 #define OUTPUT_BUFFER_SIZE_SAMPLES( cfg ) (cfg->FragmentSize*OUTPUT_N_CH)
 #define OUTPUT_BUFFER_SIZE( cfg )	 (OUTPUT_BUFFER_SIZE_SAMPLES( cfg )*OUTPUT_SAMPLE_LEN)
 #define OUTPUT_RING_SIZE( cfg ) 	 (cfg->RingBufferSize*OUTPUT_BUFFER_SIZE( cfg ))
-
-
 #else
 #define OUTPUT_BUFFER_SIZE	(512*OUTPUT_SAMPLE_LEN*OUTPUT_N_CH)
 #define OUTPUT_RING_BUF_SIZE	5
@@ -105,7 +99,6 @@ struct OutChannel
     long bytes_written;
 
     unsigned short mask;
-//    guint16 mask;
 
     AFormat aformat;
     int n_ch;
@@ -162,6 +155,8 @@ int AUDIOOUTPUT_Cleanup (void);
 
 /* interface to input plugin */
 int AUDIOOUTPUT_Open (int, AFormat, int, int, int *);
+int AUDIOOUTPUT_SetSpeed(int channel, float speed);
+
 int output_close (int);
 int output_read (int, unsigned char *, int);
 int output_write (int, void*, int);
@@ -170,7 +165,7 @@ long output_buffer_free (int);
 int output_pause (int, int);
 int output_set_time (int, long);
 long output_get_time (int);
-int AudioOutput_SetSpeed(int channel, float speed);
+
 
 /* interface to mixer */
 int output_set_volume (int, float);

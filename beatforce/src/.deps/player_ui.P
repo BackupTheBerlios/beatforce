@@ -26,8 +26,8 @@ player_ui.o: player_ui.c ../config.h player.h input_plugin.h songdb.h \
  /usr/include/SDL/SDL_keysym.h /usr/include/SDL/SDL_mouse.h \
  /usr/include/SDL/SDL_video.h /usr/include/SDL/SDL_mutex.h \
  /usr/include/SDL/SDL_quit.h /usr/include/SDL/SDL_version.h \
- ../lib/src/SDL_Widget.h /usr/include/SDL/SDL_image.h \
- ../lib/src/SDL_ProgressBar.h
+ ../lib/src/SDL_Slider.h ../lib/src/SDL_Widget.h \
+ /usr/include/SDL/SDL_image.h ../lib/src/SDL_ProgressBar.h
 player_ui.c :
 ../config.h :
 player.h :
@@ -93,6 +93,7 @@ output_plugin.h :
 /usr/include/SDL/SDL_mutex.h :
 /usr/include/SDL/SDL_quit.h :
 /usr/include/SDL/SDL_version.h :
+../lib/src/SDL_Slider.h :
 ../lib/src/SDL_Widget.h :
 /usr/include/SDL/SDL_image.h :
 ../lib/src/SDL_ProgressBar.h :

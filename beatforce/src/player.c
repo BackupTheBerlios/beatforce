@@ -88,7 +88,7 @@ int PLAYER_Init(int player_nr, PlayerConfig * cfg)
     object_set_data(player_nr,player);
 
     INPUT_Init (player_nr, PLUGIN_GetList(PLUGIN_TYPE_INPUT));
-    playlist_init (player_nr);
+    PLAYLIST_Init (player_nr);
   
     return 0;
 }
@@ -101,8 +101,6 @@ player_finalize (int player_nr)
         return -1;
 
     PLAYER_Pause(player_nr);
-    playlist_finalize (player_nr);
-
     OSA_RemoveTimer(p->timeout);
     return 0;
 }
@@ -331,12 +329,12 @@ void player_set_song (int player_nr, int no)
     struct PlayerPrivate *p;
     int ent, err = 0;
 
-    printf("Player set song %d %d\n",player_nr,no);
+    TRACE("PLAYER_SetSong -> %d",player_nr);
     p = object_get_data(player_nr);
     if(p==NULL)
         return;
 
-    ent = playlist_get_entries (player_nr);
+    ent =  PLAYLIST_GetNoOfEntries (player_nr);
     if (ent == 0)
     {
         printf ("playlist has no entries.\n");
@@ -354,15 +352,14 @@ void player_set_song (int player_nr, int no)
         return;
     }
 
-    pe = playlist_GetSong (player_nr, no);
+    pe = PLAYLIST_GetSong (player_nr, no);
     if(pe == NULL)
     {
         return;
     }
     p->playing_no     = no;
     p->playing_unique = pe->unique;
-    printf("Setting id %s\n",pe->e->filename);
-    input_get_tag (PLAYER1,pe->e->filename,pe->e);
+    INPUT_GetTag(PLAYER1,pe->e->filename,pe->e);
     p->playing_id = pe->e->id;
     err = player_load (player_nr);
     if (err)
@@ -384,7 +381,7 @@ void player_set_song (int player_nr, int no)
     {
         printf ("player_set_song: error loading song ID %ld.", pe->e->id);
 
-        if (playlist_get_entries (player_nr) > 1)
+        if (PLAYLIST_GetNoOfEntries (player_nr) > 1)
         {
             player_set_song (player_nr, no + 1);
             printf ("trying next!\n");
@@ -395,7 +392,7 @@ void player_set_song (int player_nr, int no)
     }
 //    else
 //        playlist_do_renumber (p->PlayerWindow);
-    printf ("-----------------player_set_song end.\n\n\n");
+    TRACE("PLAYER_SetSong <- %d",player_nr);
 
 }
 
@@ -407,6 +404,7 @@ player_load (int player_nr)
     struct PlayerPrivate *p = object_get_data(player_nr);
     struct SongDBEntry *e;
 
+    TRACE("player_load ->");
     if(p==NULL)
         return -1;
 
@@ -421,7 +419,7 @@ player_load (int player_nr)
     {
         p->play = 0;
         e   =  SONGDB_GetEntry (p->playing_id);
-        err =  input_load_file (player_nr, e);
+        err =  INPUT_LoadFile (player_nr, e);
         if (err)
         {
             fprintf (stderr, "Error 0x%x(%d) loading song id %ld: %s\n", err, err,
@@ -442,6 +440,7 @@ player_load (int player_nr)
                  -cerr);
         return -2;
     }
+    TRACE("player_load <-");
     return 0;
 
 }
@@ -525,8 +524,6 @@ long PLAYER_GetTimeLeft(int player_nr)
         }
     }
     return t;
-
-
 }
 
 int PLAYER_SetTimePlayed(int player_nr,long seconds)
@@ -534,4 +531,44 @@ int PLAYER_SetTimePlayed(int player_nr,long seconds)
     struct PlayerPrivate *p = object_get_data(player_nr);
     INPUT_Seek(p->current_plugin, seconds*1000);
     return 0;
+}
+
+int PLAYER_GetBitrate(int player_nr)
+{
+    struct SongDBEntry *e;
+    struct PlayerPrivate *p = object_get_data(player_nr);
+    
+    if(p->playlist)
+    {
+        e   =  p->playlist->e;
+        
+        if(e && e->AddInfo)
+        {
+            return e->AddInfo->bitrate;
+        }
+    }
+    return 0;
+}
+
+int PLAYER_GetSamplerate(int player_nr)
+{
+    long t=0;
+    struct SongDBEntry *e;
+    struct PlayerPrivate *p = object_get_data(player_nr);
+
+    if(p->playlist)
+    {
+        e   =  p->playlist->e;
+
+        if(e && e->AddInfo)
+        {
+            return e->AddInfo->SampleRate;
+        }
+    }
+    return t;
+}
+
+int PLAYER_SetSpeed(double speed)
+{
+
 }

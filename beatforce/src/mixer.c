@@ -225,7 +225,7 @@ int MIXER_DoFade(int autofade, int instant)
         {
             if (from != -1)
             {
-                printf("autofade: 2 players are playing, can't decide which to fade.\n");
+                LOG("autofade: 2 players are playing, can't decide which to fade");
                 return -1;
             }
             from = 1;
@@ -233,11 +233,9 @@ int MIXER_DoFade(int autofade, int instant)
 
         if (from == -1)
         {
-            printf ("autofade: no player playing!\n");
+            LOG("autofade: no player playing!");
             return -1;
         }
-        printf("determining from %d\n",from);
-
     }
     else
     {

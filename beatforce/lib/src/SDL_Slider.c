@@ -37,7 +37,7 @@ const struct S_Widget_FunctionList SDL_Slider_FunctionList =
     SDL_SliderDraw,
     SDL_SliderProperties,
     SDL_SliderEventHandler,
-    SDL_SliderSetCallback
+    NULL
 };
 
 void* SDL_SliderCreate(SDL_Rect* rect)
@@ -73,8 +73,9 @@ void* SDL_SliderCreate(SDL_Rect* rect)
     slider->NormalStepSize    = 1.0;
 
     // initialize eventhandler
-    slider->SliderChangedCB = NULL;
-    
+    slider->OnSliderChanged      = NULL;
+    slider->OnSliderChangedData  = NULL;
+
     return slider;
 }
 
@@ -205,6 +206,17 @@ void SDL_SliderProperties(void *slider,int feature,va_list list)
         }
         break;
     }
+    case SET_CALLBACK:
+    {
+        int event=va_arg(list,int);
+        if(event==SDL_CHANGED)
+        {
+            Slider->OnSliderChanged=va_arg(list,void*);
+            Slider->OnSliderChangedData=va_arg(list,void*);
+        }
+
+    }
+
     default:
         break;
 
@@ -296,17 +308,9 @@ void SDL_SliderEventHandler(void * slider,SDL_Event *event)
     if(Slider->changed)
     {
         // Run event handler if available (SDL_CHANGED event)
-        if(Slider->SliderChangedCB != NULL)
-            Slider->SliderChangedCB(Slider);
+        if(Slider->OnSliderChanged != NULL)
+            Slider->OnSliderChanged(Slider->OnSliderChangedData);
     }
-}
-
-void SDL_SliderSetCallback(void* slider,void *function,E_Widget_Event event)
-{
-    SDL_Slider *Slider=(SDL_Slider*)slider;
-
-    if(event == SDL_CHANGED)
-        Slider->SliderChangedCB=function;
 }
 
 

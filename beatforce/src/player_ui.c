@@ -28,6 +28,7 @@
 #include "audio_output.h"
 
 #include "SDL_Font.h"
+#include "SDL_Slider.h"
 #include "SDL_Widget.h"
 #include "SDL_ProgressBar.h"
 
@@ -36,10 +37,10 @@ extern SDL_Font *DigitsFont;
 
 PlayerDisplay UI_Players[2];
 
- // local prototypes
+/* local prototypes */
+void playerui_SetSpeed(void *data);
 void UI_PlayerUpdateTimeLabel(void *data);
 void UI_ProgressBarClicked(void *data);
-
 
 
  /* Exported functions */
@@ -71,23 +72,41 @@ void PLAYERUI_CreateWindow(int nr, int x)
     SDL_WidgetProperties(SET_FG_COLOR,0xf0f0f0);
 
     /* Create the artist/title label */
-    UI_Players[nr].songlabel=SDL_WidgetCreate(SDL_LABEL,x+9,120,244,14);
+    UI_Players[nr].Artist=SDL_WidgetCreate(SDL_LABEL,x+9,120,244,14);
+    SDL_WidgetProperties(SET_FONT,LargeBoldFont);
+    SDL_WidgetProperties(SET_FG_COLOR,0xfffff7);
+
+    /* Create the samplerate label */
+    UI_Players[nr].Samplerate=SDL_WidgetCreate(SDL_LABEL,x+120,90,44,14);
+    SDL_WidgetProperties(SET_FONT,LargeBoldFont);
+    SDL_WidgetProperties(SET_FG_COLOR,0xfffff7);
+
+    /* Create the bitrate label */
+    UI_Players[nr].Bitrate=SDL_WidgetCreate(SDL_LABEL,x+120,104,44,14);
     SDL_WidgetProperties(SET_FONT,LargeBoldFont);
     SDL_WidgetProperties(SET_FG_COLOR,0xfffff7);
 
     /* Create the volume bar widget */
-    UI_Players[nr].volumebarleft=SDL_WidgetCreate(SDL_VOLUMEBAR,x+268,68,6,95);
+    UI_Players[nr].VolumeLeft=SDL_WidgetCreate(SDL_VOLUMEBAR,x+268,68,6,95);
     SDL_WidgetProperties(SET_MAX_VALUE,127);
     SDL_WidgetProperties(SET_MIN_VALUE,0);
 
-    UI_Players[nr].volumebarright=SDL_WidgetCreate(SDL_VOLUMEBAR,x+278,68,6,95);
+    UI_Players[nr].VolumeRight=SDL_WidgetCreate(SDL_VOLUMEBAR,x+278,68,6,95);
     SDL_WidgetProperties(SET_MAX_VALUE,127);
     SDL_WidgetProperties(SET_MIN_VALUE,0);
 
     /* Create the progressbar */
-    UI_Players[nr].songprogress=SDL_WidgetCreate(SDL_PROGRESSBAR,x+6,34,250,13);
+    UI_Players[nr].SongProgress=SDL_WidgetCreate(SDL_PROGRESSBAR,x+6,34,250,13);
     SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,UI_ProgressBarClicked,&UI_Players[nr]);
 
+    /* Create the pitch slider */
+    UI_Players[nr].Pitch=SDL_WidgetCreate(SDL_SLIDER,x+310,60,45,100);
+    SDL_WidgetProperties(SET_BUTTON_IMAGE,THEME_DIR"/beatforce/slibut.bmp");
+    SDL_WidgetProperties(SET_MAX_VALUE,2);
+    SDL_WidgetProperties(SET_MIN_VALUE,0);
+    SDL_WidgetProperties(SET_CUR_VALUE,1.0);    
+    SDL_WidgetProperties(SET_NORMAL_STEP_SIZE,0.1);
+    SDL_WidgetProperties(SET_CALLBACK,SDL_CHANGED,playerui_SetSpeed,&UI_Players[nr]);
 
 }
 
@@ -100,8 +119,8 @@ void UI_PlayerSetArtistTitle(int player)
     /* Get and set the artist information */
     player_get_songfield(player,label);
 
-    if(UI_Players[player].songlabel)
-        SDL_WidgetPropertiesOf(UI_Players[player].songlabel,SET_CAPTION,label);
+    if(UI_Players[player].Artist)
+        SDL_WidgetPropertiesOf(UI_Players[player].Artist,SET_CAPTION,label);
 }
 
 /* 
@@ -153,7 +172,7 @@ void UI_PlayerUpdateTimeLabel(void *data)
             player_get_song(john->PlayerNr,&id);
             id++;
             e=SONGDB_GetEntry(id);
-            playlist_set_entry(!john->PlayerNr,e);
+            PLAYLIST_SetEntry(!john->PlayerNr,e);
             player_set_song(!john->PlayerNr,0);  // when set_entry is excecuted we only have 1 item thus 0
             MIXER_DoFade(1,0);
             totaltime = 0;
@@ -179,21 +198,30 @@ void UI_PlayerUpdateTimeLabel(void *data)
     }
     SDL_WidgetPropertiesOf(john->TimeRemaining,SET_CAPTION,string);
 
-    if(john->songprogress)
+    if(john->SongProgress)
     {
-        SDL_WidgetPropertiesOf(john->songprogress,SET_MAX_VALUE,totaltime/10);
-        SDL_WidgetPropertiesOf(john->songprogress,SET_CUR_VALUE,(double)(time/10));
+        SDL_WidgetPropertiesOf(john->SongProgress,SET_MAX_VALUE,totaltime/10);
+        SDL_WidgetPropertiesOf(john->SongProgress,SET_CUR_VALUE,(double)(time/10));
         
     }
     {
         int left,right;
         output_get_volume_level(john->PlayerNr,&left,&right);
         vol=(double)left;
-        SDL_WidgetPropertiesOf(john->volumebarleft,SET_CUR_VALUE,vol);
+        SDL_WidgetPropertiesOf(john->VolumeLeft,SET_CUR_VALUE,vol);
         vol=(double)right;
-        SDL_WidgetPropertiesOf(john->volumebarright,SET_CUR_VALUE,vol);
+        SDL_WidgetPropertiesOf(john->VolumeRight,SET_CUR_VALUE,vol);
     }
+    {
+        char label[255];
+        sprintf(label,"%d",PLAYER_GetSamplerate(john->PlayerNr)/1000);
+        SDL_WidgetPropertiesOf(john->Samplerate,SET_CAPTION,label);
+        sprintf(label,"%d",PLAYER_GetBitrate(john->PlayerNr)/1000);
+        SDL_WidgetPropertiesOf(john->Bitrate,SET_CAPTION,label);
+    }
+        
     
+
 }
 
 
@@ -216,8 +244,19 @@ void UI_ProgressBarClicked(void *playerdata)
 {
     PlayerDisplay *Player= (PlayerDisplay*)playerdata;
 
-    int time=((SDL_ProgressBar*)UI_Players[Player->PlayerNr].songprogress)->CurrentValue;
+    int time=((SDL_ProgressBar*)UI_Players[Player->PlayerNr].SongProgress)->CurrentValue;
 
     PLAYER_SetTimePlayed(Player->PlayerNr,time/100);
 }
 
+
+/* Callback function for pitch slider */
+void playerui_SetSpeed(void *data)
+{
+    double curval;
+    PlayerDisplay *active=(PlayerDisplay*)data;
+   
+    SDL_WidgetPropertiesOf(active->Pitch,GET_CUR_VALUE,&curval);
+    curval=2.0-curval;
+    AUDIOOUTPUT_SetSpeed(active->PlayerNr,curval);
+}

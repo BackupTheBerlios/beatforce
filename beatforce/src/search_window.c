@@ -141,7 +141,7 @@ void playsong()
                 player=0;
         }
         
-        playlist_set_entry(player,e);
+        PLAYLIST_SetEntry(player,e);
         player_set_song(player,0);  // when set_entry is excecuted we only have 1 item thus 0
         
         if(autofade == 1)

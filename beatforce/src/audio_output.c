@@ -454,7 +454,7 @@ output_pause (int c, int pause)
     return 0;
 }
 
-int AudioOutput_SetSpeed(int channel, float speed)
+int AUDIOOUTPUT_SetSpeed(int channel, float speed)
 {
     if (channel >= OUTPUT_N_CHANNELS || channel < 0)
         return ERROR_UNKNOWN_CHANNEL;

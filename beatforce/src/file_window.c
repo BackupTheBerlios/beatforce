@@ -256,7 +256,7 @@ void FileWindow_DirSelectClicked(void *data)
         mp3=mp3->next;
     }
     MAINUI_CloseWindow(FileWindow);
-    UI_SongdbChangeDatabase(directory);
+    SONGDBUI_ChangeDatabase(directory);
     
 
     

@@ -19,6 +19,9 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#ifndef __PLAYER_UI_H__
+#define __PLAYER_UI_H__
+
 /* Public routines */
 
 /* 
@@ -44,9 +47,18 @@ typedef struct PlayerDisplay
     void *TimeElapsed;
     void *TimeRemaining;
 
-    void *songlabel;
-    void *songprogress; 
-    void *volumebarleft;
-    void *volumebarright;
+    void *Title;
+    void *Artist;
+    void *Samplerate;
+    void *Bitrate;
+    void *SongProgress; 
+    void *VolumeLeft;
+    void *VolumeRight;
+
+    void *Pitch;
 
 }PlayerDisplay;
+
+
+
+#endif /* __PLAYER_UI_H__ */

@@ -28,6 +28,7 @@
 #include "SDL_Table.h"
 #include "SDL_Tab.h"
 #include "songdb.h"
+#include "songdb_ui.h"
 #include "player.h"
 #include "playlist.h"
 #include "configfile.h"
@@ -71,7 +72,7 @@ void eventhandler(SDL_Table *table)
         if(player!=1)
             player=0;
     }
-    playlist_set_entry(player,e);
+    PLAYLIST_SetEntry(player,e);
     player_set_song(player,0);  // when set_entry is excecuted we only have 1 item thus 0
     UI_PlayerSetArtistTitle(player);
     
@@ -116,9 +117,9 @@ void SONGDBUI_CreateWindow()
                 }
             }
         }
-        UI_SongdbChangeDatabase(songdbcfg->TabString[0]);
+        SONGDBUI_ChangeDatabase(songdbcfg->TabString[0]);
     }
-    SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,UI_SongdbChangeDatabase,NULL);
+    SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,SONGDBUI_ChangeDatabase,NULL);
     SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_RETURN,UI_SongdbRenameFinished);
 
     /* Create buttons which change the tabs */
@@ -136,10 +137,10 @@ void SONGDBUI_CreateWindow()
     
 }
 
-void UI_SongdbChangeDatabase(char *string)
+void SONGDBUI_ChangeDatabase(char *string)
 {
     SDL_Tab *t;
-    TRACE("UI_SongdbChangeDabase enter %s",string);
+    TRACE("SONGDBUI_ChangeDabase enter %s",string);
     
     t=(SDL_Tab *)tabwidget;
     SONGDB_SetActiveList(t->hl->index);
@@ -154,15 +155,6 @@ void UI_SongdbChangeDatabase(char *string)
         }
 
     }
-}
-
-
-void UI_SongdbCreateSearchWindow()
-{
-    SDL_WidgetCreate(SDL_EDIT,333,26,200,20);
-    SDL_WidgetProperties(SET_FONT,LargeBoldFont);
-    SDL_WidgetProperties(SET_CAPTION,"Hello World");
-
 }
 
 void UI_SongdbChangeDirClicked(void *data)
