@@ -7,15 +7,14 @@ SDL_Slider.o: SDL_Slider.c /usr/include/stdlib.h \
  /usr/include/time.h /usr/include/endian.h /usr/include/bits/endian.h \
  /usr/include/sys/select.h /usr/include/bits/select.h \
  /usr/include/bits/sigset.h /usr/include/bits/time.h \
- /usr/include/sys/sysmacros.h /usr/include/alloca.h \
- /usr/include/SDL/SDL_image.h /usr/include/SDL/SDL.h \
- /usr/include/SDL/SDL_main.h /usr/include/SDL/SDL_types.h \
- /usr/include/SDL/SDL_getenv.h /usr/include/SDL/SDL_error.h \
- /usr/include/SDL/begin_code.h /usr/include/SDL/close_code.h \
- /usr/include/SDL/SDL_rwops.h /usr/include/stdio.h \
- /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h \
- /usr/include/bits/wchar.h /usr/include/gconv.h \
- /usr/lib/gcc-lib/i386-linux/2.95.4/include/stdarg.h \
+ /usr/include/sys/sysmacros.h /usr/include/alloca.h SDL_Slider.h \
+ SDL_Widget.h /usr/lib/gcc-lib/i386-linux/2.95.4/include/stdarg.h \
+ /usr/include/SDL/SDL.h /usr/include/SDL/SDL_main.h \
+ /usr/include/SDL/SDL_types.h /usr/include/SDL/SDL_getenv.h \
+ /usr/include/SDL/SDL_error.h /usr/include/SDL/begin_code.h \
+ /usr/include/SDL/close_code.h /usr/include/SDL/SDL_rwops.h \
+ /usr/include/stdio.h /usr/include/libio.h /usr/include/_G_config.h \
+ /usr/include/wchar.h /usr/include/bits/wchar.h /usr/include/gconv.h \
  /usr/include/bits/stdio_lim.h /usr/include/bits/stdio.h \
  /usr/include/SDL/SDL_timer.h /usr/include/SDL/SDL_audio.h \
  /usr/include/SDL/SDL_byteorder.h /usr/include/SDL/SDL_cdrom.h \
@@ -24,7 +23,7 @@ SDL_Slider.o: SDL_Slider.c /usr/include/stdlib.h \
  /usr/include/SDL/SDL_keysym.h /usr/include/SDL/SDL_mouse.h \
  /usr/include/SDL/SDL_video.h /usr/include/SDL/SDL_mutex.h \
  /usr/include/SDL/SDL_quit.h /usr/include/SDL/SDL_version.h \
- SDL_Slider.h SDL_Widget.h SDL_WidTool.h
+ /usr/include/SDL/SDL_image.h SDL_WidTool.h
 SDL_Slider.c :
 /usr/include/stdlib.h :
 /usr/include/features.h :
@@ -44,7 +43,9 @@ SDL_Slider.c :
 /usr/include/bits/time.h :
 /usr/include/sys/sysmacros.h :
 /usr/include/alloca.h :
-/usr/include/SDL/SDL_image.h :
+SDL_Slider.h :
+SDL_Widget.h :
+/usr/lib/gcc-lib/i386-linux/2.95.4/include/stdarg.h :
 /usr/include/SDL/SDL.h :
 /usr/include/SDL/SDL_main.h :
 /usr/include/SDL/SDL_types.h :
@@ -59,7 +60,6 @@ SDL_Slider.c :
 /usr/include/wchar.h :
 /usr/include/bits/wchar.h :
 /usr/include/gconv.h :
-/usr/lib/gcc-lib/i386-linux/2.95.4/include/stdarg.h :
 /usr/include/bits/stdio_lim.h :
 /usr/include/bits/stdio.h :
 /usr/include/SDL/SDL_timer.h :
@@ -76,6 +76,5 @@ SDL_Slider.c :
 /usr/include/SDL/SDL_mutex.h :
 /usr/include/SDL/SDL_quit.h :
 /usr/include/SDL/SDL_version.h :
-SDL_Slider.h :
-SDL_Widget.h :
+/usr/include/SDL/SDL_image.h :
 SDL_WidTool.h :

@@ -26,7 +26,6 @@
 #include "SDL_Stack.h"
 
 T_Widget_EventHandler user_eventhandler;
-int forceredraw;
 int StackLock;
 SDL_Surface *last_surface = NULL;
 SDL_Surface *previous;
@@ -36,6 +35,7 @@ int fadey;
 int fadew;
 int fadeh;
 int fadeon;
+static SDL_sem *MySem;
 
 void EnableFade()
 {
@@ -44,13 +44,14 @@ void EnableFade()
     fadew=0;
     fadeh=0;
     fadeon=0;
-
 }
 
 int SDL_WidgetInit()
 {
     target_surface = NULL;
     StackLock = 0;
+    MySem=SDL_CreateSemaphore(1);
+    SDL_StackInit();
     return 1;
 }
 
@@ -58,6 +59,7 @@ int SDL_WidgetUseSurface(SDL_Surface *surface)
 {
     int retval;
     retval=SDL_SurfaceStack(surface);
+    SDL_WidgetForceRedraw();
     return 1;
 }
 
@@ -193,7 +195,6 @@ int SDL_DrawAllWidgets(SDL_Surface *screen)
     SDL_Rect dest;
     SDL_Rect src;
 
-
     if(target_surface == NULL && screen)
         target_surface = screen;
 
@@ -221,35 +222,34 @@ int SDL_DrawAllWidgets(SDL_Surface *screen)
     }
 
     SDL_WidgetLOCK();
-    
+
     current_widget=SDL_StackGetStack();
 
     
 //    if(current_widget == NULL)
 //        printf("Nothing to draw\n");
 
+    SDL_SemWait(MySem);
     while(current_widget)
     {
         draw=WidgetTable[current_widget->type]->draw;
 //        draw(current_widget->data,active_surface);
-        if(previous != active_surface)
-            forceredraw=1;
+
         draw(current_widget->data,screen);
 
         current_widget=current_widget->next;
     }
-
+    SDL_SemPost(MySem);
         
     //   SDL_BlitSurface(active_surface,NULL,screen,NULL);
 ///    SDL_BlitSurface(last_surface,&src,screen,&dest);
         
     SDL_UpdateRect(screen,0,0,0,0);
     
-    if(forceredraw)
-        forceredraw=0;
     
     if(previous!=active_surface)
         previous=active_surface;
+
 
     SDL_WidgetUNLOCK();
 
@@ -319,14 +319,23 @@ int SDL_WidgetLoseFocus()
     return 1;
 }
 
-int SDL_WidgetNeedsRedraw()
-{
-    return forceredraw;
-}
-
 int SDL_WidgetForceRedraw()
 {
-    forceredraw=1;
+    T_Widget_Properties properties;
+    Stack* current_widget;
+
+    current_widget=SDL_StackGetStack();
+
+    SDL_SemWait(MySem);
+    while(current_widget)
+    {
+        properties=WidgetTable[current_widget->type]->properties;
+        if(properties)
+            properties(current_widget->data,FORCE_REDRAW,NULL);
+        current_widget=current_widget->next;
+    }
+    SDL_SemPost(MySem);
+
     return 1;
 }
 

@@ -64,20 +64,60 @@ static void PLAYERUI_UpdateState(int player);
 static void PLAYERUI_EditTitleReturn(void *data);
 #endif
 
-void hide(void *data)
+static void PLAYERUI_HidePlayer(void *data)
 {
     if(UI_Players[0].State == PLAYERUI_STATE_NORMAL)
-    {
         UI_Players[0].State = PLAYERUI_STATE_INFO;
+    else
+        UI_Players[0].State = PLAYERUI_STATE_NORMAL;
+
+    if(UI_Players[0].State == PLAYERUI_STATE_INFO)
+    {
+        BFList *l=UI_Players[0].Images;
+        
+        SDL_WidgetPropertiesOf(UI_Players[0].ButtonPlay,SET_VISIBLE,0);
+        SDL_WidgetPropertiesOf(UI_Players[0].ButtonPause,SET_VISIBLE,0);
+        SDL_WidgetPropertiesOf(UI_Players[0].SongProgress,SET_VISIBLE,0);        
+        SDL_WidgetPropertiesOf(UI_Players[0].Artist,SET_VISIBLE,0);
+        SDL_WidgetPropertiesOf(UI_Players[0].Title,SET_VISIBLE,0);
+        SDL_WidgetPropertiesOf(UI_Players[0].PlayerState,SET_VISIBLE,0);
+        SDL_WidgetPropertiesOf(UI_Players[0].Pitch,SET_VISIBLE,0);
+        SDL_WidgetPropertiesOf(UI_Players[0].TimeRemaining,SET_VISIBLE,0);
+        SDL_WidgetPropertiesOf(UI_Players[0].TimeElapsed,SET_VISIBLE,0);
+        SDL_WidgetPropertiesOf(UI_Players[0].Bitrate,SET_VISIBLE,0);
+        SDL_WidgetPropertiesOf(UI_Players[0].Samplerate,SET_VISIBLE,0);
+        SDL_WidgetPropertiesOf(UI_Players[0].VolumeLeft,SET_VISIBLE,0);
+        SDL_WidgetPropertiesOf(UI_Players[0].VolumeRight,SET_VISIBLE,0);
+        while(l)
+        {
+            SDL_WidgetPropertiesOf(l->data,SET_VISIBLE,0);        
+            l=l->next;
+        }
+        SDL_WidgetForceRedraw();
     }
     else
     {
-        UI_Players[0].State = PLAYERUI_STATE_NORMAL;
+        BFList *l=UI_Players[0].Images;
+
+        SDL_WidgetPropertiesOf(UI_Players[0].SongProgress,SET_VISIBLE,1);        
+        SDL_WidgetPropertiesOf(UI_Players[0].Artist,SET_VISIBLE,1);
+        SDL_WidgetPropertiesOf(UI_Players[0].Title,SET_VISIBLE,1);
+        SDL_WidgetPropertiesOf(UI_Players[0].PlayerState,SET_VISIBLE,1);
+        SDL_WidgetPropertiesOf(UI_Players[0].Pitch,SET_VISIBLE,1);
+        SDL_WidgetPropertiesOf(UI_Players[0].TimeRemaining,SET_VISIBLE,1);
+        SDL_WidgetPropertiesOf(UI_Players[0].TimeElapsed,SET_VISIBLE,1);
+        SDL_WidgetPropertiesOf(UI_Players[0].Bitrate,SET_VISIBLE,1);
+        SDL_WidgetPropertiesOf(UI_Players[0].Samplerate,SET_VISIBLE,1);
+        SDL_WidgetPropertiesOf(UI_Players[0].VolumeLeft,SET_VISIBLE,1);
+        SDL_WidgetPropertiesOf(UI_Players[0].VolumeRight,SET_VISIBLE,1);
+        while(l)
+        {
+            SDL_WidgetPropertiesOf(l->data,SET_VISIBLE,1);        
+            l=l->next;
+        }
     }
-
-
-
 }
+
 
 /* Exported functions */
 void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
@@ -105,7 +145,7 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
     while(Image)
     {
         t=SDL_WidgetCreateR(SDL_PANEL,Image->Rect);
-        SDL_WidgetProperties(SET_NORMAL_IMAGE,Image->filename);
+        SDL_WidgetProperties(SET_IMAGE,IMG_Load(Image->filename));
         UI_Players[nr].Images=LLIST_Append(UI_Players[nr].Images,t);
         Image=Image->next;
         
@@ -113,7 +153,7 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
     if(nr == 0)
     {
         SDL_WidgetCreate(SDL_BUTTON,290,34,20,20);
-        SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,hide,NULL);
+        SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,PLAYERUI_HidePlayer,NULL);
     }
     while(Button)
     {
@@ -226,7 +266,7 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
     {
         /* Create the pitch slider */
         UI_Players[nr].Pitch=SDL_WidgetCreateR(SDL_SLIDER,pt->Slider->Rect);
-        SDL_WidgetProperties(SET_BUTTON_IMAGE,pt->Slider->button);
+        SDL_WidgetProperties(SET_BUTTON_IMAGE,IMG_Load(pt->Slider->button));
         SDL_WidgetProperties(SET_MAX_VALUE,2);
         SDL_WidgetProperties(SET_MIN_VALUE,0);
         SDL_WidgetProperties(SET_CUR_VALUE,1.0);    
@@ -259,51 +299,7 @@ void PLAYERUI_Redraw()
     }
 #endif
 
-    if(UI_Players[0].State == PLAYERUI_STATE_INFO)
-    {
-        BFList *l=UI_Players[0].Images;
-        SDL_WidgetPropertiesOf(UI_Players[0].ButtonPlay,SET_VISIBLE,0);
-        SDL_WidgetPropertiesOf(UI_Players[0].ButtonPause,SET_VISIBLE,0);
-        SDL_WidgetPropertiesOf(UI_Players[0].SongProgress,SET_VISIBLE,0);        
-        SDL_WidgetPropertiesOf(UI_Players[0].Artist,SET_VISIBLE,0);
-        SDL_WidgetPropertiesOf(UI_Players[0].Title,SET_VISIBLE,0);
-        SDL_WidgetPropertiesOf(UI_Players[0].PlayerState,SET_VISIBLE,0);
-        SDL_WidgetPropertiesOf(UI_Players[0].Pitch,SET_VISIBLE,0);
-        SDL_WidgetPropertiesOf(UI_Players[0].TimeRemaining,SET_VISIBLE,0);
-        SDL_WidgetPropertiesOf(UI_Players[0].TimeElapsed,SET_VISIBLE,0);
-        SDL_WidgetPropertiesOf(UI_Players[0].Bitrate,SET_VISIBLE,0);
-        SDL_WidgetPropertiesOf(UI_Players[0].Samplerate,SET_VISIBLE,0);
-        SDL_WidgetPropertiesOf(UI_Players[0].VolumeLeft,SET_VISIBLE,0);
-        SDL_WidgetPropertiesOf(UI_Players[0].VolumeRight,SET_VISIBLE,0);
-        while(l)
-        {
-            SDL_WidgetPropertiesOf(l->data,SET_VISIBLE,0);        
-            l=l->next;
-        }
-        SDL_WidgetForceRedraw();
-        return;
-    }
-    else
-    {
-        BFList *l=UI_Players[0].Images;
-        SDL_WidgetPropertiesOf(UI_Players[0].SongProgress,SET_VISIBLE,1);        
-        SDL_WidgetPropertiesOf(UI_Players[0].Artist,SET_VISIBLE,1);
-        SDL_WidgetPropertiesOf(UI_Players[0].Title,SET_VISIBLE,1);
-        SDL_WidgetPropertiesOf(UI_Players[0].PlayerState,SET_VISIBLE,1);
-        SDL_WidgetPropertiesOf(UI_Players[0].Pitch,SET_VISIBLE,1);
-        SDL_WidgetPropertiesOf(UI_Players[0].TimeRemaining,SET_VISIBLE,1);
-        SDL_WidgetPropertiesOf(UI_Players[0].TimeElapsed,SET_VISIBLE,1);
-        SDL_WidgetPropertiesOf(UI_Players[0].Bitrate,SET_VISIBLE,1);
-        SDL_WidgetPropertiesOf(UI_Players[0].Samplerate,SET_VISIBLE,1);
-        SDL_WidgetPropertiesOf(UI_Players[0].VolumeLeft,SET_VISIBLE,1);
-        SDL_WidgetPropertiesOf(UI_Players[0].VolumeRight,SET_VISIBLE,1);
-        while(l)
-        {
-            SDL_WidgetPropertiesOf(l->data,SET_VISIBLE,1);        
-            l=l->next;
-        }
-        SDL_WidgetForceRedraw();
-    }
+    
 
 
 

@@ -80,7 +80,7 @@ typedef struct SDL_Table
     /* Scrollbar */
     void* Scrollbar;
     int   ScrollbarWidth;
-    char *ScrollbarImage;
+    SDL_Surface *ScrollbarImage;
 
     struct SDL_Table    *next;
 }SDL_Table;

@@ -40,6 +40,7 @@ typedef struct StackList
     struct StackList *next;
 }StackList;
 
+int SDL_StackInit();
 int SDL_SurfaceStack(SDL_Surface *surface);
 SDL_Surface* SDL_GetSurfaceStack();
 Stack *SDL_StackGetSurfaceStack(SDL_Surface *surface);

@@ -124,7 +124,7 @@ void PLAYLISTUI_CreateWindow(ThemePlaylist *pl)
         SDL_WidgetProperties(SET_FG_COLOR,WHITE);
         SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
         SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION, playliststring);
-        SDL_WidgetProperties(SET_IMAGE,THEME_DIR"/beatforce/tablescrollbar.bmp");
+        SDL_WidgetProperties(SET_IMAGE,IMG_Load(THEME_DIR"/beatforce/tablescrollbar.bmp"));
         SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,playlisteventhandler,NULL);
     }
 }

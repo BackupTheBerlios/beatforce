@@ -93,7 +93,7 @@ void SONGDBUI_CreateWindow(ThemeSongdb *ts)
         SDL_WidgetProperties(ROWS,SONGDB_GetNoOfEntries());
         SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION,songdbstring);
         SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,eventhandler,table);
-        SDL_WidgetProperties(SET_IMAGE,THEME_DIR"/beatforce/tablescrollbar.bmp");
+        SDL_WidgetProperties(SET_IMAGE,IMG_Load(THEME_DIR"/beatforce/tablescrollbar.bmp"));
 
         /* Craete the tab section below the table*/
         tabwidget=SDL_WidgetCreate(SDL_TAB,ts->Table->Rect.x,ts->Table->Rect.y + ts->Table->Rect.h,
@@ -116,8 +116,8 @@ void SONGDBUI_CreateWindow(ThemeSongdb *ts)
         case BUTTON_CHANGE_DIR:
             //add dir to highlighted tab
             SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
-            SDL_WidgetProperties(SET_NORMAL_IMAGE,Button->normal);
-            SDL_WidgetProperties(SET_PRESSED_IMAGE,Button->pressed);
+            SDL_WidgetProperties(SET_NORMAL_IMAGE,IMG_Load(Button->normal));
+            SDL_WidgetProperties(SET_PRESSED_IMAGE,IMG_Load(Button->pressed));
             SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,SONGDBUI_ChangeGroupClicked,NULL);        
             break;
         }

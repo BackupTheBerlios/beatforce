@@ -28,7 +28,18 @@ StackList *stacklist;
 Stack     *current_stack;
 SDL_Surface  *previous_surface;
 Stack     *current_focus;
+static SDL_sem *StackSem;
 
+
+int SDL_StackInit()
+{
+    stacklist=NULL;
+    current_stack=NULL;
+    previous_surface=NULL;
+    current_focus=NULL;
+    StackSem=SDL_CreateSemaphore(1);
+    return 1;
+}
 
 /* retrun -1 on error
  * return 0 on exits and make active
@@ -50,7 +61,10 @@ SDL_SurfaceStack(SDL_Surface *surface)
         stacklist->stack=NULL;
         stacklist->parent=NULL;
         stacklist->next=NULL;
+        SDL_SemWait(StackSem);
         current_stack=stacklist->stack;
+        SDL_SemPost(StackSem);
+
     }
     else
     {
@@ -59,7 +73,9 @@ SDL_SurfaceStack(SDL_Surface *surface)
         /* If it already exists only make it active */
         if(surfaces->surface == surface)
         {
+            SDL_SemWait(StackSem);
             current_stack  = surfaces->stack;
+            SDL_SemPost(StackSem);
             return 0;
         }
         else
@@ -69,7 +85,9 @@ SDL_SurfaceStack(SDL_Surface *surface)
                 surfaces=surfaces->next;
                 if(surfaces->surface == surface)
                 {
-                     current_stack=surfaces->stack;
+                    SDL_SemWait(StackSem);
+                    current_stack=surfaces->stack;
+                    SDL_SemPost(StackSem);
 //                    printf("Found surface %p\n",current_stack);
                     return 0;
                 }
@@ -86,7 +104,9 @@ SDL_SurfaceStack(SDL_Surface *surface)
         surfaces->next->parent=surfaces->surface;
         surfaces->next->stack=NULL;
         surfaces->next->next=NULL;
-         current_stack = surfaces->next->stack;
+        SDL_SemWait(StackSem);
+        current_stack = surfaces->next->stack;
+        SDL_SemPost(StackSem);
         
     }
     return 1;
@@ -96,13 +116,18 @@ SDL_Surface *SDL_GetSurfaceStack()
 {
     StackList *surfaces;
     surfaces=stacklist;
+    SDL_SemWait(StackSem);
     while(surfaces)
     {
         if(surfaces->stack == current_stack)
+        {
+            SDL_SemPost(StackSem);
             return surfaces->surface;
+        }
         surfaces=surfaces->next;
 
     }
+    SDL_SemPost(StackSem);
     return NULL;
 
 }

@@ -50,7 +50,7 @@ void* SDL_TableCreate(SDL_Rect* rect)
     SDL_Table *newtable;
 
     newtable=(SDL_Table*)malloc(sizeof(SDL_Table));
-    newtable->fgcolor           = BLACK;//0xffffef;
+    newtable->fgcolor           = BLACK;
     newtable->bgcolor           = 0x00000f;
     newtable->rect.x            = rect->x;
     newtable->rect.y            = rect->y;
@@ -65,7 +65,7 @@ void* SDL_TableCreate(SDL_Rect* rect)
     newtable->Rows              = 0;
 
     newtable->font              = NULL;
-    // backup of the background
+    /* backup of the background */
     newtable->Background        = NULL;
 
     //data retreival function
@@ -119,25 +119,29 @@ void SDL_TableDraw(void *table,SDL_Surface *dest)
      */
     if(Table->Rows > Table->VisibleRows)
     {
-        int width,state;
+        int width,SliderState;
         double row;
         SDL_TableAttachScrollbar(Table);
 
 
         SDL_WidgetPropertiesOf(Table->Scrollbar,GET_CUR_VALUE,&row);
         SDL_WidgetPropertiesOf(Table->Scrollbar,GET_WIDTH,&width);
-        SDL_WidgetPropertiesOf(Table->Scrollbar,GET_STATE,&state);
+        SDL_WidgetPropertiesOf(Table->Scrollbar,GET_STATE,&SliderState);
 
         Table->ScrollbarWidth = width;
         
-        if(state == SLIDER_DRAG)
-            return;
-
-        if((int)row != Table->FirstVisibleRow)
+        if(SliderState == SLIDER_DRAG)
         {
-            Table->FirstVisibleRow  = (int)row;
-            Table->TableInitialDraw = 1 ;
         }
+        else
+        {        
+            if((int)row != Table->FirstVisibleRow)
+            {
+                Table->FirstVisibleRow  = (int)row;
+                Table->TableInitialDraw = 1 ;
+            }
+        }
+        
     }
 
    
@@ -149,7 +153,7 @@ void SDL_TableDraw(void *table,SDL_Surface *dest)
         if(Table->bgcolor ==  TRANSPARANT)
         {
            if(SDL_BlitSurface(Table->Background,NULL,dest,&Table->rect)<0)
-               fprintf(stderr, "BlitSurface error: %s\n", SDL_GetError());
+               ;
         }
         else
         {
@@ -315,7 +319,7 @@ int SDL_TableProperties(void *table,int feature,va_list list)
         Table->Selectable = va_arg(list,int);
         break;
     case SET_IMAGE:
-        Table->ScrollbarImage = strdup(va_arg(list,char*));
+        Table->ScrollbarImage = va_arg(list,SDL_Surface*);
         break;
     case SET_STATE_EDIT:
         {
@@ -369,14 +373,12 @@ void SDL_TableEventHandler(void *table,SDL_Event *event)
     case SDL_MOUSEMOTION:
         if(SDL_WidgetIsInside(&Table->rect,event->motion.x,event->motion.y))
         {
-#if 0
             if(event->motion.x > (Table->rect.x + Table->rect.w - Table->ScrollbarWidth))
             {
                 /* Event are for the scrollbar */
                 break;
             }
             else
-#endif
             {
                 y=Table->rect.y;
                 for(i=0;i<Table->VisibleRows;i++)

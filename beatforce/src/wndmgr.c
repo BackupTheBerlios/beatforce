@@ -57,7 +57,13 @@ void WNDMGR_CloseWindow()
 void WNDMGR_Init()
 {
     unsigned int flags=0;
-    ThemeScreen *s=THEME_GetActive()->Screen;
+    ThemeConfig *c=THEME_GetActive();
+    ThemeScreen *s;
+    
+    if(c)
+        s=c->Screen;
+    else
+        exit(1);
 
     TRACE("UI_Init enter");
 

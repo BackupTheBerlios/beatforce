@@ -46,8 +46,8 @@ void* SDL_PanelCreate(SDL_Rect* rect)
     panel->rect.h  = rect->h;
 
     panel->color  = 0xfffff7;
-    panel->redraw = 1;
-    panel->image  = NULL;
+    panel->Redraw = 1;
+    panel->Image  = NULL;
 
     panel->Visible = 1;
     return panel;
@@ -63,29 +63,29 @@ void SDL_PanelDraw(void *panel,SDL_Surface *dest)
 
     src.x=0;
     src.y=0;
-    if(Panel->rect.w == 0 && Panel->image)
-        src.w=Panel->image->w;
+    if(Panel->rect.w == 0 && Panel->Image)
+        src.w=Panel->Image->w;
     else
         src.w=Panel->rect.w;
     
-    if(Panel->rect.h == 0 && Panel->image)
-        src.h=Panel->image->h;
+    if(Panel->rect.h == 0 && Panel->Image)
+        src.h=Panel->Image->h;
     else
         src.h=Panel->rect.h;
     
     
-    if(Panel->redraw || SDL_WidgetNeedsRedraw())
+    if(Panel->Redraw)
     {
-        if(Panel->image)
+        if(Panel->Image)
         {
-            if(SDL_BlitSurface(Panel->image,&src,dest,&Panel->rect)<0)
-                fprintf(stderr, "BlitSurface error: %s\n", SDL_GetError());
+            if(SDL_BlitSurface(Panel->Image,&src,dest,&Panel->rect)<0)
+                ;
         }
         else
         {
             SDL_FillRect(dest,&Panel->rect,Panel->color);
         }
-        Panel->redraw=0;
+        Panel->Redraw=0;
     }
     
 }
@@ -96,24 +96,24 @@ int SDL_PanelProperties(void *panel,int feature,va_list list)
 
     switch(feature)
     {
-    case SET_NORMAL_IMAGE:
-        if(Panel->image == NULL)
+    case SET_IMAGE:
+        if(Panel->Image == NULL)
         {
-            char *s = va_arg(list,char*);
-            Panel->image = IMG_Load(s);
-            if(Panel->image)
-                SDL_SetColorKey(Panel->image,SDL_SRCCOLORKEY,TRANSPARANT);
+            Panel->Image = va_arg(list,SDL_Surface*);
+            if(Panel->Image)
+                SDL_SetColorKey(Panel->Image,SDL_SRCCOLORKEY,TRANSPARANT);
         }
         break;
     case SET_BG_COLOR:
         Panel->color=va_arg(list,Uint32);
-        Panel->redraw=1;
+        Panel->Redraw=1;
         break;
     case FORCE_REDRAW:
-        Panel->redraw=1;
+        Panel->Redraw=1;
         break;
     case SET_VISIBLE:
         Panel->Visible=va_arg(list,int);
+        Panel->Redraw=1;
         break;
 
     default:

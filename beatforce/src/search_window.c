@@ -101,7 +101,7 @@ SDL_Surface *SEARCHWINDOW_Create()
     while(Image)
     {
         SDL_WidgetCreateR(SDL_PANEL,Image->Rect);
-        SDL_WidgetProperties(SET_NORMAL_IMAGE,Image->filename);
+        SDL_WidgetProperties(SET_IMAGE,IMG_Load(Image->filename));
         Image=Image->next;
     }
 
@@ -113,6 +113,7 @@ SDL_Surface *SEARCHWINDOW_Create()
     SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
     SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION,songdb_searchstring);
     SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,searchwindow_PlayClicked,NULL);
+    SDL_WidgetProperties(SET_IMAGE,IMG_Load(THEME_DIR"/beatforce/tablescrollbar.jpg"));
 
     editwidget=SDL_WidgetCreate(SDL_EDIT,312,20,400,25);
     SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));

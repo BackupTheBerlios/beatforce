@@ -80,7 +80,7 @@ void SDL_VolumeBarDraw(void *volumebar,SDL_Surface *dest)
     if(VolumeBar->Visible == 0)
         return;
 
-    if(VolumeBar->Redraw || SDL_WidgetNeedsRedraw())
+    if(VolumeBar->Redraw)
     {
         SDL_FillRect(dest,&VolumeBar->rect,0x000000);
 
@@ -130,6 +130,9 @@ int SDL_VolumeBarProperties(void *volumebar,int feature,va_list list)
         break;
     case SET_VISIBLE:
         VolumeBar->Visible=va_arg(list,int);
+        break;
+    case FORCE_REDRAW:
+        VolumeBar->Redraw=1;
         break;
     default:
         break;

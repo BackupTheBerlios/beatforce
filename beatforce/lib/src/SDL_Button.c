@@ -19,7 +19,7 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <SDL/SDL_image.h>
+#include <SDL/SDL.h>
 #include "SDL_Button.h"
 #include "SDL_Widget.h"
 
@@ -69,7 +69,6 @@ void SDL_ButtonDraw(void *data,SDL_Surface *dest)
 
     if(button->normal==NULL)
     {
-//        printf("SDL_Button: Can't draw without an image\n");
         SDL_FillRect(dest,&button->rect,0xfff000);
         return;
     }
@@ -108,48 +107,39 @@ void SDL_ButtonDraw(void *data,SDL_Surface *dest)
 
     
     if(SDL_BlitSurface(drawbutton,&src,dest,&button->rect)<0)
-        fprintf(stderr, "BlitSurface error: %s\n", SDL_GetError());
+        ;
             
 }
 
 int SDL_ButtonProperties(void *button,int feature,va_list list)
 {
-    SDL_Button *but=(SDL_Button*)button;
+    SDL_Button *Button=(SDL_Button*)button;
 
     switch(feature)
     {
-
+    case SET_IMAGE:
     case SET_NORMAL_IMAGE:
-        if(but->normal==NULL)
+        if(Button->normal==NULL)
         {
-            char *image=va_arg(list,char*);
-            
-            if(image)
-                but->normal = IMG_Load(image);
+            Button->normal = va_arg(list,SDL_Surface*);
         }
         break;
     case SET_HIGHLIGHT_IMAGE:
-        if(but->highlighted==NULL)
+        if(Button->highlighted==NULL)
         {
-            char *image=va_arg(list,char*);
-            
-            if(image)
-                but->highlighted=IMG_Load(image);
+            Button->highlighted=va_arg(list,SDL_Surface*);
         }
         break;
     case SET_PRESSED_IMAGE:
-        if(but->pressed==NULL)
+        if(Button->pressed==NULL)
         {
-            char *image=va_arg(list,char*);
-
-            if(image)
-                but->pressed=IMG_Load(image);
+            Button->pressed=va_arg(list,SDL_Surface*);
         }
         break;
     case SET_DISABLED_IMAGE:
-        if(but->disabled==NULL)
+        if(Button->disabled==NULL)
         {
-            but->disabled=IMG_Load(va_arg(list,char*));
+            Button->disabled=va_arg(list,SDL_Surface*);
         }
         break;
     case SET_CALLBACK:
@@ -157,14 +147,14 @@ int SDL_ButtonProperties(void *button,int feature,va_list list)
         int event=va_arg(list,int);
         if(event== SDL_CLICKED)
         {
-            but->Clicked=va_arg(list,void*);
-            but->ClickedData=va_arg(list,void*);
+            Button->Clicked=va_arg(list,void*);
+            Button->ClickedData=va_arg(list,void*);
         }
         break;
     }
     case SET_VISIBLE:
     {
-        but->Visible=va_arg(list,int);
+        Button->Visible=va_arg(list,int);
         break;
     }
     }
@@ -173,37 +163,37 @@ int SDL_ButtonProperties(void *button,int feature,va_list list)
 
 void SDL_ButtonEventHandler(void * button,SDL_Event *event)
 {
-    SDL_Button *but=(SDL_Button*)button;
+    SDL_Button *Button=(SDL_Button*)button;
 
-    if(but->Visible == 0)
+    if(Button->Visible == 0)
         return;
 
     switch(event->type)
     {
     case SDL_MOUSEMOTION:
-        if(SDL_WidgetIsInside(&but->rect,event->motion.x,event->motion.y))
+        if(SDL_WidgetIsInside(&Button->rect,event->motion.x,event->motion.y))
         {
-            if(but->state == SDL_BUTTON_UP)
-                but->state = SDL_BUTTON_HIGHLIGHTED;
+            if(Button->state == SDL_BUTTON_UP)
+                Button->state = SDL_BUTTON_HIGHLIGHTED;
         }
         else
-            but->state = SDL_BUTTON_UP;
+            Button->state = SDL_BUTTON_UP;
         break;
     case SDL_MOUSEBUTTONDOWN:
-        if(SDL_WidgetIsInside(&but->rect,event->motion.x,event->motion.y))
+        if(SDL_WidgetIsInside(&Button->rect,event->motion.x,event->motion.y))
         {
-            but->state = SDL_BUTTON_DOWN;
-            if(but->Clicked)
-                but->Clicked(but->ClickedData);
+            Button->state = SDL_BUTTON_DOWN;
+            if(Button->Clicked)
+                Button->Clicked(Button->ClickedData);
         }
         else
-            but->state = SDL_BUTTON_UP;
+            Button->state = SDL_BUTTON_UP;
         break;
     case SDL_MOUSEBUTTONUP:
-        if(SDL_WidgetIsInside(&but->rect,event->motion.x,event->motion.y))
-            but->state = SDL_BUTTON_HIGHLIGHTED;
+        if(SDL_WidgetIsInside(&Button->rect,event->motion.x,event->motion.y))
+            Button->state = SDL_BUTTON_HIGHLIGHTED;
         else
-            but->state = SDL_BUTTON_UP;
+            Button->state = SDL_BUTTON_UP;
         break;
     default:
         break;

@@ -48,9 +48,9 @@ ThemeTable  *XML_ParseTable(ThemeTable *pp,xmlDocPtr doc, xmlNodePtr cur);
 
 
 /* Window parsers */
-ThemeMainWindow *XML_ParseMainwindow(xmlDocPtr doc, xmlNodePtr cur);
+ThemeMainWindow   *XML_ParseMainwindow(xmlDocPtr doc, xmlNodePtr cur);
 ThemeSearchWindow *XML_ParseSearchwindow(xmlDocPtr doc, xmlNodePtr cur);
-ThemeFileWindow *XML_ParseFilewindow(xmlDocPtr doc, xmlNodePtr cur);
+ThemeFileWindow   *XML_ParseFilewindow(xmlDocPtr doc, xmlNodePtr cur);
 
 /* Mainwindow group parser */
 ThemePlayer   *XML_ParsePlayer(xmlDocPtr doc, xmlNodePtr cur);
@@ -117,19 +117,27 @@ int THEME_Init()
         return 0;
 
     NoOfThemes=LLIST_NoOfEntries(dir);
-//    if(NoOfThemes == 1)
+        
+    LIBXML_TEST_VERSION
+    xmlKeepBlanksDefault(0);
+
+    while(dir)
+    {
+        char path[255];
+        sprintf(path,"%s/skin.xml",dir->data);
+        doc = xmlParseFile(path);
+        if (doc)
+            break;
+        dir=dir->next;
+
+    }
+    if(doc)
     {
         /* use it */
-        LIBXML_TEST_VERSION
-            xmlKeepBlanksDefault(0);
-
+            
         /*
          * build an XML tree from a the file;
          */
-        doc = xmlParseFile(THEME_DIR"/beatforce/skin.xml");
-        if (doc == NULL) 
-            return 0;
-            
         cur = xmlDocGetRootElement(doc);
         if (cur == NULL) 
         {
@@ -202,15 +210,15 @@ int THEME_Init()
             cur = cur->next;
         }
         active=current;
-
     }
+
     
-    return 1;
+return 1;
 }
 
 ThemeConfig *THEME_GetActive()
 {
-    return active;
+return active;
 }
 
 int StorePropertyAsInt(xmlNodePtr cur,char *property,int *value)

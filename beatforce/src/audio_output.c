@@ -3,6 +3,8 @@
   audio_output.c  - audio output
    
   Copyright (c) 2001, Patrick Prasse (patrick.prasse@gmx.net)
+  Copyright (c) 2003, John Beuving (john.beuving@home.nl)
+  
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public Licensse as published by
@@ -586,6 +588,68 @@ static void AUDIOOUTPUT_CalculateVolume(struct OutChannel *ch)
     ch->volumeright = 20 * log(r);
 }
 
+static void AUDIOOUTPUT_Crossfade()
+{
+    int sample;
+
+    if (!((ch[0]->fader_dB <= -31) && (ch[1]->fader_dB <= -31)))
+    {
+        double ch0   = 0;
+        double ch1   = 0;
+        double value = 0;
+        MIXER_GetFaderValue(&value);
+        
+        if ((value < 0.00) || (value > 1.00001))
+        {
+            value = 0.50;
+        }
+        
+        if (value >= 0.50)
+            ch1 = 0.50;
+        else
+            ch1 = value;
+        
+        if (value <= 0.50)
+            ch0 = 0.50;
+        else
+            ch0 = 1.00 - value;
+        
+        if (ch0 != 0)
+        {
+            ch0 = pow (10,0.05 * (double) ((ch0 * 2 - 1) * 30)) * _TO_ATT (ch[0]->fader_dB);
+        }
+        
+        if (ch1 != 0)
+        {
+            ch1 = pow (10,0.05 * (double) ((ch1 * 2 - 1) * 30)) * _TO_ATT (ch[1]->fader_dB);
+        }
+        
+        for (sample = 0; sample < OUTPUT_BUFFER_SIZE_SAMPLES (audiocfg); sample++)
+        {
+            double ch0_tmp = 0;
+            double ch1_tmp = 0;
+            double tmp;
+            if (!ch[0]->paused)
+                ch0_tmp = (double) ch[0]->buffer[sample] * ch0;
+            
+            if (!ch[1]->paused)
+                ch1_tmp = (double) ch[1]->buffer[sample] * ch1;
+            
+            tmp = (int) (ch1_tmp + ch0_tmp);
+            if (tmp > 32767.0)
+            {
+                tmp = 32767.0;
+            }
+            if (tmp < -32767.0)
+            {
+                tmp = -32767.0;
+            }
+            
+            ADD_TO_OUTPUT_BUFFER (&group[0]->out_buffer[sample], tmp);
+        }                         /* for ... */
+    }                           /* { */
+}
+
 /* main thread */
 static int AUDIOOUTPUT_Loop(void *arg)
 {
@@ -703,70 +767,8 @@ static int AUDIOOUTPUT_Loop(void *arg)
         }
         /* for( channel <N_CHANNELS ) */
 
-// do the crossfading
-#if 1
-        if (!((ch[0]->fader_dB <= -31) && (ch[1]->fader_dB <= -31)))
-        {
-            double ch0   = 0;
-            double ch1   = 0;
-            double value = 0;
-            MIXER_GetFaderValue(&value);
-       
-            if ((value < 0.00) || (value > 1.00001))
-            {
-                value = 0.50;
-            }
 
-            if (value >= 0.50)
-                ch1 = 0.50;
-            else
-                ch1 = value;
-
-            if (value <= 0.50)
-                ch0 = 0.50;
-            else
-                ch0 = 1.00 - value;
-
-            if (ch0 != 0)
-            {
-                ch0 = pow (10,0.05 * (double) ((ch0 * 2 - 1) * 30)) * _TO_ATT (ch[0]->fader_dB);
-            }
-
-            if (ch1 != 0)
-            {
-                ch1 = pow (10,0.05 * (double) ((ch1 * 2 - 1) * 30)) * _TO_ATT (ch[1]->fader_dB);
-            }
-
-
-
-
-            for (sample = 0; sample < OUTPUT_BUFFER_SIZE_SAMPLES (audiocfg); sample++)
-            {
-                double ch0_tmp = 0;
-                double ch1_tmp = 0;
-                double tmp;
-                if (!ch[0]->paused)
-                    ch0_tmp = (double) ch[0]->buffer[sample] * ch0;
-                
-                if (!ch[1]->paused)
-                    ch1_tmp = (double) ch[1]->buffer[sample] * ch1;
-                
-                tmp = (int) (ch1_tmp + ch0_tmp);
-                if (tmp > 32767.0)
-                {
-                    tmp = 32767.0;
-                }
-                if (tmp < -32767.0)
-                {
-                    tmp = -32767.0;
-                }
-
-                ADD_TO_OUTPUT_BUFFER (&group[0]->out_buffer[sample], tmp);
-            }                         /* for ... */
-
-        }                           /* { */
-#endif
-
+        AUDIOOUTPUT_Crossfade();
 
         /* output pcm data to output plugin */
         {

@@ -108,7 +108,7 @@ static SDL_Surface *MAINWINDOW_CreateWindow()
     while(Image)
     {
         SDL_WidgetCreateR(SDL_PANEL,Image->Rect);
-        SDL_WidgetProperties(SET_NORMAL_IMAGE,Image->filename);
+        SDL_WidgetProperties(SET_IMAGE,IMG_Load(Image->filename));
         Image=Image->next;
     }
 

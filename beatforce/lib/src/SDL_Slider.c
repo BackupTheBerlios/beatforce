@@ -19,7 +19,6 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 #include <stdlib.h>
-#include <SDL/SDL_image.h>
 
 #include "SDL_Slider.h"
 #include "SDL_Widget.h"
@@ -174,16 +173,20 @@ int SDL_SliderProperties(void *slider,int feature,va_list list)
     case SET_LINE_IMAGE:
         if(Slider->line == NULL)
         {
-            Slider->line=IMG_Load(va_arg(list,char*));
-            SDL_SetColorKey(Slider->line,SDL_SRCCOLORKEY,TRANSPARANT);
+            Slider->line=va_arg(list,SDL_Surface*);
+            if(Slider->line)
+                SDL_SetColorKey(Slider->line,SDL_SRCCOLORKEY,TRANSPARANT);
         }
         break;
     case SET_BUTTON_IMAGE:
         if(Slider->SliderButton == NULL)
         {
-            Slider->SliderButton=IMG_Load(va_arg(list,char*));
-            SDL_SetColorKey(Slider->SliderButton,SDL_SRCCOLORKEY,TRANSPARANT);
-            SDL_SliderPixeloffset(Slider);
+            Slider->SliderButton=va_arg(list,SDL_Surface*);
+            if(Slider->SliderButton)
+            {
+                SDL_SetColorKey(Slider->SliderButton,SDL_SRCCOLORKEY,TRANSPARANT);
+                SDL_SliderPixeloffset(Slider);
+            }
         }
         break;
     case GET_CUR_VALUE:

@@ -95,7 +95,7 @@ void SDL_ProgressBarDraw(void *progressbar,SDL_Surface *dest)
     else if(ProgressBar->Orientation == HORIZONTAL)
         Maxline = ProgressBar->rect.w;
 
-    if(ProgressBar->Redraw || SDL_WidgetNeedsRedraw())
+    if(ProgressBar->Redraw)
     {
         SDL_FillRect(dest,&ProgressBar->rect,BLACK);
 
@@ -173,7 +173,9 @@ int  SDL_ProgressBarProperties(void *progressbar,int feature,va_list list)
     case SET_VISIBLE:
         ProgressBar->Visible=va_arg(list,int);
         break;
-            
+    case FORCE_REDRAW:
+        ProgressBar->Redraw=1;
+        break;
     default:
         break;          
     

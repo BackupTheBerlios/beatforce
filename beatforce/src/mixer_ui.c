@@ -60,7 +60,7 @@ void MIXERUI_CreateWindow(ThemeMixer *tm)
     while(Image)
     {
         SDL_WidgetCreateR(SDL_PANEL,Image->Rect);
-        SDL_WidgetProperties(SET_NORMAL_IMAGE,Image->filename);
+        SDL_WidgetProperties(SET_IMAGE,IMG_Load(Image->filename));
         Image=Image->next;
     }
 
@@ -83,7 +83,7 @@ void MIXERUI_CreateWindow(ThemeMixer *tm)
         case SLIDER_MAIN_VOLUME:
             // Main volume 
             mainslider=SDL_WidgetCreateR(SDL_SLIDER,Slider->Rect);
-            SDL_WidgetProperties(SET_BUTTON_IMAGE,Slider->button);
+            SDL_WidgetProperties(SET_BUTTON_IMAGE,IMG_Load(Slider->button));
             SDL_WidgetProperties(SET_MAX_VALUE,100);
             SDL_WidgetProperties(SET_MIN_VALUE,0);
             SDL_WidgetProperties(SET_NORMAL_STEP_SIZE,1.0);
@@ -93,7 +93,7 @@ void MIXERUI_CreateWindow(ThemeMixer *tm)
             /* fade slider */
             slideroffader=SDL_WidgetCreateR(SDL_SLIDER,Slider->Rect);
             SDL_WidgetProperties(SET_CALLBACK,SDL_CHANGED,MIXERUI_FaderChanged,slideroffader);
-            SDL_WidgetProperties(SET_BUTTON_IMAGE,Slider->button);
+            SDL_WidgetProperties(SET_BUTTON_IMAGE,IMG_Load(Slider->button));
             MIXER_SetFaderValue(0.0);
             MIXER_GetFaderValue (&val);
             SDL_WidgetProperties(SET_MAX_VALUE,1);
@@ -110,7 +110,7 @@ void MIXERUI_CreateWindow(ThemeMixer *tm)
         if(Button->action == BUTTON_RESET_FADER)
         {
             SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
-            SDL_WidgetProperties(SET_NORMAL_IMAGE,"c:\\beatforce\\themes\\beatforce\\butje.bmp");
+//            SDL_WidgetProperties(SET_NORMAL_IMAGE,"c:\\beatforce\\themes\\beatforce\\butje.bmp);
             SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,mixerui_AutoFadeButtonClicked,NULL);
         }
         Button=Button->next;

@@ -58,6 +58,7 @@ void* SDL_LabelCreate(SDL_Rect* rect)
     label->increase = 1;
 
     label->Pattern    = LABEL_BOUNCE;
+    label->Redraw     = 1;
     label->Background = NULL;
 
     label->Visible    = 1;
