@@ -2,7 +2,7 @@
    BeatForce
    mixer.h  - mixer interface
    
-   Copyright (c) 2003, John Beuving (john.beuving@home.nl)
+   Copyright (c) 2003-2004, John Beuving (john.beuving@wanadoo.nl)
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public Licensse as published by
@@ -35,14 +35,14 @@
 
 typedef struct
 {
-    double value;			/* 0.0 - 1.0 */
+    unsigned int value;			/* 0.0 - 1.0 */
     int autofade; 		/* autofade */
     int fade_time;		/* fade_time in msec */
     int mask;
 
     int in_progress;
     int timer;
-    float inc;
+    int inc;
     int from_player;
     int to_player;
 }
@@ -55,8 +55,8 @@ int MIXER_GetAutofade(void);
 int MIXER_SetAutofade(int autofade);
 int MIXER_GetFadeTime(void);
 
-int MIXER_GetFaderValue (double *value);
-int MIXER_SetFaderValue (double value);
+int MIXER_GetFaderValue (unsigned int *value);
+int MIXER_SetFaderValue (unsigned int value);
 
 int MIXER_DoFade(int autofade, int instant);
 int MIXER_SetCallback(void *callback);

@@ -107,7 +107,7 @@ typedef struct SDL_Table
     int ButtonHeight;
 
     /* Scrollbar */
-    void* Scrollbar;
+    SDL_Widget* Scrollbar;
     int   ScrollbarWidth;
     int Editable;
     SDL_Surface *ScrollbarImage;

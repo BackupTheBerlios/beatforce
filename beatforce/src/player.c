@@ -2,7 +2,7 @@
    BeatForce
    player.c  -	player
    
-   Copyright (c) 2003, John Beuving (john.beuving@home.nl)
+   Copyright (c) 2003-2004, John Beuving (john.beuving@wanadoo.nl)
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public Licensse as published by
@@ -482,9 +482,10 @@ int PLAYER_GetSamplerate(int player_nr)
     return t;
 }
 
-int PLAYER_SetSpeed(int player_nr,double speed)
+/* Speed is a vlaue from 0 to 500 */
+int PLAYER_SetSpeed(int player_nr,int speed)
 {
-    return AUDIOOUTPUT_SetSpeed(player_nr,(float)speed);
+    return AUDIOOUTPUT_SetSpeed(player_nr,speed);
 }
 
 

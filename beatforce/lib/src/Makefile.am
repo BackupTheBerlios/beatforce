@@ -24,8 +24,9 @@ libSDLTk_a_SOURCES = \
  SDL_ProgressBar.c  SDL_ProgressBar.h  \
  SDL_Menu.c         SDL_Menu.h         \
  SDL_Tooltip.c      SDL_Tooltip.h      \
+ SDLTk.h                               \
                                        \
- SDL_DefFont.c      SDL_DefFont.h      \
+ SDL_DefFont.c                         \
  SDL_Font.c         SDL_Font.h         \
  SDL_FontFNT.c      SDL_FontFNT.h      \
  SDL_FontBDF.c      SDL_FontBDF.h     

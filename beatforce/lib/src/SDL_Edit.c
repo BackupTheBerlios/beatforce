@@ -238,7 +238,8 @@ void SDL_EditKeyDownCB(SDL_Widget *widget,SDL_Event *event)
              SDL_WidgetDraw(widget,&widget->Rect);
              break;
          case SDLK_RETURN:
-             SDL_SignalEmit(widget,"activate");
+             if(SDL_WidgetHasFocus(widget))
+                 SDL_SignalEmit(widget,"activate");
              break;
          default:
             key=event->key.keysym.sym;

@@ -2,7 +2,7 @@
    BeatForce
    mixer.c	- mixer interface - real mixing takes place in audio_output.c !!
    
-   Copyright (c) 2003, John Beuving (john.beuving@home.nl)
+   Copyright (c) 2003-2004, John Beuving (john.beuving@wanadoo.nl)
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public Licensse as published by
@@ -161,7 +161,7 @@ int MIXER_DoFade(int autofade, int instant)
     }
     else
     {
-        float step_width = 0.05000000;
+        int step_width = 50;
 
         if (!MIXER_FadeInProgress ())
         {
@@ -174,11 +174,6 @@ int MIXER_DoFade(int autofade, int instant)
                 if(cfader->fade_time == 0)
                     cfader->fade_time = MIXER_DEFAULT_CF_FadeTime *10;
 
-#if 0
-                cfader->timer =
-                    OSA_StartTimer(cfader->fade_time / (long) (1 / step_width),
-                                   MIXER_FadeTimeout, (void*) win);
-#endif
                 cfader->timer = OSA_StartTimer(1, MIXER_FadeTimeout, NULL);
 
             }
@@ -197,11 +192,11 @@ static int MIXER_FadeTimeout ()
 {
     int end = 0;
 
-    
-    if (cfader->inc < 0 && cfader->value < 0.0000000)
+//    printf("%d %d \n",cfader->inc,cfader->value);
+    if (cfader->inc < 0 && cfader->value <= 0)
         end = 1;
 
-    if (cfader->inc > 0 && cfader->value >= 1)
+    if (cfader->inc > 0 && cfader->value >= 1000)
         end = 1;
 
     
@@ -216,9 +211,9 @@ static int MIXER_FadeTimeout ()
 
 
     cfader->value += cfader->inc;
-    if(cfader->value < 0.00)
+    if(cfader->value <= 0)
     {
-        cfader->value = 0.000000;
+        cfader->value = 0;
         end=1;
     }
     MIXER_SetFaderValue (cfader->value);
@@ -233,8 +228,6 @@ static int MIXER_FadeTimeout ()
 
         return 0;
     }
-    if(cfader->value == 1.000)
-        return 0;
 
     return 250;
 }
@@ -292,7 +285,7 @@ int MIXER_SetAutofade(int autofade)
     return 0;
 }
 
-int MIXER_GetFaderValue (double *val)
+int MIXER_GetFaderValue (unsigned int *val)
 {
 
     mutex_lock (fader_mutex);
@@ -311,9 +304,9 @@ int MIXER_GetFaderValue (double *val)
 
     mutex_unlock (fader_mutex);
 
-    if (cfader->value == -0)
+    if (cfader->value == 0)
     {
-        *val=0.000000;
+        *val=0;
         cfader->value = *val;
         return 1;
     }
@@ -331,7 +324,7 @@ int MIXER_GetFaderValue (double *val)
     return 0;
 }
 
-int MIXER_SetFaderValue (double value)
+int MIXER_SetFaderValue (unsigned int value)
 {
     mutex_lock (fader_mutex);
 

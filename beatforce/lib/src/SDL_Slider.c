@@ -70,11 +70,11 @@ SDL_Widget* SDL_SliderCreate(SDL_Rect* rect)
     // default range settings
     slider->MinValue           = 0;
     slider->MaxValue           = 100;
-    slider->CurrentValue       = 0.0;
-    slider->CurrentPercentage  = 0.0;
+    slider->CurrentValue       = 0;
+
     slider->ValueLocked        = 0;
 
-    slider->NormalStepSize    = 1.0;
+    slider->NormalStepSize     = 1;
 
     // initialize eventhandler
     slider->OnSliderChanged      = NULL;
@@ -143,14 +143,14 @@ int SDL_SliderProperties(SDL_Widget *widget,int feature,va_list list)
     case SET_MAX_VALUE:
         Slider->MaxValue = va_arg(list,int);
         if(Slider->CurrentValue > Slider->MaxValue)
-            Slider->CurrentValue = (double)Slider->MaxValue;
+            Slider->CurrentValue = Slider->MaxValue;
         break;
 
     case SET_CUR_VALUE:
         /* The currentvalue is used as an integer and a new pixeloffset */
         /* is calculated but the size of the button is not used yet     */
         /* because it doesn't have to be available at this moment       */
-        val= va_arg(list,double);
+        val= va_arg(list,int);
         if(val != Slider->CurrentValue)
         {
             Slider->CurrentValue = val;
@@ -163,7 +163,7 @@ int SDL_SliderProperties(SDL_Widget *widget,int feature,va_list list)
         }
         break;
     case SET_NORMAL_STEP_SIZE:
-        val= va_arg(list,double);
+        val= va_arg(list,int);
         Slider->NormalStepSize = val;
         break;
     case SET_LINE_IMAGE:
@@ -401,8 +401,8 @@ static void SDL_SliderCurrentValue(SDL_Slider *Slider)
             if(Slider->pixeloffset > (widget->Rect.h - Slider->SliderButton->h))
                 Slider->pixeloffset = (widget->Rect.h - Slider->SliderButton->h);
 
-            Slider->CurrentValue = (double)((Slider->MaxValue -Slider->MinValue)* Slider->pixeloffset) 
-                / (double)(widget->Rect.h - Slider->SliderButton->h);
+            Slider->CurrentValue =((double)((Slider->MaxValue -Slider->MinValue)* Slider->pixeloffset) 
+                / (double)(widget->Rect.h - Slider->SliderButton->h));
          }
     }
 }
@@ -413,7 +413,7 @@ static void SDL_SliderPaint(SDL_Slider *Slider)
 
 }
 
-double SDL_SliderGetCurrentValue(SDL_Widget *widget)
+int SDL_SliderGetCurrentValue(SDL_Widget *widget)
 {
     SDL_Slider *Slider=(SDL_Slider*)widget;
     return Slider->CurrentValue;

@@ -624,7 +624,7 @@ ThemeButton *XML_ParseButton(ThemeButton *button,xmlDocPtr doc, xmlNodePtr cur)
             if(!strcmp(action,"REMOVE"))
                 button->action=BUTTON_REMOVE;
             if(!strcmp(action,"ADD"))
-                button->action=BUTTON_ADD;
+                button->action=BUTTON_CREATE;
             if(!strcmp(action,"RENAME"))
                 button->action=BUTTON_RENAME;
             if(!strcmp(action,"ADDSELECTED"))
@@ -674,7 +674,7 @@ ThemeButton *XML_ParseButton(ThemeButton *button,xmlDocPtr doc, xmlNodePtr cur)
             if(!strcmp(action,"REMOVE"))
                 last->next->action=BUTTON_REMOVE;
             if(!strcmp(action,"ADD"))
-                last->next->action=BUTTON_ADD;
+                last->next->action=BUTTON_CREATE;
             if(!strcmp(action,"ADDALL"))
                 last->next->action=BUTTON_ADDALL;
             if(!strcmp(action,"RENAME"))

@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003 John Beuving (john.beuving@home.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -50,11 +50,11 @@ typedef struct SDL_Slider
     // Slider range (Can be queried by event callback functions
     int    MaxValue;        // maximum value (percentage = 100%)
     int    MinValue;        // minimum valie (percentage = 0%)
-    double CurrentValue;    // value of current position
-    double CurrentPercentage;
+    int    CurrentValue;    // value of current position
+
     int ValueLocked;
     
-    double NormalStepSize;
+    int NormalStepSize;
     
     //event handler functions
     void (*OnSliderChanged)(void*);
@@ -85,6 +85,6 @@ enum
     LARGE_STEP
 };
 
-double SDL_SliderGetCurrentValue(SDL_Widget *widget);
+int SDL_SliderGetCurrentValue(SDL_Widget *widget);
 
 #endif /* __SDL_SLIDER_H__ */

@@ -20,12 +20,16 @@
 */
 #include <stdarg.h>
 #include <malloc.h>
+#include <string.h>
 
 #include "SDL_Widget.h"
+#include "SDL_WidTool.h"
 #include "SDL_Tooltip.h"
 #include "SDL_Font.h"
+#include "SDL_Signal.h"
 
-void SDL_TooltipMouseMotionCB(SDL_Widget *widget,SDL_Event *event);
+static void SDL_TooltipMouseMotionCB(SDL_Widget *Widget,SDL_Event *event);
+static void SDL_TooltipHideCB(SDL_Widget *Widget);
 
 const struct S_Widget_FunctionList SDL_Tooltip_FunctionList =
 {
@@ -60,6 +64,7 @@ SDL_Widget* SDL_TooltipCreate(SDL_Widget *parent, char *text)
     tooltip->Lines  = 1;
 
     SDL_SignalConnect(parent,"mousemotion",SDL_TooltipMouseMotionCB,widget);
+    SDL_SignalConnect(parent,"hide",SDL_TooltipHideCB,widget);
 
     SDL_StoreWidget(widget);
     return widget;
@@ -76,7 +81,7 @@ void SDL_TooltipDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
     r.h = widget->Rect.h;
 
 
-    boxColor(dest,r.x,r.y,r.x + r.w,r.y + r.h,0xf1ff89ff);
+    boxColor(dest,r.x,r.y,r.x + r.w-1,r.y + r.h-1,0xf1ff89ff);
     rectangleColor(dest,r.x,r.y,r.x + r.w-1,r.y + r.h-1,0x000000ff);
       
     if(Tooltip->Lines > 1)
@@ -129,10 +134,22 @@ Uint32 TimerCallback(Uint32 interval, void *param)
         }
         SDL_WidgetShow(Widget);
     }
-    
+    return 0;
 }
 
-void SDL_TooltipMouseMotionCB(SDL_Widget *Widget,SDL_Event *event)
+static void SDL_TooltipHideCB(SDL_Widget *Widget)
+{
+    SDL_Tooltip *Tooltip=(SDL_Tooltip*)Widget;
+
+    if(Widget->Visible)
+    {
+        Tooltip->Lines=1;
+        SDL_WidgetHide(Widget);
+        SDL_RemoveTimer(Tooltip->Timer);
+    }
+}
+
+static void SDL_TooltipMouseMotionCB(SDL_Widget *Widget,SDL_Event *event)
 {
     SDL_Tooltip *Tooltip=(SDL_Tooltip*)Widget;
     if(SDL_WidgetIsInside(Tooltip->Parent,event->motion.x,event->motion.y))

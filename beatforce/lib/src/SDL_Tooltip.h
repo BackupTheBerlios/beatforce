@@ -31,7 +31,7 @@ typedef struct SDL_Tooltip
     SDL_Widget Widget;
     SDL_Widget *Parent;
 
-    SDL_TimerID  *Timer;
+    SDL_TimerID  Timer;
 
     SDL_Font     *Font;
 

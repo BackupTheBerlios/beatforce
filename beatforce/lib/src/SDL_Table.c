@@ -35,7 +35,6 @@ static void SDL_TableAttachScrollbar(SDL_Table *table);
 static void SDL_TableDrawRow(SDL_Surface *dest,SDL_Table *Table,SDL_TableRow *Row,int row);
 static void SDL_TableAddSelected(SDL_Table *table);
 static int SDL_TableIsRowSelected(SDL_Table *Table,int row);
-static void Table_EditReturnKeyPressed(void *data);
 void ScrollBarChanged(SDL_Widget *widget);
 void SDL_TableHideCB(SDL_Widget *widget); 
 void SDL_TableShowCB(SDL_Widget *widget); 
@@ -451,7 +450,8 @@ int SDL_TableEventHandler(SDL_Widget *widget,SDL_Event *event)
             }
             break;
         case SDLK_RETURN:
-            SDL_SignalEmit(widget,"activate");
+            if(SDL_WidgetHasFocus(widget))
+                SDL_SignalEmit(widget,"activate");
             break;
         default:
             break;
@@ -487,10 +487,10 @@ static void SDL_TableAttachScrollbar(SDL_Table *Table)
             
             
             Table->Scrollbar = SDL_WidgetCreateR(SDL_SCROLLBAR,SliderRect);
+            
+            Table->Scrollbar->Visible = Widget->Visible;
 
             SDL_ScrollbarSetCallback(Table->Scrollbar,ScrollBarChanged,Widget);
-            
-            SDL_WidgetHide(Table->Scrollbar);
         }
         else
         {
@@ -730,12 +730,14 @@ void SDL_TableDeleteRow(SDL_Widget *Widget,int row)
     }
     else
     {
+        tmp2=NULL;
         while(row--  && tmp->Next)
         {
             tmp2=tmp;
             tmp=tmp->Next;
         }
-        tmp2->Next=tmp->Next;
+        if(tmp2)
+            tmp2->Next=tmp->Next;
         for(i=0;i<Table->Columns;i++)
         {
             free(tmp->Next->Cell[i].String);

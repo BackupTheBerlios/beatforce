@@ -499,6 +499,7 @@ int SDL_NotebookAppendTab(SDL_Widget *parent,SDL_Widget *child,char *caption)
         tab->tabs->index = tab->NoOfTabs;
         if(child)
             child->Visible = 1;
+
     }
     else
     {
@@ -523,9 +524,13 @@ int SDL_NotebookAppendTab(SDL_Widget *parent,SDL_Widget *child,char *caption)
         l->next->index = tab->NoOfTabs;
         l->next->next = NULL;
         l->next->prev = l;
+
         if(child)
+        {
             child->Visible = 0;
-            
+            SDL_WidgetHide(child);
+        }
+                   
     }
     tab->NoOfTabs++;
  
@@ -600,7 +605,10 @@ SDL_Widget *SDL_NotebookGetChildWidget(SDL_Widget *widget)
 {
     SDL_Tab *tab=(SDL_Tab*)widget;
 
-    return tab->hl->Child;
+    if(tab->hl)
+        return tab->hl->Child;
+    else
+        return NULL;
 }
 
 void SDL_NotebookClear(SDL_Widget *widget)

@@ -2,7 +2,7 @@
   BeatForce
   songdb.c  -	song database
    
-  Copyright (c) 2003, John Beuving (john.beuving@home.nl)
+  Copyright (c) 2003-2004, John Beuving (john.beuving@wanadoo.nl)
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public Licensse as published by
@@ -421,11 +421,9 @@ struct SongDBEntry *SONGDB_GetEntryID(long id)
     
     if(id < MainGroup->Active->Songcount)
     {
-        while(id)
-        {
+        while(id--)
             Playlist=Playlist->next;
-            id--;
-        }
+
         e = Playlist;
     }
 
@@ -711,7 +709,7 @@ static int SONGDB_SaveXMLDatabase()
     /* 
      * Dumping document to stdio or file
      */
-    xmlSaveFormatFileEnc(filename, doc, "UTF-8", 1);
+    xmlSaveFormatFileEnc(filename, doc, "iso-8859-1", 1);
 
     /*free the document */
     xmlFreeDoc(doc);

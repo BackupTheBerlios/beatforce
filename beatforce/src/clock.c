@@ -44,7 +44,7 @@ SDL_Widget *CLOCK_Create(ThemeClock *Clock)
 
 void CLOCK_Redraw(SDL_Widget *clock)
 {
-    char time[6];
+    static char time[6];
     int min=0,hour=0;
 
     TRACE("CLOCK_Redraw");
@@ -52,7 +52,7 @@ void CLOCK_Redraw(SDL_Widget *clock)
     {
         OSA_GetTime(&hour,&min);
         sprintf(time,"%02d:%02d",hour,min);
-        SDL_WidgetPropertiesOf(clock,SET_CAPTION,time);
+        SDL_LabelSetText(clock,time);
     }
 }
 

@@ -86,7 +86,8 @@ struct PlEntry *PLAYLIST_GetSong (int player_nr, int no)
 int gt(void *d)
 {
     struct PlayerPrivate *p = PLAYER_GetData(1);
-    INPUT_GetTag(p->ip_plugins,test->filename,test);
+    if(p)
+        INPUT_GetTag(p->ip_plugins,test->filename,test);
     return 0;
 }
 

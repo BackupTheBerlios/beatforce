@@ -33,6 +33,7 @@
 #include "SDL_Signal.h"
 #include "SDL_Tab.h"
 #include "SDL_Table.h"
+#include "SDL_Tooltip.h"
 #include "SDL_Tree.h"
 #include "SDL_VolumeBar.h"
 

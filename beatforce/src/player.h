@@ -2,7 +2,7 @@
    BeatForce
    player.h  - player
    
-   Copyright (c) 2003, John Beuving (john.beuving@home.nl)
+   Copyright (c) 2003-2004, John Beuving (john.beuving@wanadoo.nl)
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public Licensse as published by
@@ -92,7 +92,7 @@ int PLAYER_SetSong(int player_nr, int no);
 int PLAYER_Load(int player_nr,struct SongDBEntry *e);
 
 int PLAYER_SetTimePlayed(int player_nr,long seconds);
-int PLAYER_SetSpeed(int player_nr,double speed);
+int PLAYER_SetSpeed(int player_nr,int speed);
 
 /* Functions for user interface information */
 int PLAYER_GetArtist(int player_nr,char *artist);

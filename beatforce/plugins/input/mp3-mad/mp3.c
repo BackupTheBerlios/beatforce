@@ -903,6 +903,8 @@ mp3_play (Private * h)
     if( h == NULL || private->magic != MP3MAD_MAGIC)
         return 0;
    
+    if(private->eof == 1)
+        return 0;
     private->mp3_if.output_pause (private->ch_id, 0);
     return 1;
 }

@@ -143,7 +143,7 @@ int AUDIOOUTPUT_Cleanup (void);
 
 /* interface to input plugin */
 int AUDIOOUTPUT_Open (int, AFormat, int, int, int *);
-int AUDIOOUTPUT_SetSpeed(int channel, float speed);
+int AUDIOOUTPUT_SetSpeed(int channel, int speed);
 
 /* Interface for plugins */
 int AUDIOOUTPUT_Close (int);

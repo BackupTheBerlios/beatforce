@@ -2,7 +2,7 @@
   Beatforce/ Player user interface
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003 John Beuving (john.beuving@home.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -53,6 +53,7 @@ typedef struct PlayerDisplayNormal
 
     SDL_Widget *Title;
     SDL_Widget *Artist;
+    char       sArtist[255];
     SDL_Widget *PlayerState;
     SDL_Widget *Samplerate;
     SDL_Widget *Bitrate;

@@ -2,7 +2,7 @@
   Beatforce/Main windows user interface
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003 John Beuving (john.beuving@home.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -108,7 +108,7 @@ static SDL_Surface *MAINWINDOW_CreateWindow(MainwindowWidgets *w)
     {
         SDL_Widget *image;
         image=SDL_WidgetCreateR(SDL_PANEL,Image->Rect);
-        SDL_WidgetPropertiesOf(image,SET_IMAGE,IMG_Load(Image->filename));
+        SDL_PanelSetImage(image,IMG_Load(Image->filename));
         Image=Image->next;
     }
 
@@ -234,11 +234,14 @@ int MAINWINDOW_KeyHandler(unsigned int key)
 
 static int MAINWINDOW_RedrawTimeout()
 {
-    CLOCK_Redraw(widgets->Clock);
-    MIXERUI_Redraw(widgets->Mixer);
-    PLAYERUI_Redraw();
-    SONGDBUI_Redraw(widgets->Songdb);
-    PLAYLISTUI_Redraw(widgets->Playlist);
+    if(SDL_GetSurfaceStack() == MAINWINDOW.Surface)
+    {
+        CLOCK_Redraw(widgets->Clock);
+        MIXERUI_Redraw(widgets->Mixer);
+        PLAYERUI_Redraw();
+        SONGDBUI_Redraw(widgets->Songdb);
+        PLAYLISTUI_Redraw(widgets->Playlist);
+    }
     return 60;
 }
 

@@ -3,7 +3,7 @@
   audio_output.c  - audio output
    
   Copyright (c) 2001, Patrick Prasse (patrick.prasse@gmx.net)
-  Copyright (c) 2003, John Beuving (john.beuving@home.nl)
+  Copyright (c) 2003-2004, John Beuving (john.beuving@wanadoo.nl)
   
 
   This program is free software; you can redistribute it and/or modify
@@ -402,12 +402,13 @@ int AUDIOOUTPUT_Pause (int c, int pause)
         runningcount++;
     else
         runningcount--;
+
     TRACE("AUDIOOUTPUT_Pause >%d< >%d<\n",c,pause);
     ch[c]->paused = (int) (pause != 0);
     return 1;
 }
 
-int AUDIOOUTPUT_SetSpeed(int channel, float speed)
+int AUDIOOUTPUT_SetSpeed(int channel, int speed)
 {
     if (channel >= OUTPUT_N_CHANNELS || channel < 0)
         return 0;
@@ -415,7 +416,7 @@ int AUDIOOUTPUT_SetSpeed(int channel, float speed)
         return 0;
   
     
-    ch[channel]->speed = speed;
+    ch[channel]->speed = (float)speed/100;
 
     return 0;
 }
@@ -549,23 +550,23 @@ static void AUDIOOUTPUT_Crossfade()
     {
         double ch0   = 0;
         double ch1   = 0;
-        double value = 0;
+        unsigned int value = 0;
         MIXER_GetFaderValue(&value);
         
-        if ((value < 0.00) || (value > 1.00001))
+        if (value > 1000)
         {
-            value = 0.50;
+            value = 500;
         }
         
-        if (value >= 0.50)
+        if (value >= 500)
             ch1 = 0.50;
         else
-            ch1 = value;
+            ch1 = (double)value/1000;
         
-        if (value <= 0.50)
+        if (value <= 500)
             ch0 = 0.50;
         else
-            ch0 = 1.00 - value;
+            ch0 = 1.00 - (double)(value/1000);
         
         if (ch0 != 0)
         {
@@ -663,6 +664,7 @@ static int AUDIOOUTPUT_Loop(void *arg)
                 memcpy (&ch[channel]->buffer[n_zeroes], tmp_buf, n_read * 2);
             }
 
+            
             /* perform fft for beat detection */
             if (channel == 0 || channel == 1)
             {

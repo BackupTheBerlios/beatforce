@@ -2,7 +2,7 @@
   Beatforce/ Search window
 
   This window is a jump to file type of window
-  Copyright (C) 2003 John Beuving (john.beuving@home.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -21,9 +21,11 @@
 
 #include <config.h>
 #include <string.h>
+#include <malloc.h>
 
 #include <SDL/SDL.h>
 #include <SDLTk.h>
+#include "SDL_Signal.h"
 
 #include "songdb_ui.h"
 #include "player_ui.h"
@@ -58,10 +60,27 @@ void SEARCHWINDOW_Open()
 {
     if(SEARCHWINDOW.Surface == NULL)
     {
-        SONGDB_FindEntry("");
         SEARCHWINDOW.Surface=SEARCHWINDOW_Create();
     }
     SDL_WindowOpen(&SEARCHWINDOW);                
+
+    SONGDB_FindEntry("");
+    /* Fill the table with the entire search database */
+    {
+        char *string[1];
+        int i;
+
+        string[0]=malloc(255);
+        
+        for(i=0;i<SONGDB_GetNoOfSearchResults();i++)
+        {
+            songdb_searchstring(i,string[0]);
+            SDL_TableAddRow(tablewidget,string);
+        }
+        SDL_WidgetRedrawEvent(tablewidget);
+        free(string[0]);
+    }
+    SDL_WidgetSetFocus(editwidget);
 }
 
 
@@ -87,39 +106,23 @@ static SDL_Surface *SEARCHWINDOW_Create()
     while(Image)
     {
         w=SDL_WidgetCreateR(SDL_PANEL,Image->Rect);
-        SDL_WidgetPropertiesOf(w,SET_IMAGE,IMG_Load(Image->filename));
+        SDL_PanelSetImage(w,IMG_Load(Image->filename));
         Image=Image->next;
     }
+
 
     tablewidget=SDL_WidgetCreate(SDL_TABLE,12,50,1000,540);
     SDL_WidgetPropertiesOf(tablewidget,SET_VISIBLE_COLUMNS, 1);
     SDL_WidgetPropertiesOf(tablewidget,SET_BG_COLOR,0x93c0d5);
     SDL_WidgetPropertiesOf(tablewidget,SET_FONT,THEME_Font("normal"));
-    SDL_WidgetPropertiesOf(tablewidget,SET_CALLBACK,SDL_CLICKED,searchwindow_PlayClicked,NULL);
-    SDL_WidgetPropertiesOf(tablewidget,SET_IMAGE,IMG_Load(THEME_DIR"/beatforce/tablescrollbar.jpg"));
-
-    {
-        char *string[1];
-        int i;
-
-        string[0]=malloc(255);
-        
-        for(i=0;i<SONGDB_GetNoOfSearchResults();i++)
-        {
-            songdb_searchstring(i,string[0]);
-            SDL_TableAddRow(tablewidget,string);
-        }
-        free(string[0]);
-
-    }
+    SDL_SignalConnect(tablewidget,"select-row",searchwindow_PlayClicked,tablewidget);
+    SDL_SignalConnect(tablewidget,"activate",searchwindow_PlayClicked,tablewidget);
 
     editwidget=SDL_WidgetCreate(SDL_EDIT,312,20,400,25);
     SDL_WidgetPropertiesOf(editwidget,SET_FONT,THEME_Font("normal"));
-    SDL_WidgetPropertiesOf(editwidget,SET_CALLBACK,SDL_KEYDOWN_ANY,SEARCHWINDOW_Search);
-    SDL_WidgetPropertiesOf(editwidget,SET_CALLBACK,SDL_KEYDOWN_RETURN,searchwindow_Play);
-    
-    SDL_WidgetSetFocus(editwidget);
-
+    SDL_SignalConnect(editwidget,"changed",SEARCHWINDOW_Search,NULL);
+    SDL_SignalConnect(editwidget,"activate",searchwindow_Play,NULL);
+  
     return SearchWindow;
 }
 
@@ -133,7 +136,6 @@ int SEARCHWINDOW_EventHandler(SDL_Event event)
         {
         case SDLK_ESCAPE:
             SDL_WidgetPropertiesOf(editwidget,SET_CAPTION,"");
-            SONGDB_FindEntry("");
             SDL_WindowClose();
 
             break;
@@ -153,9 +155,26 @@ int SEARCHWINDOW_EventHandler(SDL_Event event)
 static void SEARCHWINDOW_Search(void *data)
 {
     char buffer[255];
-    SDL_WidgetPropertiesOf(editwidget,GET_CAPTION,&buffer);
+
+    strcpy(buffer,SDL_EditGetText(editwidget));
+
     SONGDB_FindEntry(buffer);
-    //SDL_WidgetPropertiesOf(tablewidget,ROWS,SONGDB_GetNoOfSearchResults());
+
+    SDL_TableDeleteAllRows(tablewidget);
+    {
+        char *string[1];
+        int i;
+
+        string[0]=malloc(255);
+        for(i=0;i<SONGDB_GetNoOfSearchResults();i++)
+        {
+            songdb_searchstring(i,string[0]);
+            SDL_TableAddRow(tablewidget,string);
+        }
+        SDL_WidgetRedrawEvent(tablewidget);
+        free(string[0]);
+    }
+   
 }
 
 void searchwindow_PlayClicked(void *data)
@@ -166,10 +185,11 @@ void searchwindow_PlayClicked(void *data)
     int autofade = 0;
     
     SDL_WidgetPropertiesOf(editwidget,SET_CAPTION,"");
+    printf("PlayClicked\n");
     SDL_WindowClose();
 
     /* Get the current playlist entry */
-    e = SONGDB_GetSearchEntry(table->CurrentRow);
+    e = SONGDB_GetSearchEntry(table->HighlightedRow);
 
     if(e)
     {
@@ -195,8 +215,7 @@ void searchwindow_PlayClicked(void *data)
             PLAYER_Play(player);
 
         SONGDBUI_Play(player);
-        /* and the search results */
-        SONGDB_FindEntry("");
+
     }
 }
 
@@ -209,6 +228,7 @@ void searchwindow_Play(void *data)
     /* Reset the edit window */
     /* Close this window. main UI can determine to open the correct one again */
     SDL_WidgetPropertiesOf(editwidget,SET_CAPTION,"");
+    printf("Play\n");
     SDL_WindowClose();
 
     /* Get the current playlist entry */
@@ -230,8 +250,10 @@ void searchwindow_Play(void *data)
         }
 
         /* Add the song to the bottom of the playlist */
-        PLAYLIST_AddEntry(player,e);
-        
+//        PLAYLIST_AddEntry(player,e);
+        PLAYER_Load(0,e);
+        PLAYER_Play(0);
+        SONGDBUI_Play(0);
 #if 0
         player_set_song(player,0);  // when set_entry is excecuted we only have 1 item thus 0
         
@@ -266,7 +288,7 @@ void songdb_searchstring(long row,char *dest)
         return;
     
     e = SONGDB_GetSearchEntry(row);
-
+    
     dest[0]='\0';
     if(e)
     {
