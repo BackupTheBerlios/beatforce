@@ -58,8 +58,8 @@
         normal="pauseonly_green.bmp"
         action="PAUSE"/>   
 
-     <text x="19" y="90" w="105" h="22" font="digits" fgcolor="0xf0f0f0" display="TIME_ELAPSED"/>
-     <text x="175" y="90" w="105" h="22" font="digits"  fgcolor="0xf0f0f0" display="TIME_REMAINING"/>
+     <text x="19" y="90" w="92" h="22" font="digits" fgcolor="0xf0f0f0" display="TIME_ELAPSED"/>
+     <text x="175" y="90" w="92" h="22" font="digits"  fgcolor="0xf0f0f0" display="TIME_REMAINING"/>
      <text x="19" y="120" w="244" h="14" font="normal" fgcolor="0xfffff7" display="SONG_ARTIST"/>
      <text x="19" y="136" w="244" h="14" font="normal" fgcolor="0xfffff7" display="SONG_TITLE"/>    
      <text x="109" y="85" w="68" h="14" font="small" fgcolor="0xfffff7" display="SAMPLERATE"/> 
@@ -90,8 +90,8 @@
         normal="pauseonly_green.bmp"
         action="PAUSE"/>   
 
-     <text x="619" y="90" w="105" h="22" font="digits" fgcolor="0xf0f0f0" display="TIME_ELAPSED"/>
-     <text x="775" y="90" w="105" h="22"  font="digits"  fgcolor="0xf0f0f0" display="TIME_REMAINING"/>
+     <text x="619" y="90" w="92" h="22" font="digits" fgcolor="0xf0f0f0" display="TIME_ELAPSED"/>
+     <text x="775" y="90" w="92" h="22"  font="digits"  fgcolor="0xf0f0f0" display="TIME_REMAINING"/>
      <text x="619" y="120" w="244" h="14" font="normal" fgcolor="0xfffff7" display="SONG_ARTIST"/> 
      <text x="619" y="136" w="244" h="14" font="normal" fgcolor="0xfffff7" display="SONG_TITLE"/>    
      <text x="709" y="85" w="68" h="14" font="small" fgcolor="0xfffff7" display="SAMPLERATE"/> 

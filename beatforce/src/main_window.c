@@ -120,10 +120,8 @@ static SDL_Surface *MAINWINDOW_CreateWindow(MainwindowWidgets *w)
     PLAYERUI_CreateWindow(1,mw->Player[1]);
 
     w->Mixer = MIXERUI_CreateWindow(mw->Mixer);
-
     w->Songdb = SONGDBUI_CreateWindow(mw->Songdb);    
-//    SDL_WidgetCreate(SDL_BUTTON,450,100,20,20);
-//    SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,configopen,NULL);
+
     OSA_StartTimer(60,MAINWINDOW_RedrawTimeout,NULL);
 
     return MainWindow;
@@ -236,13 +234,11 @@ int MAINWINDOW_KeyHandler(unsigned int key)
 
 static int MAINWINDOW_RedrawTimeout()
 {
-
     CLOCK_Redraw(widgets->Clock);
     MIXERUI_Redraw(widgets->Mixer);
     PLAYERUI_Redraw();
     SONGDBUI_Redraw(widgets->Songdb);
     PLAYLISTUI_Redraw(widgets->Playlist);
-
     return 60;
 }
 

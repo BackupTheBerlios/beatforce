@@ -61,59 +61,6 @@ static void PLAYERUI_UpdateState(int player);
 static void PLAYERUI_EditTitleReturn(void *data);
 #endif
 
-static void PLAYERUI_HidePlayer(void *data)
-{
-    if(UI_Players[0].State == PLAYERUI_STATE_NORMAL)
-        UI_Players[0].State = PLAYERUI_STATE_INFO;
-    else
-        UI_Players[0].State = PLAYERUI_STATE_NORMAL;
-
-    if(UI_Players[0].State == PLAYERUI_STATE_INFO)
-    {
-        BFList *l=UI_Players[0].Images;
-        
-        SDL_WidgetPropertiesOf(UI_Players[0].Normal.ButtonPlay,SET_VISIBLE,0);
-        SDL_WidgetPropertiesOf(UI_Players[0].Normal.ButtonPause,SET_VISIBLE,0);
-        SDL_WidgetPropertiesOf(UI_Players[0].Normal.SongProgress,SET_VISIBLE,0);        
-        SDL_WidgetPropertiesOf(UI_Players[0].Normal.Artist,SET_VISIBLE,0);
-        SDL_WidgetPropertiesOf(UI_Players[0].Normal.Title,SET_VISIBLE,0);
-        SDL_WidgetPropertiesOf(UI_Players[0].Normal.PlayerState,SET_VISIBLE,0);
-        SDL_WidgetPropertiesOf(UI_Players[0].Normal.Pitch,SET_VISIBLE,0);
-        SDL_WidgetPropertiesOf(UI_Players[0].Normal.TimeRemaining,SET_VISIBLE,0);
-        SDL_WidgetPropertiesOf(UI_Players[0].Normal.TimeElapsed,SET_VISIBLE,0);
-        SDL_WidgetPropertiesOf(UI_Players[0].Normal.Bitrate,SET_VISIBLE,0);
-        SDL_WidgetPropertiesOf(UI_Players[0].Normal.Samplerate,SET_VISIBLE,0);
-        SDL_WidgetPropertiesOf(UI_Players[0].Normal.VolumeLeft,SET_VISIBLE,0);
-        SDL_WidgetPropertiesOf(UI_Players[0].Normal.VolumeRight,SET_VISIBLE,0);
-        while(l)
-        {
-            SDL_WidgetPropertiesOf(l->data,SET_VISIBLE,0);        
-            l=l->next;
-        }
-    }
-    else
-    {
-        BFList *l=UI_Players[0].Images;
-
-        SDL_WidgetPropertiesOf(UI_Players[0].Normal.SongProgress,SET_VISIBLE,1);        
-        SDL_WidgetPropertiesOf(UI_Players[0].Normal.Artist,SET_VISIBLE,1);
-        SDL_WidgetPropertiesOf(UI_Players[0].Normal.Title,SET_VISIBLE,1);
-        SDL_WidgetPropertiesOf(UI_Players[0].Normal.PlayerState,SET_VISIBLE,1);
-        SDL_WidgetPropertiesOf(UI_Players[0].Normal.Pitch,SET_VISIBLE,1);
-        SDL_WidgetPropertiesOf(UI_Players[0].Normal.TimeRemaining,SET_VISIBLE,1);
-        SDL_WidgetPropertiesOf(UI_Players[0].Normal.TimeElapsed,SET_VISIBLE,1);
-        SDL_WidgetPropertiesOf(UI_Players[0].Normal.Bitrate,SET_VISIBLE,1);
-        SDL_WidgetPropertiesOf(UI_Players[0].Normal.Samplerate,SET_VISIBLE,1);
-        SDL_WidgetPropertiesOf(UI_Players[0].Normal.VolumeLeft,SET_VISIBLE,1);
-        SDL_WidgetPropertiesOf(UI_Players[0].Normal.VolumeRight,SET_VISIBLE,1);
-        while(l)
-        {
-            SDL_WidgetPropertiesOf(l->data,SET_VISIBLE,1);        
-            l=l->next;
-        }
-    }
-}
-
 
 /* Exported functions */
 void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
@@ -186,8 +133,7 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
 
             SDL_WidgetPropertiesOf(UI_Players[nr].Normal.ButtonPause,
                                    SET_CALLBACK,SDL_CLICKED,PLAYERUI_PlayButton,&UI_Players[nr]);
-            SDL_WidgetPropertiesOf(UI_Players[nr].Normal.ButtonPause,
-                                   SET_VISIBLE,0);
+
             break;
         case BUTTON_INFO:
             /* Create the info button */
@@ -201,8 +147,8 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
             if(Button->pressed)
                 SDL_WidgetPropertiesOf(UI_Players[nr].Normal.ButtonInfo,
                                      SET_PRESSED_IMAGE,  IMG_Load(Button->pressed));
-            SDL_WidgetPropertiesOf(UI_Players[nr].Normal.ButtonInfo,
-                                   SET_CALLBACK,SDL_CLICKED,PLAYERUI_HidePlayer,&UI_Players[nr]);
+//            SDL_WidgetPropertiesOf(UI_Players[nr].Normal.ButtonInfo,
+//                                   SET_CALLBACK,SDL_CLICKED,PLAYERUI_HidePlayer,&UI_Players[nr]);
             
         }
         Button=Button->next;
@@ -343,34 +289,6 @@ void PLAYERUI_Redraw()
 
     PLAYERUI_UpdateState(0);
     PLAYERUI_UpdateState(1);
-
-    if(UI_Players[0].State == PLAYERUI_STATE_NORMAL)
-    {
-        if(PLAYER_IsPlaying(0))
-        {
-            SDL_WidgetPropertiesOf(UI_Players[0].Normal.ButtonPlay,SET_VISIBLE,0);
-            SDL_WidgetPropertiesOf(UI_Players[0].Normal.ButtonPause,SET_VISIBLE,1);
-        }    
-        else
-        {
-            SDL_WidgetPropertiesOf(UI_Players[0].Normal.ButtonPause , SET_VISIBLE,0);
-            SDL_WidgetPropertiesOf(UI_Players[0].Normal.ButtonPlay  , SET_VISIBLE,1);
-        }
-        
-        if(UI_Players[1].Normal.ButtonPause)
-        {
-            if(PLAYER_IsPlaying(1))
-            {
-                SDL_WidgetPropertiesOf(UI_Players[1].Normal.ButtonPlay,SET_VISIBLE,0);
-                SDL_WidgetPropertiesOf(UI_Players[1].Normal.ButtonPause,SET_VISIBLE,1);
-            }
-            else
-            {
-                SDL_WidgetPropertiesOf(UI_Players[1].Normal.ButtonPlay,SET_VISIBLE,1);
-                SDL_WidgetPropertiesOf(UI_Players[1].Normal.ButtonPause,SET_VISIBLE,0);
-            }
-        }
-    }
 
 }
 
