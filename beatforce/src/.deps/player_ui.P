@@ -5,7 +5,11 @@ player_ui.o: player_ui.c /usr/include/memory.h /usr/include/features.h \
  /usr/include/bits/string.h /usr/include/bits/string2.h \
  /usr/include/endian.h /usr/include/bits/endian.h \
  /usr/include/bits/types.h /usr/include/bits/pthreadtypes.h \
- /usr/include/bits/sched.h /usr/include/stdlib.h ../config.h osa.h \
+ /usr/include/bits/sched.h /usr/include/stdlib.h \
+ /usr/include/sys/types.h /usr/include/time.h \
+ /usr/include/sys/select.h /usr/include/bits/select.h \
+ /usr/include/bits/sigset.h /usr/include/bits/time.h \
+ /usr/include/sys/sysmacros.h /usr/include/alloca.h ../config.h osa.h \
  llist.h player.h input_plugin.h songdb.h configfile.h mixer.h \
  playlist.h player_ui.h theme.h /usr/include/SDL/SDL.h \
  /usr/include/SDL/SDL_main.h /usr/include/SDL/SDL_types.h \
@@ -24,12 +28,9 @@ player_ui.o: player_ui.c /usr/include/memory.h /usr/include/features.h \
  /usr/include/SDL/SDL_video.h /usr/include/SDL/SDL_mutex.h \
  /usr/include/SDL/SDL_quit.h /usr/include/SDL/SDL_version.h \
  ../lib/src/SDL_Font.h audio_output.h types.h ringbuffer.h \
- /usr/include/vrb.h /usr/include/sys/types.h /usr/include/time.h \
- /usr/include/sys/select.h /usr/include/bits/select.h \
- /usr/include/bits/sigset.h /usr/include/bits/time.h \
- /usr/include/sys/sysmacros.h /usr/include/alloca.h output_plugin.h \
- wndmgr.h ../lib/src/SDL_Slider.h ../lib/src/SDL_Widget.h \
- /usr/include/SDL/SDL_image.h ../lib/src/SDL_ProgressBar.h debug.h
+ /usr/include/vrb.h output_plugin.h wndmgr.h ../lib/src/SDL_Slider.h \
+ ../lib/src/SDL_Widget.h /usr/include/SDL/SDL_image.h \
+ ../lib/src/SDL_ProgressBar.h debug.h
 player_ui.c :
 /usr/include/memory.h :
 /usr/include/features.h :
@@ -45,6 +46,14 @@ player_ui.c :
 /usr/include/bits/pthreadtypes.h :
 /usr/include/bits/sched.h :
 /usr/include/stdlib.h :
+/usr/include/sys/types.h :
+/usr/include/time.h :
+/usr/include/sys/select.h :
+/usr/include/bits/select.h :
+/usr/include/bits/sigset.h :
+/usr/include/bits/time.h :
+/usr/include/sys/sysmacros.h :
+/usr/include/alloca.h :
 ../config.h :
 osa.h :
 llist.h :
@@ -92,14 +101,6 @@ audio_output.h :
 types.h :
 ringbuffer.h :
 /usr/include/vrb.h :
-/usr/include/sys/types.h :
-/usr/include/time.h :
-/usr/include/sys/select.h :
-/usr/include/bits/select.h :
-/usr/include/bits/sigset.h :
-/usr/include/bits/time.h :
-/usr/include/sys/sysmacros.h :
-/usr/include/alloca.h :
 output_plugin.h :
 wndmgr.h :
 ../lib/src/SDL_Slider.h :

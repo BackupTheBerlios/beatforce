@@ -20,6 +20,7 @@
 */
 
 #include <memory.h> 
+#include <stdlib.h>
 
 #include "config.h"
 
@@ -402,9 +403,13 @@ static void PLAYERUI_UpdateTime(int player)
             }
             else
             {
+
                 long id;
+#if 0
                 PLAYER_GetPlayingID(player,&id);
                 id++;
+#endif
+                id=rand()%SONGDB_GetNoOfEntries();
                 e=SONGDB_GetEntryID(id);
                 PLAYLIST_SetEntry(!player,e);
                 player_set_song(!player,0);  /* when set_entry is excecuted we only have 1 item thus 0 */
@@ -501,7 +506,6 @@ static void PLAYERUI_PlayButton(void *data)
     {
         SDL_WidgetPropertiesOf(UI_Players[0].ButtonPlay,SET_VISIBLE,1);
         SDL_WidgetPropertiesOf(UI_Players[0].ButtonPause,SET_VISIBLE,0);
-        printf("Player is playing %d\n",current->PlayerNr);
         PLAYER_Pause (current->PlayerNr);
     }
     else
