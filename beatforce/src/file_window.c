@@ -58,7 +58,7 @@ BFList *TableDirs; /* list of directories in directory[255] */
 
 int change;
 
-char directory[255];
+char directory[255]; /* Selected directory in directory tree */
 
 /* Local function prototypes */
 SDL_Surface *Window_CreateFileWindow();
@@ -130,7 +130,7 @@ static void FILEWINDOW_DirectoryClicked(void *data)
     char diry[255];
     char *r;
 
-    t=SDL_TreeGetSelectedItem(data);
+    t = SDL_TreeGetSelectedItem(data);
     if(t)
     {
 //        printf("DirectoryClicked %s\n",t->Label);
@@ -283,85 +283,6 @@ static void FILEWINDOW_AddAll(void *data)
             l=l->next;
         }
     }
-}
-
-int GetDir(int count,char *string)
-{
-    char *word[20];
-    int nw=0;
-    char *dircopy;
-    char *ptr;
-    dircopy=strdup(directory);
-
-    memset(word,0,20*sizeof(char*));
-    if(strlen(dircopy) > 1)
-        word[nw++]="";
-
-    for(ptr=dircopy; nw < 20; ptr=strchr(ptr,'/'))
-    {
-        if(ptr==NULL)
-            break;
-        else if(*ptr == '/')
-        {
-            while(*ptr == '/')
-            {
-                *ptr = '\0';
-                ptr++;
-            }
-            if(*ptr)
-                word[nw++] = ptr;
-        }
-        else
-        {
-            if(*ptr)
-                word[nw++]=ptr;
-        }
-   
-    }
-    if(count < 20 && word[count])
-        sprintf(string,"%s",word[count]);
-
-    free(dircopy);
-    return nw;
-    
-}
-
-int GetSubDir(int count,char *string)
-{
-    BFList *dirss;
-    char *t;
-    int c;
-    int entrycount;
-
-    dirss=TableDirs;
-
-    entrycount=LLIST_NoOfEntries(dirss);
-    c=count;
-    while(dirss)
-    {
-        t=strrchr((char*)dirss->data,'/');
-        t++;
-        if(*t != '.')
-        {
-            if(count==0)
-                break;
-            count--;
-        }
-        dirss=dirss->next;
-
-    }
-    if(dirss)
-    {
-        t=strrchr((char*)dirss->data,'/');
-        t++;
-        if(string)
-            sprintf(string,"/%s",t);
-    }
-    else
-    {
-        return 0;
-    }
-    return entrycount;
 }
 
 /* 
@@ -566,7 +487,7 @@ SDL_Surface *Window_CreateFileWindow()
             SDL_WidgetProperties(SET_VISIBLE_COLUMNS, 1);
             SDL_WidgetProperties(SET_VISIBLE_ROWS, 19);
             SDL_WidgetProperties(COLUMN_WIDTH,1,Table->Rect.w);
-            SDL_WidgetProperties(SET_SELECTABLE,1);
+            SDL_WidgetProperties(SET_SELECTABLE,2);
             SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
             SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
             SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION,FILEWINDOW_GetSubgroup);

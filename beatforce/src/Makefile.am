@@ -38,7 +38,8 @@ clock.c         clock.h         \
                                 \
 file_window.c   file_window.h   \
 main_window.c   main_window.h   \
-search_window.c search_window.h
+search_window.c search_window.h \
+config_window.c config_window.h
 
-beatforce_LDADD   = -L../lib/src/ -lSDLTk -lSDL -lSDL_image -lfftw3 -lvrb -lxml2
+beatforce_LDADD   = -L../lib/src/ -lSDLTk -lSDL -lSDL_image -lfftw3 -lxml2
 

@@ -107,6 +107,7 @@ void WNDMGR_Init()
     else
     {
         flags |= SDL_SWSURFACE;
+        flags |= SDL_DOUBLEBUF;
     }
 
     if(s->NoFrame)
@@ -175,7 +176,10 @@ int WNDMGR_Main()
             if(gEventsAllowed)
             {
                 if(CurWindow)
-                    CurWindow->EventHandler(test_event);
+                {
+                    if(CurWindow->EventHandler)
+                        CurWindow->EventHandler(test_event);
+                }
                 else
                     WNDMGR_Running=0;
             }

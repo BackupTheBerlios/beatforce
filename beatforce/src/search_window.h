@@ -21,8 +21,6 @@
 #ifndef __SEARCH_WINDOW_H__
 #define __SEARCH_WINDOW_H__
 
-void SEARCHWINDOW_Init();
 void SEARCHWINDOW_Open();
-SDL_Surface *SEARCHWINDOW_Create();
 
 #endif /* __SEARCH_WINDOW_H__ */

@@ -1,7 +1,7 @@
 /*
-  Beatforce/ Startup of beatforce
+  Beatforce/ Header of config window
 
-  Copyright (C) 2003 John Beuving (john.beuving@home.nl)
+  Copyright (C) 2004 John Beuving (john.beuving@home.nl)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -18,18 +18,10 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef __MAIN_WINDOW_H__
-#define __MAIN_WINDOW_H__
-
-typedef struct MainwindowWidgets
-{
-    void *Clock;
-    void *Playlist;
-    void *Mixer;
-    void *Songdb;
-}MainwindowWidgets;
+#ifndef __CONFIG_WINDOW_H__
+#define __CONFIG_WINDOW_H__
 
 
-void MAINWINDOW_Open();
+void CONFIGWINDOW_Open();
 
-#endif /* __MAIN_WINDOW_H__ */
+#endif /* __CONFIG_WINDOW_H__ */

@@ -43,6 +43,7 @@
 #include "main_window.h"
 #include "wndmgr.h"
 #include "search_window.h"
+#include "config_window.h"
 
 int control_state;
 static int MAINWINDOW_EventHandler(SDL_Event event);
@@ -60,12 +61,6 @@ Window MAINWINDOW={ MAINWINDOW_EventHandler , MAINWINDOW_NotifyHandler , NULL, N
 #define BF_MAINVOLUMEUP    SDLK_SLASH
 #define BF_AUTOFADE        SDLK_f
 
-void MAINWINDOW_Init()
-{
-
-}
-
-
 void MAINWINDOW_Open()
 {
     if(MAINWINDOW.Surface == NULL)
@@ -76,6 +71,11 @@ void MAINWINDOW_Open()
         MAINWINDOW.TransferData=widgets;
     }
     WNDMGR_Open(&MAINWINDOW);
+}
+
+void configopen(void *d)
+{
+    CONFIGWINDOW_Open();
 }
 
 static SDL_Surface *MAINWINDOW_CreateWindow(MainwindowWidgets *w)
@@ -117,6 +117,9 @@ static SDL_Surface *MAINWINDOW_CreateWindow(MainwindowWidgets *w)
     PLAYERUI_CreateWindow(1,mw->Player[1]);
     w->Mixer=MIXERUI_CreateWindow(mw->Mixer);
     
+    SDL_WidgetCreate(SDL_BUTTON,450,100,20,20);
+    SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,configopen,NULL);
+
     return MainWindow;
 }
 

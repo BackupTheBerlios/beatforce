@@ -25,24 +25,25 @@
 
 #define AUDIO_OUTPUT 1
 #define CLOCK        2
-#define EFFECT       3
-#define FILEWINDOW   4
-#define INPUT        5
-#define MP3          6
-#define OGG          7
-#define OSA          8
-#define OUTPUT       9
-#define PLAYER       10
-#define PLAYER_UI    11
-#define PLAYLIST     12
-#define PLAYLIST_UI  13
-#define PLUGIN       14
-#define RINGBUFFER   15
-#define SAMPLER      16
-#define SONGDB       17
-#define SONGDB_UI    18
-#define THEME        19
-#define WNDMGR       20
+#define CONFIGWINDOW 3
+#define EFFECT       4
+#define FILEWINDOW   5
+#define INPUT        6
+#define MP3          7
+#define OGG          8
+#define OSA          9
+#define OUTPUT       10
+#define PLAYER       11
+#define PLAYER_UI    12
+#define PLAYLIST     13
+#define PLAYLIST_UI  14
+#define PLUGIN       15
+#define RINGBUFFER   16
+#define SAMPLER      17
+#define SONGDB       18
+#define SONGDB_UI    19
+#define THEME        20
+#define WNDMGR       21
 
 #define name(x) x
 #define module( x ) ( #x )
@@ -71,6 +72,11 @@ void printid(char *id,int line,char *message);
 #endif
 
 #if MODULE_ID == CLOCK
+#define TRACE TRACE_OFF
+#define DEBUG DEBUG_OFF
+#endif
+
+#if MODULE_ID == CONFIGWINDOW
 #define TRACE TRACE_OFF
 #define DEBUG DEBUG_OFF
 #endif

@@ -116,6 +116,8 @@ void SDL_AddToStack(int item,SDL_Rect* dest,void *data)
     if(CreateOnStack->stack==NULL)
     {
         CreateOnStack->stack=malloc(sizeof(Stack));
+        memset(CreateOnStack->stack,0,sizeof(Stack));
+
         CreateOnStack->stack->dest.x=dest->x;
         CreateOnStack->stack->dest.y=dest->y;
         CreateOnStack->stack->dest.w=dest->w;
@@ -147,6 +149,7 @@ void SDL_AddToStack(int item,SDL_Rect* dest,void *data)
         while(temp->next)
             temp=temp->next;
         temp->next=malloc(sizeof(Stack));
+        memset(temp->next,0,sizeof(Stack));
         temp=temp->next;
         temp->dest.x=dest->x;
         temp->dest.y=dest->y;

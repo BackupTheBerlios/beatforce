@@ -188,11 +188,11 @@ SDL_Surface *SDL_WidgetGetActiveSurface();
 SDL_Surface *SDL_WidgetNewSurface(int width,int height,int bpp);
 int SDL_WidgetForceRedraw(SDL_Surface *surface);
 
-void* SDL_WidgetCreate(E_Widget_Type widget,int x,int y, int w, int h);
-void* SDL_WidgetCreateR(E_Widget_Type widget,SDL_Rect dest);
+SDL_Widget* SDL_WidgetCreate(E_Widget_Type widget,int x,int y, int w, int h);
+SDL_Widget* SDL_WidgetCreateR(E_Widget_Type widget,SDL_Rect dest);
 
 int   SDL_WidgetProperties(int feature,...);
-int   SDL_WidgetPropertiesOf(void* widget, int feature,...);
+int   SDL_WidgetPropertiesOf(SDL_Widget* widget, int feature,...);
 
 int   SDL_DrawAllWidgets(SDL_Surface *screen);
 int   SDL_WidgetEventCallback(void *function,E_Widget_Event event);

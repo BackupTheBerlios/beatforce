@@ -45,15 +45,15 @@ void* SDL_ButtonCreate(SDL_Rect* rect)
     newbutton->normal       = NULL;
     newbutton->highlighted  = NULL; 
     newbutton->pressed      = NULL; 
-    newbutton->rect.x=rect->x;
-    newbutton->rect.y=rect->y;
-    newbutton->rect.w=rect->w;
-    newbutton->rect.h=rect->h;
+    newbutton->rect.x       = rect->x;
+    newbutton->rect.y       = rect->y;
+    newbutton->rect.w       = rect->w;
+    newbutton->rect.h       = rect->h;
     newbutton->Clicked      = NULL;
     newbutton->ClickedData  = NULL;
     newbutton->Visible      = 1;
-    newbutton->state = SDL_BUTTON_UP;
-    newbutton->next  = NULL;
+    newbutton->state        = SDL_BUTTON_UP;
+    newbutton->next         = NULL;
     return newbutton;
 }
 
@@ -69,7 +69,14 @@ void SDL_ButtonDraw(void *data,SDL_Surface *dest)
 
     if(button->normal==NULL)
     {
-        SDL_FillRect(dest,&button->rect,0xfff000);
+        /* Draw a default button with no text inside */
+        SDL_Rect new;
+        new.x = button->rect.x+2;
+        new.y = button->rect.y+2;
+        new.w = button->rect.w-4;
+        new.h = button->rect.h-4;
+        SDL_FillRect(dest,&button->rect,0x000000);
+        SDL_FillRect(dest,&new,0xeeeeee);
         return;
     }
     else
@@ -208,3 +215,4 @@ void SDL_ButtonClose(void *button)
 
     free(Button);
 }
+

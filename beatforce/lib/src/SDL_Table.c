@@ -317,6 +317,17 @@ int SDL_TableProperties(void *table,int feature,va_list list)
         break;
     case SET_SELECTABLE:
         Table->Selectable = va_arg(list,int);
+        
+        /* At least one item has to be selected */
+        if(Table->Selectable == 2)
+        {
+            if(Table->Selected == NULL)
+            {
+                Table->CurrentRow=0;
+                /* Add to selected */
+                SDL_TableAddSelected(Table);
+            }
+        }
         break;
     case SET_IMAGE:
         Table->ScrollbarImage = va_arg(list,SDL_Surface*);
@@ -411,6 +422,7 @@ void SDL_TableEventHandler(void *table,SDL_Event *event)
             {
                 if(event->motion.x > (Table->rect.x + Table->rect.w - Table->ScrollbarWidth))
                 {
+                    /* Event is for the scrollbar */
                     break;
                 }
                 else
@@ -611,9 +623,14 @@ static void SDL_TableAddSelected(SDL_Table *table)
         {
             if(table->Selected[i] == table->CurrentRow)
             {
-                table->Selected[i]=-1;
-                t(table);
-                return;
+                /* Remove the item when it is not in browse mode 
+                   in browse mode at least one has to be selected */
+                if(table->Selectable != 2)
+                { 
+                    table->Selected[i]=-1;
+                    t(table);
+                    return;
+                }
             }
         }
 
@@ -627,6 +644,7 @@ static void SDL_TableAddSelected(SDL_Table *table)
         {
             table->Selected[0]=table->CurrentRow;
         }
+        
     }
 }
 

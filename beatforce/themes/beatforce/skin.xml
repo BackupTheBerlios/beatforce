@@ -132,7 +132,14 @@
   </filewindow>
 
   <searchwindow>
+     <clock x="4" y="4" w="60" h="22" font="digits" bgcolor="0x00000" fgcolor="0x00e1ff"/>
      <image filename="sbackground.bmp" x="0" y="0"/>
   </searchwindow>
 
+  <configwindow>
+     <clock x="4" y="4" w="60" h="22" font="digits" bgcolor="0x00000" fgcolor="0x00e1ff"/>
+     <image filename="sbackground.bmp" x="0" y="0"/>
+  </configwindow>
+
 </Beatforce>
+

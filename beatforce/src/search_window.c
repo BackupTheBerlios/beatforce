@@ -55,11 +55,6 @@ int SEARCHWINDOW_EventHandler(SDL_Event event);
 Window SEARCHWINDOW={ SEARCHWINDOW_EventHandler , NULL, NULL,NULL};
 
 
-void SEARCHWINDOW_Init()
-{
-
-}
-
 void SEARCHWINDOW_Open()
 {
     if(SEARCHWINDOW.Surface == NULL)

@@ -38,6 +38,7 @@
 #define MODULE_ID THEME
 #include "debug.h"
 
+#define DEFAULT_THEME "beatforce"
 
 /* Help function */
 static int StorePropertyAsString(xmlNodePtr cur,char *property,char **string);
@@ -56,6 +57,7 @@ ThemeTable  *XML_ParseTable(ThemeTable *pp,xmlDocPtr doc, xmlNodePtr cur);
 ThemeMainWindow   *XML_ParseMainwindow(xmlDocPtr doc, xmlNodePtr cur);
 ThemeSearchWindow *XML_ParseSearchwindow(xmlDocPtr doc, xmlNodePtr cur);
 ThemeFileWindow   *XML_ParseFilewindow(xmlDocPtr doc, xmlNodePtr cur);
+ThemeConfigWindow *XML_ParseConfigwindow(xmlDocPtr doc, xmlNodePtr cur);
 
 /* Mainwindow group parser */
 ThemePlayer   *XML_ParsePlayer(xmlDocPtr doc, xmlNodePtr cur);
@@ -65,6 +67,7 @@ ThemeMixer    *XML_ParseMixer(xmlDocPtr doc, xmlNodePtr cur);
 ThemeSongdb   *XML_ParseSongdb(xmlDocPtr doc, xmlNodePtr cur);
 
 static ThemeConfig *active;
+static BFList      *ThemeList;
 
 ThemeImage *XML_ParseImage(ThemeImage *image,xmlDocPtr doc, xmlNodePtr cur)
 {
@@ -105,61 +108,25 @@ ThemeImage *XML_ParseImage(ThemeImage *image,xmlDocPtr doc, xmlNodePtr cur)
     
 }
 
-int THEME_Init()
+int THEME_Load(char *theme)
 {
-    BFList *dir=NULL;
-    int NoOfThemes;
-    ThemeConfig *current;
+    char path[255];
+
     xmlNodePtr cur;
     xmlDocPtr doc=NULL;
     xmlChar *key;
+    ThemeConfig *current;
+
 
     current=(ThemeConfig*)malloc(sizeof(ThemeConfig));
     memset(current,0,sizeof(ThemeConfig));
 
-#if 0
-    dir=OSA_FindDirectories(THEME_DIR);
-    if(dir == NULL)
-    {
-        ERROR("Couldn't list directories in %s",THEME_DIR);
+    if(theme == NULL)
         return 0;
-    }
 
-    NoOfThemes=LLIST_NoOfEntries(dir);
-#endif   
-    LIBXML_TEST_VERSION
-    xmlKeepBlanksDefault(0);
+    sprintf(path,"%s/%s/skin.xml",THEME_DIR,theme);
 
-//    while(dir)
-    {
-        char path[255];
-        FILE *fd;
-//        sprintf(path,"%s/skin.xml",(char*)dir->data);
-
-        sprintf(path,"/usr/share/beatforce/themes/beatforce/skin.xml");
-        if((fd=fopen(path,"rb")))
-        {  
-            fclose(fd);
-            doc = xmlParseFile(path);
-            if (doc)
-            {
-                DEBUG("Document %s parsed succesfully",path);
-//                break;
-            }
-            else
-                ERROR("xmlParsefile failed while the file exists and can be opened %s",path);
-        }
-        else
-        {
-            ERROR("Cannot open skin.xml in %s",path);
-        }
-        dir=dir->next;
-    }
-    if(doc == NULL)
-    {
-        ERROR("No theme could be loaded: Exiting .....");
-        exit(0);
-    }
+    doc = xmlParseFile(path);    
     if(doc)
     {
         /* use it */
@@ -224,13 +191,17 @@ int THEME_Init()
             {
                 current->Font=XML_ParseFont(doc,cur);
             }
-            if ((!xmlStrcmp(cur->name, (const xmlChar *)"mainwindow"))) 
+            if ((!xmlStrcmp(cur->name, (const xmlChar *)"configwindow"))) 
             {
-                current->MainWindow=XML_ParseMainwindow(doc,cur);
+                current->ConfigWindow=XML_ParseConfigwindow(doc,cur);
             }
             if ((!xmlStrcmp(cur->name, (const xmlChar *)"filewindow"))) 
             {
                 current->FileWindow=XML_ParseFilewindow(doc,cur);
+            }
+            if ((!xmlStrcmp(cur->name, (const xmlChar *)"mainwindow"))) 
+            {
+                current->MainWindow=XML_ParseMainwindow(doc,cur);
             }
             if ((!xmlStrcmp(cur->name, (const xmlChar *)"searchwindow"))) 
             {
@@ -239,8 +210,52 @@ int THEME_Init()
             cur = cur->next;
         }
         active=current;
+        return 1;
     }
-    return 1;
+    else
+    {
+        return 0;
+    }
+
+}
+
+int THEME_Init()
+{
+    BFList *dir=NULL;
+    int NoOfThemes=0;
+
+    ThemeList = NULL;
+
+    dir=OSA_FindDirectories(THEME_DIR);
+    if(dir == NULL)
+    {
+        ERROR("Couldn't list directories in %s",THEME_DIR);
+        return 0;
+    }
+
+
+    while(dir)
+    {
+        char path[255];
+        FILE *fd;
+        sprintf(path,"%s/%s/skin.xml",THEME_DIR,(char*)dir->data);
+
+        if((fd=fopen(path,"rb")))
+        {  
+            fclose(fd);
+            ThemeList=LLIST_Append(ThemeList,strdup(dir->data));
+            NoOfThemes++;
+        }
+        free(dir->data);
+        dir=dir->next;
+    }
+    if(NoOfThemes == 0)
+        return 0;
+    if(NoOfThemes == 1)
+        return THEME_Load(ThemeList->data);
+    else
+        return THEME_Load(DEFAULT_THEME);
+
 }
 
 ThemeConfig *THEME_GetActive()
@@ -301,6 +316,35 @@ static void RebuildFilename(char **string)
         *string=malloc(strlen(filename));
         sprintf(*string,"%s",filename);
     }
+}
+
+ThemeConfigWindow *XML_ParseConfigwindow(xmlDocPtr doc, xmlNodePtr cur)
+{
+    ThemeConfigWindow *configwindow;
+
+    configwindow=NULL;
+    cur = cur->xmlChildrenNode;
+
+    if(cur)
+    {
+
+        configwindow=malloc(sizeof(ThemeConfigWindow));
+        memset(configwindow,0,sizeof(ThemeConfigWindow));
+
+        while (cur != NULL) 
+        {
+            if ((!xmlStrcmp(cur->name, (const xmlChar *)"clock"))) 
+            {
+                configwindow->Clock=XML_ParseClock(doc,cur);
+            }
+            if ((!xmlStrcmp(cur->name, (const xmlChar *)"image"))) 
+            {
+                configwindow->Image=XML_ParseImage(configwindow->Image,doc,cur);
+            }
+            cur=cur->next;
+        }
+    }
+    return configwindow;
 }
 
 ThemeFileWindow *XML_ParseFilewindow(xmlDocPtr doc, xmlNodePtr cur)

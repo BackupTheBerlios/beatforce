@@ -34,6 +34,7 @@ enum
     BUTTON_INFO,
     BUTTON_RESET_FADER,
     BUTTON_CHANGE_DIR,
+    BUTTON_CONFIG_WINDOW,
 
     /*File window */
     BUTTON_RENAME,
@@ -58,8 +59,8 @@ enum
     SLIDER_VOLUME_RIGHT_PLAYER1,
     SLIDER_VOLUME_LEFT_PLAYER2,
     SLIDER_VOLUME_RIGHT_PLAYER2,
-    SLIDER_EQUELIZER_10HZ_PLAYER1,
-    SLIDER_EQUELIZER_10HZ_PLAYER2
+    SLIDER_EQUALIZER_10HZ_PLAYER1,
+    SLIDER_EQUALIZER_10HZ_PLAYER2
 
 }eSliderAction;
 
@@ -240,6 +241,12 @@ typedef struct
     ThemeMixer    *Mixer;
 }ThemeMainWindow;
 
+typedef struct ThemeConfigWindow
+{
+    ThemeImage *Image;
+    ThemeClock *Clock;    
+}ThemeConfigWindow;
+
 typedef struct ThemeSearchWindow
 {
     ThemeImage *Image;
@@ -261,6 +268,7 @@ typedef struct
     ThemeMainWindow   *MainWindow;
     ThemeSearchWindow *SearchWindow;
     ThemeFileWindow   *FileWindow;
+    ThemeConfigWindow *ConfigWindow;
 }
 ThemeConfig;
 

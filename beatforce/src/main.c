@@ -49,8 +49,7 @@ int main(int argc, char *argv[])
     CONFIGFILE_OpenDefaultFile();
     
     THEME_Init();     
-    MAINWINDOW_Init();
-    SEARCHWINDOW_Init();
+    
     FILEWINDOW_Init();
 
     SDL_WidgetInit();
