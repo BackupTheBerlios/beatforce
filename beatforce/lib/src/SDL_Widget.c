@@ -55,11 +55,20 @@ int SDL_WidgetInit()
     return 1;
 }
 
+SDL_Surface *SDL_WidgetNewSurface(int width,int height,int bpp)
+{
+    SDL_Surface *s;
+    s=SDL_CreateRGBSurface(SDL_SWSURFACE,width,height,bpp,
+                           0xff0000,0x00ff00,0x0000ff,0x000000);
+    SDL_StackNewSurface(s);
+    return s;
+
+}
+
 int SDL_WidgetUseSurface(SDL_Surface *surface)
 {
-    int retval;
-    retval=SDL_SurfaceStack(surface);
-    SDL_WidgetForceRedraw();
+    SDL_WidgetForceRedraw(surface);
+    SDL_SurfaceStack(surface);
     return 1;
 }
 
@@ -72,7 +81,7 @@ int SDL_WidgetClearSurface(SDL_Surface *surface)
 {
     Stack* current_widget;
     
-    current_widget=SDL_StackGetSurfaceStack(surface);
+    current_widget=SDL_StackGetStack(surface);
     return 1;
 }
 
@@ -137,7 +146,7 @@ int SDL_WidgetPropertiesOf(void *widget,int feature,...)
 
     va_start(ap,feature);
 
-    current_widget=SDL_StackGetStack();
+    current_widget=SDL_StackGetStack(NULL);
 
     while(current_widget)
     {
@@ -163,7 +172,7 @@ int SDL_WidgetPropertiesOf(void *widget,int feature,...)
 int SDL_WidgetClose(void *widget)
 {
     Stack *current_widget,*prev;
-    current_widget=SDL_StackGetStack();
+    current_widget=SDL_StackGetStack(NULL);
     prev=NULL;
 
     while(current_widget)
@@ -223,7 +232,7 @@ int SDL_DrawAllWidgets(SDL_Surface *screen)
 
     SDL_WidgetLOCK();
 
-    current_widget=SDL_StackGetStack();
+    current_widget=SDL_StackGetStack(NULL);
 
     
 //    if(current_widget == NULL)
@@ -263,7 +272,7 @@ void  SDL_WidgetEvent(SDL_Event *event)
     {
     case SDL_MOUSEBUTTONDOWN:
     {
-        focus_widget=SDL_StackGetStack();
+        focus_widget=SDL_StackGetStack(NULL);
         
         while(focus_widget)
         {
@@ -281,7 +290,7 @@ void  SDL_WidgetEvent(SDL_Event *event)
 
     }
 
-    current_widget=SDL_StackGetStack();
+    current_widget=SDL_StackGetStack(NULL);
 
     while(current_widget)
     {
@@ -316,14 +325,16 @@ int SDL_WidgetLoseFocus()
     return 1;
 }
 
-int SDL_WidgetForceRedraw()
+int SDL_WidgetForceRedraw(SDL_Surface *surface)
 {
     T_Widget_Properties properties;
     Stack* current_widget;
 
-    current_widget=SDL_StackGetStack();
-
-    SDL_mutexP(MyMutex);
+    current_widget=SDL_StackGetStack(surface);
+    
+    if(current_widget == NULL)
+        return 0;
+    
     while(current_widget)
     {
         properties=WidgetTable[current_widget->type]->properties;
@@ -331,8 +342,6 @@ int SDL_WidgetForceRedraw()
             properties(current_widget->data,FORCE_REDRAW,NULL);
         current_widget=current_widget->next;
     }
-    SDL_mutexV(MyMutex);
-
     return 1;
 }
 

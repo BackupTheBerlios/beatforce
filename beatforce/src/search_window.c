@@ -64,11 +64,8 @@ void SEARCHWINDOW_Open()
 {
     if(SEARCHWINDOW.Surface == NULL)
     {
-        SDL_WidgetLOCK();
         SONGDB_FindEntry("");
         SEARCHWINDOW.Surface=SEARCHWINDOW_Create();
-
-        SDL_WidgetUNLOCK();
     }
     WNDMGR_Open(&SEARCHWINDOW);                
 }
@@ -90,9 +87,7 @@ SDL_Surface *SEARCHWINDOW_Create()
     Image=sw->Image;
 
 
-    SearchWindow = SDL_CreateRGBSurface(SDL_SWSURFACE,1024,685,32,0xff0000,0x00ff00,0x0000ff,0x000000);
-
-    SDL_WidgetUseSurface(SearchWindow);
+    SearchWindow = SDL_WidgetNewSurface(1024,685,32);
 
     while(Image)
     {

@@ -495,9 +495,8 @@ SDL_Surface *Window_CreateFileWindow()
     Button = fw->Button;
     Table  = fw->Table;
 
-    FileWindow = SDL_CreateRGBSurface(SDL_SWSURFACE,1024,685,32,0xff0000,0x00ff00,0x0000ff,0x000000);
+    FileWindow = SDL_WidgetNewSurface(1024,685,32);
 
-    SDL_WidgetUseSurface(FileWindow);
 
     while(Image)
     {

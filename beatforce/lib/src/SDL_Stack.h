@@ -23,6 +23,7 @@
 #include <SDL/SDL.h> 
 
 
+/* Widget list for a specific surface */
 typedef struct Stack
 {
     SDL_Rect dest;
@@ -32,6 +33,7 @@ typedef struct Stack
 }Stack;
 
 
+/* Surface with widget settings */
 typedef struct StackList
 {
     SDL_Surface *surface;
@@ -42,11 +44,12 @@ typedef struct StackList
 
 int SDL_StackInit();
 int SDL_SurfaceStack(SDL_Surface *surface);
+int SDL_NewSurfaceStack(SDL_Surface *surface);
 SDL_Surface* SDL_GetSurfaceStack();
 Stack *SDL_StackGetSurfaceStack(SDL_Surface *surface);
 
 void SDL_AddToStack(int item,SDL_Rect* dest,void *data);
-Stack *SDL_StackGetStack();
+Stack *SDL_StackGetStack(SDL_Surface *surface);
 Stack *SDL_StackGetLastItem();
 void SDL_StackSetFocus(Stack *focus_widget);
 Stack *SDL_StackGetFocus();

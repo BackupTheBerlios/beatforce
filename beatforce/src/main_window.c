@@ -98,11 +98,9 @@ static SDL_Surface *MAINWINDOW_CreateWindow(MainwindowWidgets *w)
 
 
     control_state=0;
-    MainWindow = SDL_CreateRGBSurface(SDL_SWSURFACE,s->Width,s->Height,s->BPP,
-                                      0xff0000,0x00ff00,0x0000ff,0x000000);
+    MainWindow = SDL_WidgetNewSurface(s->Width,s->Height,s->BPP);
     SDL_SetColorKey(MainWindow,0,0); // disable transparancy
-    
-    SDL_WidgetUseSurface(MainWindow);
+   
 
     while(Image)
     {

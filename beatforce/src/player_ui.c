@@ -93,7 +93,7 @@ static void PLAYERUI_HidePlayer(void *data)
             SDL_WidgetPropertiesOf(l->data,SET_VISIBLE,0);        
             l=l->next;
         }
-        SDL_WidgetForceRedraw();
+        SDL_WidgetForceRedraw(NULL);
     }
     else
     {

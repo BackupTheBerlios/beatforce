@@ -24,110 +24,83 @@
 #include "SDL_Stack.h"
 #include "SDL_Widget.h"
 
-StackList *stacklist;
-Stack     *current_stack;
-SDL_Surface  *previous_surface;
-Stack     *current_focus;
-static SDL_sem *StackSem;
+SDL_Surface  *previous_surface; /* Previous active surface */
 
+Stack     *current_focus;       /* Current widget focus    */
+static SDL_sem *StackSem;
+StackList *SurfaceList;         /* List of surfaces (NEW)  */
+StackList *CreateOnStack;
+StackList *ActiveScreen;
 
 int SDL_StackInit()
 {
-    stacklist=NULL;
-    current_stack=NULL;
     previous_surface=NULL;
     current_focus=NULL;
+    SurfaceList   = NULL;
+    CreateOnStack = NULL;
+    ActiveScreen  = NULL;
     StackSem=SDL_CreateSemaphore(1);
     return 1;
 }
 
-/* retrun -1 on error
- * return 0 on exits and make active
- * return 1 if a new one is created
- */
+int SDL_StackNewSurface(SDL_Surface *surface)
+{
+    if(SurfaceList == NULL)
+    {
+        SurfaceList=(StackList*)malloc(sizeof(StackList));
+        memset(SurfaceList,0,sizeof(StackList));
+        SurfaceList->surface=surface;
+        CreateOnStack=SurfaceList;
+    }
+    else
+    {
+        StackList *l;
+        l=SurfaceList;
+        while(l->next)
+            l=l->next;
+
+        l->next=(StackList*)malloc(sizeof(StackList));
+        memset(l->next,0,sizeof(StackList));
+        l->next->surface=surface;
+        CreateOnStack=l->next;
+        return 0;
+    }
+    return 1;
+}
+
+
 int 
 SDL_SurfaceStack(SDL_Surface *surface)
 {
     StackList *surfaces;
+    surfaces=SurfaceList;
 
-    previous_surface=SDL_GetSurfaceStack();
-
-    if(stacklist==NULL)
+    while(surfaces)
     {
-        stacklist=malloc(sizeof(StackList));
-        if(stacklist==NULL)
-            return -1;
-        stacklist->surface=surface;
-        stacklist->stack=NULL;
-        stacklist->parent=NULL;
-        stacklist->next=NULL;
-        SDL_SemWait(StackSem);
-        current_stack=stacklist->stack;
-        SDL_SemPost(StackSem);
-
-    }
-    else
-    {
-        surfaces=stacklist;
-
-        /* If it already exists only make it active */
         if(surfaces->surface == surface)
         {
-            SDL_SemWait(StackSem);
-            current_stack  = surfaces->stack;
-            SDL_SemPost(StackSem);
-            return 0;
+            ActiveScreen=surfaces;
+            return 1;
         }
-        else
-        {
-            while(surfaces->next)
-            {
-                surfaces=surfaces->next;
-                if(surfaces->surface == surface)
-                {
-                    SDL_SemWait(StackSem);
-                    current_stack=surfaces->stack;
-                    SDL_SemPost(StackSem);
-//                    printf("Found surface %p\n",current_stack);
-                    return 0;
-                }
-            }
-        }
+        surfaces=surfaces->next;
 
-        
-        /* Add a new one */
-        surfaces->next=(StackList*)malloc(sizeof(StackList));
-        if(surfaces->next==NULL)
-            return -1;
-        
-        surfaces->next->surface=surface;
-        surfaces->next->parent=surfaces->surface;
-        surfaces->next->stack=NULL;
-        surfaces->next->next=NULL;
-        SDL_SemWait(StackSem);
-        current_stack = surfaces->next->stack;
-        SDL_SemPost(StackSem);
-        
     }
-    return 1;
+    return 0;
 }
 
 SDL_Surface *SDL_GetSurfaceStack()
 {
     StackList *surfaces;
-    surfaces=stacklist;
-    SDL_SemWait(StackSem);
+    surfaces=SurfaceList;
     while(surfaces)
     {
-        if(surfaces->stack == current_stack)
+        if(surfaces == ActiveScreen)
         {
-            SDL_SemPost(StackSem);
             return surfaces->surface;
         }
         surfaces=surfaces->next;
 
     }
-    SDL_SemPost(StackSem);
     return NULL;
 
 }
@@ -140,47 +113,24 @@ SDL_Surface *SDL_GetPreviousStack()
 
 void SDL_AddToStack(int item,SDL_Rect* dest,void *data)
 {
-    StackList *list;
-
-    if(current_stack==NULL)
+    if(CreateOnStack->stack==NULL)
     {
-        current_stack=malloc(sizeof(Stack));
-        current_stack->dest.x=dest->x;
-        current_stack->dest.y=dest->y;
-        current_stack->dest.w=dest->w;
-        current_stack->dest.h=dest->h;
-        current_stack->type=item;
-        current_stack->data=data;
-        current_stack->next=NULL;
+        CreateOnStack->stack=malloc(sizeof(Stack));
+        CreateOnStack->stack->dest.x=dest->x;
+        CreateOnStack->stack->dest.y=dest->y;
+        CreateOnStack->stack->dest.w=dest->w;
+        CreateOnStack->stack->dest.h=dest->h;
+        CreateOnStack->stack->type=item;
+        CreateOnStack->stack->data=data;
+        CreateOnStack->stack->next=NULL;
 
         /* Set the focus to the new widget */
-        SDL_StackSetFocus(current_stack);
-
-        /* Add the newly created Stack to the stacklist */
-        list=stacklist;
-
-        if(list->stack == NULL)
-        {
-            list->stack = current_stack;
-        }
-        else
-        {
-            while(list->next)
-            {
-                list=list->next;
-                if(list->stack == NULL)
-                {
-                    list->stack = current_stack;
-                    return;
-                }
-                
-            }
-        }
+        SDL_StackSetFocus(CreateOnStack->stack);
     }
     else
     {
         Stack *temp;
-        temp=current_stack;
+        temp=CreateOnStack->stack;
         
         while(temp)
         {
@@ -193,7 +143,7 @@ void SDL_AddToStack(int item,SDL_Rect* dest,void *data)
             }
             temp=temp->next;
         }
-        temp=current_stack;
+        temp=CreateOnStack->stack;
         while(temp->next)
             temp=temp->next;
         temp->next=malloc(sizeof(Stack));
@@ -212,36 +162,37 @@ void SDL_AddToStack(int item,SDL_Rect* dest,void *data)
 
 }
 
-
 Stack *SDL_StackGetLastItem()
 {
-    Stack *tmp=current_stack;
+    Stack *tmp=CreateOnStack->stack;
     while(tmp->next)
         tmp=tmp->next;
     return tmp;
 }
 
-Stack *SDL_StackGetStack()
+
+Stack *SDL_StackGetStack(SDL_Surface *surface)
 {
-    return current_stack;
-}
+    StackList *surfaces;
+    surfaces=SurfaceList;
 
-Stack *SDL_StackGetSurfaceStack(SDL_Surface *surface)
-{
-    StackList* surfaces;
-
-    surfaces=stacklist;
-
-    while(surfaces)
+    if(surface == NULL)
     {
-        if(surfaces->surface == surface)
-            return surfaces->stack;
-        surfaces=surfaces->next;
+        return ActiveScreen->stack;
+    }
+    else
+    {
+        while(surfaces)
+        {
+            if(surfaces->surface == surface)
+                return surfaces->stack;
+            
+            surfaces=surfaces->next;
+        }
 
     }
-    return NULL;    
+    return NULL;
 }
-
 
 void SDL_StackSetFocus(Stack *focus_widget)
 {
