@@ -142,7 +142,6 @@ static void SONGDBUI_ChangeDatabase()
 
 void SONGDBUI_Redraw()
 {
-    long id;
     SongDBSubgroup *sg;
     
     if(SONGDB_GroupChanged())
@@ -160,16 +159,14 @@ void SONGDBUI_Redraw()
         }
         SONGDBUI_ChangeDatabase();
     }
-    if(PLAYER_IsPlaying(0))
-    {
-        PLAYER_GetPlayingID(0,&id);
-        SDL_WidgetPropertiesOf(table,SET_HIGHLIGHTED,id);    
-    }
-    if(PLAYER_IsPlaying(1))
-    {
-        PLAYER_GetPlayingID(1,&id);
-        SDL_WidgetPropertiesOf(table,SET_HIGHLIGHTED,id);    
-    }
+ 
+}
+
+void SONGDBUI_Play(int player_nr)
+{
+    long id
+    PLAYER_GetPlayingID(player_nr,&id);
+    SDL_WidgetPropertiesOf(table,SET_HIGHLIGHTED,id);    
 }
        
 

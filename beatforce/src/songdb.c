@@ -371,7 +371,7 @@ long SONGDB_GetNoOfSearchResults(void)
 
 struct SongDBEntry *SONGDB_GetSearchEntry(long id)
 {
-    if (id >= n_search_results || id == SONGDB_ID_UNKNOWN)
+    if ((id >= n_search_results && id < 0) || id == SONGDB_ID_UNKNOWN)
     {
         return NULL;
     }

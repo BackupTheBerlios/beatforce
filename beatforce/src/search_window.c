@@ -191,6 +191,7 @@ void searchwindow_PlayClicked(void *data)
         else
             PLAYER_Play(player);
 
+        SONGDBUI_Play(player);
         /* and the search results */
         SONGDB_FindEntry("");
 

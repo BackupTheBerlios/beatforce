@@ -225,6 +225,7 @@ void PLAYERUI_Redraw()
     {
         player_set_song(0,0);
         PLAYER_Play(0);
+        SONGDBUI_Play(0);
     }
 
 
@@ -397,6 +398,7 @@ static void PLAYERUI_UpdateTime(int player)
             {
                 player_set_song(!player,0);
                 MIXER_DoFade(1,0);
+                SONGDBUI_Play(!player);
                 totaltime = 0;
                 timeleft  = 0;
                 time      = 0;
@@ -414,6 +416,7 @@ static void PLAYERUI_UpdateTime(int player)
                 PLAYLIST_SetEntry(!player,e);
                 player_set_song(!player,0);  /* when set_entry is excecuted we only have 1 item thus 0 */
                 MIXER_DoFade(1,0);
+                SONGDBUI_Play(!player);
                 totaltime = 0;
                 timeleft  = 0;
                 time      = 0;
@@ -509,7 +512,10 @@ static void PLAYERUI_PlayButton(void *data)
         PLAYER_Pause (current->PlayerNr);
     }
     else
+    {
         PLAYER_Play  (current->PlayerNr);
+        SONGDBUI_Play();
+    }
 }
 
 /* Event handler for the progress bar SDL_CLICKED*/

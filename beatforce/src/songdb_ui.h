@@ -27,5 +27,7 @@
 void SONGDBUI_Redraw();
 void SONGDBUI_CreateWindow(ThemeSongdb *ts);
 
+/* To show on the songdb playlist what entry is playing */
+void SONGDBUI_Play(int player_nr);
 
 #endif /* __SONGDB_UI_H__ */
