@@ -441,8 +441,12 @@ struct SongDBEntry *SONGDB_GetSearchEntry(long id)
 struct SongDBEntry *SONGDB_GetEntryID(long id)
 {
     struct SongDBEntry *e = NULL;
-    struct SongDBEntry *Playlist = MainGroup->Active->Playlist;
+    struct SongDBEntry *Playlist = NULL;
 
+    if(MainGroup && MainGroup->Active)
+        Playlist = MainGroup->Active->Playlist;
+    else
+        return NULL;
     if(id < 0)
         return NULL;
 

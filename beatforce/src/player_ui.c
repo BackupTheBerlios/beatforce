@@ -43,7 +43,7 @@ PlayerDisplay UI_Players[2];
 
 /* local prototypes */
 void playerui_SetSpeed(void *data);
-void playerui_PlayButton(void *data);
+static void PLAYERUI_PlayButton(void *data);
 void UI_PlayerUpdateTimeLabel(void *data);
 void UI_ProgressBarClicked(void *data);
 
@@ -63,6 +63,7 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
     ThemeButton    *Button    = NULL;
     ThemeText      *Text      = NULL;
     ThemeVolumeBar *VolumeBar = NULL;
+    ThemeEdit      *Edit      = NULL;
     
     if(pt == NULL)
         return;
@@ -71,6 +72,7 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
     Button    = pt->Button;
     Text      = pt->Text;
     VolumeBar = pt->VolumeBar;
+    Edit      = pt->Edit;
 
     UI_Players[nr].PlayerNr=nr;
 
@@ -89,7 +91,7 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
         SDL_WidgetProperties(SET_NORMAL_IMAGE,   Button->normal);
         SDL_WidgetProperties(SET_HIGHLIGHT_IMAGE,Button->highlighted);
         SDL_WidgetProperties(SET_PRESSED_IMAGE,  Button->pressed);
-        SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,playerui_PlayButton,&UI_Players[nr]);
+        SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,PLAYERUI_PlayButton,&UI_Players[nr]);
         
         Button=Button->next;
     }
@@ -187,7 +189,12 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
         SDL_WidgetProperties(SET_NORMAL_STEP_SIZE,0.1);
         SDL_WidgetProperties(SET_CALLBACK,SDL_CHANGED,playerui_SetSpeed,&UI_Players[nr]);
     }
-
+    
+    if(pt->Edit)
+    {
+        UI_Players[nr].EditTitle=SDL_WidgetCreateR(SDL_EDIT,pt->Edit->Rect);
+        SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
+    }
 }
 
 void PLAYERUI_Redraw()
@@ -219,6 +226,7 @@ void PLAYERUI_Redraw()
 
     playerui_UpdateState(0);
     playerui_UpdateState(1);
+
 }
 
 /* 
@@ -241,6 +249,7 @@ void playerui_UpdateArtist(int player)
             sprintf(artist,"%s",filename);
         
     }
+
     if(UI_Players[player].Artist)
         SDL_WidgetPropertiesOf(UI_Players[player].Artist,SET_CAPTION,artist);
 }
@@ -268,7 +277,7 @@ void playerui_UpdateTime(int player)
     timeleft = PLAYER_GetTimeLeft(player);
     time     = PLAYER_GetTimePlayed(player);
     totaltime= PLAYER_GetTimeTotal(player);
-
+    
     /* Time elapsed */
     if(totaltime)
     {
@@ -416,10 +425,15 @@ void playerui_UpdateState(int player)
     SDL_WidgetPropertiesOf(UI_Players[player].State,SET_CAPTION,label);
 }
 
-void playerui_PlayButton(void *data)
+static void PLAYERUI_PlayButton(void *data)
 {
+    char title[255];
     PlayerDisplay *current=(PlayerDisplay*)data;
 
+    memset(title,0,255);
+    PLAYER_GetTitle(current->PlayerNr,title);
+    
+    SDL_WidgetPropertiesOf(UI_Players[current->PlayerNr].EditTitle,SET_CAPTION,title);
     TRACE("playerui_PlayButton %d",current->PlayerNr);    
 
     if(PLAYER_IsPlaying(current->PlayerNr))

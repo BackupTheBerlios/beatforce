@@ -55,6 +55,7 @@ typedef struct PlayerDisplay
 
     void *Pitch;
 
+    void *EditTitle;
 }PlayerDisplay;
 
 

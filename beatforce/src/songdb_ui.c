@@ -84,7 +84,7 @@ void SONGDBUI_CreateWindow(ThemeSongdb *ts)
         SDL_WidgetProperties(SET_VISIBLE_ROWS,    ts->Table->Rows);
         SDL_WidgetProperties(SET_VISIBLE_COLUMNS, ts->Table->Columns);
         SDL_WidgetProperties(COLUMN_WIDTH, 1, 30  );
-        SDL_WidgetProperties(COLUMN_WIDTH, 2, 490 );
+        SDL_WidgetProperties(COLUMN_WIDTH, 2, 290 );
         SDL_WidgetProperties(COLUMN_WIDTH, 3, 10  );
         SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
         SDL_WidgetProperties(ROWS,SONGDB_GetNoOfEntries());

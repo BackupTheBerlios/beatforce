@@ -136,12 +136,12 @@ typedef struct ThemeColumn
     struct ThemeColumn *next;
 }ThemeColumn;
 
-typedef struct ThemeLabel
+typedef struct ThemeEdit
 {
     SDL_Rect Rect;
     int display;
-    struct ThemeLabel *next;
-}ThemeLabel;
+    struct ThemeEdit *next;
+}ThemeEdit;
 
 typedef struct ThemeTable
 {
@@ -175,6 +175,7 @@ typedef struct ThemeSlider
 
 typedef struct
 {
+    ThemeEdit        *Edit;
     ThemeText        *Text;
     ThemeImage       *Image;
     ThemeButton      *Button;

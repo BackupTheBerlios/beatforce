@@ -459,28 +459,28 @@ ThemeImage *XML_ParseImage(ThemeImage *image,xmlDocPtr doc, xmlNodePtr cur)
     
 }
 
-ThemeLabel *XML_ParseLabel(ThemeLabel *label,xmlDocPtr doc, xmlNodePtr cur)
+ThemeEdit *XML_ParseEdit(ThemeEdit *edit,xmlDocPtr doc, xmlNodePtr cur)
 {
-    if(label == NULL)
+    if(edit == NULL)
     {
-        label=malloc(sizeof(ThemeLabel));
-        memset(label,0,sizeof(ThemeLabel));
+        edit=malloc(sizeof(ThemeEdit));
+        memset(edit,0,sizeof(ThemeEdit));
                     
-        StorePropertyAsShort(cur,"x",&label->Rect.x);
-        StorePropertyAsShort(cur,"y",&label->Rect.y);
-        StorePropertyAsShort(cur,"w",&label->Rect.w);
-        StorePropertyAsShort(cur,"h",&label->Rect.h);
+        StorePropertyAsShort(cur,"x",&edit->Rect.x);
+        StorePropertyAsShort(cur,"y",&edit->Rect.y);
+        StorePropertyAsShort(cur,"w",&edit->Rect.w);
+        StorePropertyAsShort(cur,"h",&edit->Rect.h);
         
     }
     else
     {
-        ThemeLabel *last;
-        last=label;
+        ThemeEdit *last;
+        last=edit;
         while(last->next)
             last=last->next;
 
-        last->next=malloc(sizeof(ThemeLabel));
-        memset(last->next,0,sizeof(ThemeLabel));
+        last->next=malloc(sizeof(ThemeEdit));
+        memset(last->next,0,sizeof(ThemeEdit));
 
         StorePropertyAsShort(cur,"x",&last->next->Rect.x);
         StorePropertyAsShort(cur,"y",&last->next->Rect.y);
@@ -488,7 +488,7 @@ ThemeLabel *XML_ParseLabel(ThemeLabel *label,xmlDocPtr doc, xmlNodePtr cur)
         StorePropertyAsShort(cur,"h",&last->next->Rect.h);
         
     }
-    return label;
+    return edit;
 }
 
 
@@ -910,6 +910,10 @@ ThemePlayer *XML_ParsePlayer(xmlDocPtr doc, xmlNodePtr cur)
             if ((!xmlStrcmp(cur->name, (const xmlChar *)"slider")))
             {
                 player->Slider=XML_ParseSlider(player->Slider,doc,cur);
+            }
+            if ((!xmlStrcmp(cur->name, (const xmlChar *)"edit")))
+            {
+                player->Edit=XML_ParseEdit(player->Edit,doc,cur);
             }
             cur=cur->next;
         }
