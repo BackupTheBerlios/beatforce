@@ -112,8 +112,8 @@ void printid(char *id,int line,char *message);
 #if MODULE_ID == PLAYER
 #undef TRACE
 #undef DEBUG
-#define TRACE TRACE_ON
-#define DEBUG DEBUG_ON
+#define TRACE TRACE_OFF
+#define DEBUG DEBUG_OFF
 #endif
 
 #if MODULE_ID == PLAYER_UI
@@ -132,8 +132,8 @@ void printid(char *id,int line,char *message);
 #endif
 
 #if MODULE_ID == PLUGIN
-#define TRACE TRACE_ON
-#define DEBUG DEBUG_ON
+#define TRACE TRACE_OFF
+#define DEBUG DEBUG_OFF
 #endif
 
 #if MODULE_ID == RINGBUFFER
@@ -157,8 +157,8 @@ void printid(char *id,int line,char *message);
 #endif
 
 #if MODULE_ID == THEME
-#define TRACE TRACE_ON
-#define DEBUG DEBUG_ON
+#define TRACE TRACE_OFF
+#define DEBUG DEBUG_OFF
 #endif
 
 #endif //MODULE_ID

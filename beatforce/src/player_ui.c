@@ -152,8 +152,9 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
     }        
     if(nr == 0)
     {
-        SDL_WidgetCreate(SDL_BUTTON,290,34,20,20);
+        SDL_WidgetCreate(SDL_BUTTON,273,34,0,0);
         SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,PLAYERUI_HidePlayer,NULL);
+        SDL_WidgetProperties(SET_NORMAL_IMAGE, IMG_Load("/home/beuving/beatforce/themes/beatforce/info.bmp"));
     }
     while(Button)
     {
