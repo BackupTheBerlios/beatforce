@@ -120,16 +120,13 @@ int PLAYLIST_Remove(int player_nr,long songdb_id)
     struct PlEntry *newlist = playlist[0];
     struct PlEntry *pe = newlist;
     printf("PLAYLIST_Remove songsb %d\n",songdb_id);
-    exit(1);
 
     while(newlist)
     {
         if(newlist->e && newlist->e->id == songdb_id)
         {
-            printf("Entrie foudn to remvoe\n");
-            exit(1);
-
-            no_of_entries--;
+            printf("Found playlist entry\n");
+//            no_of_entries--;
             break;
         }
 
