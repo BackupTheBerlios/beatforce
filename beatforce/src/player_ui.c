@@ -40,18 +40,17 @@
 #define MODULE_ID PLAYER_UI
 #include "debug.h"
 
-
-
 PlayerDisplay UI_Players[2];
 
 /* local prototypes */
-static void PLAYERUI_SetSpeed(void *data);
-static void PLAYERUI_PlayButton(void *data);
+static void PLAYERUI_SetSpeed(void *data);   /* Speed slider callback */
+static void PLAYERUI_PlayButton(void *data); /* Play  button callback */
+
 void UI_PlayerUpdateTimeLabel(void *data);
 void UI_ProgressBarClicked(void *data);
 
 /* Prototypes for redraw functions */
-void playerui_UpdateArtist(int player);
+static void PLAYERUI_UpdateArtist(int player);  /* Redraw of the artist label */
 void playerui_UpdateTime(int player);
 void playerui_UpdateTitle(int player);
 void playerui_UpdateFileInfo(int player);
@@ -246,7 +245,7 @@ void PLAYERUI_Redraw()
  * 
  *
  */
-void playerui_UpdateArtist(int player)
+static void PLAYERUI_UpdateArtist(int player)
 {
     char artist[255];
     memset(artist,0,255);
