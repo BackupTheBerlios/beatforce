@@ -109,7 +109,7 @@ void FILEWINDOW_Open()
 
 static void FILEWINDOW_RenameSubgroupFinished()
 {
-    SDL_TableRow *row;
+    SDL_TableRow *row=NULL;
     char newlabel[255];
     SDL_WidgetPropertiesOf(TableSubgroup,GET_SELECTED,&row);
     if(row)
@@ -164,6 +164,7 @@ static void FILEWINDOW_AddSelected(void *data)
     {
         while(row)
         {
+            
             FILEWINDOW_GetFilesInDirectory(row->index,0,string);
             if(strlen(string))
             {
@@ -171,15 +172,14 @@ static void FILEWINDOW_AddSelected(void *data)
                 if(lSubgroup)
                 {
                     SONGDB_AddFileTo(lSubgroup->index,string);
-                    SDL_WidgetPropertiesOf(TableFilesInDirectory,CLEAR_SELECTED,0);
+////                    return;
                 }
 //                else
 //                    ERROR("No subgroup selected");
             }
-
             row=row->next;
         }
-
+        SDL_WidgetPropertiesOf(TableFilesInDirectory,CLEAR_SELECTED,0);
     }
     else
     {
