@@ -598,7 +598,6 @@ int FILEWINDOW_EventHandler(SDL_Event event)
         case SDLK_ESCAPE:
             SDL_WidgetPropertiesOf(TableSubgroup,CLEAR_SELECTED,0);
             WNDMGR_CloseWindow();
-            SONGDBUI_ChangeDatabase();
             break;
       
         default:

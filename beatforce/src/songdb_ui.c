@@ -53,7 +53,7 @@ void UI_SongdbRenameClicked(void *data);
 void UI_SongdbAddTabClicked(void *data);
 void songdbui_RemoveTab(void *data);
 
-void UI_SongdbChangeDatabase();
+static void SONGDBUI_ChangeDatabase();
 
 void songdbstring(long row,int column,char *dest);
 void *table;
@@ -118,13 +118,17 @@ void SONGDBUI_CreateWindow(ThemeSongdb *ts)
     }
 }
 
-void SONGDBUI_ChangeDatabase()
+static void SONGDBUI_ChangeDatabase()
 {
     SDL_Tab *t;
     
     t=(SDL_Tab *)tabwidget;
-    SONGDB_SetActiveSubgroup(t->hl->index);
+    if(t && t->hl)
+    {
+        SONGDB_SetActiveSubgroup(t->hl->index);
+    }
     SDL_WidgetPropertiesOf(table,ROWS,SONGDB_GetNoOfEntries());
+    
     
 }
 
@@ -146,6 +150,7 @@ void SONGDBUI_Redraw()
             SDL_WidgetPropertiesOf(tabwidget,TAB_ADD,sg->Name);
             sg=sg->next;
         }
+        SONGDBUI_ChangeDatabase();
     }
     
 
@@ -154,7 +159,6 @@ void SONGDBUI_Redraw()
 
 static void SONGDBUI_ChangeGroupClicked(void *data)
 {
-    /* Will call void UI_SongdbChangeDatabase(char *string) when finished */
     FILEWINDOW_Open();
 }
 

@@ -26,7 +26,7 @@
 
 void SONGDBUI_Redraw();
 void SONGDBUI_CreateWindow(ThemeSongdb *ts);
-void SONGDBUI_ChangeDatabase();
+
 
 
 #endif /* __SONGDB_UI_H__ */
