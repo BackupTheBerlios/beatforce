@@ -25,7 +25,7 @@
 #include <string.h>
 #include <malloc.h>
 
-#include "main_ui.h"
+#include "wndmgr.h"
 #include "songdb_ui.h"
 
 
@@ -44,12 +44,15 @@ char directory[255];
 
 /* Local function prototypes */
 SDL_Surface *Window_CreateFileWindow();
+int FILEWINDOW_EventHandler(SDL_Event event);
 
 /* Local callback functions */
 void FileWindow_DirSelectClicked(void *data);
 
 void dirselect(SDL_Table *table);
 void dirstring(long row,int column,char *dest);
+
+Window FILEWINDOW={ FILEWINDOW_EventHandler };
 
 SDL_Surface *FileWindow;
 
@@ -131,6 +134,27 @@ SDL_Surface *Window_CreateFileWindow()
     SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,FileWindow_DirSelectClicked,NULL);
 
     return FileWindow;
+}
+
+int FILEWINDOW_EventHandler(SDL_Event event)
+{
+    switch(event.type)
+    {
+    case SDL_KEYDOWN:
+        switch( event.key.keysym.sym ) 
+        {
+        case SDLK_ESCAPE:
+            WNDMGR_CloseWindow();
+            break;
+      
+        default:
+            break;
+            
+        }
+        break;
+
+    }
+    return 0;
 }
 
 void dirstring(long row,int column,char *dest)
@@ -255,7 +279,7 @@ void FileWindow_DirSelectClicked(void *data)
         free(mp3->data);
         mp3=mp3->next;
     }
-    MAINUI_CloseWindow(FileWindow);
+    WNDMGR_CloseWindow(FileWindow);
     SONGDBUI_ChangeDatabase(directory);
     
 

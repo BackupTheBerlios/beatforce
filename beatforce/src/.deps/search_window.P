@@ -24,7 +24,7 @@ search_window.o: search_window.c /usr/include/string.h \
  ../lib/src/SDL_Widget.h /usr/include/SDL/SDL_image.h \
  ../lib/src/SDL_Font.h ../lib/src/SDL_Table.h songdb_ui.h player_ui.h \
  mixer_ui.h songdb.h configfile.h llist.h player.h input_plugin.h \
- playlist.h mixer.h osa.h search_window.h main_ui.h
+ playlist.h mixer.h osa.h search_window.h wndmgr.h
 search_window.c :
 /usr/include/string.h :
 /usr/include/features.h :
@@ -86,4 +86,4 @@ playlist.h :
 mixer.h :
 osa.h :
 search_window.h :
-main_ui.h :
+wndmgr.h :

@@ -25,7 +25,7 @@
 
 #define AUDIO_OUTPUT 1
 #define INPUT        2
-#define MAIN_UI      3
+#define WNDMGR       3
 #define MP3          4
 #define OSA          5
 #define OUTPUT       6
@@ -63,7 +63,7 @@ void printid(char *id,int line,char *message);
 #define DEBUG DEBUG_ON
 #endif
 
-#if MODULE_ID == MAIN_UI
+#if MODULE_ID == WNDMGR
 #undef TRACE
 #undef DEBUG
 #define TRACE TRACE_OFF

@@ -24,7 +24,7 @@ file_window.o: file_window.c /usr/include/SDL/SDL.h \
  songdb.h configfile.h /usr/include/string.h \
  /usr/include/bits/string.h /usr/include/bits/string2.h \
  /usr/include/endian.h /usr/include/bits/endian.h \
- /usr/include/stdlib.h /usr/include/malloc.h main_ui.h songdb_ui.h
+ /usr/include/stdlib.h /usr/include/malloc.h wndmgr.h songdb_ui.h
 file_window.c :
 /usr/include/SDL/SDL.h :
 /usr/include/SDL/SDL_main.h :
@@ -79,5 +79,5 @@ configfile.h :
 /usr/include/bits/endian.h :
 /usr/include/stdlib.h :
 /usr/include/malloc.h :
-main_ui.h :
+wndmgr.h :
 songdb_ui.h :

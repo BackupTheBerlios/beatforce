@@ -20,21 +20,21 @@
 #include <SDL/SDL.h>
 
 
-#ifndef __MAIN_UI_H__
-#define __MAIN_UI_H__
+#ifndef __WNDMGR_UI_H__
+#define __WNDMGR_UI_H__
 
 typedef struct Window
 {
     int (*EventHandler)(SDL_Event event);
 }Window;
 
-void MAINUI_Init();
-void MAINUI_Open(Window *window);
-int  MAINUI_Main();
-void MAINUI_CloseWindow();
-void MAINUI_Exit();
+void WNDMGR_Init();
+void WNDMGR_Open(Window *window);
+int  WNDMGR_Main();
+void WNDMGR_CloseWindow();
+void WNDMGR_Exit();
 
-void MAINUI_DisableEventhandler();
-void MAINUI_EnableEventhandler();
+void WNDMGR_DisableEventhandler();
+void WNDMGR_EnableEventhandler();
 
-#endif __MAIN_UI_H__
+#endif __WNDMGR_H__

@@ -23,7 +23,7 @@
 #include <string.h>
 #include <malloc.h>
 
-#include "main_ui.h"
+#include "wndmgr.h"
 #include "SDL_Widget.h"
 #include "SDL_Font.h"
 #include "SDL_Table.h"
@@ -181,13 +181,13 @@ void UI_SongdbRenameFinished(void *data)
         printf("Nothing to copy from\n");
     
     strcpy(songdbcfg->TabTitle[t->hl->index],t->hl->caption);
-    MAINUI_EnableEventhandler();
+    WNDMGR_EnableEventhandler();
 }
 
 void UI_SongdbRenameClicked(void *data)
 {
     SDL_WidgetPropertiesOf(tabwidget,SET_STATE_EDIT,0);
-    MAINUI_DisableEventhandler();
+    WNDMGR_DisableEventhandler();
 }
 
 

@@ -10,7 +10,7 @@ songdb_ui.o: songdb_ui.c /usr/include/stdio.h /usr/include/features.h \
  /usr/include/string.h /usr/include/bits/string.h \
  /usr/include/bits/string2.h /usr/include/endian.h \
  /usr/include/bits/endian.h /usr/include/stdlib.h \
- /usr/include/malloc.h main_ui.h /usr/include/SDL/SDL.h \
+ /usr/include/malloc.h wndmgr.h /usr/include/SDL/SDL.h \
  /usr/include/SDL/SDL_main.h /usr/include/SDL/SDL_types.h \
  /usr/include/SDL/SDL_getenv.h /usr/include/SDL/SDL_error.h \
  /usr/include/SDL/begin_code.h /usr/include/SDL/close_code.h \
@@ -51,7 +51,7 @@ songdb_ui.c :
 /usr/include/bits/endian.h :
 /usr/include/stdlib.h :
 /usr/include/malloc.h :
-main_ui.h :
+wndmgr.h :
 /usr/include/SDL/SDL.h :
 /usr/include/SDL/SDL_main.h :
 /usr/include/SDL/SDL_types.h :

@@ -32,19 +32,19 @@
 
 #include <SDL_Table.h>
 
-#include "main_ui.h"
+#include "wndmgr.h"
 #include "osa.h"
 
 #include "main_window.h"
 #include "file_window.h"
 #include "search_window.h"
 
-#define MODULE_ID MAIN_UI
+#define MODULE_ID WNDMGR
 #include "debug.h" 
 
 SDL_Surface *screen;
 Window *CurWindow;
-int MAINUI_Running;
+int WNDMGR_Running;
 
 SDL_Font *SmallFont;
 SDL_Font *LargeBoldFont;
@@ -56,15 +56,15 @@ int gEventsAllowed;
 
 
 /* Local prototypes */
-int mainui_Redraw(void *data);
+int wndmgr_Redraw(void *data);
 
 
-void MAINUI_CloseWindow()
+void WNDMGR_CloseWindow()
 {
     MAINWINDOW_Open();//Always go back to main window
 }
 
-void MAINUI_Init()
+void WNDMGR_Init()
 {
     TRACE("UI_Init enter");
 
@@ -95,23 +95,26 @@ void MAINUI_Init()
     
 }
 
-void MAINUI_Open(Window *window)
+void WNDMGR_Open(Window *window)
 {
     CurWindow=window;
 }
 
 
-int MAINUI_Main(void * data)
+int WNDMGR_Main(void * data)
 {
     SDL_Event test_event;
     int timer;
     int retval=0;
     
-    MAINUI_Running = 1;
-    MAINWINDOW_Open();
-    timer=OSA_StartTimer(50,mainui_Redraw,NULL);
+    WNDMGR_Running = 1;
+    gEventsAllowed = 1;
 
-    while(MAINUI_Running)
+
+    MAINWINDOW_Open();
+    timer=OSA_StartTimer(50,wndmgr_Redraw,NULL);
+
+    while(WNDMGR_Running)
     {
         while(SDL_PollEvent(&test_event)) 
         {
@@ -121,7 +124,7 @@ int MAINUI_Main(void * data)
             switch(test_event.type) 
             {
                case SDL_QUIT:
-                MAINUI_Running=0;
+                WNDMGR_Running=0;
                 break;
             default:
                 break;
@@ -139,24 +142,24 @@ int MAINUI_Main(void * data)
     return 1;
 }
 
-void MAINUI_Exit()
+void WNDMGR_Exit()
 {
-    MAINUI_Running=0;
+    WNDMGR_Running=0;
 }
 
-int mainui_Redraw(void *data)
+int wndmgr_Redraw(void *data)
 {
 //    mainui_NotifyRedraw();
     SDL_DrawAllWidgets(screen);
     return 50; //redraw every 50ms 
 }
 
-void MAINUI_DisableEventhandler()
+void WNDMGR_DisableEventhandler()
 {
     gEventsAllowed=0;
 }
 
-void MAINUI_EnableEventhandler()
+void WNDMGR_EnableEventhandler()
 {
     gEventsAllowed=1;
 }

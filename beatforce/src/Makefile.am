@@ -22,7 +22,7 @@ output_plugin.h                 \
 err.h                           \
 interface.h                     \
                                 \
-main_ui.c       main_ui.h       \
+wndmgr.c        wndmgr.h        \
 player_ui.c     player_ui.h     \
 songdb_ui.c     songdb_ui.h     \
 playlist_ui.c   playlist_ui.h   \

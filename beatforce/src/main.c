@@ -31,7 +31,7 @@
 #include "osa.h"
 
 // user interface include
-#include "main_ui.h"
+#include "wndmgr.h"
 
 ConfigFile     *cfgfile;
 AudioConfig    *audiocfg;
@@ -44,7 +44,7 @@ int
 main(int argc, char *argv[])
 {
     OSA_Init();
-    MAINUI_Init(); 
+    WNDMGR_Init(); 
 
     //beatforce
     cfgfile = bf_cfg_open_default_file ();
@@ -71,7 +71,7 @@ main(int argc, char *argv[])
     PLAYER_Init (1, playercfg1);
 
     /*beatforce UI*/
-    MAINUI_Main(NULL);
+    WNDMGR_Main(NULL);
 
 
     AUDIOOUTPUT_Cleanup();

@@ -33,7 +33,7 @@
 
 #include "config.h"
 
-#include "main_ui.h"
+#include "wndmgr.h"
 #include "search_window.h"
 
 void songend_callback(int player_nr)
@@ -41,7 +41,6 @@ void songend_callback(int player_nr)
 
 }
 
-extern void MAINUI_Open(Window *window);
 int control_state;
 int MAINWINDOW_EventHandler(SDL_Event event);
 
@@ -63,7 +62,7 @@ void MAINWINDOW_Open()
         MainWindow=MAINWINDOW_CreateWindow();
     }
     SDL_WidgetUseSurface(MainWindow);
-    MAINUI_Open(&MAINWINDOW);
+    WNDMGR_Open(&MAINWINDOW);
 }
 
 SDL_Surface *MAINWINDOW_CreateWindow()
@@ -138,7 +137,7 @@ int MAINWINDOW_EventHandler(SDL_Event event)
             break;
 
         case SDLK_ESCAPE:
-            MAINUI_Exit();
+            WNDMGR_Exit();
             break;
                 
         

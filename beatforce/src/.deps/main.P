@@ -14,7 +14,7 @@ main.o: main.c /usr/include/stdio.h /usr/include/features.h \
  /usr/include/sys/sysmacros.h /usr/include/alloca.h configfile.h \
  llist.h plugin.h ../config.h songdb.h input.h input_plugin.h player.h \
  output.h audio_output.h types.h ringbuffer.h /usr/local/include/vrb.h \
- output_plugin.h mixer.h osa.h main_ui.h /usr/include/SDL/SDL.h \
+ output_plugin.h mixer.h osa.h wndmgr.h /usr/include/SDL/SDL.h \
  /usr/include/SDL/SDL_main.h /usr/include/SDL/SDL_types.h \
  /usr/include/SDL/SDL_getenv.h /usr/include/SDL/SDL_error.h \
  /usr/include/SDL/begin_code.h /usr/include/SDL/close_code.h \
@@ -70,7 +70,7 @@ ringbuffer.h :
 output_plugin.h :
 mixer.h :
 osa.h :
-main_ui.h :
+wndmgr.h :
 /usr/include/SDL/SDL.h :
 /usr/include/SDL/SDL_main.h :
 /usr/include/SDL/SDL_types.h :

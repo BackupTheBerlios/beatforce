@@ -36,7 +36,7 @@
 #include "osa.h"
 
 #include "search_window.h"
-#include "main_ui.h"
+#include "wndmgr.h"
 
 
 extern SDL_Font *LargeBoldFont;
@@ -71,7 +71,7 @@ void SEARCHWINDOW_Open()
     {
         SDL_WidgetUseSurface(SearchWindow);
     }
-    MAINUI_Open(&SEARCHWINDOW);                
+    WNDMGR_Open(&SEARCHWINDOW);                
 }
 
 
@@ -114,7 +114,7 @@ int SEARCHWINDOW_EventHandler(SDL_Event event)
         switch( event.key.keysym.sym ) 
         {
         case SDLK_ESCAPE:
-            MAINUI_CloseWindow();
+            WNDMGR_CloseWindow();
             break;
       
         default:
@@ -145,7 +145,7 @@ void searchwindow_PlayClicked(void *data)
     int autofade = 0;
     
     SDL_WidgetPropertiesOf(editwidget,SET_CAPTION,"");
-    MAINUI_CloseWindow(SDL_WidgetGetActiveSurface());
+    WNDMGR_CloseWindow(SDL_WidgetGetActiveSurface());
 
     /* Get the current playlist entry */
     e = SONGDB_GetSearchEntry(table->CurrentRow);
@@ -195,7 +195,7 @@ void searchwindow_Play(void *data)
     /* Reset the edit window */
     /* Close this window. main UI can determine to open the correct one again */
     SDL_WidgetPropertiesOf(editwidget,SET_CAPTION,"");
-    MAINUI_CloseWindow(SDL_WidgetGetActiveSurface());
+    WNDMGR_CloseWindow(SDL_WidgetGetActiveSurface());
 
     /* Get the current playlist entry */
     e = SONGDB_GetSearchEntry(0);
