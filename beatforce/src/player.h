@@ -110,6 +110,8 @@ long PLAYER_GetTimePlayed(int player_nr);
 int PLAYER_GetBitrate(int player_nr);
 int PLAYER_GetSamplerate(int player_nr);
 
+/* Change file information */
+int PLAYER_SetTitle(int player_nr,char *title);
 
 
 

@@ -25,5 +25,5 @@ void MIXERUI_Redraw();
 
 /* for main window */
 int MIXERUI_DecreaseMainVolume();
-int MIXERIO_IncreaseMainVolume();
+int MIXERUI_IncreaseMainVolume();
 #endif __MIXER_UI_H__

@@ -114,7 +114,9 @@ BFList *OSA_FindFiles(char *dir,char *extension,int recursive)
     int offset=0;
 
     if(dir == NULL)
+    {
         return NULL;
+    }
     
     d=opendir(dir+offset);
     if(d==NULL)

@@ -149,7 +149,7 @@ int wndmgr_Redraw(void *data)
     return 50; //redraw every 50ms 
 }
 
-/* disable sending events to thw event handler of the current window
+/* disable sending events to the event handler of the current window
    this can be used when all events have to be send to a widget
    for example when the widget is in an edit state */
 void WNDMGR_DisableEventhandler()

@@ -498,13 +498,31 @@ int PLAYER_GetTitle(int player_nr,char *label)
     return 0;
 }
 
+int PLAYER_SetTitle(int player_nr,char *title)
+{
+    struct SongDBEntry *e;
+    struct PlayerPrivate *p = PLAYER_GetData(player_nr);
+
+    e = SONGDB_GetEntryID(p->songdb_id);
+    
+    if(e)
+    {
+        if(e->title)
+            free(e->title);
+        e->title=strdup(title);
+        return 1;
+    }
+    return 0;
+
+}
+
 /* This functions return the filename with the filepath */
 int PLAYER_GetFilename(int player_nr,char *filename)
 {
     struct SongDBEntry *e;
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
 
-    e=SONGDB_GetEntryID(p->songdb_id);
+    e = SONGDB_GetEntryID(p->songdb_id);
     
     if(e && e->filename)
     {

@@ -118,10 +118,9 @@ void SONGDBUI_CreateWindow(ThemeSongdb *ts)
     }
 }
 
-void SONGDBUI_ChangeDatabase(char *string)
+void SONGDBUI_ChangeDatabase()
 {
     SDL_Tab *t;
-    TRACE("SONGDBUI_ChangeDabase enter %s",string);
     
     t=(SDL_Tab *)tabwidget;
     SONGDB_SetActiveSubgroup(t->hl->index);

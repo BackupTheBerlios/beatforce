@@ -342,12 +342,17 @@ static void FILEWINDOW_DirectoryClicked(void *data)
 
     memset(newdir,0,255);
 
+    /* Get the rownumber which is clicked */
     c=t->CurrentRow;
     
     nw=GetDir(0,str);
     if(c == 0)
     {
-        sprintf(directory,"/");
+        if(!strcmp(directory,"/"))
+            sprintf(directory,"%s",str);
+        else
+            sprintf(directory,"/");
+        nw2=GetSubDir(0,str);
     }
     else if(c < nw)
     {
@@ -369,8 +374,9 @@ static void FILEWINDOW_DirectoryClicked(void *data)
         sprintf(directory,"%s%s",newdir,str);
     }
     files=OSA_FindFiles(directory,".mp3",0);
-
-
+    
+    SDL_WidgetPropertiesOf(t,ROWS,nw2);
+    
 }
 
 void FILEWINDOW_DeleteSelected(void *data)
@@ -592,6 +598,7 @@ int FILEWINDOW_EventHandler(SDL_Event event)
         case SDLK_ESCAPE:
             SDL_WidgetPropertiesOf(TableSubgroup,CLEAR_SELECTED,0);
             WNDMGR_CloseWindow();
+            SONGDBUI_ChangeDatabase();
             break;
       
         default:

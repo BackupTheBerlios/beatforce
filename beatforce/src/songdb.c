@@ -162,11 +162,10 @@ int SONGDB_Init (SongDBConfig * our_cfg)
 
 int SONGDB_Exit()
 {
-#if 0
     xmlDocPtr doc = NULL;       /* document pointer */
     xmlNodePtr root_node = NULL;
     xmlNodePtr maingroup = NULL, subgroup = NULL, file = NULL;
-    int i;
+    struct SongDBEntry *Playlist;
 
     LIBXML_TEST_VERSION;
     /* 
@@ -187,10 +186,14 @@ int SONGDB_Exit()
     {
         subgroup=xmlNewChild(maingroup, NULL, BAD_CAST "subgroup", NULL);
         xmlNewProp(subgroup, BAD_CAST "name", BAD_CAST MainGroup->Subgroup->Name);
-        for(i=0;i<MainGroup->Subgroup->Songcount;i++)        
+        
+        Playlist=MainGroup->Subgroup->Playlist;
+
+        while(Playlist)
         {
             file=xmlNewChild(subgroup,NULL,"song",NULL);
-            xmlNewProp(file, BAD_CAST "filename", BAD_CAST MainGroup->Subgroup->Playlist->filename);
+            xmlNewProp(file, BAD_CAST "filename", BAD_CAST Playlist->filename);
+            Playlist=Playlist->next;
         }
         MainGroup->Subgroup=MainGroup->Subgroup->next;
     }
@@ -208,7 +211,8 @@ int SONGDB_Exit()
      *have been allocated by the parser.
      */
     xmlCleanupParser();
-#endif
+
+
     return(0);
 
 }

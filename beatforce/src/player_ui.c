@@ -55,6 +55,8 @@ void playerui_UpdateFileInfo(int player);
 void playerui_UpdateVolume(int player);
 void playerui_UpdateState(int player);
 
+/* Callback for edit title */
+static void PLAYERUI_EditTitleReturn(void *data);
 
  /* Exported functions */
 void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
@@ -194,6 +196,7 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
     {
         UI_Players[nr].EditTitle=SDL_WidgetCreateR(SDL_EDIT,pt->Edit->Rect);
         SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
+        SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_RETURN,PLAYERUI_EditTitleReturn);
     }
 }
 
@@ -399,7 +402,12 @@ void playerui_UpdateFileInfo(int player)
     sprintf(label,"%d KBit",PLAYER_GetBitrate(player)/1000);
     SDL_WidgetPropertiesOf(UI_Players[player].Bitrate,SET_CAPTION,label);
 }
-        
+
+
+static void PLAYERUI_EditTitleReturn(void *data)
+{
+    PLAYER_SetTitle(0,"john");
+}        
   
 void playerui_UpdateState(int player)
 {
