@@ -26,7 +26,7 @@ InputInterface beatforce_if =
 {
     AUDIOOUTPUT_Open,
     output_write,
-    output_pause,
+    AUDIOOUTPUT_Pause,
     output_buffer_free,
     output_get_time,
     output_close,

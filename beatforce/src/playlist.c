@@ -41,7 +41,6 @@ long curr_unique;
 
 int PLAYLIST_Init (int player_nr)
 {
-    object_get_data(player_nr)->playlist=NULL;
     curr_unique = 0;
     no_of_entries=0;
     return 0;
@@ -58,7 +57,7 @@ struct PlEntry *PLAYLIST_GetSong (int player_nr, int no)
     struct PlEntry *pe;
     int index=0;
 
-    pe=object_get_data(player_nr)->playlist;
+    pe= PLAYER_GetData(player_nr)->playlist;
     
     if(pe == NULL)
         return NULL;
@@ -77,7 +76,7 @@ struct PlEntry *PLAYLIST_GetSong (int player_nr, int no)
 void PLAYLIST_SetEntry(int player_nr, struct SongDBEntry *e)
 {
     struct PlEntry *pe;
-    struct PlEntry *newlist = object_get_data(player_nr)->playlist;
+    struct PlEntry *newlist = PLAYER_GetData(player_nr)->playlist;
 
 #define STR( x )  ((x == NULL) ? ("") : (x))
 
@@ -91,12 +90,12 @@ void PLAYLIST_SetEntry(int player_nr, struct SongDBEntry *e)
     no_of_entries=1;
     if(newlist==NULL)
     {
-        object_get_data(player_nr)->playlist=pe;
+        PLAYER_GetData(player_nr)->playlist=pe;
     }
     else
     {
-        free(object_get_data(player_nr)->playlist);
-        object_get_data(player_nr)->playlist=pe;
+        free(PLAYER_GetData(player_nr)->playlist);
+        PLAYER_GetData(player_nr)->playlist=pe;
     }
 
 }
@@ -104,7 +103,7 @@ void PLAYLIST_SetEntry(int player_nr, struct SongDBEntry *e)
 void PLAYLIST_DoAdd(int player_nr, int row, struct SongDBEntry *e)
 {
     struct PlEntry *pe;
-    struct PlEntry *newlist = object_get_data(player_nr)->playlist;
+    struct PlEntry *newlist = PLAYER_GetData(player_nr)->playlist;
 
 #define STR( x )  ((x == NULL) ? ("") : (x))
 
@@ -122,8 +121,7 @@ void PLAYLIST_DoAdd(int player_nr, int row, struct SongDBEntry *e)
     no_of_entries++;
     if(newlist==NULL)
     {
-        printf("Creating new list\n");
-        object_get_data(player_nr)->playlist=pe;
+        PLAYER_GetData(player_nr)->playlist=pe;
     }
     else
     {

@@ -23,6 +23,7 @@
 #include <SDL/SDL.h>
 #include <SDL_Widget.h>
 #include <SDL_Font.h>
+#include <SDL_Table.h>
 
 #include "songdb_ui.h"
 #include "player_ui.h"
@@ -42,8 +43,9 @@ extern SDL_Font *LargeBoldFont;
 void *editwidget;
 void *tablewidget;
 
-void searchfor(void *arg);
-void playsong();
+void searchwindow_Search(void *data);
+void searchwindow_PlayClicked(void *data);
+void searchwindow_Play(void *data);
 void songdb_searchstring(long row,int column,char *dest);
 
 SDL_Surface *SearchWindow;
@@ -68,22 +70,16 @@ void SEARCHWINDOW_Open()
     }
 }
 
-int Window_SearchWindowActive()
-{
-    return (SDL_WidgetGetActiveSurface() == SearchWindow);
-}
-
 SDL_Surface *SEARCHWINDOW_Create()
 {
     SDL_Surface *SearchWindow;
 
-    SearchWindow = SDL_CreateRGBSurface(SDL_SWSURFACE,1000,600,32,0xff0000,0x00ff00,0x0000ff,0x000000);
+    SearchWindow = SDL_CreateRGBSurface(SDL_SWSURFACE,1000,650,32,0xff0000,0x00ff00,0x0000ff,0x000000);
 
     SDL_WidgetUseSurface(SearchWindow);
  
-    SDL_WidgetCreate(SDL_PANEL,0,0,1000,600);
+    SDL_WidgetCreate(SDL_PANEL,0,0,1000,650);
     SDL_WidgetProperties(SET_BG_COLOR,0x000fff);
-//    SDL_WidgetProperties(SET_NORMAL_IMAGE,"res/backg.jpg");
     
     tablewidget=SDL_WidgetCreate(SDL_TABLE,5,50,790,540);
     SDL_WidgetProperties(SET_VISIBLE_ROWS,    36);
@@ -92,19 +88,21 @@ SDL_Surface *SEARCHWINDOW_Create()
     SDL_WidgetProperties(ROWS,SONGDB_GetNoOfEntries());
     SDL_WidgetProperties(SET_FONT,LargeBoldFont);
     SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION,songdb_searchstring);
+    SDL_WidgetEventCallback(searchwindow_PlayClicked,SDL_CLICKED);
+//    SDL_WidgerProperties(SET_CALLBACK,SDL_CLICKED,
 
     editwidget=SDL_WidgetCreate(SDL_EDIT,200,20,400,25);
     SDL_WidgetProperties(SET_FONT,LargeBoldFont);
     SDL_WidgetProperties(SET_ALWAYS_FOCUS,1);
-    SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_ANY,searchfor);
-    SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_RETURN,playsong);
+    SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_ANY,searchwindow_Search);
+    SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_RETURN,searchwindow_Play);
 
     return SearchWindow;
 }
 
 
 
-void searchfor(void *arg)
+void searchwindow_Search(void *data)
 {
     char buffer[255];
     SDL_WidgetPropertiesOf(editwidget,GET_CAPTION,&buffer);
@@ -112,14 +110,63 @@ void searchfor(void *arg)
     SDL_WidgetPropertiesOf(tablewidget,ROWS,SONGDB_GetNoOfSearchResults());
 }
 
-void playsong()
+void searchwindow_PlayClicked(void *data)
+{
+    SDL_Table *table=(SDL_Table*)data;
+    struct SongDBEntry * e;
+    int player = 0;// is playing ?
+    int autofade = 0;
+    
+    SDL_WidgetPropertiesOf(editwidget,SET_CAPTION,"");
+    MAINUI_CloseWindow(SDL_WidgetGetActiveSurface());
+
+    /* Get the current playlist entry */
+    e = SONGDB_GetSearchEntry(table->CurrentRow);
+
+    if(e)
+    {
+        if(PLAYER_IsPlaying(0))
+        {
+            autofade++;
+            player=1;
+        }
+        
+        if(PLAYER_IsPlaying(1))
+        {
+            autofade++;
+            if(player!=1)
+                player=0;
+        }
+        
+        PLAYLIST_SetEntry(player,e);
+        player_set_song(player,0);  // when set_entry is excecuted we only have 1 item thus 0
+        
+        if(autofade == 1)
+            MIXER_DoFade(1,0);
+        else
+            PLAYER_Play(player);
+
+        /* and the search results */
+        SONGDB_FindEntry("");
+
+                
+
+    }
+    else
+    {
+        printf("Can;t find search entry\n");
+    }    
+
+}
+
+void searchwindow_Play(void *data)
 {
     struct SongDBEntry * e;
     int player = 0;// is playing ?
     int autofade = 0;
 
     /* Reset the edit window */
-/* Close this window. main UI can determine to open the correct one again */
+    /* Close this window. main UI can determine to open the correct one again */
     SDL_WidgetPropertiesOf(editwidget,SET_CAPTION,"");
     MAINUI_CloseWindow(SDL_WidgetGetActiveSurface());
 

@@ -235,7 +235,6 @@ void SDL_TableProperties(void *table,int feature,va_list list)
         if(Table->Rows > Table->VisibleRows && Table->Scrollbar)
         {
             SDL_WidgetPropertiesOf(Table->Scrollbar,SET_CUR_VALUE,0.0);
-//(double)(Table->Rows-Table->VisibleRows));
             SDL_WidgetPropertiesOf(Table->Scrollbar,SET_MAX_VALUE,(int)(Table->Rows - Table->VisibleRows));
         }
         else

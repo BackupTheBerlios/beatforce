@@ -50,6 +50,7 @@ void UI_SongdbChangeDirClicked(void *data);
 void UI_SongdbRenameClicked(void *data);
 void UI_SongdbAddTabClicked(void *data);
 void UI_SongdbRenameFinished(void *data);
+void songdbui_RemoveTab(void *data);
 
 void UI_SongdbChangeDatabase();
 
@@ -134,6 +135,10 @@ void SONGDBUI_CreateWindow()
     //add a empty tab button
     SDL_WidgetCreate(SDL_BUTTON,90,610,20,20);
     SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,UI_SongdbAddTabClicked,NULL);        
+
+    //remove the active tab
+    SDL_WidgetCreate(SDL_BUTTON,120,610,20,20);
+    SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,songdbui_RemoveTab,NULL);        
     
 }
 
@@ -168,9 +173,6 @@ void UI_SongdbRenameFinished(void *data)
     SDL_Tab *t;
     t=(SDL_Tab *)tabwidget;
     
-    printf("Rename finished %d\n",t->hl->index);
-    printf("Rename string   %s\n",t->hl->caption);
-
     if(songdbcfg->TabTitle[t->hl->index-1] == NULL)
         printf("Can't rename empty tab\n");
     
@@ -178,8 +180,6 @@ void UI_SongdbRenameFinished(void *data)
         printf("Nothing to copy from\n");
     
     strcpy(songdbcfg->TabTitle[t->hl->index],t->hl->caption);
-    
-    printf("Rename finished\n");
 }
 
 void UI_SongdbRenameClicked(void *data)
@@ -210,6 +210,10 @@ void UI_SongdbAddTabClicked(void *data)
     SDL_WidgetPropertiesOf(tabwidget,ADD_TAB,NULL);
 }
 
+void songdbui_RemoveTab(void *data)
+{
+    TRACE("Remove tab:Not implemented");
+}
 
 void songdbstring(long row,int column,char *dest)
 {

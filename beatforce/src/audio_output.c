@@ -437,13 +437,8 @@ output_buffer_free (int c)
 }
 
 
-int
-output_pause (int c, int pause)
+int AUDIOOUTPUT_Pause (int c, int pause)
 {
-
-#ifdef DEBUG_OUTPUT_TRACE_PLUGIN_CALLS
-    printf ("output_pause( %d, %d )\n", c, pause);
-#endif
     if (c >= OUTPUT_N_CHANNELS || c < 0)
         return ERROR_UNKNOWN_CHANNEL;
     if(ch[c] == NULL)

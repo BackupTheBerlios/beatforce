@@ -101,8 +101,6 @@ void SDL_SliderDraw(void *slider,SDL_Surface *dest)
 
     if(Slider->line == NULL)
     {
-//        SDL_FillRect(dest,&Slider->rect,0xff0000);
-        
         if(SDL_BlitSurface(Slider->background,NULL,dest,&Slider->rect)<0)
            fprintf(stderr, "BlitSurface error: %s\n", SDL_GetError());
     }
@@ -235,48 +233,50 @@ void SDL_SliderEventHandler(void * slider,SDL_Event *event)
     case SDL_MOUSEBUTTONDOWN:
         if(Slider->SliderButton && SDL_WidgetIsInside(&Slider->rect,event->motion.x,event->motion.y))
         {
-            //          int offset=0;
             int motion;
-//            int bheight=0;
-            //int bwidth=0;
 
             if(Slider->orientation == HORIZONTAL)
             {
                 motion=event->motion.x;
-
-                /* if the button click is on the left side of the button */
-                if(motion < (Slider->rect.x + Slider->pixeloffset))
+                
+                if(event->button.button == SDL_BUTTON_LEFT)
                 {
-                    SDL_SliderStep(Slider,LEFT,NORMAL_STEP);
+                    /* if the button click is on the left side of the button */
+                    if(motion < (Slider->rect.x + Slider->pixeloffset))
+                    {
+                        SDL_SliderStep(Slider,LEFT,NORMAL_STEP);
+                    }
+                    /* the button click is on the right side off the button */
+                    else if (motion > Slider->rect.x +Slider->pixeloffset + Slider->SliderButton->w)
+                    {
+                        SDL_SliderStep(Slider,RIGHT,NORMAL_STEP);
+                    }
+                    /* if the button click is on the button */
+                    else
+                    {
+                        Slider->state=SLIDER_DRAG;
+                    }
                 }
-                /* the button click is on the right side off the button */
-                else if (motion > Slider->rect.x +Slider->pixeloffset + Slider->SliderButton->w)
-                {
-                    SDL_SliderStep(Slider,RIGHT,NORMAL_STEP);
-                }
-                /* if the button click is on the button */
-                else
-                {
-                    Slider->state=SLIDER_DRAG;
-                }
-
             }
             else
             {
                 motion=event->motion.y;
                 
-                /* if the button click is below the button */
-                if(motion > (Slider->rect.y + Slider->pixeloffset + Slider->SliderButton->h))
+                if(event->button.button == 1)
                 {
-                    SDL_SliderStep(Slider,DOWN,NORMAL_STEP);
-                }
-                else if (motion > Slider->rect.y + Slider->pixeloffset)
-                {
-                    Slider->state=SLIDER_DRAG;
-                }
-                else
-                {
-                    SDL_SliderStep(Slider,UP,NORMAL_STEP);
+                    /* if the button click is below the button */
+                    if(motion > (Slider->rect.y + Slider->pixeloffset + Slider->SliderButton->h))
+                    {
+                        SDL_SliderStep(Slider,DOWN,NORMAL_STEP);
+                    }
+                    else if (motion > Slider->rect.y + Slider->pixeloffset)
+                    {
+                        Slider->state=SLIDER_DRAG;
+                    }
+                    else
+                    {
+                        SDL_SliderStep(Slider,UP,NORMAL_STEP);
+                    }
                 }
             }
         }

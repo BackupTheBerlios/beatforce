@@ -37,19 +37,19 @@ extern int mixer_dB (int ch, float dB);
 /* Local callback functions */
 void MixerUI_AutoFadeButtonClicked(void *data);
 
-
 void *slideroffader;
 void *mainvolumeind;
+void *mainslider;
 
-void MainVolumeControlHandler(SDL_Slider *slider)
+void MainVolumeControlHandler(void *data)
 {
+    SDL_Slider *slider=(SDL_Slider *)data;
     int volume;
-    if(slider)
-    {
-        volume=slider->MaxValue - slider->CurrentValue;
-        SDL_WidgetPropertiesOf(mainvolumeind,SET_CUR_VALUE,(double)volume);
-        output_set_main_volume(volume);
-    }
+
+    volume=slider->MaxValue - slider->CurrentValue;
+    SDL_WidgetPropertiesOf(mainvolumeind,SET_CUR_VALUE,(double)volume);
+    output_set_main_volume(volume);
+    
 }
 
 void FaderControlHandler(void *data)
@@ -58,7 +58,7 @@ void FaderControlHandler(void *data)
     MIXER_SetFaderValue(slider->CurrentValue);
 }
 
-void UI_MixerRedraw(double value)
+void MIXERUI_Redraw(double value)
 {
     SDL_WidgetPropertiesOf(slideroffader,SET_CUR_VALUE,value);
 }
@@ -67,26 +67,21 @@ void MIXERUI_CreateWindow()
 {
     double val;
 
-
-    MIXER_SetCallback(UI_MixerRedraw);
+    MIXER_SetCallback(MIXERUI_Redraw);
 
     // Main volume 
-    SDL_WidgetCreate(SDL_SLIDER,478,4,47,138);    
+    mainslider=SDL_WidgetCreate(SDL_SLIDER,478,4,47,138);    
     SDL_WidgetProperties(SET_BUTTON_IMAGE,THEME_DIR"/beatforce/slibut.bmp");
     SDL_WidgetProperties(SET_MAX_VALUE,100);
     SDL_WidgetProperties(SET_MIN_VALUE,0);
     SDL_WidgetProperties(SET_NORMAL_STEP_SIZE,1.0);
-    SDL_WidgetProperties(SET_CALLBACK,SDL_CHANGED,MainVolumeControlHandler,NULL);
+    SDL_WidgetProperties(SET_CALLBACK,SDL_CHANGED,MainVolumeControlHandler,mainslider);
 
 
     mainvolumeind=SDL_WidgetCreate(SDL_VOLUMEBAR,527,11,4,124);
     SDL_WidgetProperties(SET_CUR_VALUE,100.0);
-
-
-//    output_get_main_volume(&db);
-//    SDL_WidgetProperties(SET_CUR_VALUE,(int)db);
-
-    // fade slider
+    
+    /* fade slider */
     slideroffader=SDL_WidgetCreate(SDL_SLIDER,432,162,138,45);    
     SDL_WidgetProperties(SET_CALLBACK,SDL_CHANGED,FaderControlHandler,slideroffader);
     SDL_WidgetProperties(SET_BUTTON_IMAGE,THEME_DIR"/beatforce/slibut_horizontal.bmp");

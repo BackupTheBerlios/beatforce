@@ -35,9 +35,6 @@ void PLAYERUI_CreateWindow(int nr, int x);
 void UI_PlayerSetArtistTitle(int player);
 
 
-/* Internal Function */
-void UI_PlayerPlayButtonPressed();
-
 /* Player ui data structures */
 
 typedef struct PlayerDisplay

@@ -81,7 +81,7 @@ struct PlayerPrivate
 
 #define PLAYER_PRIVATE_LEN		(sizeof( struct PlayerPrivate ))
 
-struct PlayerPrivate *object_get_data(int player_nr);
+struct PlayerPrivate *PLAYER_GetData(int player_nr);
 
 int PLAYER_Init (int, PlayerConfig *);
 int player_finalize (int);
@@ -106,10 +106,13 @@ int player_get_song(int player_nr,long *songid);
 void player_set_song (int player_nr, int no);
 
 void player_set_playing (int, int, unsigned long);
-void player_update_trackno (int);
 
 
-void player_get_songfield(int,char *);
+
+int PLAYER_GetArtist(int player_nr,char *label);
+int PLAYER_GetTitle(int player_nr,char *label);
+int PLAYER_GetFilename(int player_nr,char *filename);
+
 long PLAYER_GetTimeTotal(int player_nr);
 long PLAYER_GetTimeLeft(int player_nr);
 long PLAYER_GetTimePlayed(int player_nr);

@@ -79,7 +79,8 @@ int INPUT_Init (int player_nr, BFList * plugin_list)
     }
     if(ip_plugins == NULL)
         exit(1);
-    object_get_data(player_nr)->ip_plugins = ip_plugins;
+
+    PLAYER_GetData(player_nr)->ip_plugins = ip_plugins;
     
     return 0;
 }
@@ -123,7 +124,7 @@ int INPUT_GetTag(int player_nr, char *filename, struct SongDBEntry *e)
 
     TRACE("INPUT_GetTag enter %s",filename);
     
-    l = input_whose_file (object_get_data(player_nr)->ip_plugins, e->filename);
+    l = input_whose_file (PLAYER_GetData(player_nr)->ip_plugins, e->filename);
     if (l == NULL)
         return -10;
 
@@ -135,8 +136,7 @@ input_get_add_info (int player_nr, char *filename, struct SongAddInfo *info)
 {
     InputPluginData *l;
     
-    printf("input_get_add_info");
-    l = input_whose_file (object_get_data(player_nr)->ip_plugins, filename);
+    l = input_whose_file (PLAYER_GetData(player_nr)->ip_plugins, filename);
     if (l == NULL)
         return ERROR_NOT_SUPPORTED;
     
@@ -147,7 +147,7 @@ int INPUT_LoadFile (int player_nr,struct SongDBEntry *e)
 {
     InputPluginData *l;
     
-    l = input_whose_file (object_get_data(player_nr)->ip_plugins, e->filename);
+    l = input_whose_file (PLAYER_GetData(player_nr)->ip_plugins, e->filename);
     if (l == NULL)
     {
         printf("Impossible\n");
@@ -157,9 +157,9 @@ int INPUT_LoadFile (int player_nr,struct SongDBEntry *e)
     {
         printf("Unable to play such a low bitrate\n");
     }
-    object_get_data(player_nr)->current_plugin = l;
-    if(object_get_data(player_nr)->playing_id == SONGDB_ID_UNKNOWN)
-        object_get_data(player_nr)->playing_id = e->id;
+    PLAYER_GetData(player_nr)->current_plugin = l;
+    if(PLAYER_GetData(player_nr)->playing_id == SONGDB_ID_UNKNOWN)
+        PLAYER_GetData(player_nr)->playing_id = e->id;
 
     return l->ip->load_file (l->priv, e->filename);
 }
@@ -177,14 +177,8 @@ int
 INPUT_Play (InputPluginData * current_plugin)
 {
     if (current_plugin == NULL)
-    {
-        printf("No current plugin selected\n");
         return 0;
-    }
-    else
-    {
-        printf("Playing now\n");
-    }
+
     return current_plugin->ip->play (current_plugin->priv);
 }
 

@@ -157,7 +157,7 @@ int SONGDB_AddFilename(char *filename)
     e->filename = strdup (filename);
     e->id       = n_id[active];
 
-    if (input_whose_file (object_get_data(0)->ip_plugins, filename) != NULL)
+    if (input_whose_file (PLAYER_GetData(0)->ip_plugins, filename) != NULL)
     {
 
 //        input_get_tag (0, filename, e);

@@ -39,6 +39,7 @@ PlayerDisplay UI_Players[2];
 
 /* local prototypes */
 void playerui_SetSpeed(void *data);
+void playerui_PlayButton(void *data);
 void UI_PlayerUpdateTimeLabel(void *data);
 void UI_ProgressBarClicked(void *data);
 
@@ -58,7 +59,7 @@ void PLAYERUI_CreateWindow(int nr, int x)
     SDL_WidgetProperties(SET_HIGHLIGHT_IMAGE,THEME_DIR"/beatforce/playonly_green_highlight.bmp");
     SDL_WidgetProperties(SET_PRESSED_IMAGE,  THEME_DIR"/beatforce/playonly_green_pressed.bmp");
     SDL_WidgetProperties(SET_FONT,LargeBoldFont);
-    SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,UI_PlayerPlayButtonPressed,&UI_Players[nr]);
+    SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,playerui_PlayButton,&UI_Players[nr]);
 
     /* Time elapsed */
     UI_Players[nr].TimeElapsed=SDL_WidgetCreate(SDL_LABEL,x+9,90,105,22);
@@ -71,8 +72,13 @@ void PLAYERUI_CreateWindow(int nr, int x)
     SDL_WidgetProperties(SET_FONT,DigitsFont);
     SDL_WidgetProperties(SET_FG_COLOR,0xf0f0f0);
 
-    /* Create the artist/title label */
+    /* Create the artist label */
     UI_Players[nr].Artist=SDL_WidgetCreate(SDL_LABEL,x+9,120,244,14);
+    SDL_WidgetProperties(SET_FONT,LargeBoldFont);
+    SDL_WidgetProperties(SET_FG_COLOR,0xfffff7);
+
+    /* Create the title label */
+    UI_Players[nr].Title=SDL_WidgetCreate(SDL_LABEL,x+9,136,244,14);
     SDL_WidgetProperties(SET_FONT,LargeBoldFont);
     SDL_WidgetProperties(SET_FG_COLOR,0xfffff7);
 
@@ -112,15 +118,22 @@ void PLAYERUI_CreateWindow(int nr, int x)
 
 void UI_PlayerSetArtistTitle(int player)
 {
-    char label[255];
+    char artist[255];
+    char title[255];
 
-    memset(label,0,255);
+    memset(artist,0,255);
+    memset(title,0,255);
 
     /* Get and set the artist information */
-    player_get_songfield(player,label);
-
+    if(!PLAYER_GetArtist(player,artist) || !PLAYER_GetTitle(player,title))
+    {
+        PLAYER_GetFilename(player,artist);
+    }
     if(UI_Players[player].Artist)
-        SDL_WidgetPropertiesOf(UI_Players[player].Artist,SET_CAPTION,label);
+        SDL_WidgetPropertiesOf(UI_Players[player].Artist,SET_CAPTION,artist);
+    if(UI_Players[player].Title)
+        SDL_WidgetPropertiesOf(UI_Players[player].Title,SET_CAPTION,title);
+
 }
 
 /* 
@@ -225,17 +238,14 @@ void UI_PlayerUpdateTimeLabel(void *data)
 }
 
 
-void UI_PlayerPlayButtonPressed(void *data)
+void playerui_PlayButton(void *data)
 {
-    PlayerDisplay *john;
-
-    john=data;
-
+    PlayerDisplay *current=(PlayerDisplay*)data;
     
-    if(PLAYER_IsPlaying(john->PlayerNr))
-        PLAYER_Pause (john->PlayerNr);
+    if(PLAYER_IsPlaying(current->PlayerNr))
+        PLAYER_Pause (current->PlayerNr);
     else
-        PLAYER_Play  (john->PlayerNr);
+        PLAYER_Play  (current->PlayerNr);
     
 }
 

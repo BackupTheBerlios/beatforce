@@ -154,108 +154,37 @@ mixer_dB (int ch, float dB)
     return output_set_volume (ch, dB);
 }
 
-int mixer_set_main_volume(float dB)
-{
-    return output_set_main_volume(dB);
-}
-
-int
-mixer_BeatCount (int ch, int on)
-{
-//    printf("mixer_Beatcount %d\n",on);
-    return output_set_beatcount (ch, on);
-}
-
-int
-mixer_set_AutoFade_button (int on)
-{
-    int i;
-    int playing = -1;
-    struct PlayerPrivate *p;
-
-
-    cfader->autofade = on;
-
-    if (on)
-    {
-        for (i = 0; i < 2; i++)
-        {
-            p = object_get_data(i);
-
-            if (p->play && playing >= 0)
-            {
-                /* stop all players */
-                PLAYER_Pause (p->ch_id);
-                PLAYER_Pause (playing );
-
-                playing = -1;
-            }
-
-            if (p->play)
-                playing = i;
-        }
-
-        curr_playing = playing;
-
-    }
-    else
-        curr_playing = -1;
-
-    if (curr_playing >= 0 && curr_playing <= 1)
-    {
-        MIXER_SetFaderValue ((double) curr_playing);
-    }
-    return 0;
-}
-
-
 int MIXER_DoFade(int autofade, int instant)
 {
     void *win =NULL;
     int from = -1;
     int to   = -1;
-    struct PlayerPrivate *p;
     
-    if (win == NULL)
+    if (PLAYER_IsPlaying (0))
+        from = 0;
+    
+    if (PLAYER_IsPlaying (1))
     {
-        if (PLAYER_IsPlaying (0))
-            from = 0;
-
-        if (PLAYER_IsPlaying (1))
+        if (from != -1)
         {
-            if (from != -1)
-            {
-                LOG("autofade: 2 players are playing, can't decide which to fade");
-                return -1;
-            }
-            from = 1;
-        }
-
-        if (from == -1)
-        {
-            LOG("autofade: no player playing!");
+            LOG("autofade: 2 players are playing, can't decide which to fade");
             return -1;
         }
+        from = 1;
     }
-    else
+    
+    if (from == -1)
     {
-        p = object_get_data(0);//TODO PLAYER_PRIVATE (win);
-
-        if (!PLAYER_IsPlaying (p->ch_id))
-        {
-            printf ("do_autofade called with player not playing!\n");
-            return -2;
-        }
-        from = p->ch_id;
+        LOG("autofade: no player playing!");
+        return -1;
     }
-
+    
     if (from == 1)
         to = 0;
     else
         to = 1;
-
+    
     cfader->to_player = to;
-
     cfader->from_player = from;
 
     if (instant)
