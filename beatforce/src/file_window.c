@@ -84,30 +84,22 @@ static void FILEWINDOW_GetFilesInSubgroup(int row,int column,char *string);
 
 static void FILEWINDOW_GetSelectedSubgroup(struct SongDBSubgroup **sel_sg);
 
-Window gFILEWINDOW={ FILEWINDOW_EventHandler , FILEWINDOW_NotifyHandler };
-
-
-
-SDL_Surface *FileWindow;
+Window gFILEWINDOW={ FILEWINDOW_EventHandler , FILEWINDOW_NotifyHandler, NULL, NULL };
 
 
 void FILEWINDOW_Init()
 {
-    FileWindow = NULL;
+    gFILEWINDOW.Surface = NULL;
     subgroupsongs = NULL;
 }
 
 void FILEWINDOW_Open()
 {
-    if(FileWindow == NULL)
+    if(gFILEWINDOW.Surface == NULL)
     {
         SDL_WidgetLOCK();
-        FileWindow=Window_CreateFileWindow();
+        gFILEWINDOW.Surface=Window_CreateFileWindow();
         SDL_WidgetUNLOCK();
-    }
-    else
-    {
-        SDL_WidgetUseSurface(FileWindow);
     }
     SDL_WidgetPropertiesOf(TableSubgroup,ROWS, SONGDB_GetSubgroupCount());
     WNDMGR_Open(&gFILEWINDOW);

@@ -52,27 +52,23 @@ void searchwindow_Play(void *data);
 void songdb_searchstring(long row,int column,char *dest);
 int SEARCHWINDOW_EventHandler(SDL_Event event);
 
-Window SEARCHWINDOW={ SEARCHWINDOW_EventHandler , NULL};
-SDL_Surface *SearchWindow;
+Window SEARCHWINDOW={ SEARCHWINDOW_EventHandler , NULL, NULL,NULL};
+
 
 void SEARCHWINDOW_Init()
 {
-    SearchWindow = NULL;
+
 }
 
 void SEARCHWINDOW_Open()
 {
-    if(SearchWindow == NULL)
+    if(SEARCHWINDOW.Surface == NULL)
     {
         SDL_WidgetLOCK();
         SONGDB_FindEntry("");
-        SearchWindow=SEARCHWINDOW_Create();
+        SEARCHWINDOW.Surface=SEARCHWINDOW_Create();
 
         SDL_WidgetUNLOCK();
-    }
-    else
-    {
-        SDL_WidgetUseSurface(SearchWindow);
     }
     WNDMGR_Open(&SEARCHWINDOW);                
 }

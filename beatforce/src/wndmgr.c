@@ -48,6 +48,7 @@ SDL_Surface *screen;
 Window *CurWindow;
 int WNDMGR_Running;
 
+WindowList *WindowManager;
 
 
 int gEventsAllowed;
@@ -59,7 +60,24 @@ int WNDMGR_Redraw(void *data);
 
 void WNDMGR_CloseWindow()
 {
-    MAINWINDOW_Open(); /* Always go back to main window */
+    WindowList *l;
+
+    l=WindowManager;
+
+    if(l->Next)
+    {
+        CurWindow=l->Window;
+        free(l->Next);
+        l->Next=NULL;
+    }
+    else
+    {
+        free(WindowManager);
+        WindowManager=NULL;
+        CurWindow=NULL;
+    }
+    if(CurWindow && CurWindow->Surface)
+        SDL_WidgetUseSurface(CurWindow->Surface);
 }
 
 void WNDMGR_Init()
@@ -104,13 +122,37 @@ void WNDMGR_Init()
     }
 
     SDL_WM_SetCaption("Beatforce",NULL);
-    windowswitch=0;
-    CurWindow=NULL;
+
+    /* Initialize global variables */
+    CurWindow       = NULL;
+    WindowManager   = NULL;
+
+    windowswitch    = 0;
 }
 
 void WNDMGR_Open(Window *window)
 {
+    WindowList *l;
+
+    if(WindowManager == NULL)
+    {
+        WindowManager = malloc(sizeof(WindowList));
+        memset(WindowManager,0,sizeof(WindowList));
+        WindowManager->Window=window;
+    }
+    else
+    {
+        l=WindowManager;
+        while(l->Next)
+            l=l->Next;
+     
+        l->Next=malloc(sizeof(WindowList));
+        memset(l->Next,0,sizeof(WindowList));
+        
+        l->Next->Window=window;
+    }
     CurWindow=window;
+    SDL_WidgetUseSurface(CurWindow->Surface);
     windowswitch=1;
 }
 
@@ -131,13 +173,18 @@ int WNDMGR_Main()
         while(SDL_PollEvent(&test_event)) 
         {
             if(gEventsAllowed)
-                CurWindow->EventHandler(test_event);
+            {
+                if(CurWindow)
+                    CurWindow->EventHandler(test_event);
+                else
+                    WNDMGR_Running=0;
+            }
 
             switch(test_event.type) 
             {
                case SDL_QUIT:
-                WNDMGR_Running=0;
-                break;
+                   WNDMGR_Running=0;
+                   break;
             default:
                 break;
             }
@@ -153,18 +200,22 @@ int WNDMGR_Main()
     return 1;
 }
 
-void WNDMGR_Exit()
-{
-    WNDMGR_Running=0;
-}
-
 int WNDMGR_Redraw(void *data)
 {
-    if(CurWindow->NotifyRedraw)
-        CurWindow->NotifyRedraw(CurWindow);
+    if(CurWindow)
+    {
+        if(CurWindow->NotifyRedraw)
+            CurWindow->NotifyRedraw(CurWindow);
 
-    SDL_DrawAllWidgets(screen);
-    return 60; //redraw every 50ms 
+        SDL_DrawAllWidgets(screen);
+        return 60; //redraw every 50ms 
+    }
+    else
+    {
+        /* WindowManager is finished, no windows to draw */
+        return 0; 
+    }
+
 }
 
 /* disable sending events to the event handler of the current window

@@ -27,6 +27,7 @@ typedef struct Window
 {
     int (*EventHandler)(SDL_Event event);
     int (*NotifyRedraw)();
+
     SDL_Surface *Surface;
     void *TransferData;
 }Window;
@@ -35,7 +36,6 @@ void WNDMGR_Init();
 void WNDMGR_Open(Window *window);
 int  WNDMGR_Main();
 void WNDMGR_CloseWindow();
-void WNDMGR_Exit();
 
 void WNDMGR_DisableEventhandler();
 void WNDMGR_EnableEventhandler();

@@ -75,7 +75,6 @@ void MAINWINDOW_Open()
         MAINWINDOW.Surface=MAINWINDOW_CreateWindow(widgets);
         MAINWINDOW.TransferData=widgets;
     }
-    SDL_WidgetUseSurface(MAINWINDOW.Surface);
     WNDMGR_Open(&MAINWINDOW);
 }
 
@@ -169,7 +168,7 @@ int MAINWINDOW_KeyHandler(unsigned int key)
     switch(key)
     {
     case BF_QUIT:
-        WNDMGR_Exit();
+        WNDMGR_CloseWindow();
         break;
         
     case BF_SEARCH:
