@@ -98,6 +98,7 @@ typedef enum E_Widget_Event
     SDL_CHANGED
 }E_Widget_Event;
 
+
 /*
  * Widgets implemented
  */
@@ -114,6 +115,13 @@ typedef enum E_Widget_Type
     SDL_VOLUMEBAR,
     SDL_PROGRESSBAR,
 }E_Widget_Type;
+
+typedef struct SDL_Widget
+{
+    SDL_Rect Rect;
+    char changed;
+    void *widgetdata;
+}SDL_Widget;
 
 /**
  *  Converter function pointer types
@@ -168,6 +176,9 @@ static const struct S_Widget_FunctionList * const WidgetTable[] =
     &SDL_ProgressBar_FunctionList  //SDL_PROGRESSBAR
 };
 
+
+
+
 int SDL_WidgetInit();
 int   SDL_WidgetUseSurface(SDL_Surface *surface);
 SDL_Surface *SDL_WidgetGetActiveSurface();
@@ -183,7 +194,7 @@ int   SDL_DrawAllWidgets(SDL_Surface *screen);
 int   SDL_WidgetEventCallback(void *function,E_Widget_Event event);
 void  SDL_WidgetEvent(SDL_Event *event);
 int   SDL_WidgetIsInside(SDL_Rect *rect,int x, int y);
-int   SDL_WidgetHasFocus(void *widget);
+int   SDL_WidgetHasFocus(void *widgetdata);
 int   SDL_WidgetLoseFocus();
 
 int SDL_WidgetNeedsRedraw();

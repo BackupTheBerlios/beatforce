@@ -48,10 +48,13 @@ void *timewidget;
 BFList *dirs;
 BFList *songs;
 BFList *localsongs;
-BFList *files;
+BFList *files; /* a list with all files in the directory `directory[255]` */
 BFList *files2;
-
 BFList *subgroupsongs;
+BFList *SubDirs;
+
+BFList *TableDirs; /* list of directories in directory[255] */
+
 int change;
 
 char directory[255];
@@ -159,7 +162,7 @@ static void FILEWINDOW_RemoveSubgroup(void *data)
     if(row)
     {
         count=row[0];
-        list=SONGDB_GetSubgroup();
+        list=SONGDB_GetSubgroupList();
         while(list && count >= 0)
         {
             if(count==0)
@@ -186,7 +189,7 @@ static void FILEWINDOW_GetSelectedSubgroup(struct SongDBSubgroup **sel_sg)
         SDL_WidgetPropertiesOf(TableSubgroup,GET_SELECTED,&lSubgroup,NULL);
         if(lSubgroup)
         {
-            sg=SONGDB_GetSubgroup();
+            sg=SONGDB_GetSubgroupList();
             count=lSubgroup[0];
             while(count)
             {
@@ -285,7 +288,7 @@ int GetDir(int count,char *string)
    
     }
     if(count < 20 && word[count])
-        sprintf(string,"/%s",word[count]);
+        sprintf(string,"%s",word[count]);
 
     free(dircopy);
     return nw;
@@ -297,12 +300,11 @@ int GetSubDir(int count,char *string)
     BFList *dirss;
     char *t;
     int c;
-    int p;
+    int entrycount;
 
-    dirss=OSA_FindDirectories(directory);    
+    dirss=TableDirs;
 
-    p=LLIST_NoOfEntries(dirss);
-//    printf("directory %s %d\n",directory,p);
+    entrycount=LLIST_NoOfEntries(dirss);
     c=count;
     while(dirss)
     {
@@ -321,36 +323,39 @@ int GetSubDir(int count,char *string)
     {
         t=strrchr((char*)dirss->data,'/');
         t++;
-        sprintf(string,"/%s",t);
+        if(string)
+            sprintf(string,"/%s",t);
     }
     else
     {
         return 0;
     }
-    return p;
+    return entrycount;
 }
 
+/*
+ * Table callback for directories */
 static void FILEWINDOW_GetDirectories(int row,int column,char *string)
 {
     char dir[255];
-    int nw=0;
+    int wordcount=0; /* directory level */
     int count=0;
 
     memset(dir,0,255);
-    nw = GetDir(row,dir);
+    wordcount = GetDir(row,dir);
 
-    if(row < nw)
+    if(row < wordcount)
     {
         memset(string,' ',10);
         sprintf(string+row,"%s",dir);
     }
     else
     {
-        count = GetSubDir(row-nw,dir);
+        count = GetSubDir(row-wordcount,dir);
         if(count)
         {
             memset(string,' ',10);
-            sprintf(string+(row-(row-nw)),"%s",dir);
+            sprintf(string+(row-(row-wordcount)),"%s",dir);
         }
         
     }
@@ -363,7 +368,8 @@ static void FILEWINDOW_GetDirectories(int row,int column,char *string)
 void FILEWINDOW_GetSubgroup(int row,int column,char *string)
 {
     struct SongDBSubgroup *list;
-    list=SONGDB_GetSubgroup();
+    
+    list=SONGDB_GetSubgroupList();
     while(list && row >= 0)
     {
         if(row==0)
@@ -418,7 +424,7 @@ static void FILEWINDOW_DirectoryClicked(void *data)
 
 //    printf("str %s %d\n",str,__LINE__);
     nw=GetDir(0,str);
-//    printf("new %d\n",nw);
+
     if(c == 0)
     {
         if(!strcmp(directory,"/"))
@@ -445,7 +451,8 @@ static void FILEWINDOW_DirectoryClicked(void *data)
 //            printf("newdir %s\n",newdir);
         }
         nw2=GetSubDir(c-nw,str);
-        sprintf(directory,"%s%s",newdir,str);
+        if(strlen(str))
+            sprintf(directory,"%s%s",newdir,str);
 //        printf("directory %s\n",directory);
 //        printf("nw2 %d\n",nw2);
     }
@@ -454,8 +461,8 @@ static void FILEWINDOW_DirectoryClicked(void *data)
     
     files=LLIST_Combine(files,files2);
 
-    SDL_WidgetPropertiesOf(t,ROWS,LLIST_NoOfEntries(OSA_FindDirectories(directory)));
-
+    TableDirs=OSA_FindDirectories(directory);
+    SDL_WidgetPropertiesOf(t,ROWS,LLIST_NoOfEntries(TableDirs));
     /* Correct the rowcount for the files in directory table (for scrollbar) */
     SDL_WidgetPropertiesOf(TableFilesInDirectory,ROWS,LLIST_NoOfEntries(files));
     
@@ -651,9 +658,7 @@ SDL_Surface *Window_CreateFileWindow()
         case CONTENTS_DIRECTORIES:
             TableDirectories=SDL_WidgetCreateR(SDL_TABLE,Table->Rect);
             SDL_WidgetProperties(SET_VISIBLE_COLUMNS, 1);
-            SDL_WidgetProperties(SET_VISIBLE_ROWS, 190);
             SDL_WidgetProperties(COLUMN_WIDTH,1,Table->Rect.w);
-            SDL_WidgetPropertiesOf(TableDirectories,ROWS,19);
             SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
             SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION,FILEWINDOW_GetDirectories);
             SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
@@ -668,8 +673,13 @@ SDL_Surface *Window_CreateFileWindow()
     timewidget=CLOCK_Create(fw->Clock);
     
     sprintf(directory,"/");
+    
     files=OSA_FindFiles(directory,".mp3",0);
+    TableDirs=NULL;
 
+    TableDirs=OSA_FindDirectories(directory);
+    if(TableDirectories)
+        SDL_WidgetPropertiesOf(TableDirectories,ROWS,LLIST_NoOfEntries(TableDirs));
     return FileWindow;
 
 }

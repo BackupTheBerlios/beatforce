@@ -1,9 +1,8 @@
 /*
    BeatForce
    configfile.c  - config & config file stuff
-
-   Thanks to the people from XMMS (xmms.org) from which this code was taken.
-	   (Peter Alm, Mikael Alm, Olle Hallnas, Thomas Nilsson and 4Front Technologies)
+   
+   Copyright (C) 2004 John Beuving (john.beuving@home.nl)
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public Licensse as published by
@@ -28,427 +27,147 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include <libxml/xmlmemory.h>
+#include <libxml/parser.h>
+#include <libxml/tree.h>
+
 #include "osa.h"
 #include "configfile.h"
 
-#ifndef TRUE
-#define TRUE 1
-#endif
-
-#ifndef FALSE
-#define FALSE 0
-#endif
-
-static ConfigSection *bf_cfg_create_section (ConfigFile * cfg, char * name);
-static ConfigLine *bf_cfg_create_string (ConfigSection * section, char * key,
-					 char * value);
-static ConfigSection *bf_cfg_find_section (ConfigFile * cfg, char * name);
-static ConfigLine *bf_cfg_find_string (ConfigSection * section, char * key);
-
+static BeatforceConfig *gBeatforceConfig;
 
 AudioConfig *
-bf_cfg_read_AudioConfig (ConfigFile * cfgfile)
+CONFIGFILE_ReadAudioConfig (BeatforceConfig *cfgfile)
 {
-    AudioConfig *cfg;
-    char sect[] = "Audio";
-    int i;
-
-    cfg = malloc   (sizeof (AudioConfig));
-    memset (cfg, 0, sizeof (AudioConfig));
-
-/* Input */
-    if (!CONFIGFILE_ReadInt(cfgfile, sect, "RingBufferSize", &cfg->RingBufferSize))
-        cfg->RingBufferSize = 5;
-    if (!CONFIGFILE_ReadInt (cfgfile, sect, "FragmentSize", &cfg->FragmentSize))
-        cfg->FragmentSize = 832;
-
-
-/* Output */
-    if (!CONFIGFILE_ReadInt (cfgfile, sect, "LowWatermark", &cfg->LowWatermark))
-        cfg->LowWatermark = 3;
-
-    if (!CONFIGFILE_ReadInt (cfgfile, sect, "HighWatermark", &cfg->HighWatermark))
-        cfg->HighWatermark = 10;
-
-/* FFTW */
-    if (!CONFIGFILE_ReadInt (cfgfile, sect, "FFTW_Policy", &cfg->FFTW_Policy))
-        cfg->FFTW_Policy = 0;	/* estimate */
-
-    if (!bf_cfg_read_boolean
-        (cfgfile, sect, "FFTW_UseWisdom", &cfg->FFTW_UseWisdom))
-        cfg->FFTW_UseWisdom = FALSE;
-
-
-    for (i = 0; i <= 2; i++)
+    if(cfgfile->Audio == NULL)
     {
-        char groupname[12];
-        char name[32];
-
-        switch (i)
-        {
-        case 0:
-            sprintf (groupname, "MASTER");
-            break;
-        case 1:
-            sprintf (groupname, "GroupA");
-            break;
-        case 2:
-            sprintf (groupname, "GroupB");
-            break;
-        default:
-            break;
-        }
-
-        if(i==0)
-        {
-            sprintf (name, "Output_%s", groupname);
-            if (!bf_cfg_read_string (cfgfile, sect, name, &cfg->output_id[i]))
-                cfg->output_id[i] = "oss";
-        
-            sprintf (name, "Device_%s", groupname);
-            if (!bf_cfg_read_string (cfgfile, sect, name, &cfg->device_id[i]))
-                cfg->device_id[i] = "/dev/dsp";
-        }
-        else
-        {
-            sprintf (name, "Output_%s", groupname);
-            if (!bf_cfg_read_string (cfgfile, sect, name, &cfg->output_id[i]))
-                cfg->output_id[i] = "none";
-            
-            sprintf (name, "Device_%s", groupname);
-            if (!bf_cfg_read_string (cfgfile, sect, name, &cfg->device_id[i]))
-                cfg->device_id[i] = "none";
-
-        }
+        cfgfile->Audio=malloc(sizeof(AudioConfig));
+        memset(cfgfile->Audio,0,sizeof(AudioConfig));
+        cfgfile->Audio->RingBufferSize=5;
+        cfgfile->Audio->FragmentSize = 832;
+        cfgfile->Audio->LowWatermark = 3;
+        cfgfile->Audio->HighWatermark = 10;
+        cfgfile->Audio->FFTW_Policy = 0;	/* estimate */
+        cfgfile->Audio->FFTW_UseWisdom = 0;
+        cfgfile->Audio->output_id[0]="oss";
+        cfgfile->Audio->device_id[0]="/dev/dsp";
+        cfgfile->Audio->output_id[1]="none";
+        cfgfile->Audio->device_id[1]="none";
+        cfgfile->Audio->output_id[2]="none";
+        cfgfile->Audio->device_id[2]="none";
     }
+    
+    return cfgfile->Audio;
+}
 
+
+BeatforceConfig*
+CONFIGFILE_New (void)
+{
+    BeatforceConfig *cfg;
+    cfg = malloc (sizeof (BeatforceConfig));
+    memset(cfg, 0 ,sizeof(BeatforceConfig));
     return cfg;
 }
 
-SongDBConfig *
-bf_cfg_read_SongDBConfig (ConfigFile * cfgfile)
+AudioConfig *CONFIGFILE_GetCurrentAudioConfig()
 {
-    SongDBConfig *cfg;
-    char sect[] = "SongDB";
-    int i;
-    char string[255];
+    if(gBeatforceConfig && gBeatforceConfig->Audio)
+        return gBeatforceConfig->Audio;
+    return NULL;
+}
 
-    cfg = malloc (sizeof (SongDBConfig));
-    memset (cfg, 0, sizeof (SongDBConfig));
-    
+BeatforceConfig *
+CONFIGFILE_OpenFile(char * filename)
+{
+    BeatforceConfig *cfg;
+
+    xmlDocPtr doc = NULL;       /* document pointer */
+    xmlNodePtr cur = NULL;
+    cfg=NULL;
+
+    LIBXML_TEST_VERSION;
+    xmlKeepBlanksDefault(0);
    
-    if(!CONFIGFILE_ReadInt(cfgfile, sect, "Tabs", &cfg->Tabs))
-    {
-        cfg->Tabs = 1;
-    }
-
-    cfg->TabTitle  = malloc(cfg->Tabs * sizeof(char*));
-    cfg->TabString = malloc(cfg->Tabs * sizeof(char*));
-
-    for(i=0;i<cfg->Tabs;i++)
-    {
-        sprintf(string,"TabTitle%d",i);
-        if(!bf_cfg_read_string(cfgfile, sect,string, &cfg->TabTitle[i]))
-        {
-            cfg->TabTitle[0]=(char*)malloc(255*sizeof(char));
-            sprintf(cfg->TabTitle[i],"Beatforce");
-        }
-        sprintf(string,"TabString%d",i);
-        if(!bf_cfg_read_string(cfgfile, sect,string, &cfg->TabString[i]))
-        {
-            cfg->TabString[i]=(char*)malloc(255*sizeof(char));
-            memset(cfg->TabString[0],0,255);
-        }
-    }
-
-    if (!bf_cfg_read_string(cfgfile, sect, "Database_File", &cfg->database_file))
-    {
-        cfg->database_file = (char*)malloc(255);
-        sprintf(cfg->database_file,"%s%s",OSA_GetConfigDir(),"database");    
-    }
-
-    if (!bf_cfg_read_boolean (cfgfile, sect, "DB_Autoload", &cfg->db_autoload))
-        cfg->db_autoload = TRUE;
-
-    if (!bf_cfg_read_boolean (cfgfile, sect, "DB_Autosave", &cfg->db_autosave))
-        cfg->db_autosave = TRUE;
-
-    if (!bf_cfg_read_boolean (cfgfile, sect, "DB_Compress", &cfg->db_compress))
-        cfg->db_compress = FALSE;
-
-    bf_cfg_read_PositionConfig (cfgfile, sect, &cfg->pos);
-
-    return cfg;
-}
-
-
-PositionConfig *
-bf_cfg_read_PositionConfig (ConfigFile * cfgfile, char *sect,
-			    PositionConfig * pos)
-{
-
-    if (!CONFIGFILE_ReadInt (cfgfile, sect, "PositionX", &pos->x))
-        pos->x = -1;
-
-    if (!CONFIGFILE_ReadInt (cfgfile, sect, "PositionY", &pos->y))
-        pos->y = -1;
-
-    if (!CONFIGFILE_ReadInt (cfgfile, sect, "Width", &pos->width))
-        pos->width = -1;
-
-    if (!CONFIGFILE_ReadInt (cfgfile, sect, "Height", &pos->height))
-        pos->height = -1;
-
-    if (!CONFIGFILE_ReadInt (cfgfile, sect, "Show", &pos->show))
-        pos->show = 0;
-
-    return pos;
-}
-
-PlayerConfig *
-bf_cfg_read_PlayerConfig (ConfigFile * cfgfile, int nr)
-{
-    PlayerConfig *cfg;
-    char sect[16];
-
-    cfg = malloc (sizeof (PlayerConfig));
-    memset (cfg, 0, sizeof (PlayerConfig));
-
-    sprintf (sect, "Player%d", nr);
-
-    if (!bf_cfg_read_boolean
-        (cfgfile, sect, "RemoveAfterPlay", &cfg->RemoveAfterPlay))
-        cfg->RemoveAfterPlay = FALSE;
-
-    bf_cfg_read_PositionConfig (cfgfile, sect, &cfg->pos);
-
-    return cfg;
-}
-
-SamplerConfig *
-bf_cfg_read_SamplerConfig (ConfigFile * cfgfile)
-{
-    SamplerConfig *cfg;
-    char sect[] = "Sampler";
-
-    cfg = malloc (sizeof (SamplerConfig));
-    memset (cfg, 0, sizeof (SamplerConfig));
-
-    bf_cfg_read_PositionConfig (cfgfile, sect, &cfg->pos);
-
-    return cfg;
-}
-
-
-MixerConfig *
-bf_cfg_read_MixerConfig (ConfigFile * cfgfile)
-{
-    MixerConfig *cfg;
-    char sect[] = "Mixer";
-
-    cfg = malloc (sizeof (MixerConfig));
-    memset (cfg, 0, sizeof (MixerConfig));
-
-    if (!bf_cfg_read_boolean
-        (cfgfile, sect, "TForwAfterFadeNow", &cfg->TForwAfterFadeNow))
-        cfg->TForwAfterFadeNow = TRUE;
-
-    bf_cfg_read_PositionConfig (cfgfile, sect, &cfg->pos);
-
-    return cfg;
-}
-
-
-int
-bf_cfg_write_AudioConfig (ConfigFile * cfgfile, AudioConfig * cfg)
-{
-    char sect[] = "Audio";
-    int i;
-
-    bf_cfg_write_int (cfgfile, sect, "RingBufferSize", cfg->RingBufferSize);
-    bf_cfg_write_int (cfgfile, sect, "FragmentSize"  , cfg->FragmentSize);
-
-    bf_cfg_write_int (cfgfile, sect, "LowWatermark"  , cfg->LowWatermark);
-    bf_cfg_write_int (cfgfile, sect, "HighWatermark" , cfg->HighWatermark);
-
-    bf_cfg_write_int (cfgfile, sect, "FFTW_Policy"   , cfg->FFTW_Policy);
-    bf_cfg_write_boolean (cfgfile, sect, "FFTW_UseWisdom", cfg->FFTW_UseWisdom);
-
-    for (i = 0; i < 3; i++)
-    {
-        char groupname[12];
-        char name[32];
-
-        switch (i)
-        {
-        case 0:
-            sprintf (groupname, "MASTER");
-            break;
-        case 1:
-            sprintf (groupname, "GroupA");
-            break;
-        case 2:
-            sprintf (groupname, "GroupB");
-            break;
-        default:
-            break;
-        }
-
-        sprintf (name, "Output_%s", groupname);
-        bf_cfg_write_string (cfgfile, sect, name, cfg->output_id[i]);
-
-        sprintf (name, "Device_%s", groupname);
-        bf_cfg_write_string (cfgfile, sect, name, cfg->device_id[i]);
-
-    }
-
-    return 0;
-}
-
-int
-bf_cfg_write_SongDBConfig (ConfigFile * cfgfile, SongDBConfig * cfg)
-{
-    char sect[] = "SongDB";
-    int i;
-    char string[255];
-
-    bf_cfg_write_int     (cfgfile, sect, "Tabs",cfg->Tabs);
-    for(i=0;i<cfg->Tabs;i++)
-    {
-        sprintf(string,"TabTitle%d",i);
-        bf_cfg_write_string  (cfgfile, sect, string , cfg->TabTitle[i]);
-        sprintf(string,"TabString%d",i);
-        bf_cfg_write_string  (cfgfile, sect, string, cfg->TabString[i]);
-    }
-    bf_cfg_write_string  (cfgfile, sect, "Database_File", cfg->database_file);
-    bf_cfg_write_boolean (cfgfile, sect, "DB_Autoload"  , cfg->db_autoload);
-    bf_cfg_write_boolean (cfgfile, sect, "DB_Autosave"  , cfg->db_autosave);
-    bf_cfg_write_boolean (cfgfile, sect, "DB_Compress"  , cfg->db_compress);
-    return 0;
-}
-
-
-int
-bf_cfg_write_PlayerConfig (ConfigFile * cfgfile, PlayerConfig * cfg, int nr)
-{
-    char sect[16];
-
-    sprintf (sect, "Player%d", nr);
-
-    bf_cfg_write_boolean (cfgfile, sect, "RemoveAfterPlay",
-                          cfg->RemoveAfterPlay);
-    return 0;
-}
-
-
-
-int
-bf_cfg_write_MixerConfig (ConfigFile * cfgfile, MixerConfig * cfg)
-{
-    char sect[] = "Mixer";
-
-    bf_cfg_write_boolean (cfgfile, sect, "TForwAfterFadeNow",
-                          cfg->TForwAfterFadeNow);
-
-    return 0;
-}
-
-
-
-
-
-
-ConfigFile *
-bf_cfg_new (void)
-{
-    ConfigFile *cfg;
-
-    cfg = malloc (sizeof (ConfigFile));
-    memset(cfg, 0 ,sizeof(ConfigFile));
-    return cfg;
-}
-
-ConfigFile *
-bf_cfg_open_file (char * filename)
-{
-    ConfigFile *cfg;
-
-    FILE *file;
-    char *buffer, *tmp;
-    char *line,*tmpbuffer;
-    char *endline;
-    long filesize;
-    
-    ConfigSection *section = NULL;
-
-    if (!(file = fopen (filename, "rb")))
+    /*
+     * build an XML tree from a the file;
+     */
+    doc = xmlParseFile(filename);
+    if (doc == NULL) 
         return NULL;
-    
-    /* Determine the filesize */
-    if (fseek(file,0,SEEK_END))
-        return NULL;
-    filesize=ftell(file);
-    if (fseek(file,0,SEEK_SET))
-        return NULL;
-    
-    buffer = malloc (filesize + 1);
-    if (fread (buffer, 1, filesize, file) != filesize)
+
+    cur = xmlDocGetRootElement(doc);
+    if (cur == NULL) 
     {
-        free (buffer);
-        fclose (file);
-        return NULL;
+        fprintf(stderr,"empty document\n");
+        xmlFreeDoc(doc);
+        return 0;
     }
-    fclose (file);
-    buffer[filesize] = '\0';
-    cfg = malloc(sizeof (ConfigFile));
-    memset(cfg,0,sizeof (ConfigFile));
-
-    tmpbuffer=buffer;
-
-    while((endline = strchr(buffer,'\n')))
+        
+    /* CHeck the root node */
+    if (xmlStrcmp(cur->name, (const xmlChar *) "Beatforce")) 
     {
-        line    = buffer;
-        buffer  = endline + 1;
-        *endline = '\0';
-        if(line[0] == '[')
+        fprintf(stderr,"document of the wrong type, root node != Helping");
+        xmlFreeDoc(doc);
+        return 0;
+    }
+
+    cfg=malloc(sizeof(BeatforceConfig));
+    memset(cfg,0,sizeof(BeatforceConfig));
+
+    cur = cur->xmlChildrenNode;
+    while (cur != NULL) 
+    {
+        if((!xmlStrcmp(cur->name, (const xmlChar *)"Audio"))) 
         {
-            if ((tmp = strchr (line, ']')))
+            if(cfg->Audio == NULL)
             {
-                *tmp = '\0';
-                section = bf_cfg_create_section (cfg, line+1);
+                cfg->Audio=malloc(sizeof(AudioConfig));
+                memset(cfg->Audio,0,sizeof(AudioConfig));
+            }
+            cur = cur->xmlChildrenNode;
+            while(cur != NULL)
+            {
+                if(!xmlStrcmp(cur->name,"RingBufferSize"))
+                    cfg->Audio->RingBufferSize=atoi(xmlNodeListGetString(doc,cur->xmlChildrenNode,1));
+                if(!xmlStrcmp(cur->name,"FragmentSize"))
+                    cfg->Audio->FragmentSize=atoi(xmlNodeListGetString(doc,cur->xmlChildrenNode,1));
+                if(!xmlStrcmp(cur->name,"LowWatermark"))
+                    cfg->Audio->LowWatermark=atoi(xmlNodeListGetString(doc,cur->xmlChildrenNode,1));
+                if(!xmlStrcmp(cur->name,"HighWatermark"))
+                    cfg->Audio->HighWatermark=atoi(xmlNodeListGetString(doc,cur->xmlChildrenNode,1));
+                if(!xmlStrcmp(cur->name,"MasterOutput"))
+                    cfg->Audio->output_id[0]=xmlNodeListGetString(doc,cur->xmlChildrenNode,1);
+                if(!xmlStrcmp(cur->name,"MasterDevice"))
+                    cfg->Audio->device_id[0]=xmlNodeListGetString(doc,cur->xmlChildrenNode,1);
+
+                
+                if(cur)
+                    cur=cur->next;
             }
         }
-        else if (line[0] != '#' && section)
-        {
-            if ((tmp = strchr (line, '=')))
-            {
-                *tmp = '\0';
-                tmp++;
-                bf_cfg_create_string (section, line, tmp);
-            }
-        }
+        if(cur)
+            cur=cur->next;
     }
-    
-    buffer=tmpbuffer;
-    free (buffer);
+    xmlCleanupParser();
+
     return cfg;
 }
 
 char *
-bf_cfg_get_default_filename (void)
+CONFIGFILE_GetDefaultFilename (void)
 {
     static char *filename = NULL;
     if (!filename)
     {
         filename = malloc(255);
-        sprintf(filename,"%s%s",OSA_GetConfigDir(),"config");
+        sprintf(filename,"%s%s",OSA_GetConfigDir(),"config.xml");
     }
     return filename;
 }
 
 
-int
-bf_cfg_create_dir (void)
+int CONFIGFILE_CreateDir (void)
 {
     char *dirname;
     dirname = strdup(OSA_GetConfigDir());
@@ -456,346 +175,136 @@ bf_cfg_create_dir (void)
         if (mkdir (dirname, 0755) != 0)
         {
             fprintf(stderr,"Couldn´t create directory %s.", dirname);
+            return 0;
         }
-        printf ("Created Directory %s .", dirname);
     }
     free (dirname);
-    return TRUE;
+    return 1;
 }
 
 
-ConfigFile *
-bf_cfg_create_default_file (void)
+BeatforceConfig *
+CONFIGFILE_CreateDefaultFile (void)
 {
-    ConfigFile *cfgfile;
+    BeatforceConfig *cfgfile;
 
-    cfgfile = bf_cfg_new ();
-    bf_cfg_create_dir ();
+    cfgfile = CONFIGFILE_New();
+    CONFIGFILE_CreateDir ();
+    CONFIGFILE_ReadAudioConfig(cfgfile);
+    
+//    CONFIGFILE_WriteAudioConfig(cfgfile, CONFIGFILE_ReadAudioConfig(cfgfile));
 
-
-    bf_cfg_write_AudioConfig   (cfgfile, bf_cfg_read_AudioConfig   (cfgfile));
-    bf_cfg_write_SongDBConfig  (cfgfile, bf_cfg_read_SongDBConfig  (cfgfile));
-    bf_cfg_write_PlayerConfig  (cfgfile, bf_cfg_read_PlayerConfig  (cfgfile, 0), 0);
-    bf_cfg_write_PlayerConfig  (cfgfile, bf_cfg_read_PlayerConfig  (cfgfile, 1), 1);
-    bf_cfg_write_MixerConfig   (cfgfile, bf_cfg_read_MixerConfig   (cfgfile));
-
-    if (!bf_cfg_write_default_file (cfgfile))
+    if (!CONFIGFILE_WriteDefaultFile (cfgfile))
     {
-        bf_cfg_free (cfgfile);
-        fprintf(stderr,"Couldn't write default config %s", bf_cfg_get_default_filename());
+        CONFIGFILE_Free (cfgfile);
+        fprintf(stderr,"Couldn't write default config %s", CONFIGFILE_GetDefaultFilename());
         return NULL;
     }
 
     return cfgfile;
 }
 
-ConfigFile *
-bf_cfg_open_default_file (void)
+void
+CONFIGFILE_OpenDefaultFile(void)
 {
-    ConfigFile *ret;
+    BeatforceConfig *ret;
     
-    ret = bf_cfg_open_file (bf_cfg_get_default_filename ());
+    ret = CONFIGFILE_OpenFile(CONFIGFILE_GetDefaultFilename());
 
     if (!ret)
-    {
-//        char str[255];
+        ret = CONFIGFILE_CreateDefaultFile();
 
-        /*sprintf("This seems to be your first start of BeatForce,\n"
-          "At least I could not find a config file in %s\n"
-                "Please edit your Preferences and choose your output.\n"
-                "Please restart BeatForce after this is done.\n"
-                " AND NOW: Have a lot of fun with BeatForce!\n",
-                bf_cfg_get_default_filename ());
-        bf_error_dialog (str);*/
-
-        ret = bf_cfg_create_default_file ();
-    }
-
-    return ret;
+    gBeatforceConfig=ret;
+    
 }
 
 int
-bf_cfg_write_file (ConfigFile * cfg, char * filename)
+CONFIGFILE_WriteFile (BeatforceConfig * cfg, char * filename)
 {
-    FILE *file;
-    BFList *section_list, *line_list;
-    ConfigSection *section;
-    ConfigLine *line;
+    xmlDocPtr doc = NULL;       /* document pointer */
+    xmlNodePtr root_node = NULL, node = NULL; /* node pointers */
+    xmlNodePtr audio;
+    char buff[256];
 
-    if (!(file = fopen (filename, "w")))
-        return FALSE;
 
-    section_list = cfg->sections;
-    while (section_list)
-    {
-        section = (ConfigSection *) section_list->data;
-        if (section->lines)
-        {
-            fprintf (file, "[%s]\n", section->name);
-            line_list = section->lines;
-            while (line_list)
-            {
-                line = (ConfigLine *) line_list->data;
-                fprintf(file, "%s=%s\n", line->key, line->value);
-                line_list = line_list->next;
-            }
-            fprintf (file, "\n");
-        }
-        section_list = section_list->next;
-    }
-    fclose (file);
-    return TRUE;
+    LIBXML_TEST_VERSION;
+
+    /* 
+     * Creates a new document, a node and set it as a root node
+     */
+    doc = xmlNewDoc(BAD_CAST "1.0");
+    root_node = xmlNewNode(NULL, BAD_CAST "Beatforce");
+    xmlDocSetRootElement(doc, root_node);
+
+    /* 
+     * xmlNewChild() creates a new node, which is "attached" as child node
+     * of root_node node. 
+     */
+    audio=xmlNewChild(root_node, NULL, BAD_CAST "Audio",NULL);
+
+    sprintf(buff,"%d",cfg->Audio->RingBufferSize);
+    node=xmlNewChild(audio,NULL,BAD_CAST "RingBufferSize",buff);
+
+    sprintf(buff,"%d",cfg->Audio->FragmentSize);
+    node=xmlNewChild(audio,NULL,BAD_CAST "FragmentSize",buff);
+
+#if 0
+    sprintf(buff,"%d",cfg->Audio->LowWaterMark);
+    node=xmlNewChild(audio,NULL,BAD_CAST "LowWaterMark",buff);
+
+    sprintf(buff,"%d",cfg->Audio->HighWaterMark);
+    node=xmlNewChild(audio,NULL,BAD_CAST "HighWaterMark",buff);
+#endif
+
+    sprintf(buff,"%d",cfg->Audio->FFTW_Policy);
+    node=xmlNewChild(audio,NULL,BAD_CAST "FFTWPolicy",buff);
+
+    sprintf(buff,"%d",cfg->Audio->FFTW_UseWisdom);
+    node=xmlNewChild(audio,NULL,BAD_CAST "FFTWUseWisdom",buff);
+
+    node=xmlNewChild(audio,NULL,BAD_CAST "MasterOutput",cfg->Audio->output_id[0]);
+    node=xmlNewChild(audio,NULL,BAD_CAST "MasterDevice",cfg->Audio->device_id[0]);
+    
+    node=xmlNewChild(audio,NULL,BAD_CAST "GroupAOutput",cfg->Audio->output_id[1]);
+    node=xmlNewChild(audio,NULL,BAD_CAST "GroupADevice",cfg->Audio->device_id[1]);
+ 
+    node=xmlNewChild(audio,NULL,BAD_CAST "GroupBOutput",cfg->Audio->output_id[2]);
+    node=xmlNewChild(audio,NULL,BAD_CAST "GroupBDevice",cfg->Audio->device_id[2]);
+
+    /* 
+     * Dumping document to stdio or file
+     */
+    xmlSaveFormatFileEnc(filename, doc, "UTF-8", 1);
+
+    /*free the document */
+    xmlFreeDoc(doc);
+
+    /*
+     *Free the global variables that may
+     *have been allocated by the parser.
+     */
+    xmlCleanupParser();
+
+    /*
+     * this is to debug memory for regression tests
+     */
+    xmlMemoryDump();
+
+    return 1;
 }
 
 int
-bf_cfg_write_default_file (ConfigFile * cfg)
+CONFIGFILE_WriteDefaultFile (BeatforceConfig * cfg)
 {
-    return bf_cfg_write_file (cfg, bf_cfg_get_default_filename ());
-}
-
-int
-bf_cfg_read_string (ConfigFile * cfg, char * section, char * key,
-		    char ** value)
-{
-    ConfigSection *sect;
-    ConfigLine    *line;
-
-    if (!(sect = bf_cfg_find_section (cfg, section)))
-        return FALSE;
-    if (!(line = bf_cfg_find_string (sect, key)))
-        return FALSE;
-    *value = strdup (line->value);
-    return TRUE;
-}
-
-int CONFIGFILE_ReadInt(ConfigFile * cfg, char * section, char * key, int *value)
-{
-    char *str;
-
-    if (!bf_cfg_read_string (cfg, section, key, &str))
-        return FALSE;
-    *value = atoi (str);
-    free (str);
-
-    return TRUE;
-}
-
-int
-bf_cfg_read_boolean (ConfigFile * cfg, char * section, char * key,
-		     int * value)
-{
-    char *str;
-
-    if (!bf_cfg_read_string (cfg, section, key, &str))
-        return FALSE;
-    if (!strcmp (str, "TRUE"))
-        *value = TRUE;
-    else
-        *value = FALSE;
-    free (str);
-    return TRUE;
-}
-
-int
-bf_cfg_read_float (ConfigFile * cfg, char * section, char * key,
-		   float * value)
-{
-    char *str;
-
-    if (!bf_cfg_read_string (cfg, section, key, &str))
-        return FALSE;
-
-    *value = (float)strtod(str, NULL);
-    free (str);
-
-    return TRUE;
-}
-
-int
-bf_cfg_read_double (ConfigFile * cfg, char * section, char * key,
-		    double * value)
-{
-    char *str;
-
-    if (!bf_cfg_read_string (cfg, section, key, &str))
-        return FALSE;
-
-    *value = strtod(str, NULL);
-    free (str);
-
-    return TRUE;
+    return CONFIGFILE_WriteFile (cfg, CONFIGFILE_GetDefaultFilename ());
 }
 
 void
-bf_cfg_write_string (ConfigFile * cfg, char * section, char * key,
-		     char * value)
+CONFIGFILE_Free (BeatforceConfig * cfg)
 {
-    ConfigSection *sect;
-    ConfigLine *line;
 
-    sect = bf_cfg_find_section (cfg, section);
-    if (!sect)
-    {
-        sect = bf_cfg_create_section (cfg, section);
-    }
-    if ((line = bf_cfg_find_string (sect, key)))
-    {
-        free (line->value);
-        line->value = strdup(value);
-    }
-    else
-    {
-        bf_cfg_create_string (sect, key, value);
-    }
-}
-
-void
-bf_cfg_write_int (ConfigFile * cfg, char * section, char * key, int value)
-{
-    char strvalue[50];
-
-    sprintf(strvalue,"%d", value);
-    bf_cfg_write_string (cfg, section, key, strvalue);
-}
-
-void
-bf_cfg_write_boolean (ConfigFile * cfg, char * section, char * key,
-		      int value)
-{
-    if (value)
-        bf_cfg_write_string (cfg, section, key, "TRUE");
-    else
-        bf_cfg_write_string (cfg, section, key, "FALSE");
-}
-
-void
-bf_cfg_write_float (ConfigFile * cfg, char * section, char * key,
-		    float value)
-{
-    char strvalue[50];
-
-    sprintf(strvalue,"%g",value);
-    bf_cfg_write_string (cfg, section, key, strvalue);
-}
-
-void
-bf_cfg_write_double (ConfigFile * cfg, char * section, char * key,
-		     double value)
-{
-    char strvalue[50];
-
-    sprintf(strvalue,"%g",value);
-    bf_cfg_write_string (cfg, section, key, strvalue);
-}
-
-void
-bf_cfg_remove_key (ConfigFile * cfg, char * section, char * key)
-{
-    ConfigSection *sect;
-    ConfigLine *line;
-
-    if ((sect = bf_cfg_find_section (cfg, section)) != NULL)
-    {
-        if ((line = bf_cfg_find_string (sect, key)) != NULL)
-        {
-            free (line->key);
-            free (line->value);
-            free (line);
-            sect->lines = LLIST_Remove (sect->lines, line);
-        }
-    }
-}
-
-void
-bf_cfg_free (ConfigFile * cfg)
-{
-    ConfigSection *section;
-    ConfigLine *line;
-    BFList *section_list, *line_list;
-
-    section_list = cfg->sections;
-    while (section_list)
-    {
-        section = (ConfigSection *) section_list->data;
-        free (section->name);
-
-        line_list = section->lines;
-        while (line_list)
-        {
-            line = (ConfigLine *) line_list->data;
-            free (line->key);
-            free (line->value);
-            free (line);
-            line_list = line_list->next;
-        }
-        //g_list_free (section->lines);
-        free (section->lines);
-        free (section);
-
-        section_list = section_list->next;
-    }
-    //g_list_free (cfg->sections);
-    free (cfg->sections);
     free (cfg);
     cfg = NULL;
 }
 
-static ConfigSection *
-bf_cfg_create_section (ConfigFile * cfg, char * name)
-{
-    ConfigSection *section;
 
-    section = malloc (sizeof (ConfigSection));
-    memset(section,0,(sizeof (ConfigSection)));
-    section->name = strdup (name);
-    cfg->sections = LLIST_Append (cfg->sections, section);
-
-    return section;
-}
-
-static ConfigLine *
-bf_cfg_create_string (ConfigSection * section, char * key, char * value)
-{
-    ConfigLine *line;
-
-    line = malloc (sizeof (ConfigLine));
-    memset(line,0,(sizeof (ConfigLine)));
-    line->key   = strdup(key);
-    line->value = strdup(value);
-    section->lines = LLIST_Append (section->lines, line);
-    return line;
-}
-
-static ConfigSection *
-bf_cfg_find_section (ConfigFile * cfg, char * name)
-{
-    ConfigSection *section;
-    BFList *list;
-    
-    list = cfg->sections;
-    while (list)
-    {
-        section = (ConfigSection *) list->data;
-        if (!strcmp (section->name, name))
-            return section;
-        list=list->next;
-    }
-    return NULL;
-}
-
-static ConfigLine *
-bf_cfg_find_string (ConfigSection * section, char * key)
-{
-    ConfigLine *line;
-    BFList *list;
-
-    list = section->lines;
-    while (list)
-    {
-        line = (ConfigLine *) list->data;
-        if (!strcmp (line->key, key))
-            return line;
-        list = list->next;
-    }
-    return NULL;
-}

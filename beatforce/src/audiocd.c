@@ -1,6 +1,7 @@
 /*
-  Beatforce/ Effect
+  Beatforce/ Audio CD tests
 
+  one line to give the program's name and an idea of what it does.
   Copyright (C) 2003 John Beuving (john.beuving@home.nl)
 
   This program is free software; you can redistribute it and/or
@@ -18,7 +19,17 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-int EFFECT_Init();
-int EFFECT_Run(int size);
-int EFFECT_Cleanup();
-int EFFECT_Play();
+#include "audiocd.h"
+#include "osa_cdrom.h"
+
+static CDDrives *AudioDiscs;
+
+int AUDIOCD_Init()
+{
+    
+
+
+}
+
+
+

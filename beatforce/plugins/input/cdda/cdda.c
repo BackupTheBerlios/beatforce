@@ -50,23 +50,10 @@ int cdda_play_loop (void *);
 
 struct config *cfg;
 
-#if 0
-/*
- * extensions for transferring audio frames
- * currently used by sbpcd.c, cdu31a.c, ide-cd.c
- */
-struct cdrom_read_audio
-{
-    union cdrom_addr addr; /* frame address */
-    unsigned char addr_format; /* CDROM_LBA or CDROM_MSF */
-    int nframes; /* number of 2352-byte-frames to read at once, limited by the drivers */
-    unsigned char *buf; /* frame buffer (size: nframes*2352 bytes) */
-};
-#endif
 
-static struct cdrom_read_audio arg;
-static struct cdrom_tochdr hdr;
-static struct cdrom_tocentry entry[100];
+struct cdrom_read_audio arg;
+struct cdrom_tochdr hdr;
+struct cdrom_tocentry entry[100];
 
 typedef struct TOC {	/* structure of table of contents (cdrom) */
     unsigned char reserved1;
@@ -186,7 +173,6 @@ CDDA_Init(Private ** p, int ch_id)
 
     //to be done
     cdda_priv->going     =1 ;
-//    cdda_priv->decode_thread=OSA_CreateThread(cdda_play_loop, (void *)cdda_priv);    
     *p = (Private *) cdda_priv;
 
     return 0;
@@ -296,7 +282,7 @@ cdda_get_tag (Private * h, char *path, struct SongDBEntry *e)
                 cdda_priv->cachedid = CDDB_CalcID(ourtoc,ourtracks);
                 sprintf(temp,
                         "GET /~cddb/cddb.cgi?cmd=cddb+read+%s+%08x%s&proto=%d HTTP/1.0\r\n\r\n",
-                        "misc", CDDB_CalcID(ourtoc,ourtracks),"&hello=nobody+localhost+beatforce+0.0.1",2);
+                        "misc", CDDB_CalcID(ourtoc,ourtracks),"&hello=nobody+localhost+beatforce+0.2.0",2);
                 
                 sock=HTTP_OpenConnection("www.freedb.org",80);
                 if(sock <= 0)
@@ -419,9 +405,8 @@ cdda_load_file (Private * h, char *filename)
 
         
         
-        if (private->cdda_if.output_open
-            (private->ch_id,
-             FMT_S16_NE, private->rate, private->channels, &private->max_bytes))
+        if (!private->cdda_if.output_open(private->ch_id,FMT_S16_NE, private->rate, 
+                                         private->channels, &private->max_bytes))
         {
             close (private->fd);
             private->fd = -1;

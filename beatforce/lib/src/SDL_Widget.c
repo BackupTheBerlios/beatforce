@@ -98,7 +98,7 @@ void* SDL_WidgetCreateR(E_Widget_Type widget,SDL_Rect dest)
         create=WidgetTable[widget]->create;
         
         widgetdata=create(&dest);
-        
+
         if(widgetdata == NULL)
         {
             printf("Error creating widget\n");
@@ -233,24 +233,21 @@ int SDL_DrawAllWidgets(SDL_Surface *screen)
     while(current_widget)
     {
         draw=WidgetTable[current_widget->type]->draw;
-//        draw(current_widget->data,active_surface);
-
         draw(current_widget->data,screen);
-        
-
         current_widget=current_widget->next;
     }
     SDL_SemPost(MySem);
-        
+    SDL_UpdateRect(screen,0,0,0,0);                
+
     //   SDL_BlitSurface(active_surface,NULL,screen,NULL);
 ///    SDL_BlitSurface(last_surface,&src,screen,&dest);
-    SDL_UpdateRect(screen,0,0,0,0);        
+
     
     if(previous!=active_surface)
         previous=active_surface;
 
 
-    SDL_WidgetUNLOCK();
+
 
     return 1;
 }

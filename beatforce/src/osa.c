@@ -117,6 +117,7 @@ BFList *OSA_FindFiles(char *dir,char *extension,int recursive)
     char filename[255];
     struct stat buf;
 
+    TRACE("OSA_FindFiles enter %s",dir);
     if(dir == NULL)
     {
         return NULL;

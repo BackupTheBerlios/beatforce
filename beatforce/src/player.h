@@ -71,7 +71,7 @@ struct PlayerPrivate
 
 struct PlayerPrivate *PLAYER_GetData(int player_nr);
 
-int PLAYER_Init (int, PlayerConfig *);
+int PLAYER_Init (int player_nr);
 int player_finalize (int);
 
 int PLAYER_EOF(int);

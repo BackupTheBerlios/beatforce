@@ -219,13 +219,16 @@ int oss_get_volume(Private * P, float *volume)
     int vol;
     oss_private *p = (oss_private *) P;
 
-    ioctl(fileno(p->mixer_fd), MIXER_READ(SOUND_MIXER_PCM), &vol);
+    if(p->mixer_fd)
+    {
+        ioctl(fileno(p->mixer_fd), MIXER_READ(SOUND_MIXER_PCM), &vol);
 
-    vol = (vol & 0xff);
+        vol = (vol & 0xff);
         
-    *volume=(float)vol;
-
-    return 1;
+        *volume=(float)vol;
+        return 1;
+    }
+    return 0;
 }
 
 int oss_set_volume(Private * P, float volume)

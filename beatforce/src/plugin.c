@@ -100,7 +100,6 @@ int PLUGIN_Cleanup()
     BFList *temp;
     EffectPlugin *e;
     TRACE("PLUGIN_Cleanup");
-    printf("PLUGIN_CLEANUP\n");
     temp=effect_list;
 
     while(temp)

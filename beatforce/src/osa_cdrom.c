@@ -1,3 +1,23 @@
+/*
+  Beatforce/ Operating System Abstraction layer
+
+  one line to give the program's name and an idea of what it does.
+  Copyright (C) 2003 John Beuving (john.beuving@home.nl)
+
+  This program is free software; you can redistribute it and/or
+  modify it under the terms of the GNU General Public License
+  as published by the Free Software Foundation; either version 2
+  of the License, or (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+*/
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
@@ -6,29 +26,25 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <malloc.h>
+#include <string.h>
 
 #include <SDL/SDL.h>
 
 #include "songdb.h"
+#include "osa_cdrom.h"
 
-typedef struct TOC {	/* structure of table of contents (cdrom) */
-    unsigned char reserved1;
-    unsigned char bFlags;
-    unsigned char bTrack;
-    unsigned char reserved2;
-    unsigned int dwStartSector;
-    unsigned char ISRC[15];
-} TOC;
 
-TOC *g_toc;
-int cdtracks;
 
+
+
+#if 0
 static char * cddb_generate_offset_string()
 {
 	char *buffer;
 	int i;
 
-	buffer = malloc((cdtracks-1) * 7 + 1);
+	buffer = (char*)malloc((cdtracks-1) * 7 + 1);
 
         
 	sprintf(buffer, "%d", g_toc[0].dwStartSector+150);
@@ -38,22 +54,19 @@ static char * cddb_generate_offset_string()
 
 	return buffer;
 }
+#endif
 
-int OSACDROM_TestDrive(char *dev);
-void DisplayToc ( );
-extern SongDBGroup *MainGroup;
-
-
-
-long GetStartSector ( p_track )
-    unsigned long p_track;
+#if 0
+long GetStartSector (unsigned long p_track)
 {
     unsigned long i;
 
-    for (i = 0; i < cdtracks; i++) {
-        if (g_toc [i].bTrack == p_track) {
-            unsigned long dw = g_toc [i].dwStartSector;
-            if ((g_toc [i].bFlags & CDROM_DATA_TRACK) != 0)
+    for (i = 0; i < AudioDiscs->cdtracks; i++) 
+    {
+        if (AudioDiscs->g_toc [i].bTrack == p_track) 
+        {
+            unsigned long dw = AudioDiscs->g_toc [i].dwStartSector;
+            if ((AudioDiscs->g_toc [i].bFlags & CDROM_DATA_TRACK) != 0)
                 return -1;
             return dw;
         }
@@ -67,30 +80,65 @@ long GetEndSector ( p_track )
 {
     unsigned long i;
 
-    for ( i = 1; i <= cdtracks; i++ ) {
-        if ( g_toc [i-1].bTrack == p_track ) {
-            unsigned long dw = g_toc [i].dwStartSector;
+    for ( i = 1; i <= AudioDiscs->cdtracks; i++ ) 
+    {
+        if ( AudioDiscs->g_toc [i-1].bTrack == p_track ) 
+        {
+            unsigned long dw = AudioDiscs->g_toc [i].dwStartSector;
             return dw-1;
         }
     }
 
     return -1;
 }
+#endif
 
 int OSACDROM_Init()
 {
-    int i;
+#if 0
+    int count,i;
+
+    count=SDL_CDNumDrives();
+    AudioDiscs=calloc(count,sizeof(CDDrives));
+    memset(AudioDiscs,0,count*sizeof(CDDrives));
     
-    /* Find out how many CD-ROM drives are connected to the system */
-    for ( i=0; i<SDL_CDNumDrives(); ++i ) 
-    {
-        OSACDROM_TestDrive((char*)SDL_CDName(i));
-    }
+    for(i=0;i<count;i++)
+        AudioDiscs[i].path=strdup(SDL_CDName(i));
+#endif
     return 1;
 }
 
-int OSACDROM_TestDrive(char *dev)
+int OSACDROM_CheckForDiscs()
 {
+#if 0
+    int i;
+    /* Find out how many CD-ROM drives are connected to the system */
+    for ( i=0; i<SDL_CDNumDrives(); ++i ) 
+        OSACDROM_TestDrive(&AudioDiscs[i]);
+
+    return 1;
+#endif
+}
+
+int OSACDROM_NumberOfDrives()
+{
+    return SDL_CDNumDrives();
+}
+
+int OSACDROM_GetTOC(char *drive)
+{
+
+
+}
+
+int OSACDOM_GetNrOfTracks(char *drive)
+{
+
+}
+
+int OSACDROM_TestDrive()
+{
+#if 0
     struct stat statstruct;
     int fd=0;
     static struct cdrom_tochdr hdr;
@@ -98,20 +146,18 @@ int OSACDROM_TestDrive(char *dev)
     struct SongDBSubgroup *sg;
     int i=0,j,err,tracks;
     TOC toc[90];
-    int id;
     
-
-    if (stat(dev, &statstruct)) 
-    {
+    if(ToTest == NULL)
         return 0;
-    }
 
-    if(!S_ISCHR(statstruct.st_mode) &&
-       !S_ISBLK(statstruct.st_mode))
-    {
+    /* Get te statistics of the device "/dev/??" */
+    if (stat(ToTest->path, &statstruct)) 
         return 0;
-    }
 
+    /* The drive has to be a character or block device */
+    if(!S_ISCHR(statstruct.st_mode) && !S_ISBLK(statstruct.st_mode))
+        return 0;
+ 
     switch ((int) (statstruct.st_rdev >> 8L)) 
     {
     case SCSI_GENERIC_MAJOR:	/* generic */
@@ -125,17 +171,15 @@ int OSACDROM_TestDrive(char *dev)
     default:
         if (!S_ISBLK(statstruct.st_mode)) 
         {
-            fprintf(stderr, "%s is not a block device\n",SDL_CDName(i));
+            fprintf(stderr, "%s is not a block device\n",ToTest->path);
             return 0;
         }
         break;
     }
-    fd = open(dev,O_RDONLY);
+    fd = open(ToTest->path,O_RDONLY);
     if (fd < 0) 
-    {
-        return 0;
-    }
-
+         return 0;
+ 
     /* read toc */
     ioctl( fd, CDROMSTOP,  NULL );
     ioctl( fd, CDROMSTART, NULL );
@@ -153,7 +197,7 @@ int OSACDROM_TestDrive(char *dev)
             return 0;
         }
     }
-    entry[j].cdte_track = CDROM_LEADOUT;
+    entry[j].cdte_track  = CDROM_LEADOUT;
     entry[j].cdte_format = CDROM_LBA;
     err = ioctl( fd, CDROMREADTOCENTRY, &entry[j] );
     if ( err != 0 ) 
@@ -169,15 +213,15 @@ int OSACDROM_TestDrive(char *dev)
         toc[j].bTrack = entry[j].cdte_track;
         toc[j].dwStartSector = entry[j].cdte_addr.lba;
     }
-    g_toc=toc;
-    cdtracks=tracks-1;
+    ToTest->g_toc=toc;
+    ToTest->cdtracks=tracks-1;
     
 #if 0
     {
         int totaltime;
         char temp[255];
 
-        totaltime=(g_toc[cdtracks].dwStartSector+150) /(75);
+        totaltime=(ToTest->g_toc[ToTest->cdtracks].dwStartSector+150) /(75);
         printf("time %d\n",totaltime);
 	sprintf(temp,
 		"GET /~cddb/cddb.cgi?cmd=cddb+query+%08x+%d+%s+%d%s&proto=%d HTTP/1.0\r\n\r\n",
@@ -192,7 +236,7 @@ int OSACDROM_TestDrive(char *dev)
 
         sprintf(temp,
         "GET /~cddb/cddb.cgi?cmd=cddb+read+%s+%08x%s&proto=%d HTTP/1.0\r\n\r\n",
-                "misc", id,"&hello=nobody+localhost+beatforce+0.0.1",2);
+                "misc", id,"&hello=nobody+localhost+beatforce+0.2.0",2);
         printf("\nstrind %s\n\n",temp);
 
 
@@ -202,23 +246,26 @@ int OSACDROM_TestDrive(char *dev)
     if(tracks > 0)
     {
         char trackname[255];
-        SONGDB_AddSubgroup(MainGroup,dev);
+        SONGDB_AddSubgroup(MainGroup,ToTest->path);
 
-        sg=SONGDB_GetSubgroup();
+        /* Get the list of sibgroups */
+        sg=SONGDB_GetSubgroupList();
+
         /* Go the the last added subgroup */
         while(sg->next)
             sg=sg->next;
 
+        /* Tell songdb it is removable storage */
         SONGDB_SubgroupSetVolatile(sg);
         
-        for(i=1;i<=cdtracks;i++)
+        for(i=1;i<=ToTest->cdtracks;i++)
         {
-            sprintf(trackname,"%s/track%02d.cdda",dev,i);
+            sprintf(trackname,"%s/track%02d.cdda",ToTest->path,i);
             SONGDB_AddFileToSubgroup(sg,trackname);
         }
 
     }
-
+#endif
     return 1;
 }
 

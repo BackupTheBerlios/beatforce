@@ -140,7 +140,7 @@ static void SONGDBUI_ChangeDatabase(void *table,void *tabwidget)
 
     if(count >=0)
     {
-        sg=SONGDB_GetSubgroup();
+        sg=SONGDB_GetSubgroupList();
         while(count)
         {
             sg=sg->next;
@@ -159,7 +159,7 @@ void SONGDBUI_Redraw(void *w)
     
     if(SONGDB_GroupChanged())
     {
-        sg=SONGDB_GetSubgroup();
+        sg=SONGDB_GetSubgroupList();
         
         while(SDL_WidgetPropertiesOf(widgets->Tabs,TAB_REMOVE,NULL))
         {

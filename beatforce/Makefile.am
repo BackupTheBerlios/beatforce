@@ -11,5 +11,4 @@ install-exec-hook:
 	 done \
 	fi
 
-
-
+AUTOMAKE_OPTIONS = foreign 

@@ -33,6 +33,7 @@
 #include "plugin.h"
 #include "sampler.h"
 #include "audio_output.h"
+#include "osa.h"
 
 #define MODULE_ID SAMPLER
 #include "debug.h"
@@ -58,6 +59,7 @@ int SAMPLER_Init()
 {
     int i=0;
 
+#if 0
     samples[0].filename=strdup("/home/beuving/test.mp3");
     samples[1].filename=strdup("/home/beuving/test.ogg");
     samples[2].filename=strdup("/home/beuving/test.ogg");
@@ -68,7 +70,7 @@ int SAMPLER_Init()
     samples[7].filename=strdup("/home/beuving/test.ogg");
     samples[8].filename=strdup("/home/beuving/test.ogg");
     samples[9].filename=strdup("/home/beuving/test.ogg");
-
+#endif
 
     for(i=0;i<10;i++)
         SamplerPlugins[i] = INPUT_Init (i+2, PLUGIN_GetList(PLUGIN_TYPE_INPUT));

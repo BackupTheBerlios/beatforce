@@ -24,79 +24,9 @@
 #ifndef __CONFIGFILE_H__
 #define __CONFIGFILE_H__
 
-#include "llist.h"
-
-typedef struct
-{
-    char *key;
-    char *value;
-}
-ConfigLine;
-
-typedef struct
-{
-    char *name;
-    BFList *lines;
-}
-ConfigSection;
-
-typedef struct
-{
-    BFList *sections;
-}
-ConfigFile;
-
-char *bf_cfg_get_default_filename (void);
-
-ConfigFile *bf_cfg_new (void);
-ConfigFile *bf_cfg_open_file (char * filename);
-int bf_cfg_write_file (ConfigFile * cfg, char * filename);
-void bf_cfg_free (ConfigFile * cfg);
-ConfigFile *bf_cfg_open_default_file (void);
-int bf_cfg_create_dir (void);
-int bf_cfg_write_default_file (ConfigFile * cfg);
-
-int bf_cfg_read_string (ConfigFile * cfg, char * section, char * key,
-			     char ** value);
-int CONFIGFILE_ReadInt(ConfigFile * cfg, char * section, char * key,int * value);
-int bf_cfg_read_boolean (ConfigFile * cfg, char * section, char * key,
-			      int * value);
-int bf_cfg_read_float (ConfigFile * cfg, char * section, char * key,
-			    float * value);
-int bf_cfg_read_double (ConfigFile * cfg, char * section, char * key,
-			     double * value);
-
-void bf_cfg_write_string (ConfigFile * cfg, char * section, char * key,
-			  char * value);
-void bf_cfg_write_int (ConfigFile * cfg, char * section, char * key,
-		       int value);
-void bf_cfg_write_boolean (ConfigFile * cfg, char * section, char * key,
-			   int value);
-void bf_cfg_write_float (ConfigFile * cfg, char * section, char * key,
-			 float value);
-void bf_cfg_write_double (ConfigFile * cfg, char * section, char * key,
-			  double value);
-
-void bf_cfg_remove_key (ConfigFile * cfg, char * section, char * key);
-
-
-typedef struct
-{
-    int x;
-    int y;
-    int height;
-    int width;
-    int show;
-}
-PositionConfig;
-
-
 typedef struct
 {
     int RemoveAfterPlay;
-
-    PositionConfig pos;
-
 }
 PlayerConfig;
 
@@ -133,12 +63,6 @@ typedef struct
 AudioConfig;
 
 
-typedef struct TabEntry
-{
-    char *TabTitle;
-    char *TabString;
-    struct TabEntry *next;
-}TabEntry;
 
 typedef struct
 {
@@ -158,15 +82,13 @@ typedef struct
     int SongClickButton;
     int SongClickAction;
     int SongDragButton;
-
-    PositionConfig pos;
+   
 }
 SongDBConfig;
 
 typedef struct
 {
-
-    PositionConfig pos;
+    char SampleFilename[9];
 }
 SamplerConfig;
 
@@ -186,24 +108,24 @@ typedef struct
     float fade_time;
     int auto_fade;
 
-    PositionConfig pos;
+    
 }
 MixerConfig;
 
-AudioConfig *bf_cfg_read_AudioConfig (ConfigFile *);
-SongDBConfig *bf_cfg_read_SongDBConfig (ConfigFile *);
-PositionConfig *bf_cfg_read_PositionConfig (ConfigFile *, char *,
-					    PositionConfig *);
 
-PlayerConfig *bf_cfg_read_PlayerConfig (ConfigFile *, int);
-SamplerConfig *bf_cfg_read_SamplerConfig (ConfigFile *);
-MixerConfig *bf_cfg_read_MixerConfig (ConfigFile *);
+typedef struct 
+{
+    AudioConfig   *Audio;
+    MixerConfig   *Mixer;
+    SamplerConfig *Sampler;
+}
+BeatforceConfig;
 
-int bf_cfg_write_AudioConfig (ConfigFile *, AudioConfig *);
-int bf_cfg_write_SongDBConfig (ConfigFile *, SongDBConfig *);
-int bf_cfg_write_PositionConfig (ConfigFile *, char *, PositionConfig *);
-int bf_cfg_write_PlayerConfig (ConfigFile *, PlayerConfig *, int);
-int bf_cfg_write_SamplerConfig (ConfigFile *, SamplerConfig *);
-int bf_cfg_write_MixerConfig (ConfigFile *, MixerConfig *);
+void CONFIGFILE_Free (BeatforceConfig * cfg);
+void CONFIGFILE_OpenDefaultFile (void);
+AudioConfig *CONFIGFILE_GetCurrentAudioConfig();
+int CONFIGFILE_WriteDefaultFile (BeatforceConfig * cfg);
+
+
 
 #endif /* __CONFIGFILE_H__ */

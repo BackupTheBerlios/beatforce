@@ -29,7 +29,6 @@
 #include <time.h>
 #include <ctype.h>
 
-#include "configfile.h"
 #include "songdb.h"
 #include "player.h"
 #include "osa.h"
@@ -80,7 +79,7 @@ int parsesubgroup(xmlDocPtr doc, xmlNodePtr cur)
     if(key)
         SONGDB_AddSubgroup(MainGroup,key);
     
-    sg=SONGDB_GetSubgroup();
+    sg=SONGDB_GetSubgroupList();
     /* Go the the last added subgroup */
     while(sg->next)
         sg=sg->next;
@@ -113,7 +112,7 @@ int parsesubgroup(xmlDocPtr doc, xmlNodePtr cur)
 }
 
 
-int SONGDB_Init (SongDBConfig * our_cfg)
+int SONGDB_Init ()
 {
     MainGroup=malloc(sizeof(SongDBGroup));
     memset(MainGroup,0,sizeof(SongDBGroup));
@@ -250,7 +249,7 @@ int SONGDB_RemovePlaylistEntry(struct SongDBSubgroup *sg,struct SongDBEntry *e)
     }
     return 0;
 }
-struct SongDBSubgroup *SONGDB_GetSubgroup()
+struct SongDBSubgroup *SONGDB_GetSubgroupList()
 {
     return MainGroup->Subgroup;
 }

@@ -38,107 +38,121 @@
 #include "debug.h"
 
 
-#define mutex_unlock( m )   (m=0)
-#ifdef __USE_RB_MUTEX__
-#define mutex_lock( m )     while( m );  m = 1
-#else
-#define mutex_lock( m )
-#endif
-
-int rb_mutex;
-
 /* call before output thread is active !!!!! */
 int
 rb_init (struct OutRingBuffer **rb, int size)
 {
-  struct OutRingBuffer *ring;
+    struct OutRingBuffer *ring;
 
-  if(rb==NULL || size <= 1024)
-  {
-      return 0;
-  }
+    if(rb==NULL || size <= 1024)
+    {
+        return 0;
+    }
 
-  rb_mutex = 0;
+    ring = malloc (sizeof (struct OutRingBuffer));
+    if(ring == NULL)
+    {
+        ERROR("Not enough memory");
+        return 0;
+    }
+    memset (ring, 0, sizeof (struct OutRingBuffer));
 
-  ring = malloc (sizeof (struct OutRingBuffer));
-  if(ring == NULL)
-  {
-      ERROR("Not enough memory");
-      return 0;
-  }
-  memset (ring, 0, sizeof (struct OutRingBuffer));
-
-  ring->vrb_buf = vrb_new (size, NULL);
-  if(ring->vrb_buf == NULL)
-  {
-      ERROR("Not enough memory");
-      return 0;
-  }
-  ring->size = size;
-  *rb = ring;
+    ring->size = 1;
+    while(ring->size <= size)
+        ring->size <<= 1;
 
 
+    ring->rd_pointer = 0;
+    ring->wr_pointer = 0;
+    ring->buffer=malloc(sizeof(char)*(ring->size));
+    
+    *rb = ring;
 
-  return 1;
+
+
+    return 1;
 }
 
 
 int
 rb_write (struct OutRingBuffer *rb, unsigned char * buf, int len)
 {
-  int nwritten;
+    int total;
+    int i;
 
-  mutex_lock (rb_mutex);
-  nwritten =  vrb_put (rb->vrb_buf, (char *) buf, (size_t) len);
-  mutex_unlock (rb_mutex);
+    /* total = len = min(space, len) */
+    total = rb_free(rb);
+    if(len > total)
+        len = total;
+    else
+        total = len;
 
-  return nwritten;
+    i = rb->wr_pointer;
+    if(i + len > rb->size)
+    {
+        memcpy(rb->buffer + i, buf, rb->size - i);
+        buf += rb->size - i;
+        len -= rb->size - i;
+        i = 0;
+    }
+    memcpy(rb->buffer + i, buf, len);
+    rb->wr_pointer = i + len;
+
+    return total;
+
+        
 }
 
 int
 rb_free (struct OutRingBuffer *rb)
 {
-  int free = 0;
-
-
-
-  mutex_lock (rb_mutex);
-  free = (int) vrb_space_len (rb->vrb_buf);
-  mutex_unlock (rb_mutex);
-  return free;
+    return (rb->size - 1 - rb_data_size(rb));
 }
 
 
 int
 rb_read (struct OutRingBuffer *rb, unsigned char * buf, int max)
 {
-  int nread = 0;
+    int total;
+    int i;
 
+    /* total = len = min(used, len) */
+    total = rb_data_size(rb);
 
+    if(max > total)
+        max = total;
+    else
+        total = max;
 
-  mutex_lock (rb_mutex);
-  nread = (int) vrb_get (rb->vrb_buf, (char *) buf, (size_t) max);
-  mutex_unlock (rb_mutex);
+    i = rb->rd_pointer;
+    if(i + max > rb->size)
+    {
+        memcpy(buf, rb->buffer + i, rb->size - i);
+        buf += rb->size - i;
+        max -= rb->size - i;
+        i = 0;
+    }
+    memcpy(buf, rb->buffer + i, max);
+    rb->rd_pointer = i + max;
 
-  return nread;
+    return total;
 
 }
 
 int
 rb_data_size (struct OutRingBuffer *rb)
 {
-
-  return (vrb_capacity (rb->vrb_buf) - vrb_space_len (rb->vrb_buf));
+    return ((rb->wr_pointer - rb->rd_pointer) & (rb->size-1));
 }
+
 
 int
 rb_clear (struct OutRingBuffer *rb)
 {
-    char *temp;
-    temp=malloc(rb->size);
-    memset(temp,0,rb->size);
-    rb_write(rb,temp,rb->size);
-    free(temp);
+    memset(rb->buffer,0,rb->size);
+    rb->rd_pointer=0;
+    rb->wr_pointer=0;
+
     return 0;
 }
 

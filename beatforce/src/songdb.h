@@ -100,7 +100,7 @@ typedef struct SongDBSubgroup
 
 #define SONGDB_ID_UNKNOWN	0xffffff00	/* id not specified in songdb_search */
 
-int SONGDB_Init (SongDBConfig * our_cfg);
+int SONGDB_Init ();
 int SONGDB_Exit();
 
 
@@ -122,7 +122,7 @@ int SONGDB_AddSubgroup(struct SongDBGroup *group,char *title);
 int SONGDB_RemoveSubgroup(struct SongDBSubgroup *sg);
 int SONGDB_RenameSubgroup(struct SongDBSubgroup *sg, char *title);
 int SONGDB_RemovePlaylistEntry(struct SongDBSubgroup *sg,struct SongDBEntry *e);
-struct SongDBSubgroup *SONGDB_GetSubgroup();
+struct SongDBSubgroup *SONGDB_GetSubgroupList();
 int SONGDB_SubgroupSetVolatile(struct SongDBSubgroup *subgroup);
 int SONGDB_SubgroupCount();
 int SONGDB_AddFileToSubgroup(struct SongDBSubgroup *sg,char *filename);

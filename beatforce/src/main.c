@@ -40,31 +40,14 @@
 #include "wndmgr.h"
 #include "SDL_Widget.h"
 
-ConfigFile     *cfgfile;
-AudioConfig    *audiocfg;
-SongDBConfig   *songdbcfg;
-PlayerConfig   *playercfg0, *playercfg1;
-SamplerConfig  *samplercfg;
-MixerConfig    *mixercfg;
+
 
 int main(int argc, char *argv[])
 {
     OSA_Init();
     
-    cfgfile = bf_cfg_open_default_file ();
-    if (cfgfile == NULL)
-    {
-        printf("Could not create nor open the configfile!\n");
-    }
-
-    audiocfg   = bf_cfg_read_AudioConfig   (cfgfile);
-    songdbcfg  = bf_cfg_read_SongDBConfig  (cfgfile);
-    playercfg0 = bf_cfg_read_PlayerConfig  (cfgfile, 0);
-    playercfg1 = bf_cfg_read_PlayerConfig  (cfgfile, 1);
-    samplercfg = bf_cfg_read_SamplerConfig (cfgfile);
-    mixercfg   = bf_cfg_read_MixerConfig   (cfgfile);
-    bf_cfg_free (cfgfile);
-
+    CONFIGFILE_OpenDefaultFile();
+    
     THEME_Init();     
     MAINWINDOW_Init();
     SEARCHWINDOW_Init();
@@ -77,21 +60,21 @@ int main(int argc, char *argv[])
     PLUGIN_Init (PLUGIN_TYPE_INPUT);
     PLUGIN_Init (PLUGIN_TYPE_OUTPUT);
     PLUGIN_Init (PLUGIN_TYPE_EFFECT);
-
-    AUDIOOUTPUT_Init (audiocfg);
+    
+    AUDIOOUTPUT_Init ();
     EFFECT_Init();
     
     MIXER_Init  ();
-    PLAYER_Init (0, playercfg0);
-    PLAYER_Init (1, playercfg1);
+    PLAYER_Init (0);
+    PLAYER_Init (1);
     SAMPLER_Init();
-    SONGDB_Init (songdbcfg);
+    SONGDB_Init ();
 
 
     OSACDROM_Init();
 
     MAINWINDOW_Open();
-
+    OSACDROM_CheckForDiscs();
     /*beatforce UI*/
     WNDMGR_Main(); /* main loop */
 
@@ -101,14 +84,6 @@ int main(int argc, char *argv[])
     SONGDB_Exit();
     EFFECT_Cleanup();
     PLUGIN_Cleanup();
-    // save everything on exit
-    cfgfile = bf_cfg_open_default_file ();
-    bf_cfg_write_AudioConfig   (cfgfile, audiocfg);
-    bf_cfg_write_SongDBConfig  (cfgfile, songdbcfg);
-    bf_cfg_write_PlayerConfig  (cfgfile, playercfg0,0);
-    bf_cfg_write_PlayerConfig  (cfgfile, playercfg1,1);
-    bf_cfg_write_MixerConfig   (cfgfile, mixercfg);
-    bf_cfg_write_file (cfgfile, bf_cfg_get_default_filename ());
 
     return 1;
 

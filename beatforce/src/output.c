@@ -71,7 +71,8 @@ OUTPUT_PluginInit(struct OutGroup *grp, AudioConfig * cfg, int i)
     memset (grp->dev, 0, sizeof (OutputDevice));
 
     /* The output id should be something else than "none" */
-    if (strcmp (cfg->output_id[i], "none"))
+    
+    if (cfg->output_id[i] && strcmp (cfg->output_id[i], "none"))
     {
         next = list;
         while (next)
@@ -123,10 +124,9 @@ OUTPUT_PluginOpen (struct OutGroup *grp, AudioConfig * cfg, int i, int ch,
         return 0;
     }
 
-    err =
-        grp->dev->op->open (grp->dev->priv, cfg->device_id[i],
-                            (int) cfg->FragmentSize, cfg->LowWatermark,
-                            cfg->HighWatermark, ch, rate, fmt);
+    err = grp->dev->op->open (grp->dev->priv, cfg->device_id[i],
+                              (int) cfg->FragmentSize, cfg->LowWatermark,
+                              cfg->HighWatermark, ch, rate, fmt);
     if (err)
     {
         ERROR("Unable to open output for group %d: error %d\n", i, -err);
@@ -231,9 +231,9 @@ int OUTPUT_PluginGetVolume (struct OutGroup *grp)
         return 0;
 
     if( grp->dev->op->get_volume (grp->dev->priv, &volume) <= 0)
-    {
-        printf("Unable to get volume: error 0x%x\n", -err);
-    }
+        return 0;
+
+
     grp->mainvolume=(int)volume;
     TRACE("OUTPUT_PluginGetVolume leave");
     return 1;

@@ -64,7 +64,7 @@ struct PlayerPrivate *PLAYER_GetData(int player_nr)
 }
 
 
-int PLAYER_Init(int player_nr, PlayerConfig * cfg)
+int PLAYER_Init(int player_nr)
 {
     struct PlayerPrivate *player;
 

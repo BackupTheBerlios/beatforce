@@ -138,7 +138,7 @@ struct OutGroup
 };
 
 /* init function */
-int AUDIOOUTPUT_Init (AudioConfig *);
+int AUDIOOUTPUT_Init ();
 int AUDIOOUTPUT_Cleanup (void);
 
 /* interface to input plugin */

@@ -27,6 +27,7 @@
 #include "songdb.h"
 #include "playlist.h"
 
+#include "effect.h"
 #include "mixer.h"
 #include "mixer_ui.h"
 

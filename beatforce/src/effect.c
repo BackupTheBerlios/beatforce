@@ -70,7 +70,6 @@ int EFFECT_Init()
 
 int EFFECT_Run(int size)
 {
-    return 0;
     if(run && dc)
         dc->run(m->handle,size);
 }

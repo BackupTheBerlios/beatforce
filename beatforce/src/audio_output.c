@@ -47,7 +47,8 @@
 #define MODULE_ID AUDIO_OUTPUT
 #include "debug.h"
 
-
+AudioConfig *audiocfg;
+extern BeatforceConfig *cfgfile;
 
 #define mutex_unlock( m )	(m=0)
 #define mutex_lock( m ) 	while( m );  m = 1
@@ -63,11 +64,10 @@ struct OutGroup *group[3];
 int output_thread;
 int output_thread_stop;
 
+int runningcount;
 
 fftw_plan fftplan_out;
 fftw_complex *fftw_in, *fftw_out;
-
-AudioConfig *audiocfg;
 
 #define _TO_ATT( _dB )		( (_dB > -31) ? ( pow( 10, 0.05 * _dB ) ) : (0) )
 
@@ -89,12 +89,15 @@ ADD_TO_OUTPUT_BUFFER (output_word * _buf, float _ch)
     (output_word) (*_buf) = (output_word) tmp1;
 }
 
-int AUDIOOUTPUT_Init (AudioConfig * audio_cfg)
+int AUDIOOUTPUT_Init ()
 {
     int i;
-
     TRACE("AUDIO_OUTPUT_Init %d",OUTPUT_N_CHANNELS);
-    audiocfg = audio_cfg;
+
+    audiocfg=CONFIGFILE_GetCurrentAudioConfig();
+
+    if(audiocfg == NULL)
+        return 0;
 
     for (i = 0; i < OUTPUT_N_CHANNELS; i++)
     {
@@ -183,9 +186,10 @@ int AUDIOOUTPUT_Init (AudioConfig * audio_cfg)
 /* Init output thread */
     output_thread_stop = 0;
     n_open = 0;
+    runningcount=0;
     output_thread=i=OSA_CreateThread(AUDIOOUTPUT_Loop,NULL);
 
-    return 0;
+    return 1;
 }
 
 
@@ -199,7 +203,7 @@ int AUDIOOUTPUT_Cleanup (void)
     {
         OUTPUT_PluginCleanup(group[i]);
     }
-    return 0;
+    return 1;
 }
 
 
@@ -223,7 +227,6 @@ int AUDIOOUTPUT_Open(int c, AFormat fmt, int rate, int nch, int *max_bytes)
         fprintf (stderr,"output_open: someone tries to open channel already open!\n");
         return 0;
     }
-
     if (max_bytes != NULL)
     {
         *max_bytes =
@@ -234,7 +237,6 @@ int AUDIOOUTPUT_Open(int c, AFormat fmt, int rate, int nch, int *max_bytes)
             audiocfg->RingBufferSize;
         DEBUG("Setting max_bytes = %d", *max_bytes);
     }
-
     if( c >= 2 )
     {
         ch[c]->mask = GROUP_MASTER;
@@ -277,11 +279,9 @@ int AUDIOOUTPUT_Close(int c)
     printf ("INFORMAL: BPMCOUNT: prescale was %ld\n", ch[c]->bpm_prescale);
 #endif
     n_open--;
-#if 1
     /* empty ring buffer */
 //    rb_clear (ch[c]->rb);
     memset (ch[c]->buffer, 0, OUTPUT_BUFFER_SIZE (audiocfg));
-#endif
 
     return 0;
 }
@@ -398,7 +398,11 @@ int AUDIOOUTPUT_Pause (int c, int pause)
     if(ch[c] == NULL)
         return 0;
   
-
+    if(pause == 0)
+        runningcount++;
+    else
+        runningcount--;
+    TRACE("AUDIOOUTPUT_Pause >%d< >%d<\n",c,pause);
     ch[c]->paused = (int) (pause != 0);
     return 1;
 }
@@ -509,7 +513,7 @@ static void AUDIOOUTPUT_CalculateVolume(struct OutChannel *ch)
     int sample;
     int l=0,l1=0;
     int r=0,r1=0;
-              
+
     for (sample = 0; sample < OUTPUT_BUFFER_SIZE_SAMPLES (audiocfg); sample++)
     {
         if(sample % 2 == 0)
@@ -526,6 +530,7 @@ static void AUDIOOUTPUT_CalculateVolume(struct OutChannel *ch)
         }
 
     }
+
     l /= 376; //volumecorrection
     r /= 376; //volumecorrection
     ch->volumeleft  = 20 * log(l);
@@ -571,7 +576,7 @@ static void AUDIOOUTPUT_Crossfade()
         {
             ch1 = pow (10,0.05 * (double) ((ch1 * 2 - 1) * 30)) * _TO_ATT (ch[1]->fader_dB);
         }
-        
+
         for (sample = 0; sample < OUTPUT_BUFFER_SIZE_SAMPLES (audiocfg); sample++)
         {
             double ch0_tmp = 0;
@@ -603,16 +608,16 @@ static int AUDIOOUTPUT_Loop(void *arg)
 {
     int channel=0, i=0;
     unsigned int sample=0;
-
     output_word *tmp_buf = malloc (2 * OUTPUT_BUFFER_SIZE (audiocfg));
     
     memset(tmp_buf,0,(2 * OUTPUT_BUFFER_SIZE (audiocfg)));
-    
     if (tmp_buf == NULL)
-        return -1;
+        return 0;
 
     while (!output_thread_stop)
     {
+        while(runningcount == 0)
+            SDL_Delay(50);
 
         for (i = 0; i < 3; i++)
         {
@@ -631,10 +636,12 @@ static int AUDIOOUTPUT_Loop(void *arg)
                 output_read (channel, (unsigned char *) ch[channel]->buffer,
                              OUTPUT_BUFFER_SIZE (audiocfg));
 
+#if 0
             if(channel==0)
             {
                 EFFECT_Run(OUTPUT_BUFFER_SIZE(audiocfg));
             }
+#endif
 
             if (n_read < 0)
             {
@@ -733,10 +740,10 @@ static int AUDIOOUTPUT_Loop(void *arg)
             err = OUTPUT_BUFFER_SIZE_SAMPLES (audiocfg) * 2;
             err = OUTPUT_PluginWrite (group[0], group[0]->out_buffer, err);
         }
-
     }/* for(;;) */
 
     free(tmp_buf);
+
     return 0;
 }
 
@@ -751,6 +758,7 @@ do_fft (int c, output_word * buf)
 #define CALC_BPM( _msec )	(60000/_msec)
     if (!(c == 0 || c == 1))
         return -1;
+
 
     /* fill the fftw input buffer */
     for (j = 0; j < audiocfg->FragmentSize; j++)
@@ -778,7 +786,6 @@ do_fft (int c, output_word * buf)
         
 
         beat = beat / 5; //de gemiddelde amplitude
-
         beat = beat / audiocfg->FragmentSize * 2;  
         beat = beat / 18;
 

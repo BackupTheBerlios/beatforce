@@ -1,6 +1,7 @@
 /*
-  Beatforce/ Effect
+  Beatforce/ Operating System Abstraction layer
 
+  one line to give the program's name and an idea of what it does.
   Copyright (C) 2003 John Beuving (john.beuving@home.nl)
 
   This program is free software; you can redistribute it and/or
@@ -18,7 +19,29 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-int EFFECT_Init();
-int EFFECT_Run(int size);
-int EFFECT_Cleanup();
-int EFFECT_Play();
+#ifndef __AUDIOCD_H__
+#define __AUDIOCD_H__
+
+
+typedef struct TOC {	/* structure of table of contents (cdrom) */
+    unsigned char reserved1;
+    unsigned char bFlags;
+    unsigned char bTrack;
+    unsigned char reserved2;
+    unsigned int dwStartSector;
+    unsigned char ISRC[15];
+} TOC;
+
+
+typedef struct
+{
+    int discinserted;
+    char *path;
+    TOC *g_toc;
+    int cdtracks;
+}CDDrives;
+
+
+int AUDIOCD_Init();
+
+#endif /* __AUDIOCD_H__ */
