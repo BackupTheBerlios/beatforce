@@ -13,6 +13,7 @@
     <image filename="seperator.bmp"   x="0" y="230" w="1024" h="3"  /> 
     <image filename="logo.bmp"        x="100" y="0" w="800"  h="30"  /> 
     <image filename="waitlist.bmp"    x="540" y="340"/>  
+    <image filename="songdb.bmp"      x="28"  y="268"/>
 
     <clock x="4" y="4" w="60" h="22" font="digits" bgcolor="0x00000" fgcolor="0x00e1ff"/>
 

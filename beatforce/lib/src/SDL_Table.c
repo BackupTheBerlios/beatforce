@@ -148,8 +148,8 @@ void SDL_TableDraw(void *table,SDL_Surface *dest)
     {
         if(Table->bgcolor ==  TRANSPARANT)
         {
-            if(SDL_BlitSurface(Table->Background,NULL,dest,&Table->rect)<0)
-                fprintf(stderr, "BlitSurface error: %s\n", SDL_GetError());
+           if(SDL_BlitSurface(Table->Background,NULL,dest,&Table->rect)<0)
+               fprintf(stderr, "BlitSurface error: %s\n", SDL_GetError());
         }
         else
         {
@@ -530,8 +530,8 @@ static void SDL_TableDrawRow(SDL_Surface *dest,SDL_Table *Table,int row)
             la.w = RowDims.w;
             la.h = RowDims.h;
 
-            if(SDL_BlitSurface(Table->Background,&la,dest,&RowDims)<0)
-                fprintf(stderr, "BlitSurface error: %s\n", SDL_GetError());
+//  if(SDL_BlitSurface(Table->Background,&la,dest,&RowDims)<0)
+      //              fprintf(stderr, "BlitSurface error: %s\n", SDL_GetError());
         }
         else
             SDL_FillRect(dest,&RowDims,Table->bgcolor);
