@@ -253,6 +253,7 @@ int GetDir(int count,char *string)
     memset(word,0,20*sizeof(char*));
     if(strlen(dircopy) > 1)
         word[nw++]="";
+
     for(ptr=dircopy; nw < 20; ptr=strchr(ptr,'/'))
     {
         if(ptr==NULL)
@@ -274,7 +275,7 @@ int GetDir(int count,char *string)
         }
    
     }
-    if(word[count])
+    if(count < 20 && word[count])
         sprintf(string,"/%s",word[count]);
 
     free(dircopy);
@@ -323,6 +324,7 @@ static void FILEWINDOW_GetDirectories(int row,int column,char *string)
     int nw=0;
     int count=0;
 
+    memset(dir,0,255);
     nw = GetDir(row,dir);
 
     if(row < nw)
