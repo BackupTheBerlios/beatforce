@@ -254,8 +254,8 @@ void PLAYERUI_Redraw()
     }    
     else
     {
-        SDL_WidgetPropertiesOf(UI_Players[0].ButtonPlay,SET_VISIBLE,1);
-        SDL_WidgetPropertiesOf(UI_Players[0].ButtonPause,SET_VISIBLE,0);
+        SDL_WidgetPropertiesOf(UI_Players[0].ButtonPause , SET_VISIBLE,0);
+        SDL_WidgetPropertiesOf(UI_Players[0].ButtonPlay  , SET_VISIBLE,1);
     }
 
     if(UI_Players[1].ButtonPause)
@@ -514,7 +514,6 @@ static void PLAYERUI_PlayButton(void *data)
     else
     {
         PLAYER_Play  (current->PlayerNr);
-        SONGDBUI_Play();
     }
 }
 

@@ -75,7 +75,6 @@ void SDL_ButtonDraw(void *data,SDL_Surface *dest)
     }
     else
     {
-
         src.x=0;
         src.y=0;
 

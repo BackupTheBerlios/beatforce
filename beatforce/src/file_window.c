@@ -599,6 +599,7 @@ SDL_Surface *Window_CreateFileWindow()
             SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION,FILEWINDOW_GetSubgroup);
             SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,FILEWINDOW_SubgroupClicked,NULL);
             SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_RETURN,FILEWINDOW_RenameSubgroupFinished,NULL);
+            SDL_WidgetProperties(SET_IMAGE,THEME_DIR"/beatforce/tablescrollbar.jpg");
             break;
         case CONTENTS_FILESINDIRECTORY:
             TableFilesInDirectory=SDL_WidgetCreateR(SDL_TABLE,Table->Rect);
@@ -610,6 +611,7 @@ SDL_Surface *Window_CreateFileWindow()
             SDL_WidgetProperties(SET_SELECTABLE,-1);
             SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION,FILEWINDOW_GetFilesInDirectory);
             SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
+            SDL_WidgetProperties(SET_IMAGE,THEME_DIR"/beatforce/tablescrollbar.jpg");
             break;
         case CONTENTS_FILESINSUBGROUP:
             TableFilesInSubgroup=SDL_WidgetCreateR(SDL_TABLE,Table->Rect);
@@ -621,6 +623,7 @@ SDL_Surface *Window_CreateFileWindow()
             SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
             SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION,FILEWINDOW_GetFilesInSubgroup);
             SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
+            SDL_WidgetProperties(SET_IMAGE,THEME_DIR"/beatforce/tablescrollbar.jpg");
             break;
         case CONTENTS_DIRECTORIES:
             TableDirectories=SDL_WidgetCreateR(SDL_TABLE,Table->Rect);

@@ -270,7 +270,6 @@ void songdb_searchstring(long row,int column,char *dest)
     if(SONGDB_GetNoOfSearchResults() < row)
         return;
     
-    printf("Getting row %d\n",row);
     e = SONGDB_GetSearchEntry(row);
 
     dest[0]='\0';

@@ -81,7 +81,8 @@ typedef enum E_Widget_Properties
     
     SET_STATE_EDIT,
     SET_VISIBLE,
-    SET_HIGHLIGHTED
+    SET_HIGHLIGHTED,
+    SET_IMAGE
     
 }E_Widget_Properties;
 

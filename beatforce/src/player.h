@@ -88,7 +88,7 @@ void player_forw (int, int);
 
 int PLAYER_IsPlaying(int);
 
-int PLAYER_GetPlayingID(int player_nr,long *songid);
+int PLAYER_GetPlayingEntry(int player_nr,struct SongDBEntry **e);
 void player_set_song (int player_nr, int no);
 
 int PLAYER_SetTimePlayed(int player_nr,long seconds);

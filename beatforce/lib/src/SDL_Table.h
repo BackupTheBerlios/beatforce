@@ -75,8 +75,12 @@ typedef struct SDL_Table
     SDL_Edit *edit;
 
     char *editcaption;
+
+
+    /* Scrollbar */
     void* Scrollbar;
     int   ScrollbarWidth;
+    char *ScrollbarImage;
 
     struct SDL_Table    *next;
 }SDL_Table;

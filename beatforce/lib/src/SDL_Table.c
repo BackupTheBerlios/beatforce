@@ -87,6 +87,7 @@ void* SDL_TableCreate(SDL_Rect* rect)
     newtable->TableInitialDraw            = 1; 
 
     newtable->edit              = NULL;
+    newtable->ScrollbarImage    = NULL;
    
     newtable->Selected          = NULL;
     newtable->SelectedCount     = 0;
@@ -301,6 +302,9 @@ int SDL_TableProperties(void *table,int feature,va_list list)
     case SET_SELECTABLE:
         Table->Selectable = va_arg(list,int);
         break;
+    case SET_IMAGE:
+        Table->ScrollbarImage = strdup(va_arg(list,char*));
+        break;
     case SET_STATE_EDIT:
         {
             if(Table->edit == NULL)
@@ -353,12 +357,14 @@ void SDL_TableEventHandler(void *table,SDL_Event *event)
     case SDL_MOUSEMOTION:
         if(SDL_WidgetIsInside(&Table->rect,event->motion.x,event->motion.y))
         {
+#if 0
             if(event->motion.x > (Table->rect.x + Table->rect.w - Table->ScrollbarWidth))
             {
                 /* Event are for the scrollbar */
                 break;
             }
             else
+#endif
             {
                 y=Table->rect.y;
                 for(i=0;i<Table->VisibleRows;i++)
@@ -389,11 +395,13 @@ void SDL_TableEventHandler(void *table,SDL_Event *event)
         {
             if(event->button.button == 1)
             {
+#if 0
                 if(event->motion.x > (Table->rect.x + Table->rect.w - Table->ScrollbarWidth))
                 {
                     break;
                 }
                 else
+#endif
                 {
                     Table->CurrentRow = Table->FirstVisibleRow + 
                         (event->motion.y - Table->rect.y) / Table->RowHeight;
@@ -463,7 +471,8 @@ static void SDL_TableAttachScrollbar(SDL_Table *Table)
             SliderRect.w     = 45;
             
             Table->Scrollbar = SDL_WidgetCreateR(SDL_SLIDER,SliderRect);
-            SDL_WidgetProperties(SET_BUTTON_IMAGE,"res/tablescrollbar.jpg");
+            if(Table->ScrollbarImage)
+                SDL_WidgetProperties(SET_BUTTON_IMAGE,Table->ScrollbarImage);
             SDL_WidgetProperties(SET_MAX_VALUE,(int)(Table->Rows - Table->VisibleRows));
             SDL_WidgetProperties(SET_MIN_VALUE,0);
 //            SDL_WidgetProperties(SET_CUR_VALUE,(double)(Table->Rows - Table->VisibleRows));

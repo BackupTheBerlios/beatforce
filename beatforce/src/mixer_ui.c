@@ -151,8 +151,6 @@ void mixerui_AutoFadeButtonClicked(void *data)
     if(!MIXER_FadeInProgress())
         MIXER_DoFade(1,0);  //param 1 is autofade param2 is instant
 
-    SONGDBUI_Play(0);
-    SONGDBUI_Play(1);
 }
 
 static void MIXERUI_FaderChanged(void *data)

@@ -23,6 +23,7 @@
 #include <string.h>
 #include <malloc.h>
 
+#include "config.h"
 #include "wndmgr.h"
 #include "SDL_Widget.h"
 #include "SDL_Font.h"
@@ -90,6 +91,7 @@ void SONGDBUI_CreateWindow(ThemeSongdb *ts)
         SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
         SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION,songdbstring);
         SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,eventhandler,table);
+        SDL_WidgetProperties(SET_IMAGE,THEME_DIR"/beatforce/tablescrollbar.jpg");
     }
 
     /* Craete the tab section below the table*/
@@ -170,16 +172,17 @@ void SONGDBUI_Redraw()
 
 void SONGDBUI_Play(int player_nr)
 {
-    long id;
     int tab;
+    struct SongDBEntry *e;
+
     tab=SONGDBUI_GetHighlightedTab();
-    
+
     if(tab>=0)
     {
-        PLAYER_GetPlayingID(player_nr,&id);
+        PLAYER_GetPlayingEntry(player_nr,&e);
         activesong[0]=tab;
-        activesong[1]=id;
-        SDL_WidgetPropertiesOf(table,SET_HIGHLIGHTED,id);    
+        activesong[1]=e->id;
+        SDL_WidgetPropertiesOf(table,SET_HIGHLIGHTED,e->id);    
     }
 }
        

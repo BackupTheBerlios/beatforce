@@ -96,15 +96,14 @@ int PLAYER_Exit(int player_nr)
     return 0;
 }
 
-int PLAYER_GetPlayingID(int player_nr,long *songid)
+int PLAYER_GetPlayingEntry(int player_nr,struct SongDBEntry **e)
 {
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
 
-    if (p == NULL || songid == NULL)
+    if (p == NULL || e == NULL)
         return 0;
     
-    if(songid)
-        *songid=p->songdb_id;
+    *e=p->e;
 
     return 1;
 }
