@@ -1,10 +1,10 @@
 cd ../lib/src
-touch ~/cvs/bf/lib/src/SDL_Stack.h
+touch ~/t/beatforce/lib/src/SDL_Stack.h
 make 
 
 echo
 echo
 echo
 cd ../../src
-touch ~/cvs/bf/src/main.c
+touch ~/t/beatforce/src/main.c
 make

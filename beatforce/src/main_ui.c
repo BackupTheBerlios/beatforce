@@ -45,7 +45,6 @@
 #include "debug.h" 
 
 SDL_Surface *screen;
-
 SDL_Surface *MainWindow;
 
 
@@ -82,7 +81,7 @@ void MAINUI_Init()
     FILEWINDOW_Init();
 
     LargeBoldFont=SDL_FontInit(THEME_DIR"/beatforce/digital.fnt");
-//    LargeBoldFont=SDL_FontInit("./res/arial10.bdf");
+//  LargeBoldFont=SDL_FontInit(THEME_DIR"/beatforce/arial12.bdf");
 //    LargeBoldFont=SDL_FontInit("./res/cour10.bdf");
     DigitsFont=SDL_FontInit(THEME_DIR"/beatforce/digits.fnt");
 

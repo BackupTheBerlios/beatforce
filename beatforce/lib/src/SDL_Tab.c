@@ -421,6 +421,7 @@ int Tab_DrawTabWithCaption(SDL_Surface *dest,SDL_Tab *tab,SDL_TabList * tl, int 
         SDL_FillRect(dest,&dst,0xff00ff);
 
     SDL_FontSetColor(tab->font,0xffffee);
+
     if(tl->caption)
     {
         SDL_FontDrawString(dest,tab->font,tl->caption,
@@ -447,7 +448,6 @@ int Tab_DrawArrows(SDL_Surface *dest,SDL_Tab *tab)
 
     SDL_WidgetCreate(SDL_BUTTON,tab->rect->x,tab->rect->y,20,30);
 
-    //SDL_FontDrawString(dest,tab->font,"LR",rect.x,rect.y);
     //SDL_FillRect(dest,&rect,SDL_MapRGB(dest->format,255,0,0));
     return 0;
 }

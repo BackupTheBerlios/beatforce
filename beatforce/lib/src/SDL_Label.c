@@ -107,8 +107,7 @@ void SDL_LabelDraw(void *label,SDL_Surface *dest)
             strncpy(string,Label->Caption,counter--);
         }
 
-        SDL_FontDrawString(dest,Label->Font,string,
-                           Label->rect.x,Label->rect.y);
+        SDL_FontDrawStringRect(dest,Label->Font,string,&Label->rect);
         
         SDL_UpdateRect(dest,
                        Label->rect.x,

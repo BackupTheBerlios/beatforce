@@ -47,7 +47,6 @@ const struct S_Widget_FunctionList SDL_Table_FunctionList =
 void* SDL_TableCreate(SDL_Rect* rect)
 {
     SDL_Table *newtable;
-//    int i;
 
     newtable=(SDL_Table*)malloc(sizeof(SDL_Table));
     newtable->fgcolor           = 0xffffef;
@@ -328,20 +327,24 @@ void SDL_TableEventHandler(void *table,SDL_Event *event)
             if(event->button.button == 4) //mousehweel down
             {
                 double row;
-                SDL_WidgetPropertiesOf(Table->Scrollbar,GET_CUR_VALUE,&row);
-                row-=5;
-                SDL_WidgetPropertiesOf(Table->Scrollbar,SET_CUR_VALUE,row);
+                if(Table->Scrollbar)
+                {
+                    SDL_WidgetPropertiesOf(Table->Scrollbar,GET_CUR_VALUE,&row);
+                    row-=5;
+                    SDL_WidgetPropertiesOf(Table->Scrollbar,SET_CUR_VALUE,row);
+                }
 
             }
-            
-        }
-        if(event->button.button == 5)
-        {
-            double row;
-            SDL_WidgetPropertiesOf(Table->Scrollbar,GET_CUR_VALUE,&row);
-            row+=5.0;
-            SDL_WidgetPropertiesOf(Table->Scrollbar,SET_CUR_VALUE,row);
-
+            if(event->button.button == 5)
+            {
+                double row;
+                if(Table->Scrollbar)
+                {
+                    SDL_WidgetPropertiesOf(Table->Scrollbar,GET_CUR_VALUE,&row);
+                    row+=5.0;
+                    SDL_WidgetPropertiesOf(Table->Scrollbar,SET_CUR_VALUE,row);
+                }
+            }
         }
         break;
     default:

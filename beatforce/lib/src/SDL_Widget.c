@@ -136,7 +136,7 @@ int SDL_WidgetPropertiesOf(void *widget,int feature,...)
     }
     else
     {
-        printf("Widget not found\n");
+//        printf("SDL_WidgetPropertiesOf not found\n");
     }
     SDL_WidgetUNLOCK();
     return 1;

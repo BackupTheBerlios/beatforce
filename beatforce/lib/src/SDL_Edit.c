@@ -94,10 +94,8 @@ void  SDL_EditDraw(void *edit,SDL_Surface *dest)
         StringWidth=SDL_FontGetStringWidth(Edit->Font,Edit->Caption);
         if(StringWidth <= Edit->rect.w )
         {
-            
             SDL_FontDrawString(dest,Edit->Font,Edit->Caption,
                                Edit->rect.x,y_pos);
-                
         }
         else
         {

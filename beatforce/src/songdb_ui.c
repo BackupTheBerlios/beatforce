@@ -109,7 +109,6 @@ void SONGDBUI_CreateWindow()
                 SONGDB_SetActiveList(i);
                 SONGDB_FreeActiveList();
                 mp3  = OSA_FindFiles(songdbcfg->TabString[i],".mp3",1); //recursive search
-                
                 while(mp3)
                 {
                     SONGDB_AddFilename((char*)mp3->data);
@@ -142,10 +141,9 @@ void UI_SongdbChangeDatabase(char *string)
     SDL_Tab *t;
     TRACE("UI_SongdbChangeDabase enter %s",string);
     
-    SDL_WidgetPropertiesOf(table,ROWS,SONGDB_GetNoOfEntries());
-
     t=(SDL_Tab *)tabwidget;
     SONGDB_SetActiveList(t->hl->index);
+    SDL_WidgetPropertiesOf(table,ROWS,SONGDB_GetNoOfEntries());
 
     if(string)
     {
