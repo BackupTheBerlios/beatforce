@@ -138,7 +138,7 @@ int THEME_Init()
             if (doc)
                 break;
             else
-                printf("xmlParsefile failes while the file exists and can be opened\n");
+                ERROR("xmlParsefile failed while the file exists and can be opened %s",path);
         }
         dir=dir->next;
     }
