@@ -160,8 +160,8 @@ int INPUT_LoadFile (int player_nr,struct SongDBEntry *e)
         printf("Unable to play such a low bitrate\n");
     }
     PLAYER_GetData(player_nr)->current_plugin = l;
-    if(PLAYER_GetData(player_nr)->playing_id == SONGDB_ID_UNKNOWN)
-        PLAYER_GetData(player_nr)->playing_id = e->id;
+    if(PLAYER_GetData(player_nr)->songdb_id == SONGDB_ID_UNKNOWN)
+        PLAYER_GetData(player_nr)->songdb_id = e->id;
 
     return l->ip->load_file (l->priv, e->filename);
 }
@@ -175,8 +175,7 @@ input_close_file (InputPluginData *current_plugin)
     return current_plugin->ip->close_file (current_plugin->priv);
 }
 
-int
-INPUT_Play (InputPluginData * current_plugin)
+int INPUT_Play (InputPluginData * current_plugin)
 {
     if (current_plugin == NULL)
         return 0;
@@ -214,8 +213,7 @@ long INPUT_GetTime(InputPluginData *current_plugin)
         return time;
 }
 
-int
-input_eof (int ch_id)
+int INPUT_EOF(int ch_id)
 {
-    return player_eof(ch_id);
+    return PLAYER_EOF(ch_id);
 }

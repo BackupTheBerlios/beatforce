@@ -42,14 +42,8 @@ typedef int PlayerState;
 
 struct PlayerPrivate
 {
-    int playing_no;               /* no of song playing ( in playlist ) 0, if not in playlist */
-
-    unsigned long playing_id;     /* id of song playing  SONGDB_ID_UNKNOWN, if no entry */
-    unsigned int  songdb_index;
-
-    long playing_unique;
-    
-    int play;        
+    int playlist_id;              /* no of song playing ( in playlist ) 0, if not in playlist */
+    unsigned long songdb_id;     /* id of song playing  SONGDB_ID_UNKNOWN, if no entry */
     
     ePlayerState State;           /* State of the player */
     
@@ -81,7 +75,7 @@ struct PlayerPrivate *PLAYER_GetData(int player_nr);
 int PLAYER_Init (int, PlayerConfig *);
 int player_finalize (int);
 
-int player_eof (int);
+int PLAYER_EOF(int);
 
 
 int player_set_callback(void*);
@@ -95,30 +89,30 @@ void player_forw (int, int);
 
 
 int PLAYER_IsPlaying(int);
-int player_load (int);
 
-int player_get_song(int player_nr,long *songid);
+int PLAYER_GetPlayingID(int player_nr,long *songid);
 void player_set_song (int player_nr, int no);
 
-void player_set_playing (int, int, unsigned long);
+int PLAYER_SetTimePlayed(int player_nr,long seconds);
+int PLAYER_SetSpeed(double speed);
 
-
-
-int PLAYER_GetArtist(int player_nr,char *label);
-int PLAYER_GetTitle(int player_nr,char *label);
+/* Functions for user interface information */
+int PLAYER_GetArtist(int player_nr,char *artist);
+int PLAYER_GetTitle(int player_nr,char *title);
 int PLAYER_GetFilename(int player_nr,char *filename);
 
 long PLAYER_GetTimeTotal(int player_nr);
 long PLAYER_GetTimeLeft(int player_nr);
 long PLAYER_GetTimePlayed(int player_nr);
-int PLAYER_SetTimePlayed(int player_nr,long seconds);
+
 int PLAYER_GetBitrate(int player_nr);
 int PLAYER_GetSamplerate(int player_nr);
 
-int PLAYER_SetSpeed(double speed);
 
 
-void PLAYER_Play(int player_nr);
-void PLAYER_Pause(int player_nr);
+
+
+int PLAYER_Play(int player_nr);
+int PLAYER_Pause(int player_nr);
 
 #endif

@@ -91,8 +91,6 @@ void PLAYLIST_SetEntry(int player_nr, struct SongDBEntry *e)
 
     TRACE("PLAYLIST_SetEntry %d",player_nr);
 
-#define STR( x )  ((x == NULL) ? ("") : (x))
-
     if (e == NULL)
     {
         ERROR("entry == NULL");
@@ -114,6 +112,31 @@ void PLAYLIST_SetEntry(int player_nr, struct SongDBEntry *e)
         }
         newlist->next=pe;
     }
+
+}
+
+int PLAYLIST_Remove(int player_nr,long songdb_id)
+{
+    struct PlEntry *newlist = playlist[0];
+    struct PlEntry *pe = newlist;
+    printf("PLAYLIST_Remove songsb %d\n",songdb_id);
+    exit(1);
+
+    while(newlist)
+    {
+        if(newlist->e && newlist->e->id == songdb_id)
+        {
+            printf("Entrie foudn to remvoe\n");
+            exit(1);
+
+            no_of_entries--;
+            break;
+        }
+
+        pe=newlist;
+        newlist=newlist->next;
+    }
+    playlist[0]=newlist;
 
 }
 

@@ -30,5 +30,5 @@ InputInterface beatforce_if =
     output_buffer_free,
     output_get_time,
     output_close,
-    input_eof
+    INPUT_EOF
 };

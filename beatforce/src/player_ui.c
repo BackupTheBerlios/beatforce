@@ -234,7 +234,7 @@ void playerui_UpdateTime(int player)
         if(!MIXER_FadeInProgress())
         {
             long id;
-            PLAYER_GetSong(player,&id);
+            PLAYER_GetPlayingID(player,&id);
             id++;
             e=SONGDB_GetEntry(id);
             PLAYLIST_SetEntry(!player,e);

@@ -45,6 +45,9 @@
 
 struct PlayerPrivate *playerdata[3];
 
+int player_load (int);
+
+
 //prototypes
 unsigned int player_timeout (unsigned int interval,void *data);
 void player_set_songfield (int, char *, char *);
@@ -57,7 +60,6 @@ void player_SetData(int player_nr, struct PlayerPrivate *p)
         printf("Wrong player_nr\n");
 
     playerdata[player_nr]=p;
-
 }
 
 
@@ -74,8 +76,7 @@ int PLAYER_Init(int player_nr, PlayerConfig * cfg)
     player = malloc (PLAYER_PRIVATE_LEN);
     memset (player, 0, PLAYER_PRIVATE_LEN);
 
-    player->playing_id     = SONGDB_ID_UNKNOWN;
-    player->playing_unique = PLAYLIST_UNIQUE_UNKNOWN;
+    player->songdb_id     = SONGDB_ID_UNKNOWN;
     player->ch_id = player_nr;
     player->State = PLAYER_IDLE;
     
@@ -87,8 +88,7 @@ int PLAYER_Init(int player_nr, PlayerConfig * cfg)
     return 0;
 }
 
-int
-player_finalize (int player_nr)
+int PLAYER_Finalize(int player_nr)
 {
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
     if(p==NULL)
@@ -99,7 +99,7 @@ player_finalize (int player_nr)
     return 0;
 }
 
-int PLAYER_GetSong(int player_nr,long *songid)
+int PLAYER_GetPlayingID(int player_nr,long *songid)
 {
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
 
@@ -107,7 +107,7 @@ int PLAYER_GetSong(int player_nr,long *songid)
         return 0;
     
     if(songid)
-        *songid=p->playing_id;
+        *songid=p->songdb_id;
 
     return 1;
 }
@@ -132,8 +132,7 @@ player_do_songchange (int player_nr)
     return 0;
 }
 
-int
-player_eof (int player_nr)
+int PLAYER_EOF(int player_nr)
 {
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
     if (p == NULL)
@@ -153,7 +152,7 @@ player_timeout (unsigned int interval,void *data)
 
     if (p != NULL && p->current_plugin)
     {
-        struct SongDBEntry *e = SONGDB_GetEntryID(p->playing_id);
+        struct SongDBEntry *e = SONGDB_GetEntryID(p->songdb_id);
         songtime = INPUT_GetTime (p->current_plugin);
         if (songtime >= 0 || songtime == ERROR_EOF)
         {
@@ -188,7 +187,7 @@ player_next_track (int player_nr)
     if(p==NULL)
         return;
 
-    new_no = p->playing_no + 1;
+    new_no = p->playlist_id + 1;
     player_set_song (player_nr, new_no);
 }
 
@@ -205,14 +204,14 @@ player_track_rf (int player_nr, int rev_forw)
     {
         if (PLAYER_IsPlaying(player_nr))
         {
-            new_no = p->playing_no + 1;
+            new_no = p->playlist_id + 1;
             player_set_song (player_nr, new_no);
             PLAYER_Play(p->ch_id);
             return;
         }
         else
         {
-            new_no = p->playing_no + 1;
+            new_no = p->playlist_id + 1;
         }
     }
     else
@@ -224,10 +223,10 @@ player_track_rf (int player_nr, int rev_forw)
             if (songtime <= 1000)
             {
                 /* go to previous song */
-                new_no = p->playing_no - 1;
+                new_no = p->playlist_id - 1;
                 if (new_no <= 0)
                 {
-                    new_no = p->playing_no;
+                    new_no = p->playlist_id;
                 }
                 player_set_song (p->ch_id, new_no);
                 PLAYER_Play(p->ch_id);
@@ -236,7 +235,7 @@ player_track_rf (int player_nr, int rev_forw)
             else
             {
                 /* just restart song from beginning */
-                player_set_song (p->ch_id, p->playing_no);
+                player_set_song (p->ch_id, p->playlist_id);
                 PLAYER_Play(p->ch_id);
                 return;
             }
@@ -244,10 +243,10 @@ player_track_rf (int player_nr, int rev_forw)
         }
         else
         {
-            new_no = p->playing_no - 1;
+            new_no = p->playlist_id - 1;
             if (new_no <= 0)
             {
-                new_no = p->playing_no;
+                new_no = p->playlist_id;
             }
         }
     }
@@ -255,58 +254,53 @@ player_track_rf (int player_nr, int rev_forw)
     player_set_song (p->ch_id, new_no);
 }
 
-void PLAYER_Play(int player_nr)
-{
-    player_PlayPauses(player_nr,1);
-}
-
-void PLAYER_Pause(int player_nr)
-{
-    player_PlayPauses(player_nr,0);
-}
-
-void
-player_PlayPauses (int player_nr, int play)
+int PLAYER_Play(int player_nr)
 {
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
-  
-    if(p==NULL)
+    if(p == NULL)
+        return 0;
+
+    if(p->State == PLAYER_PLAY)
     {
-        return;
+        return 0;
     }
 
-    if (play < 0)
+    if(p->songdb_id != SONGDB_ID_UNKNOWN)
     {
-        if (PLAYER_IsPlaying(player_nr) == 0)
+        if(INPUT_Play (p->current_plugin))
         {
-            if (PLAYER_IsPlaying ((((p->ch_id == 0) ? (1) : (0))))
-                && MIXER_GetAutofade () > 0)
-            {
-                MIXER_SetAutofade (0);
-            }
-            p->play = 1;
+            PLAYLIST_Remove(player_nr,p->songdb_id);
+            p->State = PLAYER_PLAY;
         }
         else
         {
-            INPUT_Pause (p->current_plugin);
-            p->play = 0;
+            return 0; /* Invalid data for decoder */
         }
     }
     else
     {
-        if (play == 0)
-        {
-            INPUT_Pause (p->current_plugin);
-            p->play = 0;
-        }
-        else
-        {
-            INPUT_Play (p->current_plugin);
-            p->play = 1;
-        }
+        return 0; /* No song loaded */
     }
+    return 1;
 }
 
+int PLAYER_Pause(int player_nr)
+{
+    struct PlayerPrivate *p = PLAYER_GetData(player_nr);
+    if(p == NULL)
+        return 0;
+
+    if(p->State == PLAYER_PAUSE)
+    {
+        return 0;
+    }
+
+    if(INPUT_Pause (p->current_plugin))
+    {
+        p->State = PLAYER_PAUSE;
+    }
+    return 1;
+}
 
 int PLAYER_IsPlaying (int player_nr)
 {
@@ -315,7 +309,10 @@ int PLAYER_IsPlaying (int player_nr)
     if(p==NULL)
         return 0;
 
-    return p->play;
+    if(p->State == PLAYER_PLAY)
+        return TRUE;
+    else
+        return FALSE;
 }
 
 /* set song with playing id no as actrive (load it) */
@@ -325,7 +322,7 @@ void player_set_song (int player_nr, int no)
     struct PlayerPrivate *p;
     int ent, err = 0;
 
-    TRACE("PLAYER_SetSong -> %d,%d",player_nr,no);
+    TRACE("PLAYER_SetSong enter %d,%d",player_nr,no);
     p = PLAYER_GetData(player_nr);
     if(p==NULL)
         return;
@@ -334,9 +331,8 @@ void player_set_song (int player_nr, int no)
     if (ent == 0)
     {
         printf ("playlist has no entries.\n");
-        p->playing_id     = SONGDB_ID_UNKNOWN;
-        p->playing_unique = PLAYLIST_UNIQUE_UNKNOWN;
-        p->playing_no     = 0;
+        p->songdb_id     = SONGDB_ID_UNKNOWN;
+        p->playlist_id     = 0;
         player_load (player_nr);
         return;
     }
@@ -354,10 +350,11 @@ void player_set_song (int player_nr, int no)
         ERROR("Nothing loaded");
         return;
     }
-    p->playing_no     = no;
-    p->playing_unique = pe->unique;
+    p->playlist_id     = no;
+    
+   
     INPUT_GetTag(PLAYER1,pe->e->filename,pe->e);
-    p->playing_id = pe->e->id;
+    p->songdb_id = pe->e->id;
     err = player_load (player_nr);
     if (err)
     {
@@ -393,20 +390,19 @@ void player_set_song (int player_nr, int no)
 
 }
 
-int
-player_load (int player_nr)
+/* loads a song set by playing_id */
+int player_load (int player_nr)
 {
     int err = 0;
     int cerr = 0;
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
     struct SongDBEntry *e;
 
-    TRACE("player_load ->");
+    TRACE("player_load enter");
     if(p==NULL)
-        return -1;
-
-    if (p->playing_no == 0 && p->playing_id == SONGDB_ID_UNKNOWN
-        && p->playing_unique == PLAYLIST_UNIQUE_UNKNOWN)
+        return 0;
+    
+    if (p->playlist_id == 0 && p->songdb_id == SONGDB_ID_UNKNOWN)
     {
         printf ("no song to play\n");
         return 0;
@@ -414,8 +410,8 @@ player_load (int player_nr)
 
     if (! (cerr = input_close_file (p->current_plugin)) )
     {
-        p->play = 0;
-        e   =  SONGDB_GetEntryID (p->playing_id);
+        p->State = PLAYER_PAUSE;
+        e   =  SONGDB_GetEntryID (p->songdb_id);
         if(e)
             err =  INPUT_LoadFile (player_nr, e);
         else
@@ -423,7 +419,7 @@ player_load (int player_nr)
         if (err)
         {
             fprintf (stderr, "Error 0x%x(%d) loading song id %ld: %s\n", err, err,
-                     p->playing_id, e->filename);
+                     p->songdb_id, e->filename);
             return -1;
         }
     }
@@ -440,7 +436,7 @@ player_load (int player_nr)
                  -cerr);
         return -2;
     }
-    TRACE("player_load <-");
+    TRACE("player_load leave");
     return 0;
 
 }
@@ -450,7 +446,7 @@ int PLAYER_GetArtist(int player_nr,char *label)
     struct SongDBEntry *e;
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
 
-    e=SONGDB_GetEntryID(p->playing_id);
+    e=SONGDB_GetEntryID(p->songdb_id);
 
     if(e && e->artist)
     {
@@ -465,7 +461,7 @@ int PLAYER_GetTitle(int player_nr,char *label)
     struct SongDBEntry *e;
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
 
-    e=SONGDB_GetEntryID(p->playing_id);
+    e=SONGDB_GetEntryID(p->songdb_id);
     
     if(e && e->title)
     {
@@ -481,7 +477,7 @@ int PLAYER_GetFilename(int player_nr,char *filename)
     struct SongDBEntry *e;
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
 
-    e=SONGDB_GetEntryID(p->playing_id);
+    e=SONGDB_GetEntryID(p->songdb_id);
     
     if(e && e->filename)
     {
@@ -496,7 +492,7 @@ long PLAYER_GetTimeTotal(int player_nr)
     struct SongDBEntry *e;
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
 
-    e=SONGDB_GetEntryID(p->playing_id);
+    e=SONGDB_GetEntryID(p->songdb_id);
 
     if(e)
         return e->time;
@@ -520,7 +516,7 @@ long PLAYER_GetTimeLeft(int player_nr)
     struct SongDBEntry *e;
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
 
-    e=SONGDB_GetEntryID(p->playing_id);
+    e=SONGDB_GetEntryID(p->songdb_id);
     if(e)
     {
         t = e->time - INPUT_GetTime(p->current_plugin);
@@ -540,7 +536,7 @@ int PLAYER_GetBitrate(int player_nr)
     struct SongDBEntry *e;
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
 
-    e=SONGDB_GetEntryID(p->playing_id);    
+    e=SONGDB_GetEntryID(p->songdb_id);    
 
     if(e && e->AddInfo)
     {
@@ -556,7 +552,7 @@ int PLAYER_GetSamplerate(int player_nr)
     struct SongDBEntry *e;
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
 
-    e=SONGDB_GetEntryID(p->playing_id);
+    e=SONGDB_GetEntryID(p->songdb_id);
 
     if(e && e->AddInfo)
     {

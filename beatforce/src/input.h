@@ -43,6 +43,6 @@ int INPUT_Seek (InputPluginData *, long);
 
 long INPUT_GetTime (InputPluginData *);
 
-int input_eof (int);
+int INPUT_EOF(int);
 
 #endif
