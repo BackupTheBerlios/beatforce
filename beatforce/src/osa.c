@@ -99,10 +99,12 @@ BFList *OSA_FindDirectories(char *dir)
             if(dir[strlen(dir)-1]!='/')
             {
                 sprintf(dirname,"%s/%s",dir,dent->d_name);
+                TRACE("%s",dirname);
             }
             else
             {
                 sprintf(dirname,"%s%s",dir,dent->d_name);
+                TRACE("%s",dirname);
             }
             if(strlen(dirname))
                 dirs=LLIST_Append(dirs,dirname);
