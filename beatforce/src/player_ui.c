@@ -214,8 +214,8 @@ void PLAYERUI_Redraw()
     }
 
 
-    playerui_UpdateArtist(0);
-    playerui_UpdateArtist(1);
+    PLAYERUI_UpdateArtist(0);
+    PLAYERUI_UpdateArtist(1);
 
     playerui_UpdateTitle(0);
     playerui_UpdateTitle(1);
