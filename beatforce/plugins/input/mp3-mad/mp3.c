@@ -90,7 +90,8 @@ InputPlugin mp3_ip = {
     NULL,
     NULL,
 
-    mp3_cleanup
+    mp3_cleanup,
+    mp3_set_input_interface
 };
 
 InputInterface mp3_if = {
@@ -104,7 +105,12 @@ InputInterface mp3_if = {
 };
 
 InputPlugin *
-get_input_info (InputInterface *api)
+get_input_info ()
+{
+    return &mp3_ip;
+}
+
+int mp3_set_input_interface(InputInterface *api)
 {
     mp3_if.input_eof          = api->input_eof;   
     mp3_if.output_buffer_free = api->output_buffer_free;
@@ -114,9 +120,8 @@ get_input_info (InputInterface *api)
     mp3_if.output_pause       = api->output_pause;
     mp3_if.output_write       = api->output_write;
 
-    return &mp3_ip;
+    return 1;
 }
-
 
 /*ch_id is equal to player_nr */
 int
@@ -182,8 +187,8 @@ mp3_init (Private ** p, int ch_id)
     mp3_priv->magic = MP3MAD_MAGIC;
 
     //to be done
-    mp3_priv->going     =1 ;
-    mp3_priv->decode_thread=OSA_CreateThread(mp3_play_loop, (void *)mp3_priv);
+    mp3_priv->going     = 1;
+//    mp3_priv->decode_thread=OSA_CreateThread(mp3_play_loop, (void *)mp3_priv);
     *p = (Private *) mp3_priv;
 
     TRACE("mp3_init leave");
@@ -860,6 +865,8 @@ mp3_play_loop (void *param)
                     mad_timer_add (&timer, duration);
                     private->position = mad_timer_count (timer, MAD_UNITS_MILLISECONDS);
                     
+                    if(private->going == 0)
+                        break;
                     mp3_if.output_write (private->ch_id, output_ptr, bytes);
 
                     output_ptr += bytes;

@@ -63,6 +63,8 @@ typedef struct
 
     int (*cleanup) (void *);
 
+    int (*set_interface) (void *);
+
     //InputPluginOutput *output;
 
 }

@@ -37,6 +37,7 @@
 #include "types.h"
 #include "player.h"
 #include "plugin.h"
+#include "interface.h" 
 
 #define MODULE_ID INPUT
 #include "debug.h"
@@ -80,7 +81,10 @@ BFList *INPUT_Init (int channel, BFList * plugin_list)
         
         ipd->ip = (InputPlugin *) next->data;
 
+        /* Init the plugin with the default write/read function */
+        ipd->ip->set_interface(&beatforce_if);
         ipd->ip->init (&ipd->priv, channel);
+
 
         ip_plugins = LLIST_Append(ip_plugins, (void*) ipd);
         
@@ -99,7 +103,7 @@ INPUT_WhoseFile(BFList *input_plugins, char *filename)
     InputPluginData *ipd;
     BFList *next;
 
-//    TRACE("INPUT_WhoseFile %s",filename);
+    TRACE("INPUT_WhoseFile %s",filename);
     if (filename == NULL)
     {
         return NULL;
@@ -131,7 +135,7 @@ INPUT_WhoseFile(BFList *input_plugins, char *filename)
         next = next->next;
     }
 
-//    ERROR("Unknown File format: %s\n", filename);
+    ERROR("Unknown File format: %s\n", filename);
 
     return NULL;
 }
@@ -247,4 +251,14 @@ long INPUT_GetTime(InputPluginData *Plugin)
 int INPUT_EOF(int ch_id)
 {
     return PLAYER_EOF(ch_id);
+}
+
+int INPUT_SetInputInterface(InputPluginData *Plugin,InputInterface *iif)
+{
+    if(iif == NULL)
+        return 0;
+    else
+        return Plugin->ip->set_interface(iif);
+    
+    
 }

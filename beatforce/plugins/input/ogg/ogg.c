@@ -86,7 +86,8 @@ InputPlugin ogg_ip = {
     NULL,
     NULL,
 
-    ogg_cleanup
+    ogg_cleanup,
+    ogg_set_input_interface
 };
 
 InputInterface ogg_if = {
@@ -100,7 +101,12 @@ InputInterface ogg_if = {
 };
 
 InputPlugin *
-get_input_info (InputInterface *api)
+get_input_info ()
+{
+     return &ogg_ip;
+}
+
+int ogg_set_input_interface(InputInterface *api)
 {
     ogg_if.input_eof          = api->input_eof;   
     ogg_if.output_buffer_free = api->output_buffer_free;
@@ -109,10 +115,8 @@ get_input_info (InputInterface *api)
     ogg_if.output_open        = api->output_open;
     ogg_if.output_pause       = api->output_pause;
     ogg_if.output_write       = api->output_write;
-
-    return &ogg_ip;
+    return 1;
 }
-
 
 /*ch_id is equal to player_nr */
 int
@@ -235,7 +239,6 @@ ogg_get_tag (Private * h, char *path, struct SongDBEntry *e)
 
     {
         vobf=malloc(sizeof(OggVorbis_File));
-        printf("get tag %s\n",path);
         fp=fopen("/home/beuving/test.ogg","rb");
         if(fp == NULL)
             return 0;
@@ -315,7 +318,6 @@ ogg_load_file (Private * h, char *filename)
 
     if(length == 0)
     {
-        printf("Illegal size");
 #if 0
         fseek (private->fd, 0, SEEK_SET);
         scan_file (private->fd, &length, NULL);
@@ -416,7 +418,7 @@ ogg_play_loop (void *param)
 #define OGGBUG 4096
     while(private->going)
     {
-        while(!private->eof)
+        while(!private->eof && private->going)
         {
             long ret=ov_read(&private->vf,pcmout,OGGBUG,0,2,1,&current_section);
             double time=ov_time_tell(&private->vf);

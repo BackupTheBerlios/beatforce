@@ -185,11 +185,14 @@ void SONGDBUI_Play(int player_nr)
     {
         PLAYER_GetPlayingEntry(player_nr,&e);
         tab=SONGDB_FindSubgroup(e);
-        activesong[0]=tab;
-        activesong[1]=e->id;
-        SONGDBUI_SetHighlightedTab(tab);
-        SDL_WidgetPropertiesOf(Widgets->SongArchive,SET_HIGHLIGHTED,e->id);    
-        SONGDBUI_ChangeDatabase(Widgets->SongArchive,Widgets->Tabs);
+        if(e)
+        {
+            activesong[0]=tab;
+            activesong[1]=e->id;
+            SONGDBUI_SetHighlightedTab(tab);
+            SDL_WidgetPropertiesOf(Widgets->SongArchive,SET_HIGHLIGHTED,e->id);    
+            SONGDBUI_ChangeDatabase(Widgets->SongArchive,Widgets->Tabs);
+        }
     }
 }
        

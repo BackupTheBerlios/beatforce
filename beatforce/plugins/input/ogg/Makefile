@@ -86,7 +86,7 @@ libdir = /usr/share/beatforce/plugins/input
 
 libbeatforceogg_la_LDFLAGS = -module -avoid-version
 
-libbeatforceogg_la_SOURCES = ogg.c ogg.h osa.c osa.h debug.c debug.h llist.c llist.h 
+libbeatforceogg_la_SOURCES = ogg.c ogg.h 
 INCLUDES = -I../../../src -I$(top_builddir)/src $(MADDIR)
 LIBS = -lvorbis -lvorbisfile
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
@@ -99,7 +99,7 @@ DEFS = -DHAVE_CONFIG_H -I. -I$(srcdir) -I../../..
 CPPFLAGS = 
 LDFLAGS = 
 libbeatforceogg_la_LIBADD = 
-libbeatforceogg_la_OBJECTS =  ogg.lo osa.lo debug.lo llist.lo
+libbeatforceogg_la_OBJECTS =  ogg.lo
 CFLAGS = -g -O2 -I/usr/include -DHAVE_MP3
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -112,7 +112,7 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = tar
 GZIP_ENV = --best
-DEP_FILES =  .deps/debug.P .deps/llist.P .deps/ogg.P .deps/osa.P
+DEP_FILES =  .deps/ogg.P
 SOURCES = $(libbeatforceogg_la_SOURCES)
 OBJECTS = $(libbeatforceogg_la_OBJECTS)
 

@@ -28,40 +28,122 @@
 
 #include "player.h"
 #include "songdb.h"
+#include "types.h"
 #include "input.h"
 #include "plugin.h"
+#include "sampler.h"
+#include "audio_output.h"
+
 
 #define MODULE_ID SAMPLER
 #include "debug.h"
 
-struct SongDBEntry *sample;
-BFList *SamplerPlugins[2];
+BFList *SamplerPlugins;
 
+Sample samples[10];
+Sample *current;
+
+int SAMPLER_Write (int c, void* buf, int len);
+
+InputInterface sampler_if = 
+{
+    AUDIOOUTPUT_Open,
+    SAMPLER_Write,
+    AUDIOOUTPUT_Pause,
+    AUDIOOUTPUT_BufferFree,
+    AUDIOOUTPUT_GetTime,
+    AUDIOOUTPUT_Close,
+    INPUT_EOF
+};
 
 int SAMPLER_Init()
 {
-    SamplerPlugins[0] = INPUT_Init (2, PLUGIN_GetList(PLUGIN_TYPE_INPUT));
-    SamplerPlugins[1] = INPUT_Init (3, PLUGIN_GetList(PLUGIN_TYPE_INPUT));
-    sample=malloc(sizeof(struct SongDBEntry));
-    memset(sample,0,sizeof(struct SongDBEntry));
-    sample->filename=strdup("/home/beuving/test.ogg");
+    int i;
+    samples[0].filename=strdup("/home/beuving/test.mp3");
+    samples[1].filename=strdup("/home/beuving/test.ogg");
+
+    SamplerPlugins = INPUT_Init (2, PLUGIN_GetList(PLUGIN_TYPE_INPUT));
+
+    current=NULL;
+    for(i=0;i<10;i++)
+    {
+        if(samples[i].filename)
+        {
+            while(current != NULL)
+                SDL_Delay(10);
+            
+            samples[i].buffer=malloc(4000000);
+            samples[i].size=0;
+            samples[i].l = INPUT_WhoseFile (SamplerPlugins,samples[i].filename);
+            samples[i].channel=i+2;
+            samples[i].playing=0;
+            
+            INPUT_SetInputInterface(samples[i].l,&sampler_if);
+            
+            while(!INPUT_LoadFile(samples[i].l,samples[i].filename))
+                SDL_Delay(5);
+            
+            current=&samples[i];
+               
+        }
+    }
     return 1;
 }
 
+
+int play(void *data)
+{
+    unsigned long teller=0;
+    int maxb=40000;
+    int written;
+    Sample *d=(Sample*)data;
+
+    d->playing=1;
+    AUDIOOUTPUT_Close(d->channel);
+    AUDIOOUTPUT_Open(d->channel,FMT_S16_NE,44100,2, &maxb);
+
+    AUDIOOUTPUT_Pause (d->channel,0);
+
+    while(teller < d->size && d->playing)
+    {
+        while(AUDIOOUTPUT_BufferFree(d->channel) < 10000)
+            SDL_Delay(10);
+            written=AUDIOOUTPUT_Write(d->channel,d->buffer+teller,10000);
+           
+        teller+=written;
+    }
+    AUDIOOUTPUT_Close(d->channel);
+    d->playing=0;
+}
 
 int SAMPLER_Play(int s)
 {
-
-    InputPluginData *l;
-
-    if(s < 0 || s > 1)
-        return 0;
-    l = INPUT_WhoseFile (SamplerPlugins[s],sample->filename);
-
-    INPUT_CloseFile(l);
-    INPUT_LoadFile(l,sample->filename);
-    INPUT_Play (l);
+    if(s==0 || s==1)
+    {
+        if(samples[s].playing == 0)
+           OSA_CreateThread(play,&samples[s]);
+        else
+            samples[s].playing=0;
+           
+    }
     return 1;
 }
 
+int SAMPLER_Write (int c, void* buf, int len)
+{
+    if(current == NULL)
+        return 0;
+    if((len + current->size) < 4000000)
+    {
+        memcpy((current->buffer+current->size),buf,len);
+        current->size += len;
+    }
+    else
+    {
+        INPUT_Pause(current->l);
+        INPUT_CloseFile(current->l);
+        current=NULL;
+    }
+    return 1;
+}
 

@@ -125,5 +125,6 @@ int ogg_seek (Private *, long);
 
 long ogg_get_time (Private *);
 
+int ogg_set_input_interface(InputInterface *api);
 
 #endif

@@ -88,19 +88,6 @@ rb_write (struct OutRingBuffer *rb, unsigned char * buf, int len)
 {
   int nwritten;
 
-#if 0
-  {
-    int i;
-
-    printf ("rb_write %d\n", len);
-    for (i = 0; i < len; i++)
-      printf (" %x", buf[i]);
-    printf ("\n");
-  }
-#endif
-
-
-
   mutex_lock (rb_mutex);
   nwritten =  vrb_put (rb->vrb_buf, (char *) buf, (size_t) len);
   mutex_unlock (rb_mutex);
@@ -147,16 +134,12 @@ rb_data_size (struct OutRingBuffer *rb)
 int
 rb_clear (struct OutRingBuffer *rb)
 {
-
-
-
-  /* ugly */
-/*  memset (rb->vrb_buf->upper_ptr, 0, rb->vrb_buf->buf_size);
-  memset (rb->vrb_buf->lower_ptr, 0, rb->vrb_buf->buf_size);
-  rb->vrb_buf->first_ptr = rb->vrb_buf->lower_ptr;
-  rb->vrb_buf->last_ptr = rb->vrb_buf->lower_ptr;*/
-
-  return 0;
+    char *temp;
+    temp=malloc(rb->size);
+    memset(temp,0,rb->size);
+    rb_write(rb,temp,rb->size);
+    free(temp);
+    return 0;
 }
 
 

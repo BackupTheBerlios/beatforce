@@ -122,6 +122,7 @@ int SONGDB_Init (SongDBConfig * our_cfg)
     n_search_results = 0;
     n_index = 0;
 
+    srand(time(NULL));
     SONGDB_LoadXMLDatabase();
 
     MainGroup->Changed  = 1;
@@ -291,6 +292,7 @@ int SONGDB_AddFileToSubgroup(struct SongDBSubgroup *sg,char *filename)
         }
         else
         {
+            ERROR("No plugin for this file");
             return 0;
         }
     }

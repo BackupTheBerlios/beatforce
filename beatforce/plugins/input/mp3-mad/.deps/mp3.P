@@ -23,7 +23,7 @@ mp3.lo mp3.o : mp3.c /usr/include/stdlib.h /usr/include/features.h \
  /usr/include/id3tag.h ../../../src/types.h \
  ../../../src/input_plugin.h ../../../src/songdb.h \
  ../../../src/configfile.h ../../../src/llist.h ../../../src/err.h \
- osa.h llist.h mp3.h debug.h
+ ../../../src/osa.h mp3.h ../../../src/debug.h
 mp3.c :
 /usr/include/stdlib.h :
 /usr/include/features.h :
@@ -76,7 +76,6 @@ mp3.c :
 ../../../src/configfile.h :
 ../../../src/llist.h :
 ../../../src/err.h :
-osa.h :
-llist.h :
+../../../src/osa.h :
 mp3.h :
-debug.h :
+../../../src/debug.h :

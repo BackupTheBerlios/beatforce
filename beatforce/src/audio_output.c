@@ -279,7 +279,7 @@ int AUDIOOUTPUT_Close(int c)
     n_open--;
 #if 1
     /* empty ring buffer */
-    rb_clear (ch[c]->rb);
+//    rb_clear (ch[c]->rb);
     memset (ch[c]->buffer, 0, OUTPUT_BUFFER_SIZE (audiocfg));
 #endif
 
@@ -410,7 +410,6 @@ int AUDIOOUTPUT_SetSpeed(int channel, float speed)
     if(ch[channel] == NULL)
         return 0;
   
-
     
     ch[channel]->speed = speed;
 

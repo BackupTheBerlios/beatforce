@@ -21,13 +21,14 @@
 #include <config.h>
 #include <stdio.h>
 #include <string.h>
+#include <malloc.h>
 
 #include "plugin.h"
 #include "llist.h"
 #include "input_plugin.h"
 #include "output_plugin.h"
 #include "osa.h"
-#include "interface.h"
+
 
 #define MODULE_ID PLUGIN
 #include "debug.h"
@@ -97,7 +98,7 @@ static void
 PLUGIN_AddPlugin(char * filename, int type, BFList ** plugins)
 {
     void *h;
-    void *(*gpi) (InputInterface*);
+    void *(*gpi) (void);
     void *(*gpo) (void);
 
     TRACE("PLUGIN_AddPlugin %s",filename);
@@ -111,7 +112,7 @@ PLUGIN_AddPlugin(char * filename, int type, BFList ** plugins)
                 InputPlugin *p;
                 
                 DEBUG("...is input plugin");
-                p = (InputPlugin *) gpi (&beatforce_if);
+                p = (InputPlugin *) gpi();
                 p->handle = h;
                 p->filename = (char*)strdup (filename);
                 DEBUG("....desc: %s", p->description);

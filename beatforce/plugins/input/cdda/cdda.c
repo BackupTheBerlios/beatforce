@@ -117,7 +117,8 @@ InputPlugin cdda_ip = {
     NULL,
     NULL,
 
-    cdda_cleanup
+    cdda_cleanup,
+    CDDA_SetInputInterface
 };
 
 InputInterface cdda_if = {
@@ -131,7 +132,13 @@ InputInterface cdda_if = {
 };
 
 InputPlugin *
-get_input_info (InputInterface *api)
+get_input_info ()
+{
+    return &cdda_ip;
+}
+
+int
+CDDA_SetInputInterface(InputInterface *api)
 {
     cdda_if.input_eof          = api->input_eof;   
     cdda_if.output_buffer_free = api->output_buffer_free;
@@ -140,10 +147,8 @@ get_input_info (InputInterface *api)
     cdda_if.output_open        = api->output_open;
     cdda_if.output_pause       = api->output_pause;
     cdda_if.output_write       = api->output_write;
-
-    return &cdda_ip;
+    return 1;
 }
-
 
 /*ch_id is equal to player_nr */
 int

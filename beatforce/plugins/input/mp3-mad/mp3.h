@@ -23,7 +23,6 @@
 #ifndef _MP3MAD_H__
 #define _MP3MAD_H__
 
-
 #define MP3MAD_DEBUG
 
 #define MP3MAD_MAGIC	0x6d416433		/* 'mAd3' */
@@ -151,7 +150,6 @@ struct id3tag
 
 
 
-//InputPlugin *get_input_info (void);
 
 int mp3_init (Private **, int);
 int mp3_cleanup (Private *);
@@ -170,6 +168,7 @@ int mp3_pause (Private *);
 int mp3_seek (Private *, long);
 
 long mp3_get_time (Private *);
+int mp3_set_input_interface(InputInterface *api);
 
 static __inline signed long
 linear_dither (unsigned int, mad_fixed_t,

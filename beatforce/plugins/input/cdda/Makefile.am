@@ -4,6 +4,7 @@ libdir = @PLUGIN_DIR@/input
 
 libbeatforcecdda_la_LDFLAGS = -module -avoid-version
 
-libbeatforcecdda_la_SOURCES = cdda.c cdda.h cddb.c http.c http.h osa.c osa.h debug.c debug.h llist.c llist.h 
-INCLUDES =  -I../../../src -I$(top_builddir)/src $(MADDIR)
+libbeatforcecdda_la_SOURCES = cdda.c cddb.c http.c osa.c debug.c llist.c
+
+INCLUDES =  -I../../../src -I$(top_builddir)/src $(MADDIR) -L../../../src
 LIBS = -lmad -lid3tag 

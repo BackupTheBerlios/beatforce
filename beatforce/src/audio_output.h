@@ -100,6 +100,7 @@ struct OutChannel
 
     int clipping;
     int clipping_count;
+    int readdata;
 
     int padding_count;
 

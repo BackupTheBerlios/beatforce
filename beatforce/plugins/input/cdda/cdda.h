@@ -99,7 +99,7 @@ int cdda_pause (Private *);
 int cdda_seek (Private *, long);
 
 long cdda_get_time (Private *);
-
+int CDDA_SetInputInterface(InputInterface *api);
 
 
 #endif /* __CDDA_H__ */
