@@ -3,4 +3,8 @@
 Import('env')
 
 
-env.SharedLibrary()
+env.SharedLibrary('beatforceogg',['ogg.c','debug.c','llist.c','osa.c'],LIBS=['vorbis','vorbisfile'])
+
+
+env.Alias(target = "install", source=env.Install(dir="/usr/share/beatforce/plugins/input/", 
+               source="libbeatforceogg.so"))

@@ -1,0 +1,10 @@
+
+
+Import('env')
+
+
+env.SharedLibrary('raw',['raw.c'])
+
+
+env.Alias(target = "install", source=env.Install(dir="/usr/share/beatforce/plugins/output/", 
+               source="libraw.so"))

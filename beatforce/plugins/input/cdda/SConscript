@@ -3,6 +3,8 @@
 Import('env')
 
 
-env.SharedLibrary('cdda',['cdda.c'])
-env.InstallAs( target = '/usr/share/beatforce/libcdda.so',
-               source = 'libcdda.so')
+env.SharedLibrary('beatforcecdda',['cdda.c','cddb.c','debug.c','http.c','llist.c','osa.c'])
+
+
+env.Alias(target = "install", source=env.Install(dir="/usr/share/beatforce/plugins/input/", 
+               source="libbeatforcecdda.so"))

@@ -2,6 +2,33 @@
 
 Import('env')
 
-env.Alias(target = "install", source=env.Install(dir="/usr/share/beatforce/themes/beatforce/", 
-                        source="beatforce/t.bmp"))
-env.Install(dir = '/usr/share/beatforce',source = ['SConscript']);
+env.Alias(target = "install", 
+          source=env.Install(dir="/usr/share/beatforce/themes/beatforce/", 
+                        source=['beatforce/addall.bmp',
+                                'beatforce/addselected.bmp',
+                                'beatforce/create.bmp',
+                                'beatforce/editgroup.bmp',
+                                'beatforce/editgroup_p.bmp',      
+                                'beatforce/faderline.bmp',
+                                'beatforce/horline.bmp',
+                                'beatforce/info.bmp',
+                                'beatforce/playerbg.bmp',
+                                'beatforce/playonly_green.bmp',
+                                'beatforce/playonly_green_pressed.bmp',
+                                'beatforce/pauseonly_green.bmp',
+                                'beatforce/remove.bmp',
+                                'beatforce/removeselected.bmp',
+                                'beatforce/rename.bmp',
+                                'beatforce/sbackground.bmp',
+                                'beatforce/seperator.bmp',
+                                'beatforce/slibut.bmp',
+                                'beatforce/slibut_horizontal.bmp',
+                                'beatforce/songdb.bmp',
+                                'beatforce/waitlist.bmp',
+                                'beatforce/skin.xml',
+                                'beatforce/digits.fnt',
+                                'beatforce/digital.fnt',
+                                'beatforce/yysmallfont.fnt'
+                                 ]))
+
+

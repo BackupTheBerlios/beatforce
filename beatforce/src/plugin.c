@@ -183,7 +183,7 @@ PLUGIN_AddPlugin(char * filename, int type, BFList ** plugins)
     }
     else
     {
-        ERROR("Error loading plugin");
+        ERROR("Error loading plugin %s",dlerror());
     }
 
 }

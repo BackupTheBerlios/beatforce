@@ -3,4 +3,8 @@
 Import('env')
 
 
-env.SharedLibrary()
+env.SharedLibrary('beatforcemp3',['mp3.c','debug.c','llist.c','osa.c'],LIBS=['mad','id3tag'])
+
+
+env.Alias(target = "install", source=env.Install(dir="/usr/share/beatforce/plugins/input/", 
+               source="libbeatforcemp3.so"))

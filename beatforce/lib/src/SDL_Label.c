@@ -82,7 +82,7 @@ void SDL_LabelDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
         SDL_FillRect(dest,&widget->Rect,Label->bgcolor);
     }
 
-    if(Label->Caption)
+    if(Label->Caption && Label->Font)
     {
         Label_CalculatePattern(Label,&DrawPosititon);
         
@@ -190,7 +190,6 @@ static void Label_CalculatePattern(SDL_Label *Label,SDL_Rect *Rect)
         }
 
     }
-    
 
 }
 

@@ -233,8 +233,10 @@ int SDL_FontSetColor(SDL_Font *font,unsigned int color)
 
 int SDL_FontGetHeight(SDL_Font *font)
 {
-    return font->Height;
-
+    if(font != NULL)
+        return font->Height;
+    else
+        return 0;
 }
 
 

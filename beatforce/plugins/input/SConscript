@@ -3,5 +3,6 @@
 Import('env')
 
 env.SConscript(['cdda/SConscript'])
-#env.SConscript(['mp3mad/SConscript'])
-#env.SConscript(['ogg/SConscript'])
+env.SConscript(['mp3-mad/SConscript'])
+env.SConscript(['ogg/SConscript'])
+

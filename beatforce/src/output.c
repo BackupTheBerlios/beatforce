@@ -244,7 +244,7 @@ OUTPUT_PluginSetVolume (struct OutGroup *grp)
 {
     int err=0;
 
-    if(grp == NULL)
+    if(grp == NULL || grp->dev == NULL)
     {
         ERROR("Invalid arguments");
         return 0;

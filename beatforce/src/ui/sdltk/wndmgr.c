@@ -41,13 +41,17 @@ void WNDMGR_Init()
     unsigned int flags=0;
     ThemeConfig *c=THEME_GetActive();
     ThemeScreen *s;
+
+    TRACE("UI_Init enter");
     
     if(c)
         s=c->Screen;
     else
+    {
+        ERROR("No active theme found");
         exit(1);
+    }
 
-    TRACE("UI_Init enter");
 
     if ( SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_TIMER|SDL_INIT_CDROM) < 0 ) 
     {

@@ -39,12 +39,15 @@ int main(int argc, char *argv[])
     OSA_Init();
     
     CONFIGFILE_OpenDefaultFile();
-    
+
     THEME_Init();     
+
     
     FILEWINDOW_Init();
 
+
     UI_Init(argc,argv);
+
 
     /* Create lists of all available plugins */
     PLUGIN_Init (PLUGIN_TYPE_INPUT);
