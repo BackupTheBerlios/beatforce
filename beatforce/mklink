@@ -1,7 +1,0 @@
-#/bin/bash
-ln -s ../../../src/osa.c   plugins/input/mp3-mad/osa.c
-ln -s ../../../src/osa.h   plugins/input/mp3-mad/osa.h
-ln -s ../../../src/debug.c plugins/input/mp3-mad/debug.c
-ln -s ../../../src/debug.h plugins/input/mp3-mad/debug.h
-ln -s ../../../src/llist.c plugins/input/mp3-mad/llist.c
-ln -s ../../../src/llist.h plugins/input/mp3-mad/llist.h

@@ -42,6 +42,7 @@ void playlist_FreeEntry (struct PlEntry *pe);
 
 long no_of_entries;
 long curr_unique;
+static struct SongDBEntry *test;
 
 int PLAYLIST_Init (int player_nr)
 {
@@ -82,6 +83,14 @@ struct PlEntry *PLAYLIST_GetSong (int player_nr, int no)
     return pe;
 }
 
+int gt(void *d)
+{
+    struct PlayerPrivate *p = PLAYER_GetData(1);
+    printf("Start timer\n");
+    INPUT_GetTag(p->ip_plugins,test->filename,test);
+    printf("End timer %ld\n",test->time);
+    return 0;
+}
 void PLAYLIST_SetEntry(int player_nr, struct SongDBEntry *e)
 {
     struct PlEntry *pe;
@@ -95,6 +104,9 @@ void PLAYLIST_SetEntry(int player_nr, struct SongDBEntry *e)
         return;
     }
     pe = playlist_AllocEntry(e);
+    
+    test=e;
+    OSA_CreateThread(gt,NULL);
 
     no_of_entries++;
 

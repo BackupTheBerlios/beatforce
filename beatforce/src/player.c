@@ -76,6 +76,7 @@ int PLAYER_Init(int player_nr, PlayerConfig * cfg)
     player->songdb_id     = SONGDB_ID_UNKNOWN;
     player->ch_id = player_nr;
     player->State = PLAYER_IDLE;
+    player->e     = NULL;
     
     PLAYER_StorePlayerData(player_nr,player);
 
@@ -370,6 +371,7 @@ void player_set_song (int player_nr, int no)
    
     INPUT_GetTag(p->ip_plugins,pe->e->filename,pe->e);
     p->songdb_id = pe->e->id;
+    p->e         = pe->e;
     err = player_load (player_nr);
     if (err)
     {
@@ -469,7 +471,7 @@ int PLAYER_GetArtist(int player_nr,char *label)
     struct SongDBEntry *e;
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
 
-    e=SONGDB_GetEntryID(p->songdb_id);
+    e=p->e;
 
     if(e && e->artist)
     {

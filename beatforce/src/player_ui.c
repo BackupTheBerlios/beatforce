@@ -30,6 +30,7 @@
 #include "player_ui.h"
 #include "audio_output.h"
 #include "theme.h"
+#include "wndmgr.h"
 
 #include "SDL_Font.h"
 #include "SDL_Slider.h"
@@ -38,6 +39,8 @@
 
 #define MODULE_ID PLAYER_UI
 #include "debug.h"
+
+
 
 PlayerDisplay UI_Players[2];
 

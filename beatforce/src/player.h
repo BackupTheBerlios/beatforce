@@ -25,7 +25,7 @@
 
 #include "input_plugin.h"
 #include "llist.h"
-
+#include "songdb.h"
 
 #define PLAYER1 0 
 #define PLAYER2 1
@@ -42,9 +42,10 @@ typedef int PlayerState;
 
 struct PlayerPrivate
 {
-    int playlist_id;              /* no of song playing ( in playlist ) 0, if not in playlist */
+    int playlist_id;             /* no of song playing ( in playlist ) 0, if not in playlist */
     unsigned long songdb_id;     /* id of song playing  SONGDB_ID_UNKNOWN, if no entry */
     
+    struct SongDBEntry *e;
     ePlayerState State;           /* State of the player */
     
     float pitch;                  /* current pitch */

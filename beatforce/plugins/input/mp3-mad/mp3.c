@@ -164,7 +164,7 @@ mp3_init (Private ** p, int ch_id)
     if (cfg == NULL)
 	return ERROR_NO_MEMORY;
     memset (cfg, 0, sizeof (struct config));
-    cfg->lengthcalc = 1;
+    cfg->lengthcalc = 0;
 
     mp3_priv->ch_id = ch_id;
     mp3_priv->magic = MP3MAD_MAGIC;
@@ -266,6 +266,7 @@ scan_file (FILE * fd, int *length, int *bitrate)
 
 	memmove (buffer, stream.next_frame, &buffer[buflen] - stream.next_frame);
 	buflen -= stream.next_frame - &buffer[0];
+        SDL_Delay(1);
     }
 
     mad_header_finish (&header);
@@ -277,7 +278,8 @@ scan_file (FILE * fd, int *length, int *bitrate)
 
 int
 mp3_get_tag (Private * h, char *path, struct SongDBEntry *e)
-{
+{ 
+    
     FILE *fd;
     mp3Private *mp3_priv = (mp3Private *) h;
     int length = 0;
@@ -287,8 +289,7 @@ mp3_get_tag (Private * h, char *path, struct SongDBEntry *e)
     char *title = NULL, *artist = NULL, *album = NULL;
     char *comment = NULL, *year = NULL, *genre = NULL;
 
-
-    if(h == NULL || path == NULL || e ==NULL)
+    if( h == NULL ||  path == NULL ||  e ==NULL)
         return ERROR_INVALID_ARG;
   
 
@@ -299,7 +300,7 @@ mp3_get_tag (Private * h, char *path, struct SongDBEntry *e)
 	id3_latin1_t *latin1;
 	struct id3_frame *frame;
 
-	id3file = id3_file_open (path, ID3_FILE_MODE_READONLY);
+	id3file = id3_file_open ( path, ID3_FILE_MODE_READONLY);
 	if (id3file == NULL)
 	{
             ERROR("get_tag: Error opening file: %s", strerror (errno));
@@ -409,12 +410,12 @@ mp3_get_tag (Private * h, char *path, struct SongDBEntry *e)
 
 
 
-    e->title   = title;
-    e->artist  = artist;
-    e->album   = album;
-    e->comment = comment;
-    e->year    = year;
-    e->genre   = genre;
+     e->title   = title;
+     e->artist  = artist;
+     e->album   = album;
+     e->comment = comment;
+     e->year    = year;
+     e->genre   = genre;
 
 
 /* length calculation stuff */
@@ -422,25 +423,25 @@ mp3_get_tag (Private * h, char *path, struct SongDBEntry *e)
 	struct mad_header header;
 	struct xing xing;
 
-	if( e->AddInfo == NULL )
+	if(  e->AddInfo == NULL )
 	{
-            e->AddInfo = malloc( sizeof(struct SongAddInfo) );
-            if(e->AddInfo == NULL)
+             e->AddInfo = malloc( sizeof(struct SongAddInfo) );
+            if( e->AddInfo == NULL)
                 return ERROR_NO_MEMORY;
-            memset( e->AddInfo, 0, sizeof( struct SongAddInfo ));
+            memset(  e->AddInfo, 0, sizeof( struct SongAddInfo ));
 	}
 
-	fd = fopen (path, "rb");
+	fd = fopen ( path, "rb");
 	if (fd == NULL)
 	{
-            ERROR("get_tag: Error opening file %s:%s", path, strerror (errno));
+            ERROR("get_tag: Error opening file %s:%s",  path, strerror (errno));
             return ERROR_OPEN_ERROR;
 	}
 
         fseek(fd,0,SEEK_END);
         size=ftell(fd);
         fseek(fd,0,SEEK_SET);
-	e->filesize = size;
+	 e->filesize = size;
         
 	if (scan_header (fd, &header, &xing) == -1)
 	{
@@ -452,23 +453,23 @@ mp3_get_tag (Private * h, char *path, struct SongDBEntry *e)
 
 	switch( header.layer )
 	{
-        case MAD_LAYER_I: e->AddInfo->type = str_mpeg1_l1; break;
-        case MAD_LAYER_II: e->AddInfo->type = str_mpeg1_l2; break;
+        case MAD_LAYER_I:  e->AddInfo->type = str_mpeg1_l1; break;
+        case MAD_LAYER_II:  e->AddInfo->type = str_mpeg1_l2; break;
         case MAD_LAYER_III:
             if( header.flags & MAD_FLAG_MPEG_2_5_EXT )
                 e->AddInfo->type = str_mpeg25_l3;
             else 
-                e->AddInfo->type = str_mpeg1_l3;
+                 e->AddInfo->type = str_mpeg1_l3;
             break;
-        default: e->AddInfo->type = NULL; break;
+        default:  e->AddInfo->type = NULL; break;
 	}
-	e->AddInfo->n_ch = MAD_NCHANNELS(&header);
-	e->AddInfo->SampleRate = header.samplerate;
-	e->AddInfo->bitrate = header.bitrate;
+	 e->AddInfo->n_ch = MAD_NCHANNELS(&header);
+	 e->AddInfo->SampleRate = header.samplerate;
+	 e->AddInfo->bitrate = header.bitrate;
 
-	e->AddInfo->err_protection = ((header.flags & MAD_FLAG_PROTECTION) >0);
-	e->AddInfo->copyright = ((header.flags & MAD_FLAG_COPYRIGHT) >0);
-	e->AddInfo->original = ((header.flags & MAD_FLAG_ORIGINAL) >0);
+	 e->AddInfo->err_protection = ((header.flags & MAD_FLAG_PROTECTION) >0);
+	 e->AddInfo->copyright = ((header.flags & MAD_FLAG_COPYRIGHT) >0);
+	 e->AddInfo->original = ((header.flags & MAD_FLAG_ORIGINAL) >0);
 
 	fseek (fd, 0, SEEK_SET);
 
@@ -492,7 +493,7 @@ mp3_get_tag (Private * h, char *path, struct SongDBEntry *e)
 	else
 	{
             if (!cfg->lengthcalc)
-		length = -(size * 8 / (header.bitrate / 1000)); /* est. */
+		length = (size * 8 / (header.bitrate / 1000)); /* est. */
             else
             {
 		fseek (fd, 0, SEEK_SET);
@@ -500,15 +501,19 @@ mp3_get_tag (Private * h, char *path, struct SongDBEntry *e)
             }
 	}
 
-	e->time   = length;
+	 e->time   = length;
         mp3_priv->length = length;
     }
 
     fclose (fd);
     mp3_priv->size = size;
     mp3_priv->position = 0;
-    return 0;
+ 
+    return 1;
+
 }
+
+
 
 int
 mp3_get_add_info (Private * h, char *filename, struct SongAddInfo *info)
@@ -575,9 +580,11 @@ mp3_load_file (Private * h, char *filename)
 
     if(length == 0)
     {
+#if 0
         fseek (private->fd, 0, SEEK_SET);
         scan_file (private->fd, &length, NULL);
         fseek (private->fd, 0, SEEK_SET);
+#endif
     }
   
     private->length  = length;

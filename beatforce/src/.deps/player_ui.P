@@ -28,7 +28,7 @@ player_ui.o: player_ui.c /usr/include/memory.h /usr/include/features.h \
  /usr/include/sys/select.h /usr/include/bits/select.h \
  /usr/include/bits/sigset.h /usr/include/bits/time.h \
  /usr/include/sys/sysmacros.h /usr/include/alloca.h output_plugin.h \
- ../lib/src/SDL_Slider.h ../lib/src/SDL_Widget.h \
+ wndmgr.h ../lib/src/SDL_Slider.h ../lib/src/SDL_Widget.h \
  /usr/include/SDL/SDL_image.h ../lib/src/SDL_ProgressBar.h debug.h
 player_ui.c :
 /usr/include/memory.h :
@@ -101,6 +101,7 @@ ringbuffer.h :
 /usr/include/sys/sysmacros.h :
 /usr/include/alloca.h :
 output_plugin.h :
+wndmgr.h :
 ../lib/src/SDL_Slider.h :
 ../lib/src/SDL_Widget.h :
 /usr/include/SDL/SDL_image.h :

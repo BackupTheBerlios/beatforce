@@ -59,13 +59,17 @@ void songdb_FreeEntry (struct SongDBEntry *e);
 int songdb_JumpToFileMatch(char* song, char * keys[], int nw);
 int SONGDB_AddSubgroup(struct SongDBGroup *group,char *title);
 struct SongDBSubgroup *songdb_AddSubgroup(struct SongDBSubgroup *sg,char *title);
-static int count;
-BFList *tagplugins;
+
+
+static int subcount;
 
 
 int parsesubgroup(xmlDocPtr doc, xmlNodePtr cur)
 {
     xmlChar *key;
+    long time;
+    struct SongDBEntry *e;
+    SongDBSubgroup *sg;
 
     key = xmlGetProp(cur, "name");
     if(key)
@@ -77,11 +81,23 @@ int parsesubgroup(xmlDocPtr doc, xmlNodePtr cur)
         {
             key = xmlGetProp(cur, "filename");
             if(key)
-                SONGDB_AddFileToSubgroup(count,key);
+                SONGDB_AddFileToSubgroup(subcount,key);
+            key = xmlGetProp(cur, "time");
+            if(key)
+            {
+                time= atol(key);
+                printf("Got time %ld\n",time);
+                SONGDB_SetActiveSubgroup(subcount);
+                e=SONGDB_GetEntryID(SONGDB_GetNoOfEntries()-1);
+                printf("file %s\n",e->filename);
+                if(e)
+                    e->time=time;
+            }
+            
         }
         cur=cur->next;
     }
-    count++;
+    subcount++;
     return 1;
 }
 
@@ -93,7 +109,7 @@ int ReadXML()
     char filename[255];
     char *dir;
 
-    count=0;
+    subcount=0;
 
     LIBXML_TEST_VERSION;
     xmlKeepBlanksDefault(0);
@@ -175,6 +191,7 @@ int SONGDB_Exit()
     struct SongDBEntry *Playlist;
     char *dir;
     char filename[255];
+    char time[255];
 
     dir=OSA_GetConfigDir();
     sprintf(filename,"%s/music.xml",dir);
@@ -205,6 +222,11 @@ int SONGDB_Exit()
         {
             file=xmlNewChild(subgroup,NULL,"song",NULL);
             xmlNewProp(file, BAD_CAST "filename", BAD_CAST Playlist->filename);
+            if(Playlist->time)
+            {
+                sprintf(time,"%ld",Playlist->time);
+                xmlNewProp(file, BAD_CAST "time", BAD_CAST time);
+            }
             Playlist=Playlist->next;
         }
         MainGroup->Subgroup=MainGroup->Subgroup->next;
@@ -321,6 +343,8 @@ struct SongDBSubgroup *SONGDB_GetSubgroup(int which)
     }
     return NULL;
 }
+
+
 
 int SONGDB_AddFileToSubgroup(int which,char *filename)
 {

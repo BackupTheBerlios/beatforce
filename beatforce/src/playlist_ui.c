@@ -84,7 +84,7 @@ void playlisteventhandler(SDL_Table *table)
             player=0;
         else
             player=-1;
-}
+    }
 
     if(player == -1)
         printf("Can't set song to one of the players\n");
