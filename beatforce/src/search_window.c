@@ -23,7 +23,7 @@
 #include <string.h>
 
 #include <SDL/SDL.h>
-#include <SDL_Widget.h>
+#include <SDL_Window.h>
 #include <SDL_Font.h>
 #include <SDL_Table.h>
 
@@ -46,13 +46,14 @@
 void *editwidget;
 void *tablewidget;
 
+static SDL_Surface *SEARCHWINDOW_Create();
 static void SEARCHWINDOW_Search(void *data); /* This function is called when any key is pressed */
 void searchwindow_PlayClicked(void *data);
 void searchwindow_Play(void *data);
 void songdb_searchstring(long row,int column,char *dest);
 int SEARCHWINDOW_EventHandler(SDL_Event event);
 
-Window SEARCHWINDOW={ SEARCHWINDOW_EventHandler , NULL, NULL,NULL};
+SDL_Window SEARCHWINDOW={ SEARCHWINDOW_EventHandler , NULL, NULL,NULL};
 
 
 void SEARCHWINDOW_Open()
@@ -62,11 +63,11 @@ void SEARCHWINDOW_Open()
         SONGDB_FindEntry("");
         SEARCHWINDOW.Surface=SEARCHWINDOW_Create();
     }
-    WNDMGR_Open(&SEARCHWINDOW);                
+    SDL_WindowOpen(&SEARCHWINDOW);                
 }
 
 
-SDL_Surface *SEARCHWINDOW_Create()
+static SDL_Surface *SEARCHWINDOW_Create()
 {
     SDL_Surface *SearchWindow;
     ThemeConfig *tc=THEME_GetActive();
@@ -119,7 +120,7 @@ int SEARCHWINDOW_EventHandler(SDL_Event event)
         switch( event.key.keysym.sym ) 
         {
         case SDLK_ESCAPE:
-            WNDMGR_CloseWindow();
+            SDL_WindowClose();
             break;
             
         default:
@@ -150,7 +151,7 @@ void searchwindow_PlayClicked(void *data)
     int autofade = 0;
     
     SDL_WidgetPropertiesOf(editwidget,SET_CAPTION,"");
-    WNDMGR_CloseWindow(SDL_WidgetGetActiveSurface());
+    SDL_WindowClose();
 
     /* Get the current playlist entry */
     e = SONGDB_GetSearchEntry(table->CurrentRow);
@@ -193,7 +194,7 @@ void searchwindow_Play(void *data)
     /* Reset the edit window */
     /* Close this window. main UI can determine to open the correct one again */
     SDL_WidgetPropertiesOf(editwidget,SET_CAPTION,"");
-    WNDMGR_CloseWindow(SDL_WidgetGetActiveSurface());
+    SDL_WindowClose();
 
     /* Get the current playlist entry */
     e = SONGDB_GetSearchEntry(0);

@@ -35,53 +35,9 @@
 #include "debug.h" 
 
 
-/************** global variables ****************/
-
-typedef struct WindowList
-{
-    Window *Window;
-    struct WindowList *Next;
-    struct WindowList *Prev;
-}WindowList;
-
-SDL_Surface *screen;
-Window *CurWindow;
-int WNDMGR_Running;
-
-WindowList *WindowManager;
-
-
-int gEventsAllowed;
-int windowswitch;
-
-/* Local prototypes */
-int WNDMGR_Redraw(void *data);
-
-
-void WNDMGR_CloseWindow()
-{
-    WindowList *l;
-
-    l=WindowManager;
-
-    if(l->Next)
-    {
-        CurWindow=l->Window;
-        free(l->Next);
-        l->Next=NULL;
-    }
-    else
-    {
-        free(WindowManager);
-        WindowManager=NULL;
-        CurWindow=NULL;
-    }
-    if(CurWindow && CurWindow->Surface)
-        SDL_WidgetUseSurface(CurWindow->Surface);
-}
-
 void WNDMGR_Init()
 {
+    SDL_Surface *screen;
     unsigned int flags=0;
     ThemeConfig *c=THEME_GetActive();
     ThemeScreen *s;
@@ -123,118 +79,17 @@ void WNDMGR_Init()
     }
 
     SDL_WM_SetCaption("Beatforce",NULL);
-
-    /* Initialize global variables */
-    CurWindow       = NULL;
-    WindowManager   = NULL;
-
-    windowswitch    = 0;
-}
-
-void WNDMGR_Open(Window *window)
-{
-    WindowList *l;
-
-    if(WindowManager == NULL)
-    {
-        WindowManager = malloc(sizeof(WindowList));
-        memset(WindowManager,0,sizeof(WindowList));
-        WindowManager->Window=window;
-    }
-    else
-    {
-        l=WindowManager;
-        while(l->Next)
-            l=l->Next;
-     
-        l->Next=malloc(sizeof(WindowList));
-        memset(l->Next,0,sizeof(WindowList));
-        
-        l->Next->Window=window;
-    }
-    CurWindow=window;
-    SDL_WidgetUseSurface(CurWindow->Surface);
-    windowswitch=1;
-}
-
-
-int WNDMGR_Main()
-{
-    SDL_Event test_event;
-    int timer;
-
-    
-    WNDMGR_Running = 1;
-    gEventsAllowed = 1;
-
-    timer=OSA_StartTimer(1,WNDMGR_Redraw,NULL);
-
-    while(WNDMGR_Running)
-    {
-        while(SDL_PollEvent(&test_event)) 
-        {
-            if(gEventsAllowed)
-            {
-                if(CurWindow)
-                {
-                    if(CurWindow->EventHandler)
-                        CurWindow->EventHandler(test_event);
-                }
-                else
-                    WNDMGR_Running=0;
-            }
-
-            switch(test_event.type) 
-            {
-               case SDL_QUIT:
-                   WNDMGR_Running=0;
-                   break;
-            default:
-                break;
-            }
-            if(windowswitch)
-                windowswitch=0;
-            else
-                SDL_WidgetEvent(&test_event);
-        }   
-        SDL_Delay(25); /* To reduce CPU load */
-    }
-
-    OSA_RemoveTimer(timer);
-    return 1;
-}
-
-int WNDMGR_Redraw(void *data)
-{
-    if(CurWindow)
-    {
-        if(CurWindow->NotifyRedraw)
-            CurWindow->NotifyRedraw(CurWindow);
-
-        SDL_DrawAllWidgets(screen);
-        return 60; //redraw every 50ms 
-    }
-    else
-    {
-        /* WindowManager is finished, no windows to draw */
-        return 0; 
-    }
+    SDL_WindowInit(screen);
 
 }
 
-/* disable sending events to the event handler of the current window
-   this can be used when all events have to be send to a widget
-   for example when the widget is in an edit state */
 
-void WNDMGR_DisableEventhandler()
-{
-    gEventsAllowed=0;
-}
 
-void WNDMGR_EnableEventhandler()
-{
-    gEventsAllowed=1;
-}
+
+
+
+
+
 
 
 

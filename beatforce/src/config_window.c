@@ -19,7 +19,7 @@
 */
 
 #include <SDL/SDL.h>
-#include <SDL_Widget.h>
+#include <SDL_Window.h>
 #include <SDL_Table.h>
 #include <malloc.h>
 
@@ -29,11 +29,11 @@
 
 static int CONFIGWINDOW_EventHandler(SDL_Event event);
 static SDL_Surface *CONFIGWINDOW_CreateWindow();
-static int CONFIGWINDOW_NotifyHandler(Window *Win);
+static int CONFIGWINDOW_NotifyHandler(SDL_Window *Win);
 
 void *ConfigWindowClock;
 
-Window CONFIGWINDOW={ CONFIGWINDOW_EventHandler, CONFIGWINDOW_NotifyHandler, NULL, NULL };
+SDL_Window CONFIGWINDOW={ CONFIGWINDOW_EventHandler, CONFIGWINDOW_NotifyHandler, NULL, NULL };
 
 void CONFIGWINDOW_Open()
 {
@@ -41,7 +41,7 @@ void CONFIGWINDOW_Open()
     {
         CONFIGWINDOW.Surface=CONFIGWINDOW_CreateWindow();
     }
-    WNDMGR_Open(&CONFIGWINDOW);
+    SDL_WindowOpen(&CONFIGWINDOW);
 }
 
 static SDL_Surface *CONFIGWINDOW_CreateWindow()
@@ -77,6 +77,9 @@ static SDL_Surface *CONFIGWINDOW_CreateWindow()
     SDL_WidgetCreate(SDL_EDIT,312,20,400,25);
     SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
 
+    SDL_WidgetCreate(SDL_EDIT,312,50,400,25);
+    SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
+
     ConfigWindowClock=CLOCK_Create(cw->Clock);
 
     
@@ -93,7 +96,7 @@ static int CONFIGWINDOW_EventHandler(SDL_Event event)
         switch( event.key.keysym.sym ) 
         {
         case SDLK_ESCAPE:
-            WNDMGR_CloseWindow();
+            SDL_WindowClose();
             break;
         default:
             break;
@@ -114,7 +117,7 @@ static int CONFIGWINDOW_EventHandler(SDL_Event event)
 
 
 
-static int CONFIGWINDOW_NotifyHandler(Window *Win)
+static int CONFIGWINDOW_NotifyHandler(SDL_Window *Win)
 {
     CLOCK_Redraw(ConfigWindowClock);
     return 1;

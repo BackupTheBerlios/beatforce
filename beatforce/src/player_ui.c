@@ -358,11 +358,6 @@ void PLAYERUI_Redraw()
         }
     }
 
-    if(SDL_WidgetHasFocus(UI_Players[0].EditTitle) ||
-       SDL_WidgetHasFocus(UI_Players[0].EditTitle))
-        WNDMGR_DisableEventhandler();
-    else
-        WNDMGR_EnableEventhandler();
 }
 
 /* 

@@ -38,7 +38,7 @@
 #include "effect.h"
 
 #include "wndmgr.h"
-#include "SDL_Widget.h"
+#include "SDL_Window.h"
 
 
 
@@ -74,8 +74,9 @@ int main(int argc, char *argv[])
 
     MAINWINDOW_Open();
     OSACDROM_CheckForDiscs();
+
     /*beatforce UI*/
-    WNDMGR_Main(); /* main loop */
+    SDLTK_Main(); /* main loop */
 
 
     AUDIOOUTPUT_Cleanup();

@@ -18,6 +18,7 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 #include <SDL/SDL.h>
+#include "SDL_Window.h"
 #include <SDL_Table.h>
 #include <SDL_Tree.h>
 #include <config.h>
@@ -64,7 +65,7 @@ char directory[255]; /* Selected directory in directory tree */
 SDL_Surface *Window_CreateFileWindow();
 int FILEWINDOW_EventHandler(SDL_Event event);
 void FILEWINDOW_GetFilesInDirectory(int row,int column,char *string);
-static int FILEWINDOW_NotifyHandler(Window *Win);
+static int FILEWINDOW_NotifyHandler(SDL_Window *Win);
 
 /* Local callback functions */
 void FileWindow_DirSelectClicked(void *data);
@@ -84,7 +85,7 @@ static void FILEWINDOW_GetFilesInSubgroup(int row,int column,char *string);
 
 static void FILEWINDOW_GetSelectedSubgroup(struct SongDBSubgroup **sel_sg);
 
-Window gFILEWINDOW={ FILEWINDOW_EventHandler , FILEWINDOW_NotifyHandler, NULL, NULL };
+SDL_Window gFILEWINDOW={ FILEWINDOW_EventHandler , FILEWINDOW_NotifyHandler, NULL, NULL };
 
 
 void FILEWINDOW_Init()
@@ -97,14 +98,12 @@ void FILEWINDOW_Open()
 {
     if(gFILEWINDOW.Surface == NULL)
     {
-        SDL_WidgetLOCK();
         gFILEWINDOW.Surface=Window_CreateFileWindow();
-        SDL_WidgetUNLOCK();
     }
     SDL_WidgetPropertiesOf(TableSubgroup,ROWS, SONGDB_GetSubgroupCount());
-    WNDMGR_Open(&gFILEWINDOW);
+    SDL_WindowOpen(&gFILEWINDOW);
 }
-static int FILEWINDOW_NotifyHandler(Window *Win)
+static int FILEWINDOW_NotifyHandler(SDL_Window *Win)
 {
     CLOCK_Redraw(timewidget);
     return 1;
@@ -580,7 +579,7 @@ int FILEWINDOW_EventHandler(SDL_Event event)
         {
         case SDLK_ESCAPE:
             SDL_WidgetPropertiesOf(TableSubgroup,CLEAR_SELECTED,0);
-            WNDMGR_CloseWindow();
+            SDL_WindowClose();
             break;
       
         default:

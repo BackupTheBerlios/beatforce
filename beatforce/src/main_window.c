@@ -21,6 +21,7 @@
 
 #include <SDL/SDL.h>
 #include <SDL_Widget.h>
+#include <SDL_Window.h>
 #include <SDL_Table.h>
 #include <malloc.h>
 
@@ -47,11 +48,11 @@
 
 int control_state;
 static int MAINWINDOW_EventHandler(SDL_Event event);
-static int MAINWINDOW_NotifyHandler(Window *Win);
+static int MAINWINDOW_NotifyHandler(SDL_Window *Win);
 static SDL_Surface *MAINWINDOW_CreateWindow();
 static int MAINWINDOW_KeyHandler(unsigned int key);
 
-Window MAINWINDOW={ MAINWINDOW_EventHandler , MAINWINDOW_NotifyHandler , NULL, NULL };
+SDL_Window MAINWINDOW={ MAINWINDOW_EventHandler , MAINWINDOW_NotifyHandler , NULL, NULL };
 
 #define BF_CONTROL         0xf000
 #define BF_QUIT            SDLK_ESCAPE
@@ -70,7 +71,7 @@ void MAINWINDOW_Open()
         MAINWINDOW.Surface=MAINWINDOW_CreateWindow(widgets);
         MAINWINDOW.TransferData=widgets;
     }
-    WNDMGR_Open(&MAINWINDOW);
+    SDL_WindowOpen(&MAINWINDOW);
 }
 
 void configopen(void *d)
@@ -127,10 +128,13 @@ static SDL_Surface *MAINWINDOW_CreateWindow(MainwindowWidgets *w)
 
 static int MAINWINDOW_EventHandler(SDL_Event event)
 {
+    int handled=0;
     unsigned int key = 0;
+
     switch(event.type)
     {
     case SDL_KEYDOWN:
+    {
         switch( event.key.keysym.sym ) 
         {
 
@@ -143,10 +147,11 @@ static int MAINWINDOW_EventHandler(SDL_Event event)
             key=event.key.keysym.sym;
             if(control_state)
                 key |= BF_CONTROL;
-            MAINWINDOW_KeyHandler(key);
+            handled=MAINWINDOW_KeyHandler(key);
             break;
             
         }
+    }
         break;
     case SDL_KEYUP:
         switch( event.key.keysym.sym ) 
@@ -161,31 +166,38 @@ static int MAINWINDOW_EventHandler(SDL_Event event)
         }
 
     }
-    return 0;
+    return handled;
 }
 
 int MAINWINDOW_KeyHandler(unsigned int key)
 {
+    int Handled=0;
+
     switch(key)
     {
     case BF_QUIT:
-        WNDMGR_CloseWindow();
+        SDL_WindowClose();
+        Handled=1;
         break;
         
     case BF_SEARCH:
         SEARCHWINDOW_Open();
+        Handled=1;
         break;
         
     case BF_MAINVOLUMEUP:
         MIXERUI_IncreaseMainVolume();
+        Handled=1;
         break;
 
     case BF_MAINVOLUMEDOWN:
         MIXERUI_DecreaseMainVolume();
+        Handled=1;
         break;
 
     case BF_AUTOFADE:
         MIXER_DoFade(1,0);
+        Handled=1;
         break;
 
     case BF_NEXTSONG:
@@ -197,6 +209,7 @@ int MAINWINDOW_KeyHandler(unsigned int key)
                 {
                     MIXER_DoFade(1,0);
                     SONGDBUI_Play(0);
+                    Handled=1;
                 }
             }
             else if(PLAYER_IsPlaying(0) && PLAYER_IsPlaying(1)==0)
@@ -205,6 +218,7 @@ int MAINWINDOW_KeyHandler(unsigned int key)
                 {
                     MIXER_DoFade(1,0);
                     SONGDBUI_Play(1);
+                    Handled=1;
                 }
             }
 
@@ -213,12 +227,10 @@ int MAINWINDOW_KeyHandler(unsigned int key)
 
     }
 
-    return 1;
-
-
+    return Handled;
 }
 
-static int MAINWINDOW_NotifyHandler(Window *Win)
+static int MAINWINDOW_NotifyHandler(SDL_Window *Win)
 {
     MainwindowWidgets *w=(MainwindowWidgets*)Win->TransferData;
     CLOCK_Redraw(w->Clock);
