@@ -44,7 +44,6 @@
 #include "debug.h"
 
 struct PlayerPrivate *playerdata[3];
-void (*eventcallback)(int player);
 
 //prototypes
 unsigned int player_timeout (unsigned int interval,void *data);
@@ -67,11 +66,6 @@ struct PlayerPrivate *PLAYER_GetData(int player_nr)
     return playerdata[player_nr];
 }
 
-int player_set_callback(void *callback)
-{
-    eventcallback=callback;
-    return 1;
-}
 
 int PLAYER_Init(int player_nr, PlayerConfig * cfg)
 {
@@ -545,11 +539,6 @@ long PLAYER_GetTimeLeft(int player_nr)
         if(e)
         {
             t = e->time - INPUT_GetTime(p->current_plugin);
-            
-            if( (t / 1000 == 5) && eventcallback)
-            {
-                eventcallback(player_nr);
-            }
         }
     }
     return t;

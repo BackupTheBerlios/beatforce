@@ -69,8 +69,11 @@ BFList *OSA_FindDirectories(char *dir)
     struct dirent* dent;
     BFList *dirs = NULL;
 
+    TRACE("OSA_FindDirectories enter %s",dir);
+
     if(dir == NULL)
         return NULL;
+
 
     d=opendir(dir);
     if(d==NULL)
@@ -85,6 +88,7 @@ BFList *OSA_FindDirectories(char *dir)
         {
             char *dirname;
             dirname=malloc(255);
+            memset(dirname,0,255);
             if(dir[strlen(dir)-1]!='/')
             {
                 sprintf(dirname,"%s/%s",dir,dent->d_name);
@@ -140,7 +144,8 @@ BFList *OSA_FindFiles(char *dir,char *extension,int recursive)
         if(dent->d_type==4 && dent->d_name[0]!='.')
         {
             char newdir[255];
-            
+
+            memset(newdir,0,255);
             if(dir[strlen(dir)-1]=='/')
                 sprintf(newdir,"%s%s/",dir,dent->d_name);
             else

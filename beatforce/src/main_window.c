@@ -118,11 +118,6 @@ SDL_Surface *mainwindow_CreateWindow()
     PLAYERUI_CreateWindow(1,610);
     MIXERUI_CreateWindow();
 
-
-    player_set_callback(songend_callback);
-
-
-
     return MainWindow;
 }
 

@@ -27,30 +27,42 @@
 #include "osa.h"
 #include "configfile.h"
 
+#define MODULE_ID THEME
+#include "debug.h"
+
+
 int THEME_Init()
 {
     BFList *dir;
-    int NoOfThemes;
+    BFList *lt;
+    int NoOfThemes=0;
     ConfigFile *themecfg;
     char themepath[255];
     int fullscreen;
 
+    TRACE("THEME_Init enter %s",THEME_DIR);
 
     dir=OSA_FindDirectories(THEME_DIR);
+
     if(dir == NULL)
         return 0;
 
-    NoOfThemes=LLIST_NoOfEntries(dir);
-    if(NoOfThemes == 1)
+    lt=dir;
+    
+    while(lt)
     {
         /* use it */
-        sprintf(themepath,"%s%s\\theme.cfg",THEME_DIR,dir->data);
+        sprintf(themepath,"%s/theme.cfg",(char*)lt->data);
         themecfg=bf_cfg_open_file (themepath);
-        
-        bf_cfg_read_int(themecfg,"Screen","Fullscreen", &fullscreen);
-        
-
+        if(themecfg)
+        {
+            NoOfThemes++;
+            bf_cfg_read_int(themecfg,"Screen","Fullscreen", &fullscreen);
+        }
+        lt=lt->next;
     }
+
+    DEBUG("Number of themes %d",NoOfThemes);
     
     return 1;
 }

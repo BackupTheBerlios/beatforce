@@ -41,9 +41,9 @@ pkgincludedir = $(includedir)/beatforce
 top_builddir = .
 
 ACLOCAL = aclocal
-AUTOCONF = autoconf
+AUTOCONF = /home/beuving/beatforce/beatforce/missing autoconf
 AUTOMAKE = automake
-AUTOHEADER = autoheader
+AUTOHEADER = /home/beuving/beatforce/beatforce/missing autoheader
 
 INSTALL = /usr/bin/install -c
 INSTALL_PROGRAM = ${INSTALL} $(AM_INSTALL_PROGRAM_FLAGS)

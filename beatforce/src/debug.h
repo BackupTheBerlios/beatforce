@@ -32,7 +32,7 @@
 #define PLAYER       7
 #define PLUGIN       8
 #define SONGDB_UI    9
-
+#define THEME        10
 
 #define name(x) x
 #define module( x ) ( #x )
@@ -78,8 +78,8 @@ void printid(char *id,int line,char *message);
 #endif
 
 #if MODULE_ID == OSA
-#define TRACE TRACE_OFF
-#define DEBUG DEBUG_OFF
+#define TRACE TRACE_ON
+#define DEBUG DEBUG_ON
 #endif
 
 #if MODULE_ID == OUTPUT
@@ -102,6 +102,11 @@ void printid(char *id,int line,char *message);
 #if MODULE_ID == SONGDB_UI
 #undef TRACE
 #undef DEBUG
+#define TRACE TRACE_ON
+#define DEBUG DEBUG_ON
+#endif
+
+#if MODULE_ID == THEME
 #define TRACE TRACE_ON
 #define DEBUG DEBUG_ON
 #endif

@@ -28,9 +28,19 @@ char msg[40];
 
 int IGR_Write_to_log(char* id,char* text)
 {
-    unsigned char Log_string[200];
+    int size=0;
+    int i;
+    unsigned char Log_string[255];
    
-    sprintf(Log_string,"%s%s\r\n",text,id);
+    size=strlen(text);
+    size=80-size;
+    sprintf(Log_string,"%s",text);
+
+    for(i=0;i<size;i++)
+        sprintf(Log_string,"%s ",Log_string);
+
+    sprintf(Log_string,"%s%s\n",Log_string,id);
+
     printf("%s",Log_string);
     return 0;
 }
@@ -95,7 +105,7 @@ void traceprintf(char *fmt,...)
 void printid(char *id,int line,char *message)
 {
     sprintf(msg,"%s",message);
-    sprintf(module_id,"\t%s (line %04d)",id,line);
+    sprintf(module_id,"%s (line %04d)",id,line);
 }
 
 

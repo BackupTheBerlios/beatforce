@@ -383,7 +383,7 @@ bf_cfg_open_file (char * filename)
     
     ConfigSection *section = NULL;
 
-    if (!(file = fopen (filename, "r")))
+    if (!(file = fopen (filename, "rb")))
         return NULL;
     
     /* Determine the filesize */
