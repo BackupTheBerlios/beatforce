@@ -34,6 +34,7 @@
 #include "main_window.h"
 #include "search_window.h"
 #include "file_window.h"
+#include "sampler.h"
 
 #include "wndmgr.h"
 #include "SDL_Widget.h"
@@ -79,6 +80,7 @@ int main(int argc, char *argv[])
     MIXER_Init  ();
     PLAYER_Init (0, playercfg0);
     PLAYER_Init (1, playercfg1);
+    SAMPLER_Init();
     SONGDB_Init (songdbcfg);
 
     

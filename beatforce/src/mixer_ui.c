@@ -32,11 +32,23 @@
 
 #include "audio_output.h" 
 #include "theme.h"
+#include "player.h"
+#include "sampler.h"
 
 /* Local callback functions */
 static void MIXERUI_AutoFadeButtonClicked(void *data);
 static void MIXERUI_FaderChanged(void *data);
 void MIXERUI_MainVolumeChanged(void *data);
+
+void playsample(void *s)
+{
+    SAMPLER_Play(0);
+}
+
+void playsample2(void *s)
+{
+    SAMPLER_Play(1);
+}
 
 void* MIXERUI_CreateWindow(ThemeMixer *tm)
 {
@@ -110,6 +122,12 @@ void* MIXERUI_CreateWindow(ThemeMixer *tm)
         }
         Button=Button->next;
     }
+
+    SDL_WidgetCreate(SDL_BUTTON,390,34,20,20);
+    SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,playsample,NULL);
+
+    SDL_WidgetCreate(SDL_BUTTON,415,34,20,20);
+    SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,playsample2,NULL);
     return w;
 }
 

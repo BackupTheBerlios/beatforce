@@ -27,7 +27,7 @@
 #include "songdb.h"
 #include "input_plugin.h"
 
-BFList *INPUT_Init (int player_nr, BFList * plugin_list);
+BFList *INPUT_Init (int channel, BFList * plugin_list);
 
 
 InputPluginData *INPUT_WhoseFile (BFList *, char *);
@@ -35,14 +35,14 @@ InputPluginData *INPUT_WhoseFile (BFList *, char *);
 int INPUT_GetTag(BFList *input_list,char *filename, struct SongDBEntry *e);
 int input_get_add_info (int, char *, struct SongAddInfo *);
 
-int INPUT_LoadFile (int player_nr,struct SongDBEntry *e);
-int INPUT_CloseFile (InputPluginData *);
+int INPUT_LoadFile (InputPluginData *Plugin,char *filename);
+int INPUT_CloseFile (InputPluginData *Plugin);
 
-int INPUT_Play (InputPluginData *);
-int INPUT_Pause (InputPluginData *);
-int INPUT_Seek (InputPluginData *, long);
+int INPUT_Play (InputPluginData *Plugin);
+int INPUT_Pause (InputPluginData *Plugin);
+int INPUT_Seek (InputPluginData *Plugin, long time);
 
-long INPUT_GetTime (InputPluginData *);
+long INPUT_GetTime (InputPluginData *Plugin);
 
 int INPUT_EOF(int);
 

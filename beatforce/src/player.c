@@ -49,8 +49,6 @@ int player_load (int);
 
 
 
-
-
 static void PLAYER_StorePlayerData(int player_nr, struct PlayerPrivate *p)
 {
     if(player_nr > 2 || player_nr < 0)
@@ -79,7 +77,7 @@ int PLAYER_Init(int player_nr, PlayerConfig * cfg)
     player->e     = NULL;
     
     PLAYER_StorePlayerData(player_nr,player);
-
+    
     player->ip_plugins=INPUT_Init (player_nr, PLUGIN_GetList(PLUGIN_TYPE_INPUT));
 
     printf("PL %p\n",player->ip_plugins);
@@ -138,6 +136,7 @@ int PLAYER_Play(int player_nr)
 {
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
 
+    TRACE("PLAYER_Play %d",player_nr);
     if(p == NULL)
     {
         ERROR("No player data available");
@@ -276,6 +275,7 @@ int PLAYER_SetSong (int player_nr, int no)
 int player_load (int player_nr)
 {
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
+    InputPluginData *l;
 
     TRACE("player_load enter");
     
@@ -290,7 +290,14 @@ int player_load (int player_nr)
         p->State = PLAYER_PAUSE;
         if(p->e)
         {
-            if(!INPUT_LoadFile (player_nr, p->e))
+            l = INPUT_WhoseFile (PLAYER_GetData(player_nr)->ip_plugins, p->e->filename);
+            if (l == NULL)
+            {
+                printf("Impossible\n");
+                return 0;
+            }
+            PLAYER_GetData(player_nr)->current_plugin = l;
+            if(!INPUT_LoadFile (l, p->e->filename))
             {
                 ERROR("File not loaded %s",p->e->filename);
                 return 0;

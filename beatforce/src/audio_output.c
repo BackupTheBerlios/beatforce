@@ -238,6 +238,10 @@ int AUDIOOUTPUT_Open(int c, AFormat fmt, int rate, int nch, int *max_bytes)
 #endif
     }
 
+    if( c >= 2 )
+    {
+        ch[c]->mask = GROUP_MASTER;
+    }
     ch[c]->aformat = fmt;
     ch[c]->rate = rate;
     ch[c]->n_ch = nch;
@@ -693,12 +697,12 @@ static int AUDIOOUTPUT_Loop(void *arg)
                     
                     /* add to master buffer if selected */
                     /* ch 0 and ch1 are added later -> CrossFader !!! */
-                    if ((ch[i]->mask & GROUP_MASTER))
+                    if ((ch[channel]->mask & GROUP_MASTER))
                     {
                         ADD_TO_OUTPUT_BUFFER (&group[0]->out_buffer[sample], tmp);
                     }
                     
-                    if (ch[i]->mask & GROUP_MONITOR)
+                    if (ch[channel]->mask & GROUP_MONITOR)
                     {
                         ADD_TO_OUTPUT_BUFFER (&group[1]->out_buffer[sample], tmp);
                     }

@@ -16,6 +16,7 @@ songdb.c        songdb.h        \
 ringbuffer.c    ringbuffer.h    \
 audio_output.c  audio_output.h  \
 player.c        player.h        \
+sampler.c       sample.h        \
 debug.c         debug.h         \
 theme.c         theme.h         \
 types.h                         \

@@ -41,13 +41,24 @@
 #define MODULE_ID INPUT
 #include "debug.h"
 
-BFList *INPUT_Init (int player_nr, BFList * plugin_list)
+
+/* 
+   INPUT_Init; initialises all input plugins for use with an audio channel
+   
+   input:
+   channel - the channel which can be used for audio output 
+   plugin_list - list of plugins of the type InputPlugin
+
+   output:
+   returns a linked list of type InputPluginData
+*/
+BFList *INPUT_Init (int channel, BFList * plugin_list)
 {
     BFList *ip_plugins = NULL;
     InputPluginData *ipd;
     BFList *next;
 
-    TRACE("INPUT_Init enter %d",player_nr);
+    TRACE("INPUT_Init enter %d",channel);
     if (plugin_list == NULL)
     {
         ERROR("input_init: plugin_list == NULL");
@@ -57,7 +68,7 @@ BFList *INPUT_Init (int player_nr, BFList * plugin_list)
     if(next==NULL)
     {
         ERROR("No plugins available");
-        exit(2);
+        return 0;
     }
     while (next)
     {
@@ -69,7 +80,7 @@ BFList *INPUT_Init (int player_nr, BFList * plugin_list)
         
         ipd->ip = (InputPlugin *) next->data;
 
-        ipd->ip->init (&ipd->priv, player_nr);
+        ipd->ip->init (&ipd->priv, channel);
 
         ip_plugins = LLIST_Append(ip_plugins, (void*) ipd);
         
@@ -169,74 +180,64 @@ int INPUT_WriteTag(char *filename,struct SongDBEntry *e)
 
 }
 
-int INPUT_LoadFile (int player_nr,struct SongDBEntry *e)
+int INPUT_LoadFile (InputPluginData *Plugin,char *filename)
 {
-    InputPluginData *l;
-    
-    TRACE("INPUT_LoadFile %d %s",player_nr,e->filename);
-
-    l = INPUT_WhoseFile (PLAYER_GetData(player_nr)->ip_plugins, e->filename);
-    if (l == NULL)
+    TRACE("INPUT_LoadFile %s",filename);
+    if(Plugin == NULL || filename == NULL)
     {
-        printf("Impossible\n");
+        ERROR("Invalid parameters");
         return 0;
     }
-    if(e->AddInfo && e->AddInfo->SampleRate != 44100)
-    {
-        printf("Unable to play such a low bitrate\n");
-    }
-    PLAYER_GetData(player_nr)->current_plugin = l;
-    
-    return l->ip->load_file (l->priv, e->filename);
+    return Plugin->ip->load_file (Plugin->priv, filename);
 }
 
 int
-INPUT_CloseFile(InputPluginData *current_plugin)
+INPUT_CloseFile(InputPluginData *Plugin)
 {
     TRACE("INPUT_CloseFile");
 
-    if (current_plugin == NULL)
+    if (Plugin == NULL)
     {
         ERROR("Invalid parameter");
         return 0;
     }
 
-    return current_plugin->ip->close_file (current_plugin->priv);
+    return Plugin->ip->close_file (Plugin->priv);
 }
 
-int INPUT_Play (InputPluginData * current_plugin)
+int INPUT_Play (InputPluginData * Plugin)
 {
-    if (current_plugin == NULL)
+    if (Plugin == NULL)
         return 0;
     
-    return current_plugin->ip->play (current_plugin->priv);
+    return Plugin->ip->play (Plugin->priv);
 }
 
-int INPUT_Pause (InputPluginData* current_plugin)
+int INPUT_Pause (InputPluginData* Plugin)
 {
-    if (current_plugin == NULL)
+    if (Plugin == NULL)
         return 0;
 
-    return current_plugin->ip->pause (current_plugin->priv);
+    return Plugin->ip->pause (Plugin->priv);
 }
 
-int INPUT_Seek (InputPluginData* current_plugin, long msecs)
+int INPUT_Seek (InputPluginData* Plugin, long msecs)
 {
-    if (current_plugin == NULL)
+    if (Plugin == NULL)
         return 0;
 
-    return current_plugin->ip->seek (current_plugin->priv, msecs);
+    return Plugin->ip->seek (Plugin->priv, msecs);
 }
 
-long INPUT_GetTime(InputPluginData *current_plugin)
+long INPUT_GetTime(InputPluginData *Plugin)
 {
     long time;
-    if (current_plugin == NULL)
+    if (Plugin == NULL)
     {
         ERROR("No file loaded");
         return 0;
     }
-    time=current_plugin->ip->get_time (current_plugin->priv);
+    time=Plugin->ip->get_time (Plugin->priv);
     if(time < 0)
         return 0;
     else

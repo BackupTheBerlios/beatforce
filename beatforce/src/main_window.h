@@ -27,6 +27,7 @@ typedef struct MainwindowWidgets
     void *Clock;
     void *Playlist;
     void *Mixer;
+    void *Songdb;
 }MainwindowWidgets;
 
 

@@ -114,7 +114,7 @@ static SDL_Surface *MAINWINDOW_CreateWindow(MainwindowWidgets *w)
 
     w->Clock=CLOCK_Create(mw->Clock);
 
-    SONGDBUI_CreateWindow(mw->Songdb);
+    w->Songdb=SONGDBUI_CreateWindow(mw->Songdb);
     w->Playlist=PLAYLISTUI_CreateWindow(mw->Playlist);
     PLAYERUI_CreateWindow(0,mw->Player[0]);
     PLAYERUI_CreateWindow(1,mw->Player[1]);
@@ -224,7 +224,7 @@ static int MAINWINDOW_NotifyHandler(Window *Win)
     CLOCK_Redraw(w->Clock);
     MIXERUI_Redraw(w->Mixer);
     PLAYERUI_Redraw();
-    SONGDBUI_Redraw();
+    SONGDBUI_Redraw(w->Songdb);
     PLAYLISTUI_Redraw(w->Playlist);
 
     return 1;

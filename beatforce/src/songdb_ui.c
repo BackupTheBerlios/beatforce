@@ -49,15 +49,14 @@
 /* Prototypes for functions for buttosn below */
 static void SONGDBUI_ChangeGroupClicked(void *data);
 
-static void SONGDBUI_ChangeDatabase();
-static int SONGDBUI_GetHighlightedTab();
+static void SONGDBUI_ChangeDatabase(void *table,void *tabwidget);
+static int SONGDBUI_GetHighlightedTab(void *tabwidget);
 static int SONGDBUI_SetHighlightedTab(int which);
 
 void songdbstring(long row,int column,char *dest);
-void *table;
-void *tabwidget;
 
 static int activesong[2];
+SongdbWidgets *Widgets;
 
 void eventhandler(SDL_Table *table)
 {
@@ -68,19 +67,22 @@ void eventhandler(SDL_Table *table)
     PLAYLIST_AddEntry(0,e);
 }
 
-void SONGDBUI_CreateWindow(ThemeSongdb *ts)
+void *SONGDBUI_CreateWindow(ThemeSongdb *ts)
 {
-    ThemeButton *Button = NULL;
+    ThemeButton   *Button = NULL;
+    SongdbWidgets *sw;
 
     if(ts == NULL)
-        return;
+        return NULL;
 
+    sw=malloc(sizeof(SongdbWidgets));
     Button=ts->Button;
+    Widgets=sw;
 
     if(ts)
     {
         /* Create the large table (songdb)*/
-        table=SDL_WidgetCreateR(SDL_TABLE,ts->Table->Rect);/*x y w h */
+        sw->SongArchive=SDL_WidgetCreateR(SDL_TABLE,ts->Table->Rect);/*x y w h */
         SDL_WidgetProperties(SET_FONT,THEME_Font("small"));
 //        SDL_WidgetProperties(SET_VISIBLE_ROWS,    ts->Table->Rows);
         SDL_WidgetProperties(SET_VISIBLE_COLUMNS, ts->Table->Columns);
@@ -92,22 +94,17 @@ void SONGDBUI_CreateWindow(ThemeSongdb *ts)
 //        SDL_WidgetProperties(SET_BG_COLOR,TRANSPARANT);
         SDL_WidgetProperties(ROWS,SONGDB_GetNoOfEntries());
         SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION,songdbstring);
-        SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,eventhandler,table);
+        SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,eventhandler,sw->SongArchive);
         SDL_WidgetProperties(SET_IMAGE,IMG_Load(THEME_DIR"/beatforce/tablescrollbar.bmp"));
 
         /* Craete the tab section below the table*/
-        tabwidget=SDL_WidgetCreate(SDL_TAB,ts->Table->Rect.x,ts->Table->Rect.y + ts->Table->Rect.h,
+        sw->Tabs=SDL_WidgetCreate(SDL_TAB,ts->Table->Rect.x,ts->Table->Rect.y + ts->Table->Rect.h,
                                            ts->Table->Rect.w,20);
         SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
         SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
         SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,SONGDBUI_ChangeDatabase,NULL);
 
     }
-
-
-
-
-
     /* Create buttons which change the tabs */
     while(Button)
     {
@@ -125,15 +122,16 @@ void SONGDBUI_CreateWindow(ThemeSongdb *ts)
     }
     activesong[0]=-1;
     activesong[1]=-1;
+
+    return sw;
 }
 
-static void SONGDBUI_ChangeDatabase()
+static void SONGDBUI_ChangeDatabase(void *table,void *tabwidget)
 {
-
     int count;
     struct SongDBSubgroup *sg;
 
-    count=SONGDBUI_GetHighlightedTab();
+    count=SONGDBUI_GetHighlightedTab(tabwidget);
       
     if(activesong[0]==count)
         SDL_WidgetPropertiesOf(table,SET_HIGHLIGHTED,activesong[1]);                  
@@ -154,24 +152,25 @@ static void SONGDBUI_ChangeDatabase()
     
 }
 
-void SONGDBUI_Redraw()
+void SONGDBUI_Redraw(void *w)
 {
+    SongdbWidgets *widgets=(SongdbWidgets*)w;
     SongDBSubgroup *sg;
     
     if(SONGDB_GroupChanged())
     {
         sg=SONGDB_GetSubgroup();
         
-        while(SDL_WidgetPropertiesOf(tabwidget,TAB_REMOVE,NULL))
+        while(SDL_WidgetPropertiesOf(widgets->Tabs,TAB_REMOVE,NULL))
         {
         }
         
         while(sg)
         {
-            SDL_WidgetPropertiesOf(tabwidget,TAB_ADD,sg->Name);
+            SDL_WidgetPropertiesOf(widgets->Tabs,TAB_ADD,sg->Name);
             sg=sg->next;
         }
-        SONGDBUI_ChangeDatabase();
+        SONGDBUI_ChangeDatabase(widgets->SongArchive,widgets->Tabs);
     }
  
 }
@@ -180,7 +179,7 @@ void SONGDBUI_Play(int player_nr)
 {
     int tab;
     struct SongDBEntry *e;
-    tab=SONGDBUI_GetHighlightedTab();
+    tab=SONGDBUI_GetHighlightedTab(Widgets->Tabs);
 
     if(tab>=0)
     {
@@ -189,13 +188,13 @@ void SONGDBUI_Play(int player_nr)
         activesong[0]=tab;
         activesong[1]=e->id;
         SONGDBUI_SetHighlightedTab(tab);
-        SDL_WidgetPropertiesOf(table,SET_HIGHLIGHTED,e->id);    
-        SONGDBUI_ChangeDatabase();
+        SDL_WidgetPropertiesOf(Widgets->SongArchive,SET_HIGHLIGHTED,e->id);    
+        SONGDBUI_ChangeDatabase(Widgets->SongArchive,Widgets->Tabs);
     }
 }
        
 
-static int SONGDBUI_GetHighlightedTab()
+static int SONGDBUI_GetHighlightedTab(void *tabwidget)
 {
     SDL_Tab *t;
     t=(SDL_Tab *)tabwidget;
@@ -211,7 +210,7 @@ static int SONGDBUI_SetHighlightedTab(int which)
 {
     SDL_Tab *t;
     SDL_TabList *tl;
-    t=(SDL_Tab *)tabwidget;
+    t=(SDL_Tab *)Widgets->Tabs;
     tl=t->tabs;
 
     while(tl)
