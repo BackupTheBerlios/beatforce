@@ -1,0 +1,2 @@
+
+void OSACDROM_Init();
