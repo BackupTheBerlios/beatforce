@@ -28,7 +28,9 @@
 int  FONT_BDF_IsBDF(char *filename);
 void FONT_BDF_Read(char *filename,SDL_Font *font);
 void FONT_BDF_DrawString(SDL_Surface *screen,SDL_Font *font,char *string,int x, int y);
-void FONT_BDF_DrawChar(SDL_Surface *screen,SDL_Font *font,char character,int x, int y);
+int FONT_BDF_DrawChar(SDL_Surface *dest,SDL_Font *font,
+                     char character,SDL_Rect *pos,SDL_Rect* clip);
+
 
 //local protypes
 void readbdf(FILE *fp,SDL_Font *f);
@@ -84,11 +86,13 @@ void FONT_BDF_DrawString(SDL_Surface *screen,SDL_Font *font,char *string,int x, 
 
 }
 
-void FONT_BDF_DrawChar(SDL_Surface *screen,SDL_Font *font,char character,int x, int y)
+int FONT_BDF_DrawChar(SDL_Surface *dest,SDL_Font *font,
+                      char character,SDL_Rect* pos,SDL_Rect* clip)
 {
 
     BDF_Font *fnt=(BDF_Font*)font->fontdata;
-    drawbdfchar(screen,fnt->bdffont[(int)character],x,y,font->color);
+    drawbdfchar(dest,fnt->bdffont[(int)character],pos->x,pos->y,font->color);
+    return 10;
 }
 
 void readbdf(FILE *fp,SDL_Font *f)

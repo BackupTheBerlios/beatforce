@@ -25,7 +25,8 @@
 int  FONT_FNT_IsFNT(char *filename);
 void FONT_FNT_Read(char *filename,SDL_Font *font);
 void FONT_FNT_DrawString(SDL_Surface *screen,SDL_Font *font,char *string,int x, int y);
-void FONT_FNT_DrawChar(SDL_Surface *screen,SDL_Font *font,char character,int x, int y);
+int FONT_FNT_DrawChar(SDL_Surface *dest,SDL_Font *font,
+                      char character,SDL_Rect *pos,SDL_Rect *clip);
 
 //local prototypes
 void FNT_ReadFont(FILE *fp,SDL_Font *font);
@@ -61,7 +62,7 @@ void FONT_FNT_Read(char *filename,SDL_Font *font)
 
     if(fp == NULL)
     {
-        fprintf(stderr,"SDL_Font: Font file >%s< not found\n",filename);
+        fprintf(stderr,"SDL_Font: Font file %s not found\n",filename);
         return;
     }
 
@@ -77,7 +78,8 @@ void FONT_FNT_DrawString(SDL_Surface *screen,SDL_Font *font,char *string,int x, 
 
 
 
-void FONT_FNT_DrawChar(SDL_Surface *screen,SDL_Font *font,char character,int xoffset, int yoffset)
+int FONT_FNT_DrawChar(SDL_Surface *dest,SDL_Font *font,
+                      char character,SDL_Rect *pos,SDL_Rect *clip)
 {
     int x1,y1;
     int i=0;
@@ -86,6 +88,8 @@ void FONT_FNT_DrawChar(SDL_Surface *screen,SDL_Font *font,char character,int xof
     int start;
     //int ch=character;
     int width;
+    int xoffset=pos->x;
+    int yoffset=pos->y;
 
     FNT_Font *fnt=(FNT_Font*)font->fontdata;
     int which = character - fnt->firstchar;
@@ -94,7 +98,7 @@ void FONT_FNT_DrawChar(SDL_Surface *screen,SDL_Font *font,char character,int xof
     width=fnt->chartable[which*4+1]<<8|fnt->chartable[which*4];
 
     if(which < 0)
-        return;
+        return 0;
 
     start=fnt->chartable[which*4+3]<<8|fnt->chartable[which*4+2];
     start-=fnt->offset;
@@ -113,7 +117,10 @@ void FONT_FNT_DrawChar(SDL_Surface *screen,SDL_Font *font,char character,int xof
                     break;
                 if(bit & 0x80)
                 {
-                    DrawPixel(screen,newx+xoffset,y1+yoffset,font->color);
+                    if(clip && (((newx+xoffset) < clip->x) || ((newx+xoffset+1) > (clip->x +clip->w))))
+                        ;
+                    else
+                        DrawPixel(dest,newx+xoffset,y1+yoffset,font->color);
                 }
                 bit=bit<<1;
             }
@@ -121,7 +128,7 @@ void FONT_FNT_DrawChar(SDL_Surface *screen,SDL_Font *font,char character,int xof
             bit=fnt->font[i+start];
         }
     }
-
+    return width;
 }
 
 

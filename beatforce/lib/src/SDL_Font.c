@@ -31,7 +31,7 @@
 void SDL_ReadFont(FILE *fp,SDL_Font *font);
 
 int SDL_FontDrawChar(SDL_Surface *dest,SDL_Font *font,
-                     char character,SDL_Rect pos);
+                     char character,SDL_Rect *pos,SDL_Rect *clip);
 void DrawPixel(SDL_Surface *screen, int x, int y,unsigned int color2);
 int SDL_FontGetCharWidth(SDL_Font* font,char character);
 
@@ -89,7 +89,7 @@ void SDL_FontDrawStringRect(SDL_Surface *dest,SDL_Font *font,
         pos.y=rect->y;
         pos.w=rect->w;
         pos.h=rect->h;
-        xoffset+=SDL_FontDrawChar(dest,font,string[i],pos);
+        xoffset+=SDL_FontDrawChar(dest,font,string[i],&pos,NULL);
     }
 }
 
@@ -121,20 +121,54 @@ void SDL_FontDrawString(SDL_Surface *dest,SDL_Font *font,
         pos.y=y;
         pos.w=0;
         pos.h=0;
-        xoffset+=SDL_FontDrawChar(dest,font,string[i],pos);
+        xoffset+=SDL_FontDrawChar(dest,font,string[i],&pos,NULL);
     }
 }
 
+void SDL_FontDrawStringLimited(SDL_Surface *dest,SDL_Font *font,
+                               char *string,SDL_Rect *rect,SDL_Rect *clip)
+{
+    int i;
+    int size;
+    int pixelsize;
+    int xoffset=rect->x;
+    SDL_Rect pos;
+    int count=0;
+
+    if(font == NULL )//|| font->font == NULL)
+    {
+        printf("No proper font\n");
+        return;
+    }
+    if(string == NULL)
+    {
+        printf("Invalid string\n");
+        return;
+    }
+        
+    size=strlen(string);
+    pixelsize=SDL_FontGetStringWidth(font,string);
+
+    for(i=count;i<size;i++)
+    {
+        pos.x=xoffset;
+        pos.y=rect->y;
+        pos.w=0;
+        pos.h=0;
+        xoffset+=SDL_FontDrawChar(dest,font,string[i],&pos,clip);
+    }
+
+
+}
+
 int SDL_FontDrawChar(SDL_Surface *dest,SDL_Font *font,
-                     char character,SDL_Rect pos)
+                     char character,SDL_Rect *pos,SDL_Rect *clip)
 {
     int width;
     T_Font_DrawChar DrawChar;
 
-    width = SDL_FontGetCharWidth(font,character);
-    
     DrawChar = FontTable[font->type]->drawchar;
-    DrawChar(dest,font,character,pos.x,pos.y);
+    width=DrawChar(dest,font,character,pos,clip);
     return width;
 }
 
@@ -142,10 +176,6 @@ int SDL_FontDrawChar(SDL_Surface *dest,SDL_Font *font,
 int SDL_FontGetCharWidth(SDL_Font* font,char character)
 {
     int width;
-
-    if(font == NULL || font->fontdata == NULL)
-        return 0;
-
     if(font->type ==FNT_FONT)
     {
         FNT_Font *fnt=(FNT_Font*)font->fontdata;

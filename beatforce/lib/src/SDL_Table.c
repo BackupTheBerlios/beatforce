@@ -138,7 +138,9 @@ void SDL_TableDraw(void *table,SDL_Surface *dest)
      */
 //    if(Table->TableInitialDraw || SDL_WidgetNeedsRedraw())
     {
-        SDL_FillRect(dest,&Table->rect,Table->bgcolor);
+        if(SDL_BlitSurface(Table->Background,NULL,dest,&Table->rect)<0)
+           fprintf(stderr, "BlitSurface error: %s\n", SDL_GetError());
+       
         for(row=0;row<Table->VisibleRows;row++)
         {
             SDL_TableDrawRow(dest,Table,row,0);
@@ -418,8 +420,8 @@ void SDL_TableDrawRow(SDL_Surface *dest,SDL_Table *Table,int row,int update)
             if(SDL_BlitSurface(Table->Background,NULL,dest,&Table->rect)<0)
                 fprintf(stderr, "BlitSurface error: %s\n", SDL_GetError());
         }
-        else
-            SDL_FillRect(dest,&RowDims,Table->bgcolor);
+       else
+           SDL_FillRect(dest,&RowDims,Table->bgcolor);
 
         SDL_FontSetColor(Table->font,Table->fgcolor);
     }

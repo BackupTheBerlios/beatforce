@@ -71,12 +71,12 @@ SDL_Surface *MAINWINDOW_CreateWindow()
     SDL_Surface *MainWindow;
 
     control_state=0;
-    MainWindow = SDL_CreateRGBSurface(SDL_SWSURFACE,1000,650,32,0xff0000,0x00ff00,0x0000ff,0x000000);
+    MainWindow = SDL_CreateRGBSurface(SDL_SWSURFACE,1024,685,32,0xff0000,0x00ff00,0x0000ff,0x000000);
     SDL_SetColorKey(MainWindow,0,0); // disable transparancy
 
     SDL_WidgetUseSurface(MainWindow);
-    SDL_WidgetCreate(SDL_PANEL,0,0,1000,650);
-    SDL_WidgetProperties(SET_NORMAL_IMAGE,THEME_DIR"/beatforce/background.jpg");
+    SDL_WidgetCreate(SDL_PANEL,0,0,1024,685);
+    SDL_WidgetProperties(SET_NORMAL_IMAGE,THEME_DIR"/beatforce/sbackground.bmp");
 
     SONGDBUI_CreateWindow();
     PLAYLISTUI_CreateWindow();

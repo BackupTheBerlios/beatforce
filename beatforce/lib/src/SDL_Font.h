@@ -45,7 +45,7 @@ typedef struct SDL_Font
 typedef int               (*T_Font_IsFormat)       (char*);
 typedef void              (*T_Font_Read)           (char*,SDL_Font*);
 typedef void              (*T_Font_DrawString)     (SDL_Surface *,SDL_Font *,char *,int,int);
-typedef void              (*T_Font_DrawChar)       (SDL_Surface *,SDL_Font *,char,int,int);
+typedef int               (*T_Font_DrawChar)       (SDL_Surface *,SDL_Font *,char,SDL_Rect*,SDL_Rect*);
 
 
 struct S_Font_FunctionList
@@ -68,8 +68,12 @@ static const struct S_Font_FunctionList * const FontTable[] =
 
 
 SDL_Font* SDL_FontInit(char *filename);
-void SDL_FontDrawString(SDL_Surface *dest,SDL_Font *font,
+void SDL_FontDrawString(SDL_Surface *,SDL_Font *font,
                          char *string,int x, int y);
+
+void SDL_FontDrawStringLimited(SDL_Surface *dest,SDL_Font *font,
+                               char *string,SDL_Rect *rect,SDL_Rect *clip);
+
 void SDL_FontDrawStringRect(SDL_Surface *dest,SDL_Font *font,
                             char *string,SDL_Rect *rect);
 

@@ -69,6 +69,10 @@ void MIXERUI_CreateWindow()
 
     MIXER_SetCallback(MIXERUI_Redraw);
 
+    /* Create the slider background */
+    SDL_WidgetCreate(SDL_PANEL,475,9,45,100);
+    SDL_WidgetProperties(SET_NORMAL_IMAGE,   THEME_DIR"/beatforce/horline.bmp");
+
     // Main volume 
     mainslider=SDL_WidgetCreate(SDL_SLIDER,478,4,47,138);    
     SDL_WidgetProperties(SET_BUTTON_IMAGE,THEME_DIR"/beatforce/slibut.bmp");
@@ -81,6 +85,10 @@ void MIXERUI_CreateWindow()
     mainvolumeind=SDL_WidgetCreate(SDL_VOLUMEBAR,527,11,4,124);
     SDL_WidgetProperties(SET_CUR_VALUE,100.0);
     
+    /* Slider background (fader line)*/
+    SDL_WidgetCreate(SDL_PANEL,437,157,138,45);
+    SDL_WidgetProperties(SET_NORMAL_IMAGE,THEME_DIR"/beatforce/faderline.bmp");
+
     /* fade slider */
     slideroffader=SDL_WidgetCreate(SDL_SLIDER,432,162,138,45);    
     SDL_WidgetProperties(SET_CALLBACK,SDL_CHANGED,FaderControlHandler,slideroffader);
@@ -93,6 +101,7 @@ void MIXERUI_CreateWindow()
     SDL_WidgetProperties(SET_NORMAL_STEP_SIZE,0.1);
 
     SDL_WidgetCreate(SDL_BUTTON,490,140,20,20);
+    SDL_WidgetProperties(SET_NORMAL_IMAGE,"c:\\beatforce\\themes\\beatforce\\butje.bmp");
     SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,MixerUI_AutoFadeButtonClicked,NULL);
 }
 

@@ -26,23 +26,29 @@
 #include "SDL_Widget.h"
 #include "SDL_Tab.h"
 
-#define TAB_MAXWIDTH         50
-#define TAB_DEFAULTWIDTH     50
 #define TAB_DEFAULTHEIGHT    16
 #define TAB_LINE_WIDTH       1
 #define TAB_OVERLAY          6
 
-static void AddTab(SDL_Tab *tab,char *string);
-//static SDL_TabImage *SDL_CreateDefaultTab(SDL_Tab *tab, int hl);
-int Tab_DrawTabWithCaption(SDL_Surface *dest,SDL_Tab *tab,SDL_TabList * tl, int high);
-int FitsInWiget(SDL_Tab *tab,SDL_TabList *tl);
-int Tab_DrawArrows(SDL_Surface *dest,SDL_Tab *tab);
-void drawtab(SDL_Surface *dest, int xoffset, int yoffset, int highlighted);
-void SDL_TabRecalculate(SDL_Tab *tab);
 
-/* Prototypes for editwidget */
+/* Prototypes for local tab functions */
+
+static void Tab_AddArrows(SDL_Tab *tab);
+static void Tab_AddTab(SDL_Tab *tab,char *string);
+static void Tab_Recalculate(SDL_Tab *tab);
+static int  Tab_DrawTabWithCaption(SDL_Surface *dest,SDL_Tab *tab,
+                                   SDL_TabList * tl, int high);
+
+
+/* Prototypes for editwidget callbacks */
 void Tab_EditAnyKeyPressed();
 void Tab_EditReturnKeyPressed();
+
+/* Prototypes for button callbacks */
+void Tab_ArrowLeftPressed(void *data);
+void Tab_ArrowRightPressed(void *data);
+
+extern void DrawPixel(SDL_Surface *screen, int x, int y,unsigned int color2);
 
 const struct S_Widget_FunctionList SDL_Tab_FunctionList =
 {
@@ -52,8 +58,6 @@ const struct S_Widget_FunctionList SDL_Tab_FunctionList =
     SDL_TabEventHandler,
     NULL
 };
-
-
 
 void *SDL_TabCreate(SDL_Rect *rect)
 {
@@ -66,7 +70,7 @@ void *SDL_TabCreate(SDL_Rect *rect)
     newtab->rect->y    = rect->y;
     newtab->rect->w    = rect->w;
     newtab->rect->h    = rect->h;
-    newtab->min_width  = TAB_DEFAULTWIDTH;
+    newtab->min_width  = 35;
     newtab->min_height = TAB_DEFAULTHEIGHT;
     newtab->tabs  = NULL;
     newtab->next  = NULL;
@@ -75,9 +79,12 @@ void *SDL_TabCreate(SDL_Rect *rect)
     newtab->normal      = NULL;
     newtab->highlighted = NULL;
     newtab->startx      = 0;
+    newtab->maxstartx   = 0;
     newtab->doesntfit   = 0;
     newtab->overlay     = TAB_OVERLAY;
     newtab->edit        = NULL;
+    newtab->ArrowLeft   = NULL;
+    newtab->ArrowRight  = NULL;
     newtab->OnClicked   = NULL;
     newtab->OnReturn    = NULL;
     return newtab;
@@ -102,13 +109,14 @@ void SDL_TabDraw(void *data,SDL_Surface *dest)
     }
 
   
-    SDL_TabRecalculate(tab); // we can only run this with a valid surface
-    SDL_FillRect(dest,tab->rect,0xff000);        
+    Tab_Recalculate(tab); // we can only run this with a valid surface
+    SDL_FillRect(dest,tab->rect,0x222222);        
     while(tablist)
     {
         Tab_DrawTabWithCaption(dest,tab,tablist,0);
         tablist=tablist->next;
     }
+    /* Redraw the highlighted tab */
     Tab_DrawTabWithCaption(dest,tab,tab->hl,1);
     if(tab->edit)
     {
@@ -127,7 +135,7 @@ void SDL_TabProperties(void *tab,int feature,va_list list)
         break;
 
     case ADD_TAB:
-        AddTab((SDL_Tab *)tab,va_arg(list,char*));
+        Tab_AddTab((SDL_Tab *)tab,va_arg(list,char*));
         break;
 
     case SET_BG_COLOR:
@@ -192,131 +200,75 @@ void SDL_TabEventHandler(void * tab,SDL_Event *event)
     case SDL_MOUSEBUTTONDOWN:
         if(SDL_WidgetIsInside(Tab->rect,event->motion.x,event->motion.y))
         {
-            while(tl && event->motion.x > (tl->rect->x+Tab->rect->x) && 
-                  event->motion.x > (Tab->rect->x + tl->rect->x + tl->rect->w))
-                tl=tl->next;
-
-            if(tl)
+            if(event->button.button == 1)
             {
-                Tab->hl=tl;
+                /* Don't handle events when clicked on one of the arrows */
+                if(Tab->ArrowLeft && SDL_WidgetIsInside(&Tab->ArrowLeft->rect,event->motion.x,event->motion.y))
+                    return;
+            
+                if(Tab->ArrowRight && SDL_WidgetIsInside(&Tab->ArrowRight->rect,event->motion.x,event->motion.y))
+                    return;
 
-                if(Tab->OnClicked)
-                {
-                    Tab->OnClicked(NULL);
+                while(tl && event->motion.x > (tl->rect->x+Tab->rect->x - Tab->startx) && 
+                      event->motion.x > (Tab->rect->x + tl->rect->x + tl->rect->w - Tab->startx))
+                    tl=tl->next;
+
+                if(tl)
+                {   
+                    Tab->hl=tl;
+    
+                    if(Tab->OnClicked)
+                    {
+                        Tab->OnClicked(NULL);
+                    }
                 }
             }
+            if(event->button.button == 4)
+            {
+                if(Tab->doesntfit)
+                    Tab->startx+=5;
+            }
+            if(event->button.button == 5)
+            {
+                if(Tab->doesntfit)
+                    Tab->startx-=5;
+            }
+            
         }
     case SDL_MOUSEBUTTONUP:
         break;
     default:
         break;
     }
-    
-
 
 }
 
-#if 0
-static SDL_TabImage *SDL_CreateDefaultTab(SDL_Tab *tab, int hl)
+void Tab_AddArrows(SDL_Tab *tab)
 {
-    SDL_TabImage *tabimage;
-    SDL_Surface *surface;
-    Uint32 *data;
-    Uint32 rmask, gmask, bmask, amask;
-    int x=0;
-    int y=0;
-    int lineoffset=0;
-    int linex;
-    int entireline=0;
-    int line=0;
-    int width=tab->min_width;
+    SDL_Rect LeftArrow;
+    SDL_Rect RightArrow;
 
-    rmask = 0x000000ff;
-    gmask = 0x0000ff00;
-    bmask = 0x00ff0000;
-    amask = 0xff000000;
+    LeftArrow.x = tab->rect->x + tab->rect->w - (tab->rect->h *2) - 2 - 1;
+    LeftArrow.y = tab->rect->y + 1;
+    LeftArrow.w = tab->rect->h - 2;
+    LeftArrow.h = tab->rect->h - 2;
 
-    tabimage= (SDL_TabImage*)malloc(sizeof(SDL_TabImage));
-    surface = SDL_CreateRGBSurface(SDL_SWSURFACE, tab->min_width, tab->min_height, 32,
-                                   rmask, gmask, bmask, amask);
+    tab->ArrowLeft=SDL_WidgetCreate(SDL_BUTTON,LeftArrow.x,LeftArrow.y,
+                                               LeftArrow.w,LeftArrow.h);
+    SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,Tab_ArrowLeftPressed, tab);
 
-    if(surface == NULL) 
-    {
-        fprintf(stderr, "CreateRGBSurface failed: %s\n", SDL_GetError());
-        exit(1);
-    }
+    RightArrow.x = tab->rect->x + tab->rect->w - tab->rect->h - 2;
+    RightArrow.y = tab->rect->y + 1;
+    RightArrow.w = tab->rect->h - 2;
+    RightArrow.h = tab->rect->h - 2;
 
-
-
-    data=surface->pixels;
-    for(y=0;y<tab->min_height;y++)
-    {
-        linex=lineoffset;
-        for(x=0;x<width;x++)     
-        {
-            if(linex==x)
-            {
-                if(hl)
-                    *data=0xC8C8F8;
-                else
-                    *data=0x585858;
-
-                data++;
-                
-                linex++;
-                line++;
-                
-                if(!entireline)
-                {
-                    if(line >= TAB_LINE_WIDTH)
-                    {
-                        if(linex <width-lineoffset-TAB_LINE_WIDTH)
-                            linex = width-lineoffset-TAB_LINE_WIDTH;
-                    }
-                    else
-                    {
-                        data--;
-                        /*    if(hl)
-                         *data=0xC8C8C8;
-                         else
-                         *data=0xA8A8A8;*/
-                        *data=0xFFEFFF;
-                        data++;
-                    }
-                }         
-                
-
-                if(x >= (width-1)-lineoffset)
-                    linex=0;
-
-            }
-            else if((x < linex) && ( x > lineoffset))
-            {
-                *data=0x808080;
-                data++;
-            }
-            else
-            {
-                *data=0xFFFFFF;
-                data++;
-            }
-        }
-        line=0;
-        entireline=( ((tab->min_height - y -1) > TAB_LINE_WIDTH) ? 0 : 1);
-        if(y%2 == 0)
-            lineoffset++;
-    }
-
-
-    tabimage->slopewidth = surface->h /2;
-    tabimage->surface = SDL_DisplayFormat(surface);
-    SDL_FreeSurface(surface);
-
-    return tabimage;
+    tab->ArrowRight=SDL_WidgetCreate(SDL_BUTTON,RightArrow.x,RightArrow.y,
+                                                RightArrow.w,RightArrow.h);
+    SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,Tab_ArrowRightPressed, tab);
+    
 }
-#endif
 
-static void AddTab(SDL_Tab *tab,char *caption)
+static void Tab_AddTab(SDL_Tab *tab,char *caption)
 {
     SDL_TabList *l;
 
@@ -371,117 +323,182 @@ static void AddTab(SDL_Tab *tab,char *caption)
     tab->NoOfTabs++;
 }
 
-int FitsInWiget(SDL_Tab *tab,SDL_TabList *tl)
+static int Tab_DrawSlope(SDL_Surface *dest,SDL_Tab *tab,SDL_TabList * tl, int high,int left)
 {
-    int width=SDL_FontGetStringWidth(tab->font,tl->caption);
+    SDL_Rect rect;
+    unsigned int color;
+    int i=0,j=0;
+    int omde;
+    int start;
+    int end;
+    int mw,w;
+    if(left)
+        rect.x = tab->rect->x + tl->rect->x - 6;
+    else
+        rect.x = tab->rect->x + tl->rect->x + tl->rect->w;
+
+    rect.x -= tab->startx;
+
+    rect.y = tab->rect->y + tl->rect->y;
+    rect.w = 6;
+    rect.h = tl->rect->h;
+
+    if(high)
+        color=tab->bgcolor;
+    else
+        color=0x000099;
     
-    
-    while(tl->next)
+    if(rect.x > tab->rect->x + tab->rect->w)
+        return 0;
+
+    if((rect.x + rect.w) < tab->rect->x)
+        return 0;
+
+    w  = tab->rect->x -rect.x;
+    mw = tab->rect->x + tab->rect->w - rect.x;
+
+    omde=rect.h / (rect.w-1);
+    start = 0;
+    end   = rect.w; 
+
+    for(i=0;i<rect.h;i++)
     {
-        tl=tl->next;
-        width+=SDL_FontGetStringWidth(tab->font,tl->caption);
+        for(j=w;j<mw;j++)
+        {
+         
+
+            if(j >= start && j < end)
+                DrawPixel(dest,rect.x + j,rect.y + i,color);
+            if(j == start && left)
+                DrawPixel(dest,rect.x + j,rect.y + i,0xfffefe);
+
+            if(j == end && left == 0)
+                DrawPixel(dest,rect.x + j,rect.y + i,0x000101);
+        }
+        if( (i % omde) == 0)
+        {
+            if(left)
+                start++;    
+            else
+                end --;
+        }
+
     }
 
+    return 1;
 
-    if(width > tab->rect->w)
-        return 0;
-    else
-        return 1;
-
-
+    
 }
 
-int Tab_DrawTabWithCaption(SDL_Surface *dest,SDL_Tab *tab,SDL_TabList * tl, int high)
+static int Tab_DrawTabWithCaption(SDL_Surface *dest,SDL_Tab *tab,SDL_TabList * tl, int high)
 {
-    //int width       = tl->rect->w;
-//    int howmany     = 0;
-//    int where       = 0;
-//    int stretch     = 0;
-//    int slopewidth  = tab->highlighted->slopewidth;
-//    SDL_Rect src,dst;
-    SDL_Rect dst;
-//    SDL_TabImage *TabSurface;
-
+    SDL_Rect dst,set;
     int xoffset=0;
     int yoffset=0;
+    int ml = tab->startx;
 
+    xoffset = tab->rect->x;
+    yoffset = tab->rect->y;
 
-    xoffset=tab->rect->x;
-    yoffset=tab->rect->y;
-
-    dst.x = tl->rect->x + xoffset;
+    dst.x = tl->rect->x + xoffset -ml;
     dst.y = tl->rect->y + yoffset;
 
     dst.w = tl->rect->w;
     dst.h = tl->rect->h;
 
+    set.x = tl->rect->x + xoffset - ml;
+    set.y = dst.y;
+    set.w = dst.w;
+    set.h = dst.h;
+
+    /* Check if the tab doesn't start on the left side of the tab area */
+    if(dst.x < tab->rect->x)
+    {
+        /* If the entire tab is on the left side of the area return and don't draw */
+        if(((tl->rect->x + tl->rect->w) - ml) < 0)
+            return 0; 
+        dst.w = dst.w - (tab->rect->x - dst.x);
+        dst.x = tab->rect->x;
+    }
+
+    /* Check if the width doesn't go beyong the tab area */
+    if((dst.x + dst.w) > (tab->rect->x + tab->rect->w))
+        dst.w = (tab->rect->x + tab->rect->w) - dst.x;
+    
+    /* Check if the tab starts outside the area */
+    if(dst.x > (tab->rect->x + tab->rect->w))
+        return 0;
+
     if(high)
+    {
+        Tab_DrawSlope(dest,tab,tl,high,1);
         SDL_FillRect(dest,&dst,tab->bgcolor);
+        Tab_DrawSlope(dest,tab,tl,high,0);
+    }
     else
-        SDL_FillRect(dest,&dst,0xff00ff);
+    {
+        Tab_DrawSlope(dest,tab,tl,high,1);
+        SDL_FillRect(dest,&dst,0x000099);
+        Tab_DrawSlope(dest,tab,tl,high,0);
+    }
 
     SDL_FontSetColor(tab->font,0xffffee);
 
     if(tl->caption)
-    {
-        SDL_FontDrawString(dest,tab->font,tl->caption,
-                           xoffset + tl->rect->x + 10,
-                           yoffset + tl->rect->y);
-    }
+        SDL_FontDrawStringLimited(dest,tab->font,tl->caption,&set,&dst);
+    
     
     return 1;
 }
 
-void tabarrowclicked()
-{
-    printf("Tab to left\n");
-}
 
-int Tab_DrawArrows(SDL_Surface *dest,SDL_Tab *tab)
-{
-    SDL_Rect rect;
-
-    rect.x = tab->rect->x;
-    rect.y = tab->rect->y;
-    rect.w = 30;
-    rect.h = 20;
-
-    SDL_WidgetCreate(SDL_BUTTON,tab->rect->x,tab->rect->y,20,30);
-
-    //SDL_FillRect(dest,&rect,SDL_MapRGB(dest->format,255,0,0));
-    return 0;
-}
-
-
-void SDL_TabRecalculate(SDL_Tab *tab)
+static void Tab_Recalculate(SDL_Tab *tab)
 {
     SDL_TabList *tablist;
-    int width;
-
+    int width=0;
+    int maxstartx=0;
+   
     tablist=tab->tabs;
-
+    
     while(tablist)
     {
+        width = 0;
         /*just take a value of 10 for additional space */
         if(tablist->caption)
-            width = SDL_FontGetStringWidth(tab->font,tablist->caption) + 10;
-        else
+            width = SDL_FontGetStringWidth(tab->font,tablist->caption) + 2;
+        if(width < 35)
             width = 35;
+
         tablist->rect->w = width;
         tablist->rect->h = tab->font->height;
+        
         if(tablist->prev == NULL)
         {
             /* this is the first item in the tabtablist */
-            tablist->rect->x = 0;
+            tablist->rect->x = 10;
             tablist->rect->y = 0;
         }
         else
         {
+            /*just take a value of 10 for additional space */
             tablist->rect->x = tablist->prev->rect->x + tablist->prev->rect->w + 10;
             tablist->rect->y = tablist->prev->rect->y;
+            if( (tablist->rect->x + tablist->rect->w) > tab->rect->w)
+            {
+                if(tab->ArrowLeft == NULL && tab->ArrowRight == NULL)
+                    Tab_AddArrows(tab);
+                tab->doesntfit = 1;
+            }
+
         }
+        maxstartx = maxstartx + tablist->rect->w + 10;
         tablist=tablist->next;
     }
+    maxstartx -= tab->rect->w;
+    if(tab->startx > maxstartx)
+        tab->startx = maxstartx;
+    if(tab->startx < 0)
+        tab->startx = 0;
 }
 
 
@@ -513,5 +530,19 @@ void Tab_EditReturnKeyPressed(void *data)
 
     if(Tab->OnReturn)
         Tab->OnReturn();
+
+}
+
+void Tab_ArrowLeftPressed(void *data)
+{
+    SDL_Tab *Tab = (SDL_Tab*)data;
+    Tab->startx -=25;
+}
+
+void Tab_ArrowRightPressed(void *data)
+{
+    SDL_Tab *Tab = (SDL_Tab*)data;
+
+    Tab->startx +=25;
 
 }

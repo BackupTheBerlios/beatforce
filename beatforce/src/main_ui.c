@@ -70,7 +70,7 @@ void MAINUI_Init()
     }
     atexit(SDL_Quit);
  
-    screen = SDL_SetVideoMode(1000, 650, 32, SDL_SWSURFACE);
+    screen = SDL_SetVideoMode(1024,685 , 32, SDL_SWSURFACE | SDL_NOFRAME);
     
     if ( screen == NULL) 
     {

@@ -54,6 +54,10 @@ void PLAYERUI_CreateWindow(int nr, int x)
 //    SDL_WidgetCreate(SDL_PANEL,x,29,310,190);
 //    SDL_WidgetProperties(SET_BG_COLOR,0x0da0c0);
 
+    /* Background window */
+    SDL_WidgetCreate(SDL_PANEL,x+4,55,100,100);
+    SDL_WidgetProperties(SET_NORMAL_IMAGE,   THEME_DIR"/beatforce/playerbg.bmp");
+
     /* Create the play/pause button */
     SDL_WidgetCreate(SDL_BUTTON,x+157,176,80,20);
     SDL_WidgetProperties(SET_NORMAL_IMAGE,   THEME_DIR"/beatforce/playonly_green.bmp");
@@ -105,6 +109,10 @@ void PLAYERUI_CreateWindow(int nr, int x)
     /* Create the progressbar */
     UI_Players[nr].SongProgress=SDL_WidgetCreate(SDL_PROGRESSBAR,x+6,34,250,13);
     SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,UI_ProgressBarClicked,&UI_Players[nr]);
+
+    /* Create the bslider background */
+    SDL_WidgetCreate(SDL_PANEL,x+304,46,45,100);
+    SDL_WidgetProperties(SET_NORMAL_IMAGE,   THEME_DIR"/beatforce/horline.bmp");
 
     /* Create the pitch slider */
     UI_Players[nr].Pitch=SDL_WidgetCreate(SDL_SLIDER,x+310,60,45,100);

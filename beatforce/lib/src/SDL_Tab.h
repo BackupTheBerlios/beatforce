@@ -23,6 +23,7 @@
 #define __SDL_TAB_H
 
 #include "SDL_Widget.h"
+#include "SDL_Button.h"
 #include "SDL_Edit.h"
 #include "SDL_Font.h"
 
@@ -53,10 +54,13 @@ typedef struct SDL_Tab
     SDL_TabList       *hl;
 
     SDL_Edit          *edit;
+    SDL_Button        *ArrowLeft;
+    SDL_Button        *ArrowRight;
     SDL_Font          *font;
     int NoOfTabs;
 
     int startx;
+    int maxstartx;
     int doesntfit;
     int             min_width;  //the minimum width a tab may have
     int             min_height; //the minimum height a tab may have

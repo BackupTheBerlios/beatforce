@@ -92,17 +92,15 @@ void SDL_SliderDraw(void *slider,SDL_Surface *dest)
     /*
      * If there is no line image loaded use the current background as a line
      */
-    if(Slider->background == NULL && Slider->line == NULL)
+    if(Slider->background == NULL)
     {
         Slider->background=SDL_WidgetGetBackground(dest,&Slider->rect);
     }
 
-    if(Slider->line == NULL)
-    {
-        if(SDL_BlitSurface(Slider->background,NULL,dest,&Slider->rect)<0)
-           fprintf(stderr, "BlitSurface error: %s\n", SDL_GetError());
-    }
-    else
+    if(SDL_BlitSurface(Slider->background,NULL,dest,&Slider->rect)<0)
+        fprintf(stderr, "BlitSurface error: %s\n", SDL_GetError());
+
+    if(Slider->line)
     {
         if(SDL_BlitSurface(Slider->line,NULL,dest,&Slider->rect)<0)
             fprintf(stderr, "BlitSurface error: %s\n", SDL_GetError());
@@ -165,7 +163,8 @@ void SDL_SliderProperties(void *slider,int feature,va_list list)
     case SET_LINE_IMAGE:
         if(Slider->line == NULL)
         {
-            Slider->line=IMG_Load("res/sliderline.jpg");
+            Slider->line=IMG_Load(va_arg(list,char*));
+            SDL_SetColorKey(Slider->line,SDL_SRCCOLORKEY,TRANSPARANT);
         }
         break;
     case SET_BUTTON_IMAGE:

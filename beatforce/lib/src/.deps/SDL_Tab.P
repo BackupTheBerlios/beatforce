@@ -24,7 +24,8 @@ SDL_Tab.o: SDL_Tab.c /usr/include/malloc.h /usr/include/features.h \
  /usr/include/SDL/SDL_keysym.h /usr/include/SDL/SDL_mouse.h \
  /usr/include/SDL/SDL_video.h /usr/include/SDL/SDL_mutex.h \
  /usr/include/SDL/SDL_quit.h /usr/include/SDL/SDL_version.h \
- /usr/include/SDL/SDL_image.h SDL_Tab.h SDL_Edit.h SDL_Font.h
+ /usr/include/SDL/SDL_image.h SDL_Tab.h SDL_Button.h SDL_Edit.h \
+ SDL_Font.h
 SDL_Tab.c :
 /usr/include/malloc.h :
 /usr/include/features.h :
@@ -82,5 +83,6 @@ SDL_Widget.h :
 /usr/include/SDL/SDL_version.h :
 /usr/include/SDL/SDL_image.h :
 SDL_Tab.h :
+SDL_Button.h :
 SDL_Edit.h :
 SDL_Font.h :

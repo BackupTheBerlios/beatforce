@@ -109,7 +109,11 @@ void  SDL_EditDraw(void *edit,SDL_Surface *dest)
 
         if(SDL_WidgetHasFocus(edit) || Edit->Focus)
         {
-            cursor.x = Edit->rect.x + SDL_FontGetStringWidth(Edit->Font,Edit->Caption)+2;
+            StringWidth=SDL_FontGetStringWidth(Edit->Font,Edit->Caption);
+            if(StringWidth > Edit->rect.w)
+                cursor.x = Edit->rect.x + Edit->rect.w - 2;
+            else
+                cursor.x = Edit->rect.x + SDL_FontGetStringWidth(Edit->Font,Edit->Caption)+2;
             cursor.y = y_pos;
             cursor.w = 1;
             cursor.h = Edit->Font->height;

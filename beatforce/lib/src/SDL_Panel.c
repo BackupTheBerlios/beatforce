@@ -89,7 +89,10 @@ void  SDL_PanelProperties(void *panel,int feature,va_list list)
     case SET_NORMAL_IMAGE:
         if(Panel->image == NULL)
         {
-            Panel->image = IMG_Load(va_arg(list,char*));
+            char *s = va_arg(list,char*);
+            Panel->image = IMG_Load(s);
+            if(Panel->image)
+                SDL_SetColorKey(Panel->image,SDL_SRCCOLORKEY,TRANSPARANT);
         }
         break;
     case SET_BG_COLOR:

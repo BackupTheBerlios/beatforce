@@ -83,7 +83,7 @@ void SONGDBUI_CreateWindow()
 {
     
     /* Create the large table (songdb)*/
-    table=SDL_WidgetCreate(SDL_TABLE,30,330,950,250);
+    table=SDL_WidgetCreate(SDL_TABLE,30,340,950,240);
     SDL_WidgetProperties(SET_VISIBLE_ROWS,    20);
     SDL_WidgetProperties(SET_VISIBLE_COLUMNS, 3);
     SDL_WidgetProperties(COLUMN_WIDTH, 1, 30  );
