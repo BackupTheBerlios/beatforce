@@ -128,7 +128,6 @@ void SONGDBUI_CreateWindow(ThemeSongdb *ts)
         {
         case BUTTON_CHANGE_DIR:
             //add dir to highlighted tab
-            exit(1);
             SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
             SDL_WidgetProperties(SET_NORMAL_IMAGE,Button->normal);
             SDL_WidgetProperties(SET_PRESSED_IMAGE,Button->pressed);

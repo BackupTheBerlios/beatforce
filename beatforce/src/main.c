@@ -85,7 +85,6 @@ main(int argc, char *argv[])
     
    
     MAINWINDOW_Open();
-
     /*beatforce UI*/
     WNDMGR_Main();
 
