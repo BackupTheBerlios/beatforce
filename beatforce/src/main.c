@@ -45,6 +45,8 @@ int
 main(int argc, char *argv[])
 {
     OSA_Init();
+
+    THEME_Init();
     WNDMGR_Init(); 
 
     //beatforce

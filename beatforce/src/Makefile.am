@@ -16,6 +16,7 @@ ringbuffer.c    ringbuffer.h    \
 audio_output.c  audio_output.h  \
 player.c        player.h        \
 debug.c         debug.h         \
+theme.c         theme.h         \
 types.h                         \
 input_plugin.h                  \
 output_plugin.h                 \

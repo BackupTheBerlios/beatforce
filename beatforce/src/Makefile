@@ -41,9 +41,9 @@ pkgincludedir = $(includedir)/beatforce
 top_builddir = ..
 
 ACLOCAL = aclocal
-AUTOCONF = autoconf
+AUTOCONF = /home/beuving/beatforce/beatforce/missing autoconf
 AUTOMAKE = automake
-AUTOHEADER = autoheader
+AUTOHEADER = /home/beuving/beatforce/beatforce/missing autoheader
 
 INSTALL = /usr/bin/install -c
 INSTALL_PROGRAM = ${INSTALL} $(AM_INSTALL_PROGRAM_FLAGS)
@@ -84,7 +84,7 @@ VERSION = 0.1.0
 EXTRA_DIST = res
 INCLUDES = -I../lib/src/ -Wall 
 bin_PROGRAMS = beatforce
-beatforce_SOURCES =  main.c                          configfile.c    configfile.h    plugin.c        plugin.h        osa.c           osa.h           llist.c         llist.h         mixer.c         mixer.h         input.c         input.h         output.c        output.h        playlist.c      playlist.h      songdb.c        songdb.h        ringbuffer.c    ringbuffer.h    audio_output.c  audio_output.h  player.c        player.h        debug.c         debug.h         types.h                         input_plugin.h                  output_plugin.h                 err.h                           interface.h                                                     wndmgr.c        wndmgr.h        player_ui.c     player_ui.h     songdb_ui.c     songdb_ui.h     playlist_ui.c   playlist_ui.h   mixer_ui.c      mixer_ui.h                                      file_window.c   file_window.h   main_window.c   main_window.h   search_window.c search_window.h
+beatforce_SOURCES =  main.c                          configfile.c    configfile.h    plugin.c        plugin.h        osa.c           osa.h           llist.c         llist.h         mixer.c         mixer.h         input.c         input.h         output.c        output.h        playlist.c      playlist.h      songdb.c        songdb.h        ringbuffer.c    ringbuffer.h    audio_output.c  audio_output.h  player.c        player.h        debug.c         debug.h         theme.c         theme.h         types.h                         input_plugin.h                  output_plugin.h                 err.h                           interface.h                                                     wndmgr.c        wndmgr.h        player_ui.c     player_ui.h     songdb_ui.c     songdb_ui.h     playlist_ui.c   playlist_ui.h   mixer_ui.c      mixer_ui.h                                      file_window.c   file_window.h   main_window.c   main_window.h   search_window.c search_window.h
 
 
 beatforce_LDADD = -L../lib/src/ -lSDLTk -lSDL -lSDL_image -lfftw3 -lvrb 
@@ -103,7 +103,7 @@ beatforce_OBJECTS =  main.$(OBJEXT) configfile.$(OBJEXT) \
 plugin.$(OBJEXT) osa.$(OBJEXT) llist.$(OBJEXT) mixer.$(OBJEXT) \
 input.$(OBJEXT) output.$(OBJEXT) playlist.$(OBJEXT) songdb.$(OBJEXT) \
 ringbuffer.$(OBJEXT) audio_output.$(OBJEXT) player.$(OBJEXT) \
-debug.$(OBJEXT) wndmgr.$(OBJEXT) player_ui.$(OBJEXT) \
+debug.$(OBJEXT) theme.$(OBJEXT) wndmgr.$(OBJEXT) player_ui.$(OBJEXT) \
 songdb_ui.$(OBJEXT) playlist_ui.$(OBJEXT) mixer_ui.$(OBJEXT) \
 file_window.$(OBJEXT) main_window.$(OBJEXT) search_window.$(OBJEXT)
 beatforce_DEPENDENCIES = 
@@ -125,7 +125,8 @@ DEP_FILES =  .deps/audio_output.P .deps/configfile.P .deps/debug.P \
 .deps/main_window.P .deps/mixer.P .deps/mixer_ui.P .deps/osa.P \
 .deps/output.P .deps/player.P .deps/player_ui.P .deps/playlist.P \
 .deps/playlist_ui.P .deps/plugin.P .deps/ringbuffer.P \
-.deps/search_window.P .deps/songdb.P .deps/songdb_ui.P .deps/wndmgr.P
+.deps/search_window.P .deps/songdb.P .deps/songdb_ui.P .deps/theme.P \
+.deps/wndmgr.P
 SOURCES = $(beatforce_SOURCES)
 OBJECTS = $(beatforce_OBJECTS)
 
