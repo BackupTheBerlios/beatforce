@@ -169,14 +169,14 @@ void printid(char *id,int line,char *message);
 #endif
 
 #if MODULE_ID == THEME
-#define TRACE TRACE_ON
-#define DEBUG DEBUG_ON
+#define TRACE TRACE_OFF
+#define DEBUG DEBUG_OFF
 #endif
 
 #endif //MODULE_ID
 
 
-#endif //DEBUG_H
+#endif /* __DEBUG_H__ */
 
 
 

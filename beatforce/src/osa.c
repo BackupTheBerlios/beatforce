@@ -94,15 +94,23 @@ BFList *OSA_FindDirectories(char *dir)
     }
     while(dent)
     {
-        if(!strcmp(dir,"/"))
-            sprintf(dirname,"%s",dent->d_name);
+        if(dir[strlen(dir)-1]=='/')
+            sprintf(dirname,"%s%s",dir,dent->d_name);
         else
             sprintf(dirname,"%s/%s",dir,dent->d_name);
-        stat(dirname,&buf);
-        if(S_ISDIR(buf.st_mode))
+
+        if(lstat(dirname,&buf) == 0)
         {
-            if(strlen(dirname))
-                dirs=LLIST_Append(dirs,strdup(dirname));
+            /* On a succesfull call check if the entry
+               is a directory */
+            if(S_ISDIR(buf.st_mode))
+            {
+                dirs=LLIST_Append(dirs,strdup(dent->d_name));
+            }
+        }
+        else
+        {
+            ERROR("Could not stat %s",dirname);
         }
         dent=readdir(d);
     }
@@ -160,6 +168,7 @@ BFList *OSA_FindFiles(char *dir,char *extension,int recursive)
                 sprintf(newdir,"%s%s/",dir,dent->d_name);
             else
                 sprintf(newdir,"%s/%s/",dir,dent->d_name);
+
             if(recursive)
             {
                 BFList *newfiles;

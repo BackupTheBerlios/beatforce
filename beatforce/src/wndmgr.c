@@ -37,9 +37,17 @@
 
 /************** global variables ****************/
 
+typedef struct WindowList
+{
+    Window *Window;
+    struct WindowList *Next;
+    struct WindowList *Prev;
+}WindowList;
+
 SDL_Surface *screen;
 Window *CurWindow;
 int WNDMGR_Running;
+
 
 
 int gEventsAllowed;
@@ -162,6 +170,7 @@ int WNDMGR_Redraw(void *data)
 /* disable sending events to the event handler of the current window
    this can be used when all events have to be send to a widget
    for example when the widget is in an edit state */
+
 void WNDMGR_DisableEventhandler()
 {
     gEventsAllowed=0;

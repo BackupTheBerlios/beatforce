@@ -35,7 +35,7 @@ int fadey;
 int fadew;
 int fadeh;
 int fadeon;
-static SDL_sem *MySem;
+static SDL_mutex *MyMutex;
 
 void EnableFade()
 {
@@ -50,7 +50,7 @@ int SDL_WidgetInit()
 {
     target_surface = NULL;
     StackLock = 0;
-    MySem=SDL_CreateSemaphore(1);
+    MyMutex=SDL_CreateMutex();
     SDL_StackInit();
     return 1;
 }
@@ -229,15 +229,16 @@ int SDL_DrawAllWidgets(SDL_Surface *screen)
 //    if(current_widget == NULL)
 //        printf("Nothing to draw\n");
 
-    SDL_SemWait(MySem);
+    SDL_mutexP(MyMutex);
     while(current_widget)
     {
         draw=WidgetTable[current_widget->type]->draw;
         draw(current_widget->data,screen);
         current_widget=current_widget->next;
     }
-    SDL_SemPost(MySem);
     SDL_UpdateRect(screen,0,0,0,0);                
+    SDL_mutexV(MyMutex);
+
 
     //   SDL_BlitSurface(active_surface,NULL,screen,NULL);
 ///    SDL_BlitSurface(last_surface,&src,screen,&dest);
@@ -322,7 +323,7 @@ int SDL_WidgetForceRedraw()
 
     current_widget=SDL_StackGetStack();
 
-    SDL_SemWait(MySem);
+    SDL_mutexP(MyMutex);
     while(current_widget)
     {
         properties=WidgetTable[current_widget->type]->properties;
@@ -330,7 +331,7 @@ int SDL_WidgetForceRedraw()
             properties(current_widget->data,FORCE_REDRAW,NULL);
         current_widget=current_widget->next;
     }
-    SDL_SemPost(MySem);
+    SDL_mutexV(MyMutex);
 
     return 1;
 }

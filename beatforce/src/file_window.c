@@ -19,6 +19,7 @@
 */
 #include <SDL/SDL.h>
 #include <SDL_Table.h>
+#include <SDL_Tree.h>
 #include <config.h>
 
 #include "osa.h"
@@ -132,7 +133,40 @@ static void FILEWINDOW_RenameSubgroupFinished()
 
 static void FILEWINDOW_DirectoryClicked(void *data)
 {
-    printf("DirectoryClicked %d\n",SDL_TreeGetSelectedItem(data));
+    TreeNode *t;
+    BFList *l;
+    char diry[255];
+    char *r;
+
+    t=SDL_TreeGetSelectedItem(data);
+    if(t)
+    {
+//        printf("DirectoryClicked %s\n",t->Label);
+        if(t->Child == NULL)
+        {
+            TreeNode *a=t;
+            sprintf(directory,"/%s",a->Label);
+            while(a->Parent)
+            {
+                a=a->Parent;
+                sprintf(diry,"%s",directory);
+                sprintf(directory,"/%s%s",a->Label,diry);
+            }
+//            printf("Got directory %s\n",directory);
+            l=OSA_FindDirectories(directory);
+            files=OSA_FindFiles(directory,".mp3",0);
+            while(l)
+            {
+                r=(char*)l->data;
+                if(r[0] != '.')
+                    SDL_TreeInsertItem(TableDirectories,t,(char*)l->data);
+                l=l->next;
+            }
+            t->collapsed=0;
+
+        }
+    }
+
 }
 
 static void FILEWINDOW_RenameSubgroup(void *data)
@@ -586,7 +620,6 @@ SDL_Surface *Window_CreateFileWindow()
     files=OSA_FindFiles(directory,".mp3",0);
 
     {
-        void *w;
         BFList *l;
         char *r;
 #if 0
@@ -603,13 +636,14 @@ SDL_Surface *Window_CreateFileWindow()
             break;
 #endif
 
-            l=OSA_FindDirectories(directory);
+
 
             TableDirectories=SDL_WidgetCreate(SDL_TREE,10,200,200,170);
             SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
             SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
             SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,FILEWINDOW_DirectoryClicked,TableDirectories);
         
+            l=OSA_FindDirectories(directory);
             while(l)
             {
                 r=(char*)l->data;
