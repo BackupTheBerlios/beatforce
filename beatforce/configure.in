@@ -15,16 +15,17 @@ AC_PROG_CC
 AC_PROG_LIBTOOL
 
 
-# Checks for libraries
-AC_CHECK_LIB(SDL_image,IMG_Load)
-AC_CHECK_LIB(fftw3,fftw_execute)
-
 # Check for SDL 
 SDL_VERSION=1.2.0
 AM_PATH_SDL($SDL_VERSION, 
          :,
          AC_MSG_ERROR([*** SDL version $SDL_VERSION not found!]) 
 ) 
+
+# Checks for libraries
+AC_CHECK_LIB(SDL_image,IMG_Load)
+AC_CHECK_LIB(fftw3,fftw_execute)
+
 
 
 # Checks for header files

@@ -1,22 +1,20 @@
 main.o: main.c /usr/include/stdio.h /usr/include/features.h \
  /usr/include/sys/cdefs.h /usr/include/gnu/stubs.h \
  /usr/lib/gcc-lib/i386-linux/2.95.4/include/stddef.h \
- /usr/include/bits/types.h /usr/include/bits/wordsize.h \
- /usr/include/bits/typesizes.h /usr/include/libio.h \
+ /usr/include/bits/types.h /usr/include/bits/pthreadtypes.h \
+ /usr/include/bits/sched.h /usr/include/libio.h \
  /usr/include/_G_config.h /usr/include/wchar.h \
  /usr/include/bits/wchar.h /usr/include/gconv.h \
  /usr/lib/gcc-lib/i386-linux/2.95.4/include/stdarg.h \
- /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
- /usr/include/bits/stdio.h /usr/include/stdlib.h \
- /usr/include/sys/types.h /usr/include/time.h /usr/include/endian.h \
- /usr/include/bits/endian.h /usr/include/sys/select.h \
- /usr/include/bits/select.h /usr/include/bits/sigset.h \
- /usr/include/bits/time.h /usr/include/sys/sysmacros.h \
- /usr/include/bits/pthreadtypes.h /usr/include/bits/sched.h \
- /usr/include/alloca.h configfile.h llist.h plugin.h ../config.h \
- songdb.h input.h input_plugin.h player.h output.h audio_output.h \
- types.h ringbuffer.h /usr/local/include/vrb.h output_plugin.h mixer.h \
- osa.h main_window.h theme.h wndmgr.h /usr/include/SDL/SDL.h \
+ /usr/include/bits/stdio_lim.h /usr/include/bits/stdio.h \
+ /usr/include/stdlib.h /usr/include/sys/types.h /usr/include/time.h \
+ /usr/include/endian.h /usr/include/bits/endian.h \
+ /usr/include/sys/select.h /usr/include/bits/select.h \
+ /usr/include/bits/sigset.h /usr/include/bits/time.h \
+ /usr/include/sys/sysmacros.h /usr/include/alloca.h configfile.h \
+ llist.h plugin.h ../config.h songdb.h input.h input_plugin.h player.h \
+ output.h audio_output.h types.h ringbuffer.h /usr/include/vrb.h \
+ output_plugin.h mixer.h osa.h theme.h /usr/include/SDL/SDL.h \
  /usr/include/SDL/SDL_main.h /usr/include/SDL/SDL_types.h \
  /usr/include/SDL/SDL_getenv.h /usr/include/SDL/SDL_error.h \
  /usr/include/SDL/begin_code.h /usr/include/SDL/close_code.h \
@@ -27,7 +25,8 @@ main.o: main.c /usr/include/stdio.h /usr/include/features.h \
  /usr/include/SDL/SDL_keyboard.h /usr/include/SDL/SDL_keysym.h \
  /usr/include/SDL/SDL_mouse.h /usr/include/SDL/SDL_video.h \
  /usr/include/SDL/SDL_mutex.h /usr/include/SDL/SDL_quit.h \
- /usr/include/SDL/SDL_version.h
+ /usr/include/SDL/SDL_version.h ../lib/src/SDL_Font.h main_window.h \
+ search_window.h file_window.h wndmgr.h
 main.c :
 /usr/include/stdio.h :
 /usr/include/features.h :
@@ -35,8 +34,8 @@ main.c :
 /usr/include/gnu/stubs.h :
 /usr/lib/gcc-lib/i386-linux/2.95.4/include/stddef.h :
 /usr/include/bits/types.h :
-/usr/include/bits/wordsize.h :
-/usr/include/bits/typesizes.h :
+/usr/include/bits/pthreadtypes.h :
+/usr/include/bits/sched.h :
 /usr/include/libio.h :
 /usr/include/_G_config.h :
 /usr/include/wchar.h :
@@ -44,7 +43,6 @@ main.c :
 /usr/include/gconv.h :
 /usr/lib/gcc-lib/i386-linux/2.95.4/include/stdarg.h :
 /usr/include/bits/stdio_lim.h :
-/usr/include/bits/sys_errlist.h :
 /usr/include/bits/stdio.h :
 /usr/include/stdlib.h :
 /usr/include/sys/types.h :
@@ -56,8 +54,6 @@ main.c :
 /usr/include/bits/sigset.h :
 /usr/include/bits/time.h :
 /usr/include/sys/sysmacros.h :
-/usr/include/bits/pthreadtypes.h :
-/usr/include/bits/sched.h :
 /usr/include/alloca.h :
 configfile.h :
 llist.h :
@@ -71,13 +67,11 @@ output.h :
 audio_output.h :
 types.h :
 ringbuffer.h :
-/usr/local/include/vrb.h :
+/usr/include/vrb.h :
 output_plugin.h :
 mixer.h :
 osa.h :
-main_window.h :
 theme.h :
-wndmgr.h :
 /usr/include/SDL/SDL.h :
 /usr/include/SDL/SDL_main.h :
 /usr/include/SDL/SDL_types.h :
@@ -100,3 +94,8 @@ wndmgr.h :
 /usr/include/SDL/SDL_mutex.h :
 /usr/include/SDL/SDL_quit.h :
 /usr/include/SDL/SDL_version.h :
+../lib/src/SDL_Font.h :
+main_window.h :
+search_window.h :
+file_window.h :
+wndmgr.h :

@@ -23,7 +23,7 @@
 #include "SDL_FontFNT.h"
 
 int  FONT_FNT_IsFNT(char *filename);
-void FONT_FNT_Read(char *filename,SDL_Font *font);
+int FONT_FNT_Read(char *filename,SDL_Font *font);
 void FONT_FNT_DrawString(SDL_Surface *screen,SDL_Font *font,char *string,int x, int y);
 int FONT_FNT_DrawChar(SDL_Surface *dest,SDL_Font *font,
                       char character,SDL_Rect *pos,SDL_Rect *clip);
@@ -55,20 +55,20 @@ int FONT_FNT_IsFNT(char *filename)
 }
 
 
-void FONT_FNT_Read(char *filename,SDL_Font *font)
+int FONT_FNT_Read(char *filename,SDL_Font *font)
 {
     FILE *fp;
     fp=fopen(filename,"rb");
 
     if(fp == NULL)
     {
-        fprintf(stderr,"SDL_Font: Font file %s not found\n",filename);
-        return;
+        return 0;
     }
 
     FNT_ReadFont(fp,font);
     font->type = FNT_FONT;
     fclose(fp);
+    return 1;
 }
 
 void FONT_FNT_DrawString(SDL_Surface *screen,SDL_Font *font,char *string,int x, int y)
@@ -90,9 +90,14 @@ int FONT_FNT_DrawChar(SDL_Surface *dest,SDL_Font *font,
     int width;
     int xoffset=pos->x;
     int yoffset=pos->y;
+    int which;
 
     FNT_Font *fnt=(FNT_Font*)font->fontdata;
-    int which = character - fnt->firstchar;
+    if(fnt == NULL)
+        return 0;
+
+
+    which = character - fnt->firstchar;
 
 
     width=fnt->chartable[which*4+1]<<8|fnt->chartable[which*4];

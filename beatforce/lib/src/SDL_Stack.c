@@ -26,6 +26,7 @@
 
 StackList *stacklist;
 Stack     *current_stack;
+SDL_Surface  *previous_surface;
 Stack     *current_focus;
 
 
@@ -38,6 +39,8 @@ SDL_SurfaceStack(SDL_Surface *surface)
 {
     StackList *surfaces;
 
+    previous_surface=SDL_GetSurfaceStack();
+
     if(stacklist==NULL)
     {
         stacklist=malloc(sizeof(StackList));
@@ -45,6 +48,7 @@ SDL_SurfaceStack(SDL_Surface *surface)
             return -1;
         stacklist->surface=surface;
         stacklist->stack=NULL;
+        stacklist->parent=NULL;
         stacklist->next=NULL;
         current_stack=stacklist->stack;
     }
@@ -55,7 +59,7 @@ SDL_SurfaceStack(SDL_Surface *surface)
         /* If it already exists only make it active */
         if(surfaces->surface == surface)
         {
-            current_stack=surfaces->stack;
+            current_stack  = surfaces->stack;
             return 0;
         }
         else
@@ -65,21 +69,25 @@ SDL_SurfaceStack(SDL_Surface *surface)
                 surfaces=surfaces->next;
                 if(surfaces->surface == surface)
                 {
-                    current_stack=surfaces->stack;
+                     current_stack=surfaces->stack;
 //                    printf("Found surface %p\n",current_stack);
                     return 0;
                 }
             }
         }
 
+        
         /* Add a new one */
         surfaces->next=(StackList*)malloc(sizeof(StackList));
         if(surfaces->next==NULL)
             return -1;
+        
         surfaces->next->surface=surface;
+        surfaces->next->parent=surfaces->surface;
         surfaces->next->stack=NULL;
         surfaces->next->next=NULL;
-        current_stack = surfaces->next->stack;
+         current_stack = surfaces->next->stack;
+        
     }
     return 1;
 }
@@ -96,6 +104,12 @@ SDL_Surface *SDL_GetSurfaceStack()
 
     }
     return NULL;
+
+}
+
+SDL_Surface *SDL_GetPreviousStack()
+{
+    return previous_surface;
 
 }
 

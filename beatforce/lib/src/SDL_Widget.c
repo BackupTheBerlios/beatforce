@@ -28,8 +28,23 @@
 T_Widget_EventHandler user_eventhandler;
 int forceredraw;
 int StackLock;
+SDL_Surface *last_surface = NULL;
+SDL_Surface *previous;
+int fadex;
+int fadey;
+int fadew;
+int fadeh;
+int fadeon;
 
+void EnableFade()
+{
+    fadey=0;
+    fadex=0;
+    fadew=0;
+    fadeh=0;
+    fadeon=0;
 
+}
 int SDL_WidgetUseSurface(SDL_Surface *surface)
 {
     int retval;
@@ -178,7 +193,11 @@ int SDL_DrawAllWidgets(SDL_Surface *screen)
     T_Widget_Draw draw;
     //T_Widget_Properties properties;
     Stack* current_widget;
-    SDL_Surface *active_surface;
+    SDL_Surface *active_surface = NULL;
+    
+
+    SDL_Rect dest;
+    SDL_Rect src;
 
     if(StackLock)
         return 0;
@@ -187,10 +206,51 @@ int SDL_DrawAllWidgets(SDL_Surface *screen)
     if(active_surface == NULL)
         return 0;
 
+    if(previous != active_surface)
+    {
+        last_surface=previous;
+        fadeon=1;
+    }
+
+    if(fadeon)
+    {
+        
+        dest.w = 0;
+        dest.h = 0;
+        dest.x=fadex;
+        fadex+=5;
+        dest.y = fadey;
+        fadey+=5;
+        
+        src.x=fadex;
+        src.y=fadey;
+        src.w=fadew;
+        src.h=fadeh;
+        
+        fadeh-=10;
+        fadew-=10;
+    }
+    else
+    {
+        dest.x=0;
+        dest.y=0;
+        dest.w=0;
+        dest.h=0;
+
+        if(active_surface)
+        {
+            src.x=0;
+            src.y=0;
+            src.w=active_surface->w;
+            src.h=active_surface->h;
+        }
+    }  
+
     SDL_WidgetLOCK();
     
     current_widget=SDL_StackGetStack();
 
+    
 //    if(current_widget == NULL)
 //        printf("Nothing to draw\n");
 
@@ -205,9 +265,13 @@ int SDL_DrawAllWidgets(SDL_Surface *screen)
     if(forceredraw)
         forceredraw=0;
 
-    SDL_BlitSurface(active_surface,NULL,screen,NULL);
-    SDL_UpdateRect(screen,0,0,0,0);
     
+    SDL_BlitSurface(active_surface,NULL,screen,NULL);
+    SDL_BlitSurface(last_surface,&src,screen,&dest);
+        
+    SDL_UpdateRect(screen,0,0,0,0);
+    if(previous!=active_surface)
+        previous=active_surface;
     SDL_WidgetUNLOCK();
 
     return 1;
@@ -257,28 +321,6 @@ void  SDL_WidgetEvent(SDL_Event *event)
     SDL_WidgetUNLOCK();
 }
 
-
-int SDL_WidgetEventCallback(void *function,E_Widget_Event event)
-{
-
-    T_Widget_SetCallback  setcallback;
-    Stack* current_widget;
-
-    SDL_WidgetLOCK();
-    current_widget=SDL_StackGetLastItem();
-
-    setcallback=WidgetTable[current_widget->type]->setcallback;
-    if(setcallback != NULL)
-        setcallback(current_widget->data,function,event);
-    else
-        printf("No callback handler implemented for this widget\n");
-    SDL_WidgetUNLOCK();
-
-    return 1;
-
-
-}
-
 int SDL_WidgetHasFocus(void *widget)
 {
     Stack* current_widget;
@@ -309,5 +351,6 @@ int SDL_WidgetUNLOCK()
     StackLock--;
     if(StackLock < 0)
         StackLock=0;
+
     return 1;
 }

@@ -22,12 +22,13 @@
 #ifndef __PLAYER_UI_H__
 #define __PLAYER_UI_H__
 
+#include "theme.h"
 /* Public routines */
 
 /* 
  * Create a player
  */
-void PLAYERUI_CreateWindow(int nr, int x);
+void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt);
 
 
 void PLAYERUI_Redraw();

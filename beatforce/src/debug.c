@@ -23,24 +23,14 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-char module_id[40];
+char module_id[240];
 char msg[40];
 
 int IGR_Write_to_log(char* id,char* text)
 {
-    int size=0;
-    int i;
-    unsigned char Log_string[255];
+    unsigned char Log_string[300];
    
-    size=strlen(text);
-    size=80-size;
-    sprintf(Log_string,"%s",text);
-
-    for(i=0;i<size;i++)
-        sprintf(Log_string,"%s ",Log_string);
-
-    sprintf(Log_string,"%s%s\n",Log_string,id);
-
+    sprintf(Log_string,"%s%s\r\n",text,id);
     printf("%s",Log_string);
     return 0;
 }
@@ -105,7 +95,7 @@ void traceprintf(char *fmt,...)
 void printid(char *id,int line,char *message)
 {
     sprintf(msg,"%s",message);
-    sprintf(module_id,"%s (line %04d)",id,line);
+    sprintf(module_id,"\t%s (line %04d)",id,line);
 }
 
 

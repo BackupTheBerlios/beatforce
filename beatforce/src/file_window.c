@@ -17,18 +17,20 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
+
 #include <SDL/SDL.h>
 #include <SDL_Table.h>
 #include <config.h>
-#include <llist.h>
-#include <osa.h>
-#include <songdb.h>
+
+#include "osa.h"
+#include "songdb.h"
 #include <string.h>
 #include <malloc.h>
 
 #include "wndmgr.h"
 #include "songdb_ui.h"
-
+#include "llist.h"
+#include "theme.h"
 
 void *fileedit;
 void *ttable;
@@ -40,7 +42,7 @@ BFList *dirs;
 BFList *songs;
 BFList *localsongs;
 int change;
-extern SDL_Font *LargeBoldFont;
+
 char directory[255];
 
 /* Local function prototypes */
@@ -86,13 +88,30 @@ SDL_Surface *Window_CreateFileWindow()
     int localcount=0;
     char label[255];
     char label2[255];
+    ThemeConfig *tc=THEME_GetActive();
+    ThemeFileWindow *fw =NULL;
+    ThemeImage    *Image = NULL;
+    if(tc == NULL)
+        return NULL;
+
+    fw=tc->FileWindow;
+    
+    if(fw == NULL)
+        return NULL;
+    Image=fw->Image;
+
+
 
     FileWindow = SDL_CreateRGBSurface(SDL_SWSURFACE,1024,685,32,0xff0000,0x00ff00,0x0000ff,0x000000);
 
     SDL_WidgetUseSurface(FileWindow);
 
-    SDL_WidgetCreate(SDL_PANEL,0,0,1024,685);
-    SDL_WidgetProperties(SET_NORMAL_IMAGE,THEME_DIR"/beatforce/sbackground.bmp");
+    while(Image)
+    {
+        SDL_WidgetCreateR(SDL_PANEL,Image->Rect);
+        SDL_WidgetProperties(SET_NORMAL_IMAGE,Image->filename);
+        Image=Image->next;
+    }
     
     sprintf(directory,"/mnt/d");
     
@@ -114,7 +133,7 @@ SDL_Surface *Window_CreateFileWindow()
     localcount=LLIST_NoOfEntries(localsongs);
     
     fileedit=SDL_WidgetCreate(SDL_EDIT,10,5,500,25);
-    SDL_WidgetProperties(SET_FONT,LargeBoldFont);
+    SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
     SDL_WidgetProperties(SET_ALWAYS_FOCUS,1);
     SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_RETURN,filewindow_Search,NULL);
     SDL_WidgetProperties(SET_CAPTION,directory);
@@ -123,20 +142,20 @@ SDL_Surface *Window_CreateFileWindow()
     SDL_WidgetProperties(SET_VISIBLE_COLUMNS, 1);
     SDL_WidgetProperties(SET_VISIBLE_ROWS, 27);
     SDL_WidgetProperties(ROWS,count);
-    SDL_WidgetProperties(SET_FONT,LargeBoldFont);
+    SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
     SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION,dirstring);
-    SDL_WidgetEventCallback(dirselect,SDL_CLICKED);
+    SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,dirselect,NULL);
 
     sprintf(label,"Songcount local dir %d",songcount);
     sprintf(label2,"Songcount all dirs  %d",localcount);
 
     wLabel1=SDL_WidgetCreate(SDL_LABEL,10,440,450,23);
-    SDL_WidgetProperties(SET_FONT,LargeBoldFont);
+    SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
     SDL_WidgetProperties(SET_FG_COLOR,WHITE);
     SDL_WidgetProperties(SET_CAPTION,label);
 
     wLabel2=SDL_WidgetCreate(SDL_LABEL,10,470,450,23);
-    SDL_WidgetProperties(SET_FONT,LargeBoldFont);
+    SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
     SDL_WidgetProperties(SET_FG_COLOR,WHITE);
     SDL_WidgetProperties(SET_CAPTION,label2);
 
@@ -145,6 +164,7 @@ SDL_Surface *Window_CreateFileWindow()
     SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,FileWindow_DirSelectClicked,NULL);
 
     return FileWindow;
+
 }
 
 void filewindow_Search(void *data)

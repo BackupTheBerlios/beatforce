@@ -26,10 +26,11 @@
 
 //exported API calls
 int  FONT_BDF_IsBDF(char *filename);
-void FONT_BDF_Read(char *filename,SDL_Font *font);
+int FONT_BDF_Read(char *filename,SDL_Font *font);
 void FONT_BDF_DrawString(SDL_Surface *screen,SDL_Font *font,char *string,int x, int y);
 int FONT_BDF_DrawChar(SDL_Surface *dest,SDL_Font *font,
                      char character,SDL_Rect *pos,SDL_Rect* clip);
+
 
 
 //local protypes
@@ -66,19 +67,20 @@ int FONT_BDF_IsBDF(char *filename)
     }
 }
 
-void FONT_BDF_Read(char *filename,SDL_Font *font)
+int FONT_BDF_Read(char *filename,SDL_Font *font)
 {
     FILE *fp;
 
     fp=fopen(filename,"r");
     if(fp == NULL)
     {
-        fprintf(stderr,"SDL_Font: Font file %s not found\n",filename);
-        return;
+        fprintf(stderr,"SDL_FontBDF: Font file %s not found\n",filename);
+        return 0;
     }
     readbdf(fp,font);
     font->type=BDF_FONT;
     fclose(fp);
+    return 1;
 }
 
 void FONT_BDF_DrawString(SDL_Surface *screen,SDL_Font *font,char *string,int x, int y)
@@ -96,7 +98,7 @@ int FONT_BDF_DrawChar(SDL_Surface *dest,SDL_Font *font,
 
 void readbdf(FILE *fp,SDL_Font *f)
 {
-    char buffer[255];
+    char buffer[500];
     register char  *aux;
 
     BDF_Font *font;
@@ -106,6 +108,7 @@ void readbdf(FILE *fp,SDL_Font *f)
     font=malloc(sizeof(BDF_Font));
     memset(font->bdffont,0,255*sizeof(BDF_Char*));
     
+
 
     while(!feof(fp))
     {
@@ -125,7 +128,7 @@ void readbdf(FILE *fp,SDL_Font *f)
 
             sscanf(p,"%d",&value);
 
-            if(value > 255)
+            if(value > 254)
                 break;
             current=malloc(sizeof(BDF_Char));
             current->encoding=value;
@@ -142,12 +145,13 @@ void readbdf(FILE *fp,SDL_Font *f)
         }
         else if(!strncmp(buffer,"BITMAP",6))
         {
+
             int i;
             unsigned char *bits;
             /* wbytes is the width of the char in bytes. */
             current->wbytes = (current->bbx_x + 7) / 8;
             current->data=malloc(current->wbytes * current->bbx_y);
-            memset(current->data,0,24);
+            memset(current->data,0,current->wbytes * current->bbx_y);
             bits=current->data;
 					
             /* Read all pixels from file. */
@@ -189,7 +193,7 @@ void readline(FILE *fp,char *buffer)
         teller++;
     }
     while(buffer[teller-1] != '\n' && !feof(fp));
-    buffer[teller-1]=0;
+        buffer[teller-1]=0;
     
 }
 

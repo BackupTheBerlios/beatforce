@@ -143,11 +143,11 @@ struct SongDBEntry *SONGDB_GetEntry(long id)
 {
     struct SongDBEntry *e = NULL;
     
-    TRACE("SONGDB_GetEntry %d",id);
+//    TRACE("SONGDB_GetEntry %d",id);
 
     if (id >= n_id[active] || id == SONGDB_ID_UNKNOWN)
     {
-        ERROR("Returning NULL %d %d",id,n_id[active]);
+        //ERROR("Returning NULL %d %d",id,n_id[active]);
         return NULL;
     }
     e = subset[active][id];

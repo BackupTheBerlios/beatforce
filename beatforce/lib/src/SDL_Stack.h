@@ -35,7 +35,8 @@ typedef struct Stack
 typedef struct StackList
 {
     SDL_Surface *surface;
-    Stack   *stack;
+    Stack       *stack;
+    SDL_Surface *parent;
     struct StackList *next;
 }StackList;
 

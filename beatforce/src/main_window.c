@@ -18,6 +18,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
+
 #include <SDL/SDL.h>
 #include <SDL_Widget.h>
 #include <SDL_Table.h>
@@ -33,19 +34,12 @@
 #include "player.h"
 #include "songdb.h"
 
+#include "theme.h"
 
 
 
 #include "wndmgr.h"
 #include "search_window.h"
-
-extern SDL_Font *DigitsFont;
-extern SDL_Font *LargeBoldFont;
-
-void songend_callback(int player_nr)
-{
-
-}
 
 int control_state;
 int mainwindow_EventHandler(SDL_Event event);
@@ -84,7 +78,21 @@ void MAINWINDOW_Open()
 
 SDL_Surface *mainwindow_CreateWindow()
 {
-    SDL_Surface *MainWindow;
+    SDL_Surface       *MainWindow;
+    ThemeConfig       *tc = THEME_GetActive();
+    ThemeMainWindow   *mw = NULL;
+    ThemeImage        *Image = NULL;
+    
+    if(tc == NULL)
+        return NULL;
+    
+    mw=tc->MainWindow;
+    
+    if(mw == NULL)
+        return NULL;
+
+    Image=mw->Image;
+
 
     control_state=0;
     MainWindow = SDL_CreateRGBSurface(SDL_SWSURFACE,1024,685,32,0xff0000,0x00ff00,0x0000ff,0x000000);
@@ -92,31 +100,23 @@ SDL_Surface *mainwindow_CreateWindow()
 
     SDL_WidgetUseSurface(MainWindow);
 
-    SDL_WidgetCreate(SDL_PANEL,0,0,1024,685);
-    SDL_WidgetProperties(SET_NORMAL_IMAGE,THEME_DIR"/beatforce/sbackground.bmp");
-    
-    SDL_WidgetCreate(SDL_PANEL,0,230,1024,3);
-    SDL_WidgetProperties(SET_NORMAL_IMAGE,THEME_DIR"/beatforce/seperator.bmp");
+    while(Image)
+    {
+        SDL_WidgetCreateR(SDL_PANEL,Image->Rect);
+        SDL_WidgetProperties(SET_NORMAL_IMAGE,Image->filename);
+        Image=Image->next;
+    }
 
-    SDL_WidgetCreate(SDL_PANEL,0,30,1024,3);
-    SDL_WidgetProperties(SET_NORMAL_IMAGE,THEME_DIR"/beatforce/seperator.bmp");
+    timewidget=SDL_WidgetCreateR(SDL_LABEL,mw->Clock->Rect);
+    SDL_WidgetProperties(SET_BG_COLOR,mw->Clock->bgcolor);
+    SDL_WidgetProperties(SET_FG_COLOR,mw->Clock->fgcolor);
+    SDL_WidgetProperties(SET_FONT,THEME_Font(mw->Clock->font));
 
-    timewidget=SDL_WidgetCreate(SDL_LABEL,4,4,65,22);
-    SDL_WidgetProperties(SET_BG_COLOR,BLACK);
-    SDL_WidgetProperties(SET_FG_COLOR,0x00e1ff);
-    SDL_WidgetProperties(SET_FONT,DigitsFont);
-
-    SDL_WidgetCreate(SDL_LABEL,80,5,65,17);
-    SDL_WidgetProperties(SET_FG_COLOR,0x00e1ff);
-    SDL_WidgetProperties(SET_FONT,LargeBoldFont);
-    SDL_WidgetProperties(SET_CAPTION,"Beatforce");
-
-
-    SONGDBUI_CreateWindow();
-    PLAYLISTUI_CreateWindow();
-    PLAYERUI_CreateWindow(0,10);
-    PLAYERUI_CreateWindow(1,610);
-    MIXERUI_CreateWindow();
+    SONGDBUI_CreateWindow(mw->Songdb);
+    PLAYLISTUI_CreateWindow(mw->Playlist);
+    PLAYERUI_CreateWindow(0,mw->Player[0]);
+    PLAYERUI_CreateWindow(1,mw->Player[1]);
+    MIXERUI_CreateWindow(mw->Mixer);
 
     return MainWindow;
 }
@@ -202,5 +202,6 @@ int mainwindow_NotifyHandler()
 
     MIXERUI_Redraw();
     PLAYERUI_Redraw();
+
     return 1;
 }

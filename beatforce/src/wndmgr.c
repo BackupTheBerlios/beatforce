@@ -24,13 +24,7 @@
 
 //SDL gui specific
 #include <SDL/SDL.h>
-#include <SDL/SDL_image.h>
-#include <SDL/SDL_endian.h>	/* Used for the endian-dependent 24 bpp mode */
-
 #include <SDL_Widget.h>
-#include <SDL_Font.h>
-
-#include <SDL_Table.h>
 
 #include "wndmgr.h"
 #include "osa.h"
@@ -38,6 +32,7 @@
 #include "main_window.h"
 #include "file_window.h"
 #include "search_window.h"
+#include "theme.h"
 
 #define MODULE_ID WNDMGR
 #include "debug.h" 
@@ -45,11 +40,6 @@
 SDL_Surface *screen;
 Window *CurWindow;
 int WNDMGR_Running;
-
-SDL_Font *SmallFont;
-SDL_Font *LargeBoldFont;
-SDL_Font *DigitsFont;
-
 
 /* global variables */
 int gEventsAllowed;
@@ -61,39 +51,46 @@ int wndmgr_Redraw(void *data);
 
 void WNDMGR_CloseWindow()
 {
+    EnableFade();
     MAINWINDOW_Open();//Always go back to main window
 }
 
 void WNDMGR_Init()
 {
-    TRACE("WNDMGR_Init enter");
+    unsigned int flags=0;
+    ThemeScreen *s=THEME_GetActive()->Screen;
 
-    CurWindow=NULL;
-    if(SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_TIMER) < 0 ) 
+    TRACE("UI_Init enter");
+
+    if ( SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_TIMER) < 0 ) 
     {
         ERROR("Unable to init SDL: %s\n", SDL_GetError());
         exit(1);
     }
     atexit(SDL_Quit);
- 
-    screen = SDL_SetVideoMode(1024,685 , 32, SDL_SWSURFACE | SDL_NOFRAME);
+
+    if(s->FullScreen)
+    {
+        flags |= SDL_FULLSCREEN;
+    }
+    else
+    {
+        flags |= SDL_SWSURFACE;
+    }
+
+    if(s->NoFrame)
+    {
+        flags |= SDL_NOFRAME;
+    }
+    screen = SDL_SetVideoMode(s->Width,s->Height,s->BPP,flags);
     
     if ( screen == NULL) 
     {
-        fprintf(stderr, "Unable to set 800x600 video: %s\n", SDL_GetError());
+        fprintf(stderr, "Unable to set %dx%d video: %s\n", s->Width,s->Height,SDL_GetError());
         exit(1);
     }
 
     SDL_WM_SetCaption("Beatforce",NULL);
-    MAINWINDOW_Init();
-    SEARCHWINDOW_Init();
-    FILEWINDOW_Init();
-
-    LargeBoldFont=SDL_FontInit(THEME_DIR"/beatforce/digital.fnt");
-    SmallFont=SDL_FontInit(THEME_DIR"/beatforce/yysmallfont.fnt");
-//  LargeBoldFont=SDL_FontInit(THEME_DIR"/beatforce/arial12.bdf");
-//    LargeBoldFont=SDL_FontInit("./res/cour10.bdf");
-    DigitsFont=SDL_FontInit(THEME_DIR"/beatforce/digits.fnt");
     windowswitch=0;
 }
 
@@ -113,7 +110,6 @@ int WNDMGR_Main(void * data)
     WNDMGR_Running = 1;
     gEventsAllowed = 1;
 
-    
     timer=OSA_StartTimer(50,wndmgr_Redraw,NULL);
 
     while(WNDMGR_Running)
@@ -140,7 +136,7 @@ int WNDMGR_Main(void * data)
     }
 
     OSA_RemoveTimer(timer);
-    SDL_Quit();
+    //SDL_Quit();
     return 1;
 }
 
@@ -157,6 +153,9 @@ int wndmgr_Redraw(void *data)
     return 50; //redraw every 50ms 
 }
 
+/* disable sending events to thw event handler of the current window
+   this can be used when all events have to be send to a widget
+   for example when the widget is in an edit state */
 void WNDMGR_DisableEventhandler()
 {
     gEventsAllowed=0;

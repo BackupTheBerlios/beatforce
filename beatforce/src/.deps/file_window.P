@@ -6,26 +6,26 @@ file_window.o: file_window.c /usr/include/SDL/SDL.h \
  /usr/include/features.h /usr/include/sys/cdefs.h \
  /usr/include/gnu/stubs.h \
  /usr/lib/gcc-lib/i386-linux/2.95.4/include/stddef.h \
- /usr/include/bits/types.h /usr/include/bits/wordsize.h \
- /usr/include/bits/typesizes.h /usr/include/libio.h \
+ /usr/include/bits/types.h /usr/include/bits/pthreadtypes.h \
+ /usr/include/bits/sched.h /usr/include/libio.h \
  /usr/include/_G_config.h /usr/include/wchar.h \
  /usr/include/bits/wchar.h /usr/include/gconv.h \
  /usr/lib/gcc-lib/i386-linux/2.95.4/include/stdarg.h \
- /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
- /usr/include/bits/stdio.h /usr/include/SDL/SDL_timer.h \
- /usr/include/SDL/SDL_audio.h /usr/include/SDL/SDL_byteorder.h \
- /usr/include/SDL/SDL_cdrom.h /usr/include/SDL/SDL_joystick.h \
- /usr/include/SDL/SDL_events.h /usr/include/SDL/SDL_active.h \
- /usr/include/SDL/SDL_keyboard.h /usr/include/SDL/SDL_keysym.h \
- /usr/include/SDL/SDL_mouse.h /usr/include/SDL/SDL_video.h \
- /usr/include/SDL/SDL_mutex.h /usr/include/SDL/SDL_quit.h \
- /usr/include/SDL/SDL_version.h ../lib/src/SDL_Table.h \
- ../lib/src/SDL_Widget.h /usr/include/SDL/SDL_image.h \
- ../lib/src/SDL_Font.h ../config.h llist.h osa.h songdb.h configfile.h \
- /usr/include/string.h /usr/include/bits/string.h \
- /usr/include/bits/string2.h /usr/include/endian.h \
- /usr/include/bits/endian.h /usr/include/stdlib.h \
- /usr/include/malloc.h wndmgr.h songdb_ui.h
+ /usr/include/bits/stdio_lim.h /usr/include/bits/stdio.h \
+ /usr/include/SDL/SDL_timer.h /usr/include/SDL/SDL_audio.h \
+ /usr/include/SDL/SDL_byteorder.h /usr/include/SDL/SDL_cdrom.h \
+ /usr/include/SDL/SDL_joystick.h /usr/include/SDL/SDL_events.h \
+ /usr/include/SDL/SDL_active.h /usr/include/SDL/SDL_keyboard.h \
+ /usr/include/SDL/SDL_keysym.h /usr/include/SDL/SDL_mouse.h \
+ /usr/include/SDL/SDL_video.h /usr/include/SDL/SDL_mutex.h \
+ /usr/include/SDL/SDL_quit.h /usr/include/SDL/SDL_version.h \
+ ../lib/src/SDL_Table.h ../lib/src/SDL_Widget.h \
+ /usr/include/SDL/SDL_image.h ../lib/src/SDL_Font.h ../config.h osa.h \
+ llist.h songdb.h configfile.h /usr/include/string.h \
+ /usr/include/bits/string.h /usr/include/bits/string2.h \
+ /usr/include/endian.h /usr/include/bits/endian.h \
+ /usr/include/stdlib.h /usr/include/malloc.h wndmgr.h songdb_ui.h \
+ theme.h
 file_window.c :
 /usr/include/SDL/SDL.h :
 /usr/include/SDL/SDL_main.h :
@@ -41,8 +41,8 @@ file_window.c :
 /usr/include/gnu/stubs.h :
 /usr/lib/gcc-lib/i386-linux/2.95.4/include/stddef.h :
 /usr/include/bits/types.h :
-/usr/include/bits/wordsize.h :
-/usr/include/bits/typesizes.h :
+/usr/include/bits/pthreadtypes.h :
+/usr/include/bits/sched.h :
 /usr/include/libio.h :
 /usr/include/_G_config.h :
 /usr/include/wchar.h :
@@ -50,7 +50,6 @@ file_window.c :
 /usr/include/gconv.h :
 /usr/lib/gcc-lib/i386-linux/2.95.4/include/stdarg.h :
 /usr/include/bits/stdio_lim.h :
-/usr/include/bits/sys_errlist.h :
 /usr/include/bits/stdio.h :
 /usr/include/SDL/SDL_timer.h :
 /usr/include/SDL/SDL_audio.h :
@@ -71,8 +70,8 @@ file_window.c :
 /usr/include/SDL/SDL_image.h :
 ../lib/src/SDL_Font.h :
 ../config.h :
-llist.h :
 osa.h :
+llist.h :
 songdb.h :
 configfile.h :
 /usr/include/string.h :
@@ -84,3 +83,4 @@ configfile.h :
 /usr/include/malloc.h :
 wndmgr.h :
 songdb_ui.h :
+theme.h :

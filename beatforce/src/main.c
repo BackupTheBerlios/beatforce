@@ -29,8 +29,10 @@
 #include "output.h"
 #include "mixer.h"
 #include "osa.h"
-#include "main_window.h"
 #include "theme.h"
+#include "main_window.h"
+#include "search_window.h"
+#include "file_window.h"
 
 // user interface include
 #include "wndmgr.h"
@@ -45,10 +47,11 @@ MixerConfig    *mixercfg;
 int
 main(int argc, char *argv[])
 {
-    OSA_Init();
-    WNDMGR_Init(); 
-    THEME_Init();
 
+    OSA_Init();
+
+    
+    
     //beatforce
     cfgfile = bf_cfg_open_default_file ();
     if (cfgfile == NULL)
@@ -64,6 +67,13 @@ main(int argc, char *argv[])
     mixercfg   = bf_cfg_read_MixerConfig   (cfgfile);
     bf_cfg_free (cfgfile);
 
+    THEME_Init();     
+    MAINWINDOW_Init();
+    SEARCHWINDOW_Init();
+    FILEWINDOW_Init();
+
+    WNDMGR_Init(); 
+
     PLUGIN_Init (PLUGIN_TYPE_INPUT);
     PLUGIN_Init (PLUGIN_TYPE_OUTPUT);
 
@@ -72,15 +82,15 @@ main(int argc, char *argv[])
     MIXER_Init  ();
     PLAYER_Init (0, playercfg0);
     PLAYER_Init (1, playercfg1);
-
-
+    
+   
     MAINWINDOW_Open();
-
     /*beatforce UI*/
     WNDMGR_Main(NULL);
 
 
     AUDIOOUTPUT_Cleanup();
+
     // save everything on exit
     cfgfile = bf_cfg_open_default_file ();
     bf_cfg_write_AudioConfig   (cfgfile, audiocfg);
@@ -90,6 +100,6 @@ main(int argc, char *argv[])
     bf_cfg_write_MixerConfig   (cfgfile, mixercfg);
     bf_cfg_write_file (cfgfile, bf_cfg_get_default_filename ());
 
-    return 0;
+    return 1;
 
 }

@@ -20,7 +20,7 @@
 #ifndef __MIXER_UI_H__
 #define __MIXER_UI_H__
 
-void MIXERUI_CreateWindow();
+void MIXERUI_CreateWindow(ThemeMixer *tm);
 void MIXERUI_Redraw();
 
 #endif __MIXER_UI_H__

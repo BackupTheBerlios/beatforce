@@ -475,7 +475,10 @@ static void Tab_Recalculate(SDL_Tab *tab)
             width = 35;
 
         tablist->rect->w = width;
-        tablist->rect->h = tab->font->height;
+        if(tab->font)
+            tablist->rect->h = tab->font->height;
+        else
+            tablist->rect->h = 14;
         
         if(tablist->prev == NULL)
         {

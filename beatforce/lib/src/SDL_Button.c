@@ -34,7 +34,6 @@ const struct S_Widget_FunctionList SDL_Button_FunctionList =
     SDL_ButtonDraw,
     SDL_ButtonProperties,
     SDL_ButtonEventHandler,
-    SDL_ButtonSetCallback,
     SDL_ButtonClose
 };
 
@@ -173,15 +172,6 @@ void SDL_ButtonEventHandler(void * button,SDL_Event *event)
     default:
         break;
     }
-}
-
-
-void SDL_ButtonSetCallback(void* button,void *function,E_Widget_Event event)
-{
-    SDL_Button *Button=(SDL_Button*)button;
-
-    if(event==SDL_CLICKED)
-        Button->Clicked=function;
 }
 
 

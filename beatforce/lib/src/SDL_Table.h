@@ -68,13 +68,10 @@ typedef struct SDL_Table
 
     //event handler functions
     void (*Clicked)(void*);
+    void *ClickedData;
 
     //functions to retreive data
-    char *(*Table_GetString)  (long,int,char*);
-//    int (*Table_NeedRedraw)   ();
-
-//    SDL_Rect            ScrollbarRect;
-//    SDL_Scrollbar       *Scrollbar;
+    char *(*Table_GetString)  (long row,int column,char* dest);
 
     SDL_Surface *Background;
 
@@ -88,5 +85,38 @@ typedef struct SDL_Table
 void* SDL_TableCreate(SDL_Rect* rect);
 void  SDL_TableDraw (void *table,SDL_Surface *dest);
 void  SDL_TableProperties(void *table,int feature,va_list list);
+
+/*
+  Currently implemented properties:
+
+  required:
+    SET_FONT:            Set the font
+    SET_VISIBLE_ROWS:    Set the number of visible rows.
+                         If the number of rows is larger than the display area
+                         the number of visible rows is adjusted.
+    SET_VISIBLE_COLUMNS: Set the number of visible columns
+    
+    ROWS:                The number of rows which are in the data set.
+                         If larger than the number of visible rows a scrollbar
+                         will be attached.
+    
+    SET_DATA_RETREIVAL_FUNCTION:
+                         Set a function which is called when the table draw function
+                         needs data for the current row and column.
+                         PROTOTYPE: char GetString(long row,int column,char* dest);
+                         dest is allocated by the table and this is where the data
+                         has to be copied into.
+
+  optional:
+    SET_FG_COLOR:        Sets the color of the font
+    SET_BG_COLOR         Sets the background color of the entire table 
+                         (if set to transparant the background is used)
+    COLUMN_WIDTH:        Sets the width in pixels for the column.
+                         Requires two parametets: column number and pixel width
+    SET_CALLBACK:        Curently a callback can be set to the SDL_CLICKED event.
+
+*/
+
+
 void  SDL_TableEventHandler(void *table,SDL_Event *event);
-void  SDL_TableSetCallback(void* table,void *function,E_Widget_Event event);
+

@@ -20,6 +20,8 @@
 #ifndef __PLAYLIST_UI_H__
 #define __PLAYLIST_UI_H__
 
-void PLAYLISTUI_CreateWindow();
+#include "theme.h"
+
+void PLAYLISTUI_CreateWindow(ThemePlaylist *pl);
 
 #endif /* __PLAYLIST_UI_H__ */

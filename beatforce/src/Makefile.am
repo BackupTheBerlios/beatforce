@@ -1,5 +1,5 @@
 EXTRA_DIST=res
-INCLUDES = -I../lib/src/ -Wall 
+INCLUDES = -I/usr/include/libxml2/ -I../lib/src/ -Wall 
 bin_PROGRAMS = beatforce
 beatforce_SOURCES =             \
 main.c                          \
@@ -33,5 +33,5 @@ file_window.c   file_window.h   \
 main_window.c   main_window.h   \
 search_window.c search_window.h
 
-beatforce_LDADD   = -L../lib/src/ -lSDLTk -lSDL -lSDL_image -lfftw3 -lvrb 
+beatforce_LDADD   = -L../lib/src/ -lSDLTk -lSDL -lSDL_image -lfftw3 -lvrb -lxml2
 

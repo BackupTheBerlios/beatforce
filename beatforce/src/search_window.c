@@ -18,6 +18,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
+
 #include <config.h>
 #include <string.h>
 
@@ -38,9 +39,10 @@
 
 #include "search_window.h"
 #include "wndmgr.h"
+#include "theme.h"
 
 
-extern SDL_Font *LargeBoldFont;
+
 void *editwidget;
 void *tablewidget;
 
@@ -79,26 +81,41 @@ void SEARCHWINDOW_Open()
 SDL_Surface *SEARCHWINDOW_Create()
 {
     SDL_Surface *SearchWindow;
+    ThemeConfig *tc=THEME_GetActive();
+    ThemeSearchWindow *sw =NULL;
+    ThemeImage    *Image = NULL;
+    if(tc == NULL)
+        return NULL;
+
+    sw=tc->SearchWindow;
+    
+    if(sw == NULL)
+        return NULL;
+    Image=sw->Image;
+
 
     SearchWindow = SDL_CreateRGBSurface(SDL_SWSURFACE,1024,685,32,0xff0000,0x00ff00,0x0000ff,0x000000);
 
     SDL_WidgetUseSurface(SearchWindow);
- 
-    SDL_WidgetCreate(SDL_PANEL,0,0,1024,685);
-    SDL_WidgetProperties(SET_NORMAL_IMAGE,THEME_DIR"/beatforce/sbackground.bmp");
-        
+
+    while(Image)
+    {
+        SDL_WidgetCreateR(SDL_PANEL,Image->Rect);
+        SDL_WidgetProperties(SET_NORMAL_IMAGE,Image->filename);
+        Image=Image->next;
+    }
+
     tablewidget=SDL_WidgetCreate(SDL_TABLE,12,50,1000,540);
     SDL_WidgetProperties(SET_VISIBLE_ROWS,    36);
     SDL_WidgetProperties(SET_VISIBLE_COLUMNS, 1);
     SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
     SDL_WidgetProperties(ROWS,SONGDB_GetNoOfEntries());
-    SDL_WidgetProperties(SET_FONT,LargeBoldFont);
+    SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
     SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION,songdb_searchstring);
-    SDL_WidgetEventCallback(searchwindow_PlayClicked,SDL_CLICKED);
-//    SDL_WidgerProperties(SET_CALLBACK,SDL_CLICKED,
+    SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,searchwindow_PlayClicked,NULL);
 
     editwidget=SDL_WidgetCreate(SDL_EDIT,312,20,400,25);
-    SDL_WidgetProperties(SET_FONT,LargeBoldFont);
+    SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
     SDL_WidgetProperties(SET_ALWAYS_FOCUS,1);
     SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_ANY,searchwindow_Search);
     SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_RETURN,searchwindow_Play);

@@ -22,7 +22,9 @@
 #ifndef __SONGDB_UI_H__
 #define __SONGDB_UI_H__
 
-void SONGDBUI_CreateWindow();
+#include "theme.h"
+
+void SONGDBUI_CreateWindow(ThemeSongdb *ts);
 void SONGDBUI_ChangeDatabase(char *string);
 
 

@@ -39,11 +39,12 @@
 #include "player_ui.h"   /* for UI_PlayerSetArtistTitle() */
 
 #include "file_window.h"
+#include "theme.h"
 
 #define MODULE_ID SONGDB_UI
 #include "debug.h"
 
-extern SDL_Font *LargeBoldFont;
+
 extern SongDBConfig   *songdbcfg;
 
 /* Prototypes for functions for buttosn below */
@@ -65,9 +66,7 @@ void eventhandler(SDL_Table *table)
     int player=0;// is playing ?
 
     /* Get the current playlist entry */
-
     e = SONGDB_GetEntry(table->CurrentRow);
-    
     if(PLAYER_IsPlaying(0))
         player=1;
 
@@ -77,28 +76,35 @@ void eventhandler(SDL_Table *table)
             player=0;
     }
     PLAYLIST_SetEntry(player,e);
+    player_set_song(player,0);  // when set_entry is excecuted we only have 1 item thus 0
+//    UI_PlayerSetArtistTitle(player);
+    
 }
 
-void SONGDBUI_CreateWindow()
+void SONGDBUI_CreateWindow(ThemeSongdb *ts)
 {
-    
-    /* Create the large table (songdb)*/
-    table=SDL_WidgetCreate(SDL_TABLE,30,340,500,240);
-    SDL_WidgetProperties(SET_VISIBLE_ROWS,    20);
-    SDL_WidgetProperties(SET_VISIBLE_COLUMNS, 3);
-    SDL_WidgetProperties(COLUMN_WIDTH, 1, 30  );
-    SDL_WidgetProperties(COLUMN_WIDTH, 2, 490 );
-    SDL_WidgetProperties(COLUMN_WIDTH, 3, 40  );
-    SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
-    SDL_WidgetProperties(ROWS,SONGDB_GetNoOfEntries());
-    SDL_WidgetProperties(SET_FONT,LargeBoldFont);
-    SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION,songdbstring);
-    
-    SDL_WidgetEventCallback(eventhandler,SDL_CLICKED);
+    if(ts == NULL)
+        return;
+
+    if(ts)
+    {
+        /* Create the large table (songdb)*/
+        table=SDL_WidgetCreateR(SDL_TABLE,ts->Table->Rect);/*x y w h */
+        SDL_WidgetProperties(SET_VISIBLE_ROWS,    ts->Table->Rows);
+        SDL_WidgetProperties(SET_VISIBLE_COLUMNS, ts->Table->Columns);
+        SDL_WidgetProperties(COLUMN_WIDTH, 1, 30  );
+        SDL_WidgetProperties(COLUMN_WIDTH, 2, 490 );
+        SDL_WidgetProperties(COLUMN_WIDTH, 3, 40  );
+        SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
+        SDL_WidgetProperties(ROWS,SONGDB_GetNoOfEntries());
+        SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
+        SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION,songdbstring);
+        SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,eventhandler,table);
+    }
 
     /* Craete the tab section below the table*/
     tabwidget=SDL_WidgetCreate(SDL_TAB,30,580,500,20);
-    SDL_WidgetProperties(SET_FONT,LargeBoldFont);
+    SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
     SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
     {
         int i;

@@ -19,6 +19,8 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#include <memory.h> 
+
 #include "config.h"
 
 #include "osa.h"
@@ -27,15 +29,13 @@
 #include "playlist.h"
 #include "player_ui.h"
 #include "audio_output.h"
+#include "theme.h"
 
 #include "SDL_Font.h"
 #include "SDL_Slider.h"
 #include "SDL_Widget.h"
 #include "SDL_ProgressBar.h"
 
-extern SDL_Font *LargeBoldFont;
-extern SDL_Font *SmallFont;
-extern SDL_Font *DigitsFont;
 
 PlayerDisplay UI_Players[2];
 
@@ -54,81 +54,128 @@ void playerui_UpdateVolume(int player);
 
 
  /* Exported functions */
-void PLAYERUI_CreateWindow(int nr, int x)
+void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
 {
+    ThemeImage     *Image     = NULL;
+    ThemeButton    *Button    = NULL;
+    ThemeText      *Text      = NULL;
+    ThemeVolumeBar *VolumeBar = NULL;
+    
+    if(pt == NULL)
+        return;
+    
+    Image     = pt->Image;
+    Button    = pt->Button;
+    Text      = pt->Text;
+    VolumeBar = pt->VolumeBar;
+
     UI_Players[nr].PlayerNr=nr;
 
-    /* Create the beackground panel */
-//    SDL_WidgetCreate(SDL_PANEL,x,29,310,190);
-//    SDL_WidgetProperties(SET_BG_COLOR,0x0da0c0);
-
     /* Background window */
-    SDL_WidgetCreate(SDL_PANEL,x+4,55,100,100);
-    SDL_WidgetProperties(SET_NORMAL_IMAGE,   THEME_DIR"/beatforce/playerbg.bmp");
+    while(Image)
+    {
+        SDL_WidgetCreateR(SDL_PANEL,Image->Rect);
+        SDL_WidgetProperties(SET_NORMAL_IMAGE,Image->filename);
+        Image=Image->next;
+    }        
 
-    /* Create the play/pause button */
-    SDL_WidgetCreate(SDL_BUTTON,x+157,176,80,20);
-    SDL_WidgetProperties(SET_NORMAL_IMAGE,   THEME_DIR"/beatforce/playonly_green.bmp");
-    SDL_WidgetProperties(SET_HIGHLIGHT_IMAGE,THEME_DIR"/beatforce/playonly_green_highlight.bmp");
-    SDL_WidgetProperties(SET_PRESSED_IMAGE,  THEME_DIR"/beatforce/playonly_green_pressed.bmp");
-    SDL_WidgetProperties(SET_FONT,LargeBoldFont);
-    SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,playerui_PlayButton,&UI_Players[nr]);
+    while(Button)
+    {
+        /* Create the play/pause button */
+        SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
+        SDL_WidgetProperties(SET_NORMAL_IMAGE,   Button->normal);
+        SDL_WidgetProperties(SET_HIGHLIGHT_IMAGE,Button->highlighted);
+        SDL_WidgetProperties(SET_PRESSED_IMAGE,  Button->pressed);
+        SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,playerui_PlayButton,&UI_Players[nr]);
+        
+        Button=Button->next;
+    }
+   
+    while(Text)
+    {
+        switch(Text->display)
+        {
+        case TIME_ELAPSED:
+            /* Time elapsed */
+            UI_Players[nr].TimeElapsed=SDL_WidgetCreateR(SDL_LABEL,Text->Rect);
+            SDL_WidgetProperties(SET_FONT,THEME_Font(Text->font));
+            SDL_WidgetProperties(SET_FG_COLOR,Text->fgcolor);
+            break;
 
-    /* Time elapsed */
-    UI_Players[nr].TimeElapsed=SDL_WidgetCreate(SDL_LABEL,x+9,90,105,22);
-    SDL_WidgetProperties(SET_FONT,DigitsFont);
-    SDL_WidgetProperties(SET_FG_COLOR,0xf0f0f0);
+        case TIME_REMAINING:
+            /* Time remaining */
+            UI_Players[nr].TimeRemaining=SDL_WidgetCreateR(SDL_LABEL,Text->Rect);
+            SDL_WidgetProperties(SET_FONT,THEME_Font(Text->font));
+            SDL_WidgetProperties(SET_FG_COLOR,Text->fgcolor);
+            break;
 
-    /* Time remaining */
-    UI_Players[nr].TimeRemaining=SDL_WidgetCreate(SDL_LABEL,x+165,90,105,22);
-    SDL_WidgetProperties(SET_FONT,DigitsFont);
-    SDL_WidgetProperties(SET_FG_COLOR,0xf0f0f0);
+        case SONG_ARTIST:
+            /* Create the artist label */
+            UI_Players[nr].Artist=SDL_WidgetCreateR(SDL_LABEL,Text->Rect);
+            SDL_WidgetProperties(SET_FONT,THEME_Font(Text->font));
+            SDL_WidgetProperties(SET_FG_COLOR,Text->fgcolor);
+            break;
 
-    /* Create the artist label */
-    UI_Players[nr].Artist=SDL_WidgetCreate(SDL_LABEL,x+9,120,244,14);
-    SDL_WidgetProperties(SET_FONT,LargeBoldFont);
-    SDL_WidgetProperties(SET_FG_COLOR,0xfffff7);
+        case SONG_TITLE:
+            /* Create the title label */
+            UI_Players[nr].Title=SDL_WidgetCreateR(SDL_LABEL,Text->Rect);
+            SDL_WidgetProperties(SET_FONT,THEME_Font(Text->font));
+            SDL_WidgetProperties(SET_FG_COLOR,Text->fgcolor);
+            break;
+        case SAMPLERATE:
+            /* Create the samplerate label */
+            UI_Players[nr].Samplerate=SDL_WidgetCreateR(SDL_LABEL,Text->Rect);
+            SDL_WidgetProperties(SET_FONT,THEME_Font(Text->font));
+            SDL_WidgetProperties(SET_FG_COLOR,Text->fgcolor);
+            break;
+        case BITRATE:
+            /* Create the bitrate label */
+            UI_Players[nr].Bitrate=SDL_WidgetCreateR(SDL_LABEL,Text->Rect);
+            SDL_WidgetProperties(SET_FONT,THEME_Font(Text->font));
+            SDL_WidgetProperties(SET_FG_COLOR,Text->fgcolor);
+            break;
 
-    /* Create the title label */
-    UI_Players[nr].Title=SDL_WidgetCreate(SDL_LABEL,x+9,136,244,14);
-    SDL_WidgetProperties(SET_FONT,LargeBoldFont);
-    SDL_WidgetProperties(SET_FG_COLOR,0xfffff7);
+        }
+        Text=Text->next;
+    }
+   
+    while(VolumeBar)
+    {
+        switch(VolumeBar->display)
+        {
+        case VOLUME_LEFT:
+            /* Create the volume bar widget */
+            UI_Players[nr].VolumeLeft=SDL_WidgetCreateR(SDL_VOLUMEBAR,VolumeBar->Rect);
+            SDL_WidgetProperties(SET_MAX_VALUE,127);
+            SDL_WidgetProperties(SET_MIN_VALUE,0);
+            break;
+        case VOLUME_RIGHT:
+            UI_Players[nr].VolumeRight=SDL_WidgetCreateR(SDL_VOLUMEBAR,VolumeBar->Rect);
+            SDL_WidgetProperties(SET_MAX_VALUE,127);
+            SDL_WidgetProperties(SET_MIN_VALUE,0);
+            break;
+        }
+        VolumeBar=VolumeBar->next;
+    }
+    
+    if(pt->ProgressBar)
+    {
+        /* Create the progressbar */
+        UI_Players[nr].SongProgress=SDL_WidgetCreateR(SDL_PROGRESSBAR,pt->ProgressBar->Rect);
+        SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,UI_ProgressBarClicked,&UI_Players[nr]);
+    }
 
-    /* Create the samplerate label */
-    UI_Players[nr].Samplerate=SDL_WidgetCreate(SDL_LABEL,x+99,85,68,14);
-    SDL_WidgetProperties(SET_FONT,SmallFont);
-    SDL_WidgetProperties(SET_FG_COLOR,0xfffff7);
-
-    /* Create the bitrate label */
-    UI_Players[nr].Bitrate=SDL_WidgetCreate(SDL_LABEL,x+100,94,64,14);
-    SDL_WidgetProperties(SET_FONT,SmallFont);
-    SDL_WidgetProperties(SET_FG_COLOR,0xfffff7);
-
-    /* Create the volume bar widget */
-    UI_Players[nr].VolumeLeft=SDL_WidgetCreate(SDL_VOLUMEBAR,x+268,68,6,95);
-    SDL_WidgetProperties(SET_MAX_VALUE,127);
-    SDL_WidgetProperties(SET_MIN_VALUE,0);
-
-    UI_Players[nr].VolumeRight=SDL_WidgetCreate(SDL_VOLUMEBAR,x+278,68,6,95);
-    SDL_WidgetProperties(SET_MAX_VALUE,127);
-    SDL_WidgetProperties(SET_MIN_VALUE,0);
-
-    /* Create the progressbar */
-    UI_Players[nr].SongProgress=SDL_WidgetCreate(SDL_PROGRESSBAR,x+6,34,250,13);
-    SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,UI_ProgressBarClicked,&UI_Players[nr]);
-
-    /* Create the bslider background */
-    SDL_WidgetCreate(SDL_PANEL,x+304,46,45,100);
-    SDL_WidgetProperties(SET_NORMAL_IMAGE,   THEME_DIR"/beatforce/horline.bmp");
-
-    /* Create the pitch slider */
-    UI_Players[nr].Pitch=SDL_WidgetCreate(SDL_SLIDER,x+310,60,45,100);
-    SDL_WidgetProperties(SET_BUTTON_IMAGE,THEME_DIR"/beatforce/slibut.bmp");
-    SDL_WidgetProperties(SET_MAX_VALUE,2);
-    SDL_WidgetProperties(SET_MIN_VALUE,0);
-    SDL_WidgetProperties(SET_CUR_VALUE,1.0);    
-    SDL_WidgetProperties(SET_NORMAL_STEP_SIZE,0.1);
-    SDL_WidgetProperties(SET_CALLBACK,SDL_CHANGED,playerui_SetSpeed,&UI_Players[nr]);
+    if(pt->Slider)
+    {
+        /* Create the pitch slider */
+        UI_Players[nr].Pitch=SDL_WidgetCreateR(SDL_SLIDER,pt->Slider->Rect);
+        SDL_WidgetProperties(SET_BUTTON_IMAGE,pt->Slider->button);
+        SDL_WidgetProperties(SET_MAX_VALUE,2);
+        SDL_WidgetProperties(SET_MIN_VALUE,0);
+        SDL_WidgetProperties(SET_CUR_VALUE,1.0);    
+        SDL_WidgetProperties(SET_NORMAL_STEP_SIZE,0.1);
+        SDL_WidgetProperties(SET_CALLBACK,SDL_CHANGED,playerui_SetSpeed,&UI_Players[nr]);
+    }
 
 }
 
@@ -311,5 +358,5 @@ void playerui_SetSpeed(void *data)
    
     SDL_WidgetPropertiesOf(active->Pitch,GET_CUR_VALUE,&curval);
     curval=2.0-curval;
-    AUDIOOUTPUT_SetSpeed(active->PlayerNr,curval);
+    AUDIOOUTPUT_SetSpeed(active->PlayerNr,(float)curval);
 }

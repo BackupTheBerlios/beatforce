@@ -1,0 +1,108 @@
+<?xml version='1.0' ?>
+<Beatforce fullscreen="0" width="1024" height="685" bpp="32" noframe="1">
+
+  <fonts>
+   <bitmapfont id="small"  filename="yysmallfont.fnt"/>
+   <bitmapfont id="normal" filename="digital.fnt"/>
+   <bitmapfont id="digits" filename="digits.fnt"/>
+  </fonts>
+
+  <mainwindow>	
+    <image filename="sbackground.bmp" x="0" y="0"   w="1024" h="685"/>
+    <image filename="seperator.bmp"   x="0" y="30"  w="1024" h="3"  />
+    <image filename="seperator.bmp"   x="0" y="230" w="1024" h="3"  /> 
+
+    <clock x="4" y="4" w="60" h="22" font="digits" bgcolor="0x00000" fgcolor="0x00e1ff"/>
+
+    <songdb>
+      <table x="30" y="340" w="500" h="240" rows="20" columns="3">
+	<column id="1" width="80"/>  
+	<column id="2" width="490"/>
+	<column id="3" width="80"/>
+      </table>
+    </songdb>
+
+
+    <mixer>
+     <image filename="horline.bmp" x="475" y="9" w="45" h="100"/>
+     <image filename="faderline.bmp" x="437" y="157" w="138" h="45"/>
+
+     <volumebar x="527" y="11" w="4" h="124" display="VOLUME_LEFT"/>
+
+     <slider x="478" y="4" w="47" h="138" action="MAIN_VOLUME" button="slibut.bmp"/>
+     <slider x="432" y="162" w="138" h="45" action="FADER" button="slibut_horizontal.bmp"/>
+
+     <button x="490" y="140" w="20" h="20" action="RESET_FADER"/>
+    </mixer>
+
+    <playlist>
+	<table x="540" y="340" w="400" h="240" rows="16" columns="1"/>
+    </playlist>
+
+
+
+    <player id="0">
+     <image filename="playerbg.bmp" x="14" y="55" w="100" h="100"/>
+     <image filename="horline.bmp" x="314" y="46" w="45" h="100"/>
+
+     <button x="167" y="176" w="80" h="20"
+	normal="playonly_green.bmp"
+	highlight="playonly_green_highlight.bmp"
+        pressed="playonly_green_pressed.bmp"
+       action="PLAY"/>
+
+     <text x="19" y="90" w="105" h="22" font="digits" fgcolor="0xf0f0f0" display="TIME_ELAPSED"/>
+     <text x="175" y="90" w="105" h="22" font="digits"  fgcolor="0xf0f0f0" display="TIME_REMAINING"/>
+     <text x="19" y="120" w="244" h="14" font="normal" fgcolor="0xfffff7" display="SONG_ARTIST"/>
+     <text x="19" y="136" w="244" h="14" font="normal" fgcolor="0xfffff7" display="SONG_TITLE"/>    
+     <text x="109" y="85" w="68" h="14" font="small" fgcolor="0xfffff7" display="SAMPLERATE"/> 
+     <text x="110" y="94" w="64" h="14" font="small" fgcolor="0xfffff7" display="BITRATE"/> 
+
+     <volumebar x="278" y="68" w="6" h="95" display="VOLUME_LEFT"/>
+     <volumebar x="288" y="68" w="6" h="95" display="VOLUME_RIGHT"/>   
+
+     <progressbar x="16" y="34" w="250" h="13"/>
+
+     <slider x="320" y="60" w="45" h="100" action="SPEED" button="slibut.bmp"/>
+	
+
+   </player>
+
+
+    <player id="1">
+     <image filename="playerbg.bmp" x="614" y="55" w="100" h="100"/>
+     <image filename="horline.bmp" x="914" y="46" w="45" h="100"/>
+
+     <button x="767" y="176" w="80" h="20"
+       normal="playonly_green.bmp"
+       highlight="playonly_green_highlight.bmp"
+       pressed="playonly_green_pressed.bmp"
+       action="PLAY"/>
+
+     <text x="619" y="90" w="105" h="22" font="digits" fgcolor="0xf0f0f0" display="TIME_ELAPSED"/>
+     <text x="775" y="90" w="105" h="22"  font="digits"  fgcolor="0xf0f0f0" display="TIME_REMAINING"/>
+     <text x="619" y="120" w="244" h="14" font="normal" fgcolor="0xfffff7" display="SONG_ARTIST"/> 
+     <text x="619" y="136" w="244" h="14" font="normal" fgcolor="0xfffff7" display="SONG_TITLE"/>    
+     <text x="709" y="85" w="68" h="14" font="small" fgcolor="0xfffff7" display="SAMPLERATE"/> 
+     <text x="710" y="94" w="64" h="14" font="small" fgcolor="0xfffff7" display="BITRATE"/> 
+
+     <volumebar x="878" y="68" w="6" h="95" display="VOLUME_LEFT"/>
+     <volumebar x="888" y="68" w="6" h="95" display="VOLUME_RIGHT"/>   
+
+     <progressbar x="616" y="34" w="250" h="13"/>
+
+     <slider x="920" y="60" w="45" h="100" action="SPEED" button="slibut.bmp"/>
+
+   </player>
+
+  </mainwindow>
+
+  <filewindow>
+     <image filename="sbackground.bmp" x="0" y="0"   w="1024" h="685"/>
+  </filewindow>
+
+  <searchwindow>
+     <image filename="sbackground.bmp" x="0" y="0"   w="1024" h="685"/>
+  </searchwindow>
+
+</Beatforce>

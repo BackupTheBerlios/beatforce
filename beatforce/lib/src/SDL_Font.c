@@ -43,7 +43,7 @@ extern SDL_Surface *screen;
 
 SDL_Font * SDL_FontInit(char *filename)
 {
-    SDL_Font *font;
+    SDL_Font *font=NULL;
     int i;        
     T_Font_IsFormat isformat;
     T_Font_Read     readfont;
@@ -55,14 +55,17 @@ SDL_Font * SDL_FontInit(char *filename)
     {
         isformat = FontTable[i]->isformat;
         if(isformat(filename))
+        {
+            readfont = FontTable[i]->read;
+            if(readfont(filename,font) == 0)
+                return NULL;
+                
+            if(font)
+                font->color=0xfefefe;
             break;
+        }
     }
-
-    readfont = FontTable[i]->read;
-    readfont(filename,font);
-      
-    if(font)
-        font->color=0xfefefe;
+     
  
     return font;
 }
@@ -93,8 +96,8 @@ void SDL_FontDrawStringRect(SDL_Surface *dest,SDL_Font *font,
     }
 }
 
-void SDL_FontDrawString(SDL_Surface *dest,SDL_Font *font,
-                        char *string,int x, int y)
+int SDL_FontDrawString(SDL_Surface *dest,SDL_Font *font,
+                       char *string,int x, int y)
 {
     int i;
     int size;
@@ -103,13 +106,11 @@ void SDL_FontDrawString(SDL_Surface *dest,SDL_Font *font,
 
     if(font == NULL )//|| font->font == NULL)
     {
-        printf("No proper font\n");
-        return;
+        return 0;
     }
     if(string == NULL)
     {
-        printf("Invalid string\n");
-        return;
+        return 0;
     }
         
 
@@ -123,10 +124,11 @@ void SDL_FontDrawString(SDL_Surface *dest,SDL_Font *font,
         pos.h=0;
         xoffset+=SDL_FontDrawChar(dest,font,string[i],&pos,NULL);
     }
+    return 1;
 }
 
-void SDL_FontDrawStringLimited(SDL_Surface *dest,SDL_Font *font,
-                               char *string,SDL_Rect *rect,SDL_Rect *clip)
+int SDL_FontDrawStringLimited(SDL_Surface *dest,SDL_Font *font,
+                              char *string,SDL_Rect *rect,SDL_Rect *clip)
 {
     int i;
     int size;
@@ -137,13 +139,11 @@ void SDL_FontDrawStringLimited(SDL_Surface *dest,SDL_Font *font,
 
     if(font == NULL )//|| font->font == NULL)
     {
-        printf("No proper font\n");
-        return;
+        return 0;
     }
     if(string == NULL)
     {
-        printf("Invalid string\n");
-        return;
+        return 0;
     }
         
     size=strlen(string);
@@ -157,7 +157,7 @@ void SDL_FontDrawStringLimited(SDL_Surface *dest,SDL_Font *font,
         pos.h=0;
         xoffset+=SDL_FontDrawChar(dest,font,string[i],&pos,clip);
     }
-
+    return 1;
 
 }
 
@@ -179,8 +179,15 @@ int SDL_FontGetCharWidth(SDL_Font* font,char character)
     if(font->type ==FNT_FONT)
     {
         FNT_Font *fnt=(FNT_Font*)font->fontdata;
-        character -= (char)fnt->firstchar;
-        return fnt->chartable[character*4+1]<<8|fnt->chartable[character*4];
+        if(fnt)
+        {
+            character -= (char)fnt->firstchar;
+            return fnt->chartable[character*4+1]<<8|fnt->chartable[character*4];
+        }
+        else
+        {
+            return 9;
+        }
     }
     else
     {

@@ -76,9 +76,9 @@ s%@INSTALL_DATA@%${INSTALL} -m 644%g
 s%@PACKAGE@%beatforce%g
 s%@VERSION@%0.1.0%g
 s%@ACLOCAL@%aclocal%g
-s%@AUTOCONF@%/home/beuving/beatforce/beatforce/missing autoconf%g
+s%@AUTOCONF@%autoconf%g
 s%@AUTOMAKE@%automake%g
-s%@AUTOHEADER@%/home/beuving/beatforce/beatforce/missing autoheader%g
+s%@AUTOHEADER@%autoheader%g
 s%@MAKEINFO@%makeinfo%g
 s%@SET_MAKE@%%g
 s%@CC@%gcc%g

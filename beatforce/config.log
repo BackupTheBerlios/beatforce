@@ -34,7 +34,7 @@ configure:2401: checking for ranlib
 configure:2468: checking for strip
 configure:2711: checking for objdir
 configure:2738: checking for gcc option to produce PIC
-configure:2890: checking if gcc PIC flag   -fPIC works
+configure:2890: checking if gcc PIC flag     -fPIC works
 configure:2956: checking if gcc static flag -static works
 configure:2998: checking if gcc supports -c -o file.o
 configure:3046: checking if gcc supports -c -o file.lo
@@ -48,11 +48,11 @@ configure:4282: checking if libtool supports shared libraries
 configure:4286: checking whether to build shared libraries
 configure:4309: checking whether to build static libraries
 configure:4845: checking whether -lc should be explicitly linked in
-configure:5450: checking for IMG_Load in -lSDL_image
-configure:5497: checking for fftw_execute in -lfftw3
-configure:5547: checking target system type
-configure:5606: checking for sdl-config
-configure:5641: checking for SDL - version >= 1.2.0
-configure:5726: gcc -o conftest -g -O2 -I/usr/include/SDL -D_REENTRANT   conftest.c -lfftw3 -lSDL_image  -L/usr/lib -lSDL -lpthread 1>&5
-configure:5816: checking for SDL.h
-configure:5856: checking for sys/asoundlib.h
+configure:5451: checking target system type
+configure:5510: checking for sdl-config
+configure:5545: checking for SDL - version >= 1.2.0
+configure:5630: gcc -o conftest -g -O2 -I/usr/include/SDL -D_REENTRANT   conftest.c  -L/usr/lib -lSDL -lpthread 1>&5
+configure:5716: checking for IMG_Load in -lSDL_image
+configure:5763: checking for fftw_execute in -lfftw3
+configure:5817: checking for SDL.h
+configure:5857: checking for sys/asoundlib.h

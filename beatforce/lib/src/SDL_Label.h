@@ -41,6 +41,5 @@ typedef struct SDL_Label
 // prototypes
 void* SDL_LabelCreate(SDL_Rect *rect);
 void  SDL_LabelDraw(void *label,SDL_Surface *dest);
-void  SDL_LabelHandler(void * label,SDL_Event *event);
 void  SDL_LabelProperties(void *label,int feature,va_list list);
 void  SDL_LabelEventHandler(void *label,SDL_Event *event);

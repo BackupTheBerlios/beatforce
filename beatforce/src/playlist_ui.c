@@ -18,6 +18,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
+
 #include <stdio.h>
 #include <string.h>
 #include "SDL_Widget.h"
@@ -27,12 +28,13 @@
 #include "songdb.h"
 #include "playlist.h"
 #include "player.h"
+#include "theme.h"
 
 #define PLAYER1 0
 
 int previous;
 
-extern SDL_Font *LargeBoldFont;
+
 
 void playliststring(long row,int column,char *dest)
 {
@@ -85,7 +87,7 @@ void playlisteventhandler(SDL_Table *table)
             player=0;
         else
             player=-1;
-    }
+}
 
     if(player == -1)
         printf("Can't set song to one of the players\n");
@@ -95,16 +97,22 @@ void playlisteventhandler(SDL_Table *table)
 }
 
 
-void PLAYLISTUI_CreateWindow()
+void PLAYLISTUI_CreateWindow(ThemePlaylist *pl)
 {
-    SDL_WidgetCreate(SDL_TABLE,540,340,400,240);
-    
-    SDL_WidgetProperties(SET_VISIBLE_ROWS,    16);
-    SDL_WidgetProperties(SET_VISIBLE_COLUMNS, 1);
-    SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
-    SDL_WidgetProperties(SET_FONT,LargeBoldFont);
-    SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION, playliststring);
-    SDL_WidgetEventCallback(playlisteventhandler,SDL_CLICKED);
+    if(pl == NULL)
+        return;
+
+    if(pl)
+    {
+        SDL_WidgetCreateR(SDL_TABLE,pl->Table->Rect);
+
+        SDL_WidgetProperties(SET_VISIBLE_ROWS,    16);
+        SDL_WidgetProperties(SET_VISIBLE_COLUMNS, 1);
+        SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
+        SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
+        SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION, playliststring);
+        SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,playlisteventhandler,NULL);
+    }
 }
 
 
