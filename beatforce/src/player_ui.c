@@ -205,7 +205,7 @@ void UI_PlayerUpdateTimeLabel(void *data)
         
     }
     {
-        int left,right;
+        int left=0,right=0;
         output_get_volume_level(john->PlayerNr,&left,&right);
         vol=(double)left;
         SDL_WidgetPropertiesOf(john->VolumeLeft,SET_CUR_VALUE,vol);

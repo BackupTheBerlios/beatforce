@@ -612,11 +612,13 @@ output_get_bpm (int c)
 int
 output_loop (void *arg)
 {
-    int channel, i, sample;
-    int l,l1;
-    int r,r1;
+    int channel=0, i=0, sample=0;
+    int l=0,l1=0;
+    int r=0,r1=0;
     output_word *tmp_buf = malloc (2 * OUTPUT_BUFFER_SIZE (audiocfg));
-
+    
+    memset(tmp_buf,0,(2 * OUTPUT_BUFFER_SIZE (audiocfg)));
+    
     if (tmp_buf == NULL)
         return -1;
 
@@ -633,7 +635,7 @@ output_loop (void *arg)
 
         for (channel = 0; channel < OUTPUT_N_CHANNELS; channel++)
         {
-            int n_read;
+            int n_read=0;
 
             
             /* if channel closed or paused, we don't read anything */

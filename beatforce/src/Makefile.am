@@ -1,5 +1,5 @@
 EXTRA_DIST=res
-INCLUDES = -I../lib/src/ -Wall
+INCLUDES = -I../lib/src/ -Wall 
 bin_PROGRAMS = beatforce
 beatforce_SOURCES =             \
 main.c                          \
