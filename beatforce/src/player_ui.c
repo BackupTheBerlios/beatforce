@@ -333,7 +333,6 @@ void playerui_UpdateTime(int player)
     {
         SDL_WidgetPropertiesOf(UI_Players[player].SongProgress,SET_MAX_VALUE,totaltime/10);
         SDL_WidgetPropertiesOf(UI_Players[player].SongProgress,SET_CUR_VALUE,(double)(time/10));
-        
     }
 }
 

@@ -702,8 +702,8 @@ output_loop (void *arg)
                 }                       /* for( 0 to SAMPLES ) */
                 l /= 376; //volumecorrection
                 r /= 376; //volumecorrection
-                ch[channel]->volumeleft  = l;
-                ch[channel]->volumeright = r;
+                ch[channel]->volumeleft  = 20 * log(l);
+                ch[channel]->volumeright = 20 * log(r);
                 
             }
        

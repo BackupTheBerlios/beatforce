@@ -176,11 +176,11 @@ int mainwindow_HandleKeys(unsigned int key)
         break;
         
     case BF_MAINVOLUMEUP:
-        MIXER_IncreaseMainVolume();
+        MIXERUI_IncreaseMainVolume();
         break;
 
     case BF_MAINVOLUMEDOWN:
-        MIXER_DecreaseMainVolume();
+        MIXERUI_DecreaseMainVolume();
         break;
 
     case BF_NEXTSONG:

@@ -38,7 +38,7 @@ extern int mixer_dB (int ch, float dB);
 /* Local callback functions */
 void mixerui_AutoFadeButtonClicked(void *data);
 void mixerui_FaderChanged(void *data);
-void mixerui_MainVolumeChanged(void *data);
+void MIXERUI_MainVolumeChanged(void *data);
 
 void *slideroffader;
 void *mainvolumeind;
@@ -90,7 +90,7 @@ void MIXERUI_CreateWindow(ThemeMixer *tm)
             SDL_WidgetProperties(SET_MAX_VALUE,100);
             SDL_WidgetProperties(SET_MIN_VALUE,0);
             SDL_WidgetProperties(SET_NORMAL_STEP_SIZE,1.0);
-            SDL_WidgetProperties(SET_CALLBACK,SDL_CHANGED,mixerui_MainVolumeChanged,mainslider);
+            SDL_WidgetProperties(SET_CALLBACK,SDL_CHANGED,MIXERUI_MainVolumeChanged,mainslider);
             break;
         case SLIDER_FADER:
             /* fade slider */
@@ -126,6 +126,7 @@ int MIXERUI_Redraw()
     double value=0.0;
 
     AUDIOOUTPUT_GetMainVolume(&volume);    
+
     SDL_WidgetPropertiesOf(mainvolumeind,SET_CUR_VALUE,(double) volume);
     volume= 100.0 - volume;
     SDL_WidgetPropertiesOf(mainslider   ,SET_CUR_VALUE,(double) volume);
@@ -150,7 +151,7 @@ void mixerui_FaderChanged(void *data)
     MIXER_SetFaderValue(slider->CurrentValue);
 }
 
-void mixerui_MainVolumeChanged(void *data)
+void MIXERUI_MainVolumeChanged(void *data)
 {
     SDL_Slider *slider=(SDL_Slider *)data;
     int volume;
@@ -162,4 +163,16 @@ void mixerui_MainVolumeChanged(void *data)
 }
 
 
+int MIXERUI_DecreaseMainVolume()
+{
+    MIXER_DecreaseMainVolume();
+    MIXERUI_Redraw();
 
+}
+
+
+int MIXERUI_IncreaseMainVolume()
+{
+    MIXER_IncreaseMainVolume();
+    MIXERUI_Redraw();
+}

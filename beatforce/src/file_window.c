@@ -74,11 +74,8 @@ static void FILEWINDOW_RenameSubgroupFinished();
 
 /* local data retreival functions for tables */
 static void FILEWINDOW_GetDirectories(int row,int column,char *string);
+static void FILEWINDOW_GetFilesInSubgroup(int row,int column,char *string);
 
-
-void dirselect(SDL_Table *table);
-void dirstring(long row,int column,char *dest);
-void filewindow_Search(void *data);
 Window gFILEWINDOW={ FILEWINDOW_EventHandler };
 
 
@@ -385,7 +382,9 @@ void FILEWINDOW_DeleteSelected(void *data)
     
     SDL_WidgetPropertiesOf(TableSubgroup,GET_SELECTED,&lSubgroup);
     if(lSubgroup)
+    {
         list=SONGDB_GetSubgroup(lSubgroup->index);
+    }
     else
     {
 //        ERROR("No subgroup selected");
@@ -407,26 +406,31 @@ void FILEWINDOW_DeleteSelected(void *data)
 void FILEWINDOW_GetFilesInSubgroup(int row,int column,char *string)
 {
     struct SongDBSubgroup *list;
+    struct SongDBEntry    *Playlist;
     SDL_TableRow *lSubgroup;
-    
+    int count=0;
+
     SDL_WidgetPropertiesOf(TableSubgroup,GET_SELECTED,&lSubgroup);
     if(lSubgroup)
+    {
         list=SONGDB_GetSubgroup(lSubgroup->index);
+        Playlist=list->Playlist;
+    }
     else
     {
 //        ERROR("No subgroup selected");
         return;
     }
 
-    if(row < list->Songcount)
+    while(Playlist)
     {
-        if(list && list->Playlist )
+        if(count == row)
         {
-            if(list->Playlist)
-            {
-                sprintf(string,"%s",list->Playlist->filename);
-            }
+            sprintf(string,"%s",Playlist->filename);
+            break;
         }
+        Playlist=Playlist->next;
+        count++;
     }
   
   
