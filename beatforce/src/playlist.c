@@ -88,11 +88,10 @@ struct PlEntry *PLAYLIST_GetSong (int player_nr, int no)
 int gt(void *d)
 {
     struct PlayerPrivate *p = PLAYER_GetData(1);
-    printf("Start timer\n");
     INPUT_GetTag(p->ip_plugins,test->filename,test);
-    printf("End timer %ld\n",test->time);
     return 0;
 }
+
 void PLAYLIST_SetEntry(int player_nr, struct SongDBEntry *e)
 {
     struct PlEntry *pe;

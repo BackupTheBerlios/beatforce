@@ -34,7 +34,6 @@
 #include "search_window.h"
 #include "file_window.h"
 
-// user interface include
 #include "wndmgr.h"
 
 ConfigFile     *cfgfile;
@@ -44,15 +43,11 @@ PlayerConfig   *playercfg0, *playercfg1;
 SamplerConfig  *samplercfg;
 MixerConfig    *mixercfg;
 
-int
-main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
 
     OSA_Init();
-
     
-    
-    //beatforce
     cfgfile = bf_cfg_open_default_file ();
     if (cfgfile == NULL)
     {
@@ -85,7 +80,7 @@ main(int argc, char *argv[])
    
     MAINWINDOW_Open();
     /*beatforce UI*/
-    WNDMGR_Main();
+    WNDMGR_Main(); /* main loop */
 
 
     AUDIOOUTPUT_Cleanup();

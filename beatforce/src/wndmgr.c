@@ -51,7 +51,7 @@ int WNDMGR_Redraw(void *data);
 
 void WNDMGR_CloseWindow()
 {
-    MAINWINDOW_Open();//Always go back to main window
+    MAINWINDOW_Open(); /* Always go back to main window */
 }
 
 void WNDMGR_Init()
