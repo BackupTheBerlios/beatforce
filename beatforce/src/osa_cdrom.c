@@ -183,17 +183,18 @@ int OSACDROM_TestDrive(char *dev)
     
     id=OSACDROM_CalcCDDBId();
     
-//    DisplayToc();
     
     if(tracks > 0)
     {
         char trackname[255];
         SONGDB_AddSubgroup(MainGroup,dev);
         sg=SONGDB_GetSubgroup();
+
         /* Go the the last added subgroup */
         while(sg->next)
             sg=sg->next;
 
+        SONGDB_SubgroupSetVolatile(sg);
         for(i=1;i<=tracks;i++)
         {
             sprintf(trackname,"%s/track%02d.cdda",dev,i);
@@ -203,113 +204,3 @@ int OSACDROM_TestDrive(char *dev)
     }
 }
 
-void DisplayToc ( )
-{
-    unsigned i;
-    unsigned long dw;
-    unsigned mins;
-    unsigned secnds;
-    unsigned centi_secnds;	/* hundreds of a second */
-    int count_audio_trks;
-
-
-    /* get total time */
-    dw = (unsigned long) g_toc[cdtracks].dwStartSector + 150;
-    mins	       =       dw / ( 60*75 );
-    secnds       =     ( dw % ( 60*75 ) ) / 75;
-    centi_secnds = (4* ( dw %      75   ) +1 ) /3; /* convert from 1/75 to 1/100 */
-    /* g_toc [i].bFlags contains two fields:
-       bits 7-4 (ADR) : 0 no sub-q-channel information
-       : 1 sub-q-channel contains current position
-       : 2 sub-q-channel contains media catalog number
-       : 3 sub-q-channel contains International Standard
-       Recording Code ISRC
-       : other values reserved
-       bits 3-0 (Control) :
-       bit 3 : when set indicates there are 4 audio channels else 2 channels
-       bit 2 : when set indicates this is a data track else an audio track
-       bit 1 : when set indicates digital copy is permitted else prohibited
-       bit 0 : when set indicates pre-emphasis is present else not present
-    */
-
-    {
-        unsigned ii;
-
-        /* summary */
-        count_audio_trks = 0;
-        i = 0;
-        while ( i < cdtracks ) {
-            int from;
-
-            from = g_toc [i].bTrack;
-            while ( i < cdtracks && g_toc [i].bFlags == g_toc [i+1].bFlags ) i++;
-            if (i >= cdtracks) i--;
-      
-            if (g_toc[i].bFlags & 4) {
-                fputs( " DATAtrack recorded      copy-permitted tracktype\n" , stderr);
-                fprintf(stderr, "     %2d-%2d %13.13s %14.14s      data\n",from,g_toc [i].bTrack,
-                        g_toc [i].bFlags & 1 ? "incremental" : "uninterrupted", /* how recorded */
-                        g_toc [i].bFlags & 2 ? "yes" : "no" /* copy-perm */
-                    );
-            } else { 
-                fputs( "AUDIOtrack pre-emphasis  copy-permitted tracktype channels\n" , stderr);
-                fprintf(stderr, "     %2d-%2d %12.12s  %14.14s     audio    %1c\n",from,g_toc [i].bTrack,
-                        g_toc [i].bFlags & 1 ? "yes" : "no", /* pre-emph */
-                        g_toc [i].bFlags & 2 ? "yes" : "no", /* copy-perm */
-                        g_toc [i].bFlags & 8 ? '4' : '2'
-                    );
-                count_audio_trks++;
-            }
-            i++;
-        }
-        fprintf ( stderr, 
-                  "Table of Contents: total tracks:%u, (total time %u:%02u.%02u)\n",
-                  cdtracks, mins, secnds, centi_secnds );
-
-        for ( i = 0, ii = 0; i < cdtracks; i++ ) {
-            if ( g_toc [i].bTrack <= 99 ) 
-            {
-                dw = (unsigned long) (g_toc[i+1].dwStartSector - g_toc[i].dwStartSector /* + 150 - 150 */);
-                mins         =         dw / ( 60*75 );
-                secnds       =       ( dw % ( 60*75 )) / 75;
-                centi_secnds = ( 4 * ( dw %      75 ) + 1 ) / 3;
-                if ( (g_toc [i].bFlags & CDROM_DATA_TRACK) != 0 ) 
-                {
-                    fprintf ( stderr, " %2u.[%2u:%02u.%02u]",
-                              g_toc [i].bTrack,mins,secnds,centi_secnds );
-                } 
-                else 
-                {
-                    fprintf ( stderr, " %2u.(%2u:%02u.%02u)",
-                              g_toc [i].bTrack,mins,secnds,centi_secnds );
-                }
-                ii++;
-            }
-            if ( ii % 5 == 0 )
-                fputs( "\n", stderr );
-            else
-                fputc ( ',', stderr );
-        }
-        if ( (ii+1) % 5 != 0 )
-            fputs( "\n", stderr );
-
-        {
-            fputs ("\nTable of Contents: starting sectors\n", stderr);
-            for ( i = 0; i < cdtracks; i++ ) {
-                fprintf ( stderr, " %2u.(%8u)", g_toc [i].bTrack, g_toc[i].dwStartSector
-#ifdef DEBUG_CDDB
-                          +150
-#endif
-                    );
-                if ( (i+1) % 5 == 0 )
-                    fputs( "\n", stderr );
-                else
-                    fputc ( ',', stderr );
-            }
-            fprintf ( stderr, " lead-out(%8u)", g_toc[i].dwStartSector);
-            fputs ("\n", stderr);
-        }
-        
-        
-    }
-}

@@ -29,6 +29,7 @@
 #include "playlist.h"
 #include "player.h"
 #include "theme.h"
+#include "config.h"
 
 #define PLAYER1 0
 
@@ -37,11 +38,12 @@ int previous;
 #define MODULE_ID PLAYLIST_UI
 #include "debug.h"
 
+void *waitlist;
+
 void playliststring(long row,int column,char *dest)
 {
     struct PlEntry *pe;
     struct SongDBEntry *e;
-
 
     dest[0]='\0';
 
@@ -72,7 +74,7 @@ void playliststring(long row,int column,char *dest)
     }
 }
 
-void playlisteventhandler(SDL_Table *table)
+void playlisteventhandler(SDL_Table *table,SDL_Event *event)
 {
     int player=0;// is playing ?
 
@@ -90,8 +92,12 @@ void playlisteventhandler(SDL_Table *table)
     if(player == -1)
         printf("Can't set song to one of the players\n");
     else
-        player_set_song(player,table->CurrentRow);
-
+    {
+        if(event->button.button == 1)//play now left mosuebutton down
+            player_set_song(player,table->CurrentRow);
+        else if(event->button.button == 3) //remove fromw aitlist right mousebutton down
+            PLAYLIST_Remove(PLAYER1,table->CurrentRow);
+    }
 }
 
 
@@ -102,16 +108,22 @@ void PLAYLISTUI_CreateWindow(ThemePlaylist *pl)
 
     if(pl)
     {
-        SDL_WidgetCreateR(SDL_TABLE,pl->Table->Rect);
-
+        waitlist=SDL_WidgetCreateR(SDL_TABLE,pl->Table->Rect);
         SDL_WidgetProperties(SET_VISIBLE_ROWS,    16);
         SDL_WidgetProperties(SET_VISIBLE_COLUMNS, 1);
-        SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
+//        SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
+        SDL_WidgetProperties(SET_BG_COLOR,TRANSPARANT);
+        SDL_WidgetProperties(SET_FG_COLOR,WHITE);
         SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
         SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION, playliststring);
+        SDL_WidgetProperties(SET_IMAGE,THEME_DIR"/beatforce/tablescrollbar.bmp");
         SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,playlisteventhandler,NULL);
     }
 }
 
 
 
+void PLAYLISTUI_Redraw()
+{
+    SDL_WidgetPropertiesOf(waitlist,ROWS,PLAYLIST_GetNoOfEntries(PLAYER1));
+}

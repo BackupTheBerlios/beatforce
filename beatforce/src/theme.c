@@ -1059,7 +1059,7 @@ ThemePlaylist *XML_ParsePlaylist(xmlDocPtr doc, xmlNodePtr cur)
     
 }
 
-ThemeFont *AddFont(ThemeFont *font,xmlDocPtr doc, xmlNodePtr cur)
+ThemeFont *THEME_AddFont(ThemeFont *font,xmlDocPtr doc, xmlNodePtr cur)
 {
 
     if(font==NULL)
@@ -1100,7 +1100,8 @@ ThemeFont *XML_ParseFont(xmlDocPtr doc, xmlNodePtr cur)
         {
             if ((!xmlStrcmp(cur->name, (const xmlChar *)"bitmapfont"))) 
             {
-                font=AddFont(font,doc,cur);
+                font=THEME_AddFont(font,doc,cur);
+
             }
             cur=cur->next;
         }

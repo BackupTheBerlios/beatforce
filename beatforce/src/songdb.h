@@ -88,6 +88,7 @@ typedef struct SongDBSubgroup
 {
     char *Name;
     int Songcount;
+    int Volatile;
     struct SongDBEntry *Playlist;
     struct SongDBSubgroup *next;
     struct SongDBSubgroup *prev;
@@ -122,6 +123,7 @@ int SONGDB_RemoveSubgroup(struct SongDBSubgroup *sg);
 int SONGDB_RenameSubgroup(struct SongDBSubgroup *sg, char *title);
 int SONGDB_RemovePlaylistEntry(struct SongDBSubgroup *sg,struct SongDBEntry *e);
 struct SongDBSubgroup *SONGDB_GetSubgroup();
+int SONGDB_SubgroupSetVolatile(struct SongDBSubgroup *subgroup);
 int SONGDB_SubgroupCount();
 int SONGDB_AddFileToSubgroup(struct SongDBSubgroup *sg,char *filename);
 struct SongDBSubgroup *SONGDB_GetActiveSubgroup();

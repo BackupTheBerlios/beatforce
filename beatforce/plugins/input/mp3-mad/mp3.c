@@ -863,6 +863,7 @@ mp3_play_loop (void *param)
 	{
             private->eof = 1;
             mp3_if.input_eof (private->ch_id);
+            private->going=0;
 	}
     }
 

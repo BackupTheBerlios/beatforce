@@ -36,8 +36,8 @@ typedef struct SDL_Font
 {
     FontType type;
     void *fontdata;
-    
-    int height;
+   
+    int Height;
     unsigned int color;
 }SDL_Font;
 
@@ -79,5 +79,6 @@ void SDL_FontDrawStringRect(SDL_Surface *dest,SDL_Font *font,
 
 int SDL_FontGetStringWidth(SDL_Font* font,char* string);
 int SDL_FontSetColor(SDL_Font *font,unsigned int color);
+int SDL_FontGetHeight(SDL_Font *font);
 
 #endif// SDL_FONT_H

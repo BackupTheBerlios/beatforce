@@ -11,11 +11,13 @@
     <image filename="sbackground.bmp" x="0" y="0"   w="1024" h="685"/>
     <image filename="seperator.bmp"   x="0" y="30"  w="1024" h="3"  />
     <image filename="seperator.bmp"   x="0" y="230" w="1024" h="3"  /> 
+    <image filename="logo.bmp"        x="100" y="0" w="800"  h="30"  /> 
+    <image filename="waitlist.bmp"    x="540" y="340"/>  
 
     <clock x="4" y="4" w="60" h="22" font="digits" bgcolor="0x00000" fgcolor="0x00e1ff"/>
 
     <songdb>
-      <table x="30" y="340" w="500" h="240" rows="20" columns="3">
+      <table x="30" y="270" w="500" h="310" rows="20" columns="3">
 	<column id="1" width="80"/>  
 	<column id="2" width="490"/>
 	<column id="3" width="80"/>
@@ -37,7 +39,7 @@
     </mixer>
 
     <playlist>
-	<table x="540" y="340" w="400" h="240" rows="16" columns="1"/>
+       	<table x="540" y="340" w="400" h="240" rows="16" columns="1"/>
     </playlist>
 
 
@@ -112,7 +114,7 @@
   <filewindow>
      <image filename="sbackground.bmp" x="0" y="0"/>
      <table x="220" y="20" w="360" h="550" contents="FILESINDIRECTORY"/>
-     <button x="300" y="562" normal="addselected.bmp" pressed="addselected_p.bmp" action="ADDSELECTED"/>
+     <button x="290" y="562" normal="addselected.bmp" pressed="addselected_p.bmp" action="ADDSELECTED"/>
      <button x="420" y="562" normal="addall.bmp" pressed="addall.bmp" action="ADDALL"/>
      
      <table x="600" y="250" w="300" h="300" contents="FILESINSUBGROUP"/>

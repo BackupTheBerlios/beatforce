@@ -81,17 +81,17 @@ void SONGDBUI_CreateWindow(ThemeSongdb *ts)
     {
         /* Create the large table (songdb)*/
         table=SDL_WidgetCreateR(SDL_TABLE,ts->Table->Rect);/*x y w h */
-        SDL_WidgetProperties(SET_VISIBLE_ROWS,    ts->Table->Rows);
+        SDL_WidgetProperties(SET_FONT,THEME_Font("small"));
+//        SDL_WidgetProperties(SET_VISIBLE_ROWS,    ts->Table->Rows);
         SDL_WidgetProperties(SET_VISIBLE_COLUMNS, ts->Table->Columns);
         SDL_WidgetProperties(COLUMN_WIDTH, 1, 30  );
         SDL_WidgetProperties(COLUMN_WIDTH, 2, 290 );
         SDL_WidgetProperties(COLUMN_WIDTH, 3, 60  );
         SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
         SDL_WidgetProperties(ROWS,SONGDB_GetNoOfEntries());
-        SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
         SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION,songdbstring);
         SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,eventhandler,table);
-        SDL_WidgetProperties(SET_IMAGE,THEME_DIR"/beatforce/tablescrollbar.jpg");
+        SDL_WidgetProperties(SET_IMAGE,THEME_DIR"/beatforce/tablescrollbar.bmp");
     }
 
     /* Craete the tab section below the table*/

@@ -63,7 +63,7 @@ typedef struct SDL_Table
     int TableInitialDraw;
 
     //event handler functions
-    void (*Clicked)(void*);
+    void (*Clicked)(void* data,SDL_Event *event);
     void *ClickedData;
     void (*OnReturn) ();
 

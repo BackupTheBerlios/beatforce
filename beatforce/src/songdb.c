@@ -135,6 +135,11 @@ int SONGDB_Exit()
     return SONGDB_SaveXMLDatabase();
 }
 
+int SONGDB_SubgroupSetVolatile(struct SongDBSubgroup *subgroup)
+{
+    subgroup->Volatile=1;
+    return 1;
+}
 
 int SONGDB_AddSubgroup(struct SongDBGroup *group,char *title)
 {
@@ -307,6 +312,7 @@ struct SongDBSubgroup *songdb_AddSubgroup(struct SongDBSubgroup *sg,char *title)
         sg->Name=strdup(title);
         sg->Songcount=0;
         sg->Playlist=NULL;
+        sg->Volatile=0;
     }
     else
     {
@@ -320,8 +326,9 @@ struct SongDBSubgroup *songdb_AddSubgroup(struct SongDBSubgroup *sg,char *title)
         last->next->Name=strdup(title);
         last->next->Songcount=0;
         last->next->Playlist=NULL;
+        last->next->Volatile=0;
         last->next->prev=last;
-
+        
     }
     return sg;
 }
@@ -631,21 +638,24 @@ static int SONGDB_SaveXMLDatabase()
 
     while(MainGroup->Subgroup)
     {
-        subgroup=xmlNewChild(maingroup, NULL, BAD_CAST "subgroup", NULL);
-        xmlNewProp(subgroup, BAD_CAST "name", BAD_CAST MainGroup->Subgroup->Name);
-        
-        Playlist=MainGroup->Subgroup->Playlist;
-
-        while(Playlist)
+        if(MainGroup->Subgroup->Volatile == 0)
         {
-            file=xmlNewChild(subgroup,NULL,"song",NULL);
-            xmlNewProp(file, BAD_CAST "filename", BAD_CAST Playlist->filename);
-            if(Playlist->time)
+            subgroup=xmlNewChild(maingroup, NULL, BAD_CAST "subgroup", NULL);
+            xmlNewProp(subgroup, BAD_CAST "name", BAD_CAST MainGroup->Subgroup->Name);
+            
+            Playlist=MainGroup->Subgroup->Playlist;
+            
+            while(Playlist)
             {
-                sprintf(time,"%ld",Playlist->time);
-                xmlNewProp(file, BAD_CAST "time", BAD_CAST time);
+                file=xmlNewChild(subgroup,NULL,"song",NULL);
+                xmlNewProp(file, BAD_CAST "filename", BAD_CAST Playlist->filename);
+                if(Playlist->time)
+                {
+                    sprintf(time,"%ld",Playlist->time);
+                    xmlNewProp(file, BAD_CAST "time", BAD_CAST time);
+                }
+                Playlist=Playlist->next;
             }
-            Playlist=Playlist->next;
         }
         MainGroup->Subgroup=MainGroup->Subgroup->next;
     }

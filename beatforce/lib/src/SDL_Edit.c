@@ -87,7 +87,7 @@ void  SDL_EditDraw(void *edit,SDL_Surface *dest)
     
     SDL_FillRect(dest,&Edit->rect,Edit->bgcolor);
     
-    StringPos.y = Edit->rect.y + ((Edit->rect.h - Edit->Font->height)/2);
+    StringPos.y = Edit->rect.y + ((Edit->rect.h - SDL_FontGetHeight(Edit->Font))/2);
     StringPos.x = Edit->rect.x;
     StringPos.w = Edit->rect.w;
     StringPos.h = Edit->rect.h;
@@ -119,7 +119,7 @@ void  SDL_EditDraw(void *edit,SDL_Surface *dest)
             cursor.x = Edit->rect.x + SDL_FontGetStringWidth(Edit->Font,Edit->Caption)+2;
         cursor.y = StringPos.y;
         cursor.w = 1;
-        cursor.h = Edit->Font->height;
+        cursor.h = SDL_FontGetHeight(Edit->Font);
         SDL_FillRect(dest,&cursor,0x000007);
     }
     

@@ -178,6 +178,7 @@ int SDL_SliderProperties(void *slider,int feature,va_list list)
         if(Slider->SliderButton == NULL)
         {
             Slider->SliderButton=IMG_Load(va_arg(list,char*));
+            SDL_SetColorKey(Slider->SliderButton,SDL_SRCCOLORKEY,TRANSPARANT);
             SDL_SliderPixeloffset(Slider);
         }
         break;

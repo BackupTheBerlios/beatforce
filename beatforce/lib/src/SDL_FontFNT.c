@@ -114,7 +114,7 @@ int FONT_FNT_DrawChar(SDL_Surface *dest,SDL_Font *font,
     for(it=0;it<3;it++)
     {
         /*run through the font height */
-        for(y1=0;y1<font->height;y1++)
+        for(y1=0;y1<font->Height;y1++)
         {
             /*run through the current byte */
             for(x1=0;x1<8;x1++)
@@ -219,6 +219,6 @@ void FNT_ReadFont(FILE *fp,SDL_Font *font)
     }
 
     font->fontdata = fnt;
-    font->height   = height;
+    font->Height   = height;
 
 }

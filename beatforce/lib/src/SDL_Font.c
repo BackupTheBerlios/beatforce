@@ -242,12 +242,19 @@ void DrawPixel(SDL_Surface *screen, int x, int y,unsigned int color2)
     if(x > screen->w)
         return;
 
-//    if ( SDL_MUSTLOCK(screen) ) {
-//        if ( SDL_LockSurface(screen) < 0 ) {
-//            return;
-//        }
-//    }
-    switch (screen->format->BytesPerPixel) {
+
+    if ( SDL_MUSTLOCK(screen) ) 
+    {
+        if ( SDL_LockSurface(screen) < 0 ) 
+        {
+            return;
+        }
+    }
+
+    switch (screen->format->BytesPerPixel) 
+    {
+    
+
     case 1: { /* Assuming 8-bpp */
         Uint8 *bufp;
 
@@ -288,12 +295,20 @@ void DrawPixel(SDL_Surface *screen, int x, int y,unsigned int color2)
     }
     break;
     }
-//    if ( SDL_MUSTLOCK(screen) ) {
-//        SDL_UnlockSurface(screen);
-//    }
-//    SDL_UpdateRect(screen, x, y, 1, 1);
+
+    if ( SDL_MUSTLOCK(screen) ) 
+    {
+        SDL_UnlockSurface(screen);
+    }
+
+
 }
 
+int SDL_FontGetHeight(SDL_Font *font)
+{
+    return font->Height;
+
+}
 
 
 

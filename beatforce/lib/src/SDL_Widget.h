@@ -26,7 +26,7 @@
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
 
-#define TRANSPARANT 0xfefefe
+#define TRANSPARANT 0xff00ff
 #define WHITE       0xffffff
 #define BLACK       0x000000
 

@@ -207,13 +207,14 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
         SDL_WidgetProperties(SET_NORMAL_STEP_SIZE,0.1);
         SDL_WidgetProperties(SET_CALLBACK,SDL_CHANGED,PLAYERUI_SetSpeed,&UI_Players[nr]);
     }
-    
+#if 0    
     if(pt->Edit)
     {
         UI_Players[nr].EditTitle=SDL_WidgetCreateR(SDL_EDIT,pt->Edit->Rect);
         SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
         SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_RETURN,PLAYERUI_EditTitleReturn,&UI_Players[nr]);
     }
+#endif
 }
 
 void PLAYERUI_Redraw()

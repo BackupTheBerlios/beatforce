@@ -50,7 +50,7 @@ void* SDL_TableCreate(SDL_Rect* rect)
     SDL_Table *newtable;
 
     newtable=(SDL_Table*)malloc(sizeof(SDL_Table));
-    newtable->fgcolor           = 0xffffef;
+    newtable->fgcolor           = BLACK;//0xffffef;
     newtable->bgcolor           = 0x00000f;
     newtable->rect.x            = rect->x;
     newtable->rect.y            = rect->y;
@@ -88,6 +88,7 @@ void* SDL_TableCreate(SDL_Rect* rect)
 
     newtable->edit              = NULL;
     newtable->ScrollbarImage    = NULL;
+    newtable->bgcolor           = TRANSPARANT;
    
     newtable->Selected          = NULL;
     newtable->SelectedCount     = 0;
@@ -145,14 +146,21 @@ void SDL_TableDraw(void *table,SDL_Surface *dest)
      */
 //    if(Table->TableInitialDraw || SDL_WidgetNeedsRedraw())
     {
-        if(SDL_BlitSurface(Table->Background,NULL,dest,&Table->rect)<0)
-           fprintf(stderr, "BlitSurface error: %s\n", SDL_GetError());
-       
+        if(Table->bgcolor ==  TRANSPARANT)
+        {
+            if(SDL_BlitSurface(Table->Background,NULL,dest,&Table->rect)<0)
+                fprintf(stderr, "BlitSurface error: %s\n", SDL_GetError());
+        }
+        else
+        {
+            SDL_FillRect(dest,&Table->rect,Table->bgcolor);
+        }
+
         for(row=0;row<Table->VisibleRows;row++)
         {
             SDL_TableDrawRow(dest,Table,row);
         }
-        //SDL_UpdateRect(dest,Table->rect.x,Table->rect.y,Table->rect.w-45,Table->rect.h);
+        
         Table->TableInitialDraw = 0;
     }
     if(Table->edit)
@@ -192,6 +200,7 @@ int SDL_TableProperties(void *table,int feature,va_list list)
         break;
 
     case SET_FG_COLOR:
+        Table->fgcolor=va_arg(list,Uint32);
         break;
 
     case SET_BG_COLOR:
@@ -246,6 +255,8 @@ int SDL_TableProperties(void *table,int feature,va_list list)
     }
     case SET_FONT:
         Table->font=va_arg(list,SDL_Font*);
+        Table->RowHeight=SDL_FontGetHeight(Table->font)+2;
+        Table->VisibleRows = Table->rect.h / Table->RowHeight;
         break;
     case SET_DATA_RETREIVAL_FUNCTION:
         Table->Table_GetString=va_arg(list,void*);
@@ -393,7 +404,7 @@ void SDL_TableEventHandler(void *table,SDL_Event *event)
     case SDL_MOUSEBUTTONDOWN:
         if(SDL_WidgetIsInside(&Table->rect,event->motion.x,event->motion.y))
         {
-            if(event->button.button == 1)
+            if(event->button.button == 1 || event->button.button == 3)
             {
                 if(event->motion.x > (Table->rect.x + Table->rect.w - Table->ScrollbarWidth))
                 {
@@ -417,7 +428,7 @@ void SDL_TableEventHandler(void *table,SDL_Event *event)
                     }
 
                     if(Table->Clicked)
-                        Table->Clicked(Table);
+                        Table->Clicked(Table,event);
                 }
             }
             
@@ -513,7 +524,12 @@ static void SDL_TableDrawRow(SDL_Surface *dest,SDL_Table *Table,int row)
     {
         if(Table->bgcolor == TRANSPARANT)
         {
-            if(SDL_BlitSurface(Table->Background,NULL,dest,&Table->rect)<0)
+            la.x = 0;
+            la.y = RowDims.y;
+            la.w = RowDims.w;
+            la.h = RowDims.h;
+
+            if(SDL_BlitSurface(Table->Background,&la,dest,&RowDims)<0)
                 fprintf(stderr, "BlitSurface error: %s\n", SDL_GetError());
         }
         else
