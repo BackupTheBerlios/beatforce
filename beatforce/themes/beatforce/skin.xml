@@ -20,16 +20,13 @@
 	<column id="2" width="490"/>
 	<column id="3" width="80"/>
       </table>
-      <button x="30" y="640" w="20" h="20" action="CHANGE_DIR"/>
-      <button x="60" y="640" w="20" h="20" action="RENAME"/>
-      <button x="90" y="640" w="20" h="20" action="ADD"/>
-      <button x="120" y="640" w="20" h="20" action="REMOVE"/>
+      <button x="50" y="610" action="CHANGE_DIR" normal="editgroup.bmp" pressed="editgroup_p.bmp"/>
     </songdb>
 
 
     <mixer>
-     <image filename="horline.bmp" x="475" y="9" w="45" h="100"/>
-     <image filename="faderline.bmp" x="437" y="157" w="138" h="45"/>
+     <image filename="horline.bmp" x="475" y="9"/>
+     <image filename="faderline.bmp" x="437" y="157"/>
 
      <volumebar x="527" y="11" w="4" h="124" display="VOLUME_LEFT"/>
 
@@ -46,10 +43,10 @@
 
 
     <player id="0">
-     <image filename="playerbg.bmp" x="14" y="55" w="100" h="100"/>
-     <image filename="horline.bmp" x="314" y="46" w="45" h="100"/>
+     <image filename="playerbg.bmp" x="14" y="55"/>
+     <image filename="horline.bmp" x="314" y="46"/>
 
-     <button x="167" y="176" w="80" h="20"
+     <button x="167" y="176" 
 	normal="playonly_green.bmp"
 	highlight="playonly_green_highlight.bmp"
         pressed="playonly_green_pressed.bmp"
@@ -75,10 +72,10 @@
 
 
     <player id="1">
-     <image filename="playerbg.bmp" x="614" y="55" w="100" h="100"/>
-     <image filename="horline.bmp" x="914" y="46" w="45" h="100"/>
+     <image filename="playerbg.bmp" x="614" y="55"/>
+     <image filename="horline.bmp" x="914" y="46"/>
 
-     <button x="767" y="176" w="80" h="20"
+     <button x="767" y="176" 
        normal="playonly_green.bmp"
        highlight="playonly_green_highlight.bmp"
        pressed="playonly_green_pressed.bmp"
@@ -104,11 +101,21 @@
   </mainwindow>
 
   <filewindow>
-     <image filename="sbackground.bmp" x="0" y="0"   w="1024" h="685"/>
+     <image filename="sbackground.bmp" x="0" y="0"/>
+     <table x="200" y="20" w="360" h="550" contents="FILESINDIRECTORY"/>
+     <button x="320" y="562" normal="addselected.bmp" pressed="addselected_p.bmp" action="ADDSELECTED"/>
+
+     <table x="600" y="250" w="300" h="300" contents="FILESINSUBGROUP"/>
+     <button x="680" y="553" normal="removeselected.bmp" pressed="removeselected_p.bmp" action="DELETESELECTED"/>
+
+     <table x="600" y="20" w="300" h="170" contents="SUBGROUPS"/>
+     <button x="600" y="200"  normal="create.bmp" pressed="create_p.bmp" action="ADD"/>
+     <button x="700" y="200"  normal="remove.bmp" pressed="remove_p.bmp" action="REMOVE"/>
+     <button x="800" y="200"  normal="rename.bmp" pressed="rename_p.bmp" action="RENAME"/>
   </filewindow>
 
   <searchwindow>
-     <image filename="sbackground.bmp" x="0" y="0"   w="1024" h="685"/>
+     <image filename="sbackground.bmp" x="0" y="0"/>
   </searchwindow>
 
 </Beatforce>
