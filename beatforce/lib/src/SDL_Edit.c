@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003 John Beuving (john.beuving@wanadoo.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@beatforce.org)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -22,9 +22,7 @@
 #include <malloc.h>
 #include <string.h>
 
-#include "SDL_Widget.h"
-#include "SDL_Edit.h"
-#include "SDL_Signal.h"
+#include <SDLTk.h>
 
 void SDL_EditKeyDownCB(SDL_Widget *widget,SDL_Event *event);
 
@@ -36,8 +34,6 @@ const struct S_Widget_FunctionList SDL_Edit_FunctionList =
     NULL,
     NULL,
 };
-
-
 
 
 SDL_Widget *SDL_EditCreate(SDL_Rect* rect)
@@ -84,9 +80,6 @@ void  SDL_EditDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
         return;
     }
 
-
-    SDL_FontSetColor(Edit->Font,Edit->fgcolor);
-    
     SDL_FillRect(dest,&widget->Rect,BLACK);
     {
         SDL_Rect r;
@@ -124,13 +117,13 @@ void  SDL_EditDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
 
                 w = SDL_FontGetStringWidth(Edit->Font,tmp);
 
-                caption=&tmp;
+                caption=(char*)&tmp;
                 while(w > widget->Rect.w)
                 {
                     w=SDL_FontGetStringWidth(Edit->Font,caption);
                     caption++;
                 }
-                SDL_FontDrawStringRect(dest,Edit->Font,caption,&StringPos);
+                SDL_FontDrawStringRect(dest,Edit->Font,caption,Edit->fgcolor,&StringPos);
 
                 if(SDL_WidgetHasFocus(widget))
                 {
@@ -153,7 +146,7 @@ void  SDL_EditDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
                     memset(tmp,0,255);
                     strncpy(tmp,Edit->Caption+size,size2);
                     StringPos.x = cursor.x + 1;
-                    SDL_FontDrawStringRect(dest,Edit->Font,tmp,&StringPos);
+                    SDL_FontDrawStringRect(dest,Edit->Font,tmp,Edit->fgcolor,&StringPos);
                 }
             }
 
@@ -169,9 +162,6 @@ int SDL_EditProperties(SDL_Widget *widget,int feature,va_list list)
 
     switch(feature)
     {
-    case SET_FONT:
-        Edit->Font   = va_arg(list,SDL_Font*);
-        break;
     case SET_CAPTION:
         sprintf(Edit->Caption,"%s",va_arg(list,char*));
         break;
@@ -181,6 +171,8 @@ int SDL_EditProperties(SDL_Widget *widget,int feature,va_list list)
     case SET_BG_COLOR:
         Edit->bgcolor = va_arg(list,Uint32);
         break;
+    default:
+        return 0;
     }
     return 1;
 }
@@ -278,6 +270,18 @@ char *SDL_EditGetText(SDL_Widget *widget)
 {
     SDL_Edit *Edit=(SDL_Edit*)widget;
     return Edit->Caption;
+}
+
+int SDL_EditSetFont(SDL_Widget *widget,SDL_Font *font)
+{
+    SDL_Edit *Edit=(SDL_Edit*)widget;
+    
+    if(font == NULL)
+        return 0;
+    
+    Edit->Font = font;
+    
+    return 1;
 }
 
 void SDL_EditSetText(SDL_Widget *widget,const char *text)

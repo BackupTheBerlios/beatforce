@@ -60,7 +60,7 @@ int change;
 char directory[255]; /* Selected directory in directory tree */
 
 /* Local function prototypes */
-SDL_Surface *Window_CreateFileWindow();
+void Window_CreateFileWindow();
 int FILEWINDOW_EventHandler(SDL_Event event);
 void FILEWINDOW_GetFilesInDirectory(int row,int column,char *string);
 static int FILEWINDOW_NotifyHandler(SDL_Window *Win);
@@ -87,26 +87,23 @@ static void FILEWINDOW_GetFilesInSubgroup(int row,int column,char *string);
 #endif
 static void FILEWINDOW_GetSelectedSubgroup(struct SongDBSubgroup **sel_sg);
 
-SDL_Window gFILEWINDOW={ FILEWINDOW_EventHandler , FILEWINDOW_NotifyHandler, NULL, NULL };
+SDL_Window *gFILEWINDOW;
 
 
 void FILEWINDOW_Init()
 {
-    gFILEWINDOW.Surface = NULL;
-    subgroupsongs       = NULL;
+    gFILEWINDOW   = NULL;
+    subgroupsongs = NULL;
 }
 
 void FILEWINDOW_Open()
 {
-    TRACE("FILEWINDOW_Open");
-    if(gFILEWINDOW.Surface == NULL)
+    if(gFILEWINDOW == NULL)
     {
-        gFILEWINDOW.Surface=Window_CreateFileWindow();
+        Window_CreateFileWindow();
     }
-    SDL_TableSetSelected(TableSubgroup,0);
-    SDL_WindowOpen(&gFILEWINDOW);
+    SDL_WindowOpen(gFILEWINDOW);
 }
-
 static int FILEWINDOW_NotifyHandler(SDL_Window *Win)
 {
     TRACE("FILEWINDOW_NotifyHandler");
@@ -315,7 +312,7 @@ static void FILEWINDOW_AddAll(void *data)
 }
 
 /* 
- *  Table callback function for the subgroups of the active 
+ *  Table callback function for the subgroups of th active 
  *  group. 
  */
 void FILEWINDOW_LoadSubgroups(SDL_Widget *widget)
@@ -324,7 +321,6 @@ void FILEWINDOW_LoadSubgroups(SDL_Widget *widget)
     char *string[1];
 
     string[0]=malloc(255);
-
     list=SONGDB_GetSubgroupList();
     SDL_TableDeleteAllRows(widget);
     while(list)
@@ -435,9 +431,8 @@ void FILEWINDOW_GetFilesInSubgroup(int row,int column,char *string)
 #endif
 
 
-SDL_Surface *Window_CreateFileWindow()
+void Window_CreateFileWindow()
 {
-    SDL_Surface *FileWindow;
     SDL_Widget *w; /* Temporary widget */
     
     ThemeConfig *tc       = THEME_GetActive();
@@ -446,33 +441,26 @@ SDL_Surface *Window_CreateFileWindow()
     ThemeButton   *Button = NULL;
     ThemeTable    *Table  = NULL;
 
-    TRACE("Window_CreateFileWindow");
-
     if(tc == NULL)
-    {
-        ERROR("No active theme");
-        return NULL;
-    }
+        return;
 
     fw=tc->FileWindow;
     
     if(fw == NULL)
-    {
-        ERROR("No theme for filewindow");
-        return NULL;
-    }
+        return;
 
     Image  = fw->Image;
     Button = fw->Button;
     Table  = fw->Table;
 
-    FileWindow = SDL_WidgetNewSurface(1024,685,32);
+    gFILEWINDOW = SDL_WindowNew(0,0,1024,685);
 
 
     while(Image)
     {
-        w=SDL_WidgetCreateR(SDL_PANEL,Image->Rect);
+        w=SDL_WidgetCreate(SDL_PANEL,Image->x,Image->y,Image->w,Image->h);
         SDL_PanelSetImage(w,IMG_Load(Image->filename));
+        SDL_WidgetShow(w);
         Image=Image->next;
     }
 
@@ -483,44 +471,50 @@ SDL_Surface *Window_CreateFileWindow()
         {
         case BUTTON_RENAME:
             /* Rename the selected subgroup */
-            w=SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
+            w=SDL_WidgetCreate(SDL_BUTTON,Button->x,Button->y,Button->w,Button->h);
             SDL_WidgetPropertiesOf(w,SET_NORMAL_IMAGE,IMG_Load(Button->normal));
             SDL_WidgetPropertiesOf(w,SET_PRESSED_IMAGE,IMG_Load(Button->pressed));
             SDL_SignalConnect(w,"clicked",FILEWINDOW_RenameSubgroup,NULL);
+            SDL_WidgetShow(w);
             break;
         case BUTTON_CREATE:
             /* Add a subgroup */
-            w=SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
+            w=SDL_WidgetCreate(SDL_BUTTON,Button->x,Button->y,Button->w,Button->h);
             SDL_WidgetPropertiesOf(w,SET_NORMAL_IMAGE,IMG_Load(Button->normal));
             SDL_WidgetPropertiesOf(w,SET_PRESSED_IMAGE,IMG_Load(Button->pressed));
             SDL_SignalConnect(w,"clicked",FILEWINDOW_AddSubgroup,NULL);
+            SDL_WidgetShow(w);
             break;
         case BUTTON_REMOVE:
             //remove the selected subgroup
-            w=SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
+            w=SDL_WidgetCreate(SDL_BUTTON,Button->x,Button->y,Button->w,Button->h);
             SDL_WidgetPropertiesOf(w,SET_NORMAL_IMAGE,IMG_Load(Button->normal));
             SDL_WidgetPropertiesOf(w,SET_PRESSED_IMAGE,IMG_Load(Button->pressed));
             SDL_SignalConnect(w,"clicked",FILEWINDOW_RemoveSubgroup,NULL);
+            SDL_WidgetShow(w);
             break;
         case BUTTON_ADDSELECTED:
             /* add selected files to subgroup */
-            w=SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
+            w=SDL_WidgetCreate(SDL_BUTTON,Button->x,Button->y,Button->w,Button->h);
             SDL_WidgetPropertiesOf(w,SET_NORMAL_IMAGE,IMG_Load(Button->normal));
             SDL_WidgetPropertiesOf(w,SET_PRESSED_IMAGE,IMG_Load(Button->pressed));
             SDL_SignalConnect(w,"clicked",FILEWINDOW_AddSelected,NULL);
+            SDL_WidgetShow(w);
             break;
         case BUTTON_ADDALL:
             /* add all displayed files to selected subgroup */
-            w=SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
+            w=SDL_WidgetCreate(SDL_BUTTON,Button->x,Button->y,Button->w,Button->h);
             SDL_WidgetPropertiesOf(w,SET_NORMAL_IMAGE,IMG_Load(Button->normal));
             SDL_WidgetPropertiesOf(w,SET_PRESSED_IMAGE,IMG_Load(Button->pressed));
             SDL_SignalConnect(w,"clicked",FILEWINDOW_AddAll,NULL);
+            SDL_WidgetShow(w);
             break;
         case BUTTON_DELETESELECTED:
-            w=SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
+            w=SDL_WidgetCreate(SDL_BUTTON,Button->x,Button->y,Button->w,Button->h);
             SDL_WidgetPropertiesOf(w,SET_NORMAL_IMAGE,IMG_Load(Button->normal));
             SDL_WidgetPropertiesOf(w,SET_PRESSED_IMAGE,IMG_Load(Button->pressed));
             SDL_SignalConnect(w,"clicked",FILEWINDOW_DeleteSelected,NULL);
+            SDL_WidgetShow(w);
             break;
 
         }
@@ -534,36 +528,39 @@ SDL_Surface *Window_CreateFileWindow()
 
         case CONTENTS_SUBGROUPS:
             /* table with the names of the subgroups */
-            TableSubgroup=SDL_WidgetCreateR(SDL_TABLE,Table->Rect);
+            TableSubgroup=SDL_WidgetCreate(SDL_TABLE,Table->x,Table->y,Table->w,Table->h);
             SDL_WidgetPropertiesOf(TableSubgroup,SET_VISIBLE_COLUMNS, 1);
-            SDL_TableSetColumnWidth(TableSubgroup,0,Table->Rect.w);
+            SDL_TableSetColumnWidth(TableSubgroup,0,Table->w);
             SDL_WidgetPropertiesOf(TableSubgroup,SET_SELECTION_MODE,TABLE_MODE_SINGLE);
-            SDL_WidgetPropertiesOf(TableSubgroup,SET_FONT,THEME_Font("normal"));
+            SDL_WidgetPropertiesOf(TableSubgroup,SET_FONT,SDL_FontGet("normal"));
             SDL_WidgetPropertiesOf(TableSubgroup,SET_BG_COLOR,0x93c0d5);
             SDL_TableSetEditable(TableSubgroup,1);
             SDL_SignalConnect(TableSubgroup,"edited",FILEWINDOW_RenameSubgroupFinished,NULL);
 //            SDL_WidgetPropertiesOf(TableSubgroup,SET_CALLBACK,SDL_CLICKED,FILEWINDOW_SubgroupClicked,NULL);
             SDL_WidgetPropertiesOf(TableSubgroup,SET_IMAGE,IMG_Load(THEME_DIR"/beatforce/tablescrollbar.jpg"));
             FILEWINDOW_LoadSubgroups(TableSubgroup);
+            SDL_WidgetShow(TableSubgroup);
             break;
         case CONTENTS_FILESINDIRECTORY:
-            TableFilesInDirectory=SDL_WidgetCreateR(SDL_TABLE,Table->Rect);
+            TableFilesInDirectory=SDL_WidgetCreate(SDL_TABLE,Table->x,Table->y,Table->w,Table->h);
             SDL_WidgetPropertiesOf(TableFilesInDirectory,SET_VISIBLE_COLUMNS, 1);
 //            SDL_WidgetPropertiesOf(TableFilesInDirectory,COLUMN_WIDTH,1,Table->Rect.w);
 //            SDL_WidgetPropertiesOf(TableFilesInDirectory,ROWS,LLIST_NoOfEntries(files));
-            SDL_WidgetPropertiesOf(TableFilesInDirectory,SET_FONT,THEME_Font("normal"));
+            SDL_WidgetPropertiesOf(TableFilesInDirectory,SET_FONT,SDL_FontGet("normal"));
             SDL_WidgetPropertiesOf(TableFilesInDirectory,SET_SELECTION_MODE,TABLE_MODE_MULTIPLE);
             SDL_WidgetPropertiesOf(TableFilesInDirectory,SET_BG_COLOR,0x93c0d5);
             SDL_WidgetPropertiesOf(TableFilesInDirectory,SET_IMAGE,IMG_Load(THEME_DIR"/beatforce/tablescrollbar.jpg"));
+            SDL_WidgetShow(TableFilesInDirectory);
             break;
         case CONTENTS_FILESINSUBGROUP:
-            TableFilesInSubgroup=SDL_WidgetCreateR(SDL_TABLE,Table->Rect);
+            TableFilesInSubgroup=SDL_WidgetCreate(SDL_TABLE,Table->x,Table->y,Table->w,Table->h);
             SDL_WidgetPropertiesOf(TableFilesInSubgroup,SET_VISIBLE_COLUMNS, 1);
             //SDL_WidgetPropertiesOf(TableFilesInSubgroup,COLUMN_WIDTH,1,Table->Rect.w);
             SDL_WidgetPropertiesOf(TableFilesInSubgroup,SET_SELECTION_MODE,TABLE_MODE_MULTIPLE);
-            SDL_WidgetPropertiesOf(TableFilesInSubgroup,SET_FONT,THEME_Font("normal"));
+            SDL_WidgetPropertiesOf(TableFilesInSubgroup,SET_FONT,SDL_FontGet("normal"));
             SDL_WidgetPropertiesOf(TableFilesInSubgroup,SET_BG_COLOR,0x93c0d5);
             SDL_WidgetPropertiesOf(TableFilesInSubgroup,SET_IMAGE,IMG_Load(THEME_DIR"/beatforce/tablescrollbar.jpg"));
+            SDL_WidgetShow(TableFilesInSubgroup);
             break;
 
         }
@@ -582,10 +579,10 @@ SDL_Surface *Window_CreateFileWindow()
         char *r;
 
         TableDirectories=SDL_WidgetCreate(SDL_TREE,10,200,200,170);
-        SDL_WidgetPropertiesOf(TableDirectories,SET_FONT,THEME_Font("normal"));
+        SDL_WidgetPropertiesOf(TableDirectories,SET_FONT,SDL_FontGet("normal"));
         SDL_WidgetPropertiesOf(TableDirectories,SET_BG_COLOR,0x93c0d5);
         SDL_SignalConnect(TableDirectories,"clicked",FILEWINDOW_DirectoryClicked,TableDirectories);
-
+        SDL_WidgetShow(TableDirectories);
         
         l=OSA_FindDirectories(directory);
         while(l)
@@ -597,8 +594,8 @@ SDL_Surface *Window_CreateFileWindow()
         }
     }
 
-    return FileWindow;
-
+    gFILEWINDOW->EventHandler = FILEWINDOW_EventHandler;
+    gFILEWINDOW->NotifyRedraw = FILEWINDOW_NotifyHandler;
 }
 
 int FILEWINDOW_EventHandler(SDL_Event event)

@@ -45,7 +45,6 @@ typedef signed short output_word;
 #define OUTPUT_RING_SIZE	(OUTPUT_BUFFER_SIZE*OUTPUT_RING_BUF_SIZE)
 #endif
 
-#define OUTPUT_N_CHANNELS	12
 #define OUTPUT_BPM_HIST 	10
 #define OUTPUT_FFT_BANDS	15
 #define OUTPUT_FFT_HIST 	5
@@ -70,6 +69,8 @@ typedef signed short output_word;
 
 struct OutChannel
 {
+    int id;
+
     output_word *buffer;
     output_word *buffer2;
 
@@ -77,9 +78,9 @@ struct OutChannel
 
     struct OutRingBuffer *rb;
 
-    int mute;
-    int paused;
-    int open;
+    int Mute; /* boolean */
+    int Paused; /* boolean */
+    int Open;      /* boolean */
 
     long bytes_written;
 
@@ -114,9 +115,13 @@ struct OutChannel
 
     int volumeleft; /* for volume */
     int volumeright;
-    
-
 };
+
+typedef struct OutChannelList 
+{
+    struct OutChannel     *Channel;
+    struct OutChannelList *Next;
+}OutChannelList;
 
 #define OUT_CHANNEL_SIZE   (sizeof( struct OutChannel ))
 
@@ -147,14 +152,14 @@ int AUDIOOUTPUT_SetSpeed(int channel, int speed);
 
 /* Interface for plugins */
 int AUDIOOUTPUT_Close (int);
-int output_read (int, unsigned char *, int);
+int output_read (struct OutChannel *Channel,int len);
 int AUDIOOUTPUT_Write(int, void*, int);
 int output_write_blocking (int, void*, int);
 long AUDIOOUTPUT_BufferFree(int c);
 int AUDIOOUTPUT_Pause (int c, int pause);
 int output_set_time (int, long);
 long AUDIOOUTPUT_GetTime(int channel);
-
+int AUDIOOUTPUT_ChannelNew();
 
 /* interface to mixer */
 int AUDIOOUTPUT_SetVolume(int, float);
@@ -169,7 +174,7 @@ int output_set_beatcount (int, int);
 /* to player + mixer */
 double output_get_bpm (int);
 int AUDIOOUTPUT_GetVolumeLevel(int channel,int *left,int *right);
-
+struct OutChannel *AUDIOOUTPUT_GetChannelByID(int c);
 
 
 int do_fft (int, output_word *);

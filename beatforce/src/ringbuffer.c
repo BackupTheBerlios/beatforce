@@ -46,7 +46,7 @@ rb_init (struct OutRingBuffer **rb, int size)
     {
         return 0;
     }
-
+    
     ring = malloc (sizeof (struct OutRingBuffer));
     if(ring == NULL)
     {
@@ -95,7 +95,6 @@ rb_write (struct OutRingBuffer *rb, unsigned char * buf, int len)
     }
     memcpy(rb->buffer + i, buf, len);
     rb->wr_pointer = i + len;
-
     return total;
 
         
@@ -113,7 +112,6 @@ rb_read (struct OutRingBuffer *rb, unsigned char * buf, int max)
 {
     int total;
     int i;
-
     /* total = len = min(used, len) */
     total = rb_data_size(rb);
 

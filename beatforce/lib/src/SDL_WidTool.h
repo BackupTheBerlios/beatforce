@@ -1,7 +1,7 @@
 /*
   Beatforce/ SDLTk
 
-  Copyright (C) 2003 John Beuving (john.beuving@home.nl)
+  Copyright (C) 2003 John Beuving (john.beuving@beatforce.org)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -25,6 +25,5 @@
 
 int SDL_WidgetIsInside(SDL_Widget *widget,int x, int y);
 SDL_Surface* SDL_WidgetGetBackground(SDL_Surface *surface,SDL_Rect *srcrect);
-
 
 #endif /* __SDL_WIDTOOL_H__ */

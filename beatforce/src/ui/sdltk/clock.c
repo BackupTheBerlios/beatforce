@@ -1,7 +1,7 @@
 /*
   Beatforce/ Clock widget
 
-  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@beatforce.org)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -33,10 +33,12 @@ SDL_Widget *CLOCK_Create(ThemeClock *Clock)
     
     if(Clock && Clock->font)
     {
-        widget=SDL_WidgetCreateR(SDL_LABEL,Clock->Rect);
+        widget = SDL_WidgetCreate(SDL_LABEL,Clock->x,Clock->y,Clock->w,Clock->h);
         SDL_WidgetPropertiesOf(widget,SET_BG_COLOR,Clock->bgcolor);
         SDL_WidgetPropertiesOf(widget,SET_FG_COLOR,Clock->fgcolor);
-        SDL_WidgetPropertiesOf(widget,SET_FONT,THEME_Font(Clock->font));
+        
+        SDL_LabelSetFont(widget,SDL_FontGet(Clock->font));
+        SDL_WidgetShow(widget);
     }
     return widget;
 }

@@ -8,8 +8,8 @@
 
 Import('env')
 
-env.Library("ui",['ui.c',
-                  'main_window.c',
-                  'player_ui.c',        
-                  'playlist_ui.c',
-                  'songdb_ui.c'])
+env.StaticLibrary("ui",['ui.c',
+                        'main_window.c',
+                        'player_ui.c',        
+                        'playlist_ui.c',
+                        'songdb_ui.c'])

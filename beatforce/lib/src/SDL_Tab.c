@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@beatforce.org)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -23,11 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "SDL_Widget.h"
-#include "SDL_WidTool.h"
-#include "SDL_Tab.h"
-#include "SDL_Primitives.h"
-#include "SDL_Signal.h"
+#include <SDLTk.h>
 
 #define TAB_DEFAULTHEIGHT    16
 #define TAB_LINE_WIDTH       1
@@ -110,7 +106,6 @@ void SDL_TabDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
 {
     SDL_Tab     *Tab=(SDL_Tab*)widget;
     SDL_TabList *tablist;
-
 
     if(Tab->tabs==NULL)
     {
@@ -379,11 +374,9 @@ static int Tab_DrawTabWithCaption(SDL_Surface *dest,SDL_Tab *tab,SDL_TabList * t
         Tab_DrawSlope(dest,tab,tl,high,0);
     }
 
-    SDL_FontSetColor(tab->font,0xffffee);
-
     if(tl->caption)
     {
-        SDL_FontDrawStringLimited(dest,tab->font,tl->caption,&set,&dst);
+        SDL_FontDrawStringLimited(dest,tab->font,tl->caption,0xfffffee,&set,&dst);
     }
     
     return 1;

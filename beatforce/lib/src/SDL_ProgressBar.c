@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@beatforce.org)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -104,7 +104,6 @@ void SDL_ProgressBarDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
 int  SDL_ProgressBarProperties(SDL_Widget *widget,int feature,va_list list)
 {
     SDL_ProgressBar *ProgressBar=(SDL_ProgressBar*)widget;
-    double val;
 
     switch(feature)
     {
@@ -113,24 +112,7 @@ int  SDL_ProgressBarProperties(SDL_Widget *widget,int feature,va_list list)
         break;
     case SET_MIN_VALUE:
         break;
-    case SET_CUR_VALUE:
-        val=va_arg(list,double);
-        if(ProgressBar->State == PROGRESSBAR_DRAG)
-            return 0;
-        ProgressBar->CurrentValue = (int)val; 
-        if(ProgressBar->Orientation == VERTICAL)
-        {
-            ProgressBar->CurrentLine  = (val * widget->Rect.h) / 
-                (ProgressBar->MaxValue - ProgressBar->MinValue); 
-        }
-        else
-        {
-            ProgressBar->CurrentLine  = (val * widget->Rect.w) 
-                / (ProgressBar->MaxValue - ProgressBar->MinValue); 
-        }
-        SDL_WidgetRedrawEvent(widget);
-        break;
-    case GET_STATE:
+     case GET_STATE:
     {
         int *value;
         value=va_arg(list,int*);
@@ -141,11 +123,37 @@ int  SDL_ProgressBarProperties(SDL_Widget *widget,int feature,va_list list)
         break;
     }
     default:
+        return 0;
         printf("%s%d\n",__FILE__,__LINE__);
         break;          
     
     }
     return 1;
+}
+
+int SDL_ProgressBarSetCurrentValue(SDL_Widget *widget,int value)
+{
+    SDL_ProgressBar *ProgressBar=(SDL_ProgressBar*)widget;
+
+    if(ProgressBar->State == PROGRESSBAR_DRAG)
+        return 0;
+    if(ProgressBar->CurrentValue != value )
+    {
+        ProgressBar->CurrentValue = value; 
+        if(ProgressBar->Orientation == VERTICAL)
+        {
+            ProgressBar->CurrentLine  = (value * widget->Rect.h) / 
+                (ProgressBar->MaxValue - ProgressBar->MinValue); 
+        }
+        else
+        {
+            ProgressBar->CurrentLine  = (value * widget->Rect.w) 
+                / (ProgressBar->MaxValue - ProgressBar->MinValue); 
+        }
+        
+        SDL_WidgetRedrawEvent(widget);
+    }
+    return 0;
 }
 
 int SDL_ProgressBarEventHandler(SDL_Widget *widget, SDL_Event *event)

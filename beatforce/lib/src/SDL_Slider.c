@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@beatforce.org)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -20,9 +20,7 @@
 */
 #include <stdlib.h>
 
-#include "SDL_Slider.h"
-#include "SDL_Widget.h"
-#include "SDL_WidTool.h" //for SDL_WidgetGetBackground
+#include <SDLTk.h>
 
 static void SDL_SliderStep(SDL_Slider *slider,int direction,int step);
 static void SDL_SliderPixeloffset(SDL_Slider *Slider);
@@ -146,22 +144,6 @@ int SDL_SliderProperties(SDL_Widget *widget,int feature,va_list list)
             Slider->CurrentValue = Slider->MaxValue;
         break;
 
-    case SET_CUR_VALUE:
-        /* The currentvalue is used as an integer and a new pixeloffset */
-        /* is calculated but the size of the button is not used yet     */
-        /* because it doesn't have to be available at this moment       */
-        val= va_arg(list,int);
-        if(val != Slider->CurrentValue)
-        {
-            Slider->CurrentValue = val;
-            SDL_SliderPixeloffset(Slider);
-            if(Slider->CurrentValue > Slider->MaxValue)
-                Slider->CurrentValue = Slider->MaxValue;
-            SDL_SignalEmit(widget,"value-changed");
-            if(widget->Visible)
-                SDL_WidgetRedrawEvent(widget);
-        }
-        break;
     case SET_NORMAL_STEP_SIZE:
         val= va_arg(list,int);
         Slider->NormalStepSize = val;
@@ -218,6 +200,7 @@ int SDL_SliderProperties(SDL_Widget *widget,int feature,va_list list)
 int SDL_SliderEventHandler(SDL_Widget *widget,SDL_Event *event)
 {
     SDL_Slider *Slider=(SDL_Slider*)widget;
+
 
     switch(event->type)
     {
@@ -323,6 +306,25 @@ int SDL_SliderEventHandler(SDL_Widget *widget,SDL_Event *event)
     return 0;
 }
 
+
+int SDL_SliderSetCurrentValue(SDL_Widget *widget,int value)
+{
+    SDL_Slider *Slider = (SDL_Slider*)widget;
+    /* The currentvalue is used as an integer and a new pixeloffset */
+    /* is calculated but the size of the button is not used yet     */
+    /* because it doesn't have to be available at this moment       */
+
+    if(value != Slider->CurrentValue)
+    {
+        Slider->CurrentValue = value;
+        SDL_SliderPixeloffset(Slider);
+        if(Slider->CurrentValue > Slider->MaxValue)
+            Slider->CurrentValue = Slider->MaxValue;
+        SDL_SignalEmit(widget,"value-changed");
+        SDL_WidgetRedrawEvent(widget);
+    }
+    return 1;
+}
 
 /* Internal helper functions */
 

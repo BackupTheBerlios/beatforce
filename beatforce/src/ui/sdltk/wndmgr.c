@@ -83,8 +83,8 @@ void WNDMGR_Init()
     }
 
     SDL_WM_SetCaption("Beatforce",NULL);
-    SDL_WindowInit(screen);
 
+    SDL_WindowInit(screen,s->Width,s->Height,s->BPP);
 }
 
 

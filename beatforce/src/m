@@ -1,3 +1,0 @@
-cd ../lib/src && touch SDL_Stack.h && make 
-echo
-cd ../../src && touch main.c && make

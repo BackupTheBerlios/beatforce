@@ -36,7 +36,6 @@
 EffectPlugin *m;
 LADSPA_Descriptor *dc;
 int run;
-extern struct OutChannel *ch[OUTPUT_N_CHANNELS];
 
 int EFFECT_Init()
 {
@@ -80,15 +79,17 @@ int EFFECT_Run(int size)
 
 int EFFECT_Play()
 {
+    struct OutChannel *Channel;
     BFList *effects;
     int i;
 
     LADSPA_PortRangeHintDescriptor hint;
     LADSPA_Data amplitude;
 
+    Channel=AUDIOOUTPUT_GetChannelByID(0);
 //    int max_bytes=20000;
 
-    return 0;
+//    return 0;
     TRACE("EFFECT_Play");
 
     if(run)
@@ -155,7 +156,7 @@ int EFFECT_Play()
         /* Connect an audio output port */
         if(LADSPA_IS_PORT_OUTPUT(dc->PortDescriptors[i]) && LADSPA_IS_PORT_AUDIO(dc->PortDescriptors[i]))
         {
-            dc->connect_port(m->handle,i,(LADSPA_Data*)ch[0]->buffer);
+            dc->connect_port(m->handle,i,(LADSPA_Data*)Channel->buffer);
         }
         
         

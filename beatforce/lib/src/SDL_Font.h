@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003 John Beuving (john.beuving@home.nl)
+  Copyright (C) 2003 John Beuving (john.beuving@beatforce.org)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -19,8 +19,8 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef SDL_FONT_H
-#define SDL_FONT_H
+#ifndef __SDL_FONT_H__
+#define __SDL_FONT_H__
 
 #include <SDL/SDL.h>
 
@@ -31,8 +31,6 @@ typedef enum FontType
     LAST_FONT
 }FontType;
 
-
-
 typedef struct SDL_Font
 {
     FontType type;
@@ -41,6 +39,14 @@ typedef struct SDL_Font
     int Height;
     unsigned int color;
 }SDL_Font;
+
+typedef struct SDL_FontList
+{
+    struct SDL_Font     *Font;
+    char *FontId;
+    char *Filename;
+    struct SDL_FontList *Next;
+}SDL_FontList;
 
 
 typedef int               (*T_Font_IsFormat)       (char*);
@@ -68,24 +74,24 @@ static const struct S_Font_FunctionList * const FontTable[] =
 };
 
 
-SDL_Font* SDL_FontInit(char *filename);
+SDL_Font *SDL_FontGet(char *fontid);
+
 int SDL_FontDrawString(SDL_Surface *,SDL_Font *font,
-                       char *string,int x, int y);
+                       char *string,unsigned int color,int x, int y);
 
 int SDL_FontDrawStringLimited(SDL_Surface *dest,SDL_Font *font,
-                              char *string,SDL_Rect *rect,SDL_Rect *clip);
+                              char *string,unsigned int color,SDL_Rect *rect,SDL_Rect *clip);
 
 void SDL_FontDrawStringRect(SDL_Surface *dest,SDL_Font *font,
-                            char *string,SDL_Rect *rect);
+                            char *string,unsigned int color,SDL_Rect *rect);
 
 int SDL_FontGetStringWidth(SDL_Font* font,char* string);
-int SDL_FontSetColor(SDL_Font *font,unsigned int color);
 int SDL_FontGetHeight(SDL_Font *font);
 
-
-
+void SDL_FontLoad(char *fontid,char *filename);
 
 
 
 extern SDL_Font DefaultFont;
-#endif// SDL_FONT_H
+
+#endif /* __SDL_FONT_H__ */

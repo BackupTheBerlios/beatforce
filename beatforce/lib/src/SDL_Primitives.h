@@ -30,6 +30,7 @@ extern "C" {
 
 #define DLLINTERFACE
 
+
 /* ----- Prototypes */
 
 /* Note: all ___Color routines expect the color to be in format 0xRRGGBBAA */
@@ -62,6 +63,7 @@ extern "C" {
 			     Sint16 y2, Uint8 r, Uint8 g, Uint8 b, Uint8 a);
 
 /* Line */
+
 
     int SDL_DrawLine(SDL_Surface * dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint32 color);
     DLLINTERFACE int lineRGBA(SDL_Surface * dst, Sint16 x1, Sint16 y1,
@@ -164,6 +166,7 @@ extern "C" {
     DLLINTERFACE int stringColor(SDL_Surface * dst, Sint16 x, Sint16 y, char *c, Uint32 color);
     DLLINTERFACE int stringRGBA(SDL_Surface * dst, Sint16 x, Sint16 y, char *c, Uint8 r, Uint8 g, Uint8 b, Uint8 a);
 
+    int fastPixelColorNolockNoclip(SDL_Surface * dst, Sint16 x, Sint16 y, Uint32 color);
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
 };

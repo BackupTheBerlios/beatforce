@@ -70,15 +70,8 @@ int beat_fallof_time = 100;
 
 int MIXER_Init ()
 {
-    int i;
-
     cfader = malloc (sizeof (CrossFader));
     memset( cfader, 0, sizeof(CrossFader));
-
-    for (i = 0; i < OUTPUT_N_CHANNELS; i++)
-    {
-        AUDIOOUTPUT_SetVolume(i,MIXER_DEFAULT_dB);
-    }
 
     cfader->value = 0;
     cfader->timer = 0;

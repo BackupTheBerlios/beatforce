@@ -62,7 +62,7 @@ BFList *INPUT_Init (int channel, BFList * plugin_list)
     TRACE("INPUT_Init enter %d",channel);
     if (plugin_list == NULL)
     {
-        ERROR("input_init: plugin_list == NULL");
+        ERROR("INPUT_Init (channel %d): plugin_list == NULL",channel);
         return NULL;
     }
     next = plugin_list;
@@ -250,6 +250,7 @@ long INPUT_GetTime(InputPluginData *Plugin)
 
 int INPUT_EOF(int ch_id)
 {
+    printf("End of file\n");
     return PLAYER_EOF(ch_id);
 }
 

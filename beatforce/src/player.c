@@ -30,7 +30,7 @@
 #include <time.h>
 #include <math.h>
 
-
+#include "event.h"
 #include "osa.h"
 #include "player.h"
 #include "err.h"
@@ -72,9 +72,10 @@ int PLAYER_Init(int player_nr)
     player = malloc (PLAYER_PRIVATE_LEN);
     memset (player, 0, PLAYER_PRIVATE_LEN);
 
-    player->ch_id = player_nr;
-    player->State = PLAYER_IDLE;
-    player->e     = NULL;
+    player->PlayerID = player_nr;
+    player->State    = PLAYER_IDLE;
+    player->e        = NULL;
+    player->channel  = AUDIOOUTPUT_ChannelNew();
     
     PLAYER_StorePlayerData(player_nr,player);
     
@@ -87,9 +88,6 @@ int PLAYER_Init(int player_nr)
 int PLAYER_Exit(int player_nr)
 {
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
-
-    TRACE("PLAYER_Exit %d",player_nr);
-
     if(p==NULL)
         return -1;
 
@@ -152,10 +150,11 @@ int PLAYER_Play(int player_nr)
 
     if(p->e != NULL )
     {
-        if(INPUT_Play (p->current_plugin))
+        if(INPUT_Play(p->current_plugin))
         {
             PLAYLIST_Remove(player_nr,p->e);
             p->State = PLAYER_PLAY;
+            EVENT_PostEvent(EVENT_PLAYER_PLAY,player_nr);
         }
         else
         {

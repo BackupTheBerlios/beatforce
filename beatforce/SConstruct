@@ -3,27 +3,27 @@
 opts = Options('custum.py');
 
 opts.Add(EnumOption('ui', 'Set user interface', 'sdltk',
-                    allowed_values=('sdltk', 'gtk', 'qt')))
+                    allowed_values=('sdltk', 'gtk', 'gtk-2.0', 'qt')))
 
 env=Environment(options = opts)
 
+print "Building for platform: " +env['PLATFORM']
+
 Help(opts.GenerateHelpText(env))
 Export('env');
-
-if env['ui'] == 'sdltk':
-        print "Don't forget to copy `sdltk' to the archive!"
-elif env['ui'] == 'gtk':
-        print "Don't forget to copy `gtk' to the archive!"
-elif env['ui'] == 'qt':
-        print "Don't forget to copy `qt' to the archive!"
 
 Help("""
       Type: 'scons program' to build the production program,
             'scons debug' to build the debug version.
       """)
 
+#env.SConscript(['plugins/SConscript'])
 env.SConscript(['src/SConscript'])      
-env.SConscript(['plugins/SConscript'])
+env.SConscript(['src/test/SConscript'])      
+env.SConscript(['themes/SConscript'])
+
+env.Program('test',['src/test/test.c','src/songdb.o'])
+
 
 env.SConscript(['themes/SConscript'])
 

@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@beatforce.org)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -38,15 +38,18 @@ int SDL_FontGetCharWidth(SDL_Font* font,char character);
 extern SDL_Surface *screen;
 
 
+SDL_FontList *LoadedFonts = NULL;
 
 
-
-SDL_Font * SDL_FontInit(char *filename)
+static SDL_Font *SDL_FontInit(char *filename)
 {
     SDL_Font *font=NULL;
     int i;        
     T_Font_IsFormat isformat;
     T_Font_Read     readfont;
+
+    if(filename == NULL)
+        return NULL;
     
     font=malloc(sizeof(SDL_Font));
     memset(font,0,sizeof(SDL_Font));
@@ -65,16 +68,41 @@ SDL_Font * SDL_FontInit(char *filename)
             break;
         }
     }
-     
- 
-    return font;
+    return font;     
+}
+
+void SDL_FontLoad(char *fontid,char *filename)
+{
+    if(LoadedFonts == NULL)
+    {
+        LoadedFonts=(SDL_FontList*)malloc(sizeof(SDL_FontList));
+        LoadedFonts->FontId   =(char*)strdup(fontid);
+        LoadedFonts->Filename =(char*)strdup(filename);
+        LoadedFonts->Font     = NULL;
+        LoadedFonts->Next     = NULL;
+    }
+    else
+    {
+        SDL_FontList *l;
+
+        l=LoadedFonts;
+
+        while(l->Next)
+            l=l->Next;
+        
+        l->Next=(SDL_FontList*)malloc(sizeof(SDL_FontList));
+        l->Next->FontId    =(char*)strdup(fontid);
+        l->Next->Filename  =(char*)strdup(filename);
+        l->Next->Font      = NULL;
+        l->Next->Next      = NULL;
+    }
+
 }
 
 void SDL_FontDrawStringRect(SDL_Surface *dest,SDL_Font *font,
-                            char *string,SDL_Rect *rect)
+                            char *string,unsigned int color,SDL_Rect *rect)
 {
-    int i;
-    int size;
+    char *p;
     int xoffset=0;
     int height;
     SDL_Rect pos;
@@ -82,85 +110,79 @@ void SDL_FontDrawStringRect(SDL_Surface *dest,SDL_Font *font,
     if(font == NULL || string == NULL)
         return;
 
+    font->color=color;
     height=SDL_FontGetHeight(font);
-    size=strlen(string);
+
+    p=string;
     
-    for(i=0;i<size;i++)
+    while(*p != 0)
     {
-        if(SDL_FontGetCharWidth(font,string[i]) + xoffset > rect->w)
+        if(SDL_FontGetCharWidth(font,*p) + xoffset > rect->w)
             return;
 
         pos.x=xoffset+rect->x;
         pos.y=rect->y + ((rect->h - height)/2);
         pos.w=rect->w;
         pos.h=rect->h;
-        xoffset+=SDL_FontDrawChar(dest,font,string[i],&pos,NULL);
+        xoffset+=SDL_FontDrawChar(dest,font,*p,&pos,NULL);
+        p++;
     }
 }
 
 int SDL_FontDrawString(SDL_Surface *dest,SDL_Font *font,
-                       char *string,int x, int y)
+                       char *string,unsigned int color,int x, int y)
 {
-    int i;
-    int size;
+    char *p;
     int xoffset=x;
     SDL_Rect pos;
 
-    if(font == NULL )//|| font->font == NULL)
-    {
-        return 0;
-    }
-    if(string == NULL)
+    if(font == NULL || string == NULL)
     {
         return 0;
     }
         
+    font->color=color;
 
-    size=strlen(string);
+    p=string;
 
-    for(i=0;i<size;i++)
+    while(*p != 0)
     {
         pos.x=xoffset;
         pos.y=y;
         pos.w=0;
         pos.h=0;
-        xoffset+=SDL_FontDrawChar(dest,font,string[i],&pos,NULL);
+        xoffset += SDL_FontDrawChar(dest,font,*p,&pos,NULL);
+        p++;
     }
     return 1;
 }
 
 int SDL_FontDrawStringLimited(SDL_Surface *dest,SDL_Font *font,
-                              char *string,SDL_Rect *rect,SDL_Rect *clip)
+                              char *string,unsigned int color,SDL_Rect *rect,SDL_Rect *clip)
 {
-    int i;
-    int size;
-    int pixelsize;
     int xoffset=0;
+    char *p;
     SDL_Rect pos;
 
-    if(font == NULL )
+    if(font == NULL || string == NULL)
     {
         return 0;
     }
-    if(string == NULL)
-    {
-        return 0;
-    }
-        
-    size=strlen(string);
-    pixelsize=SDL_FontGetStringWidth(font,string);
 
-    for(i=0;i<size;i++)
+    font->color=color;        
+
+    p=string;
+
+    while(*p != 0)
     {
         pos.x = xoffset+rect->x;
         pos.y = rect->y;
         pos.w = rect->w;
         pos.h = rect->h;
-        xoffset+=SDL_FontDrawChar(dest,font,string[i],&pos,clip);
+        xoffset+=SDL_FontDrawChar(dest,font,*p,&pos,clip);
+        p++;
     }
-
     return 1;
-
 }
 
 int SDL_FontDrawChar(SDL_Surface *dest,SDL_Font *font,
@@ -221,16 +243,6 @@ int SDL_FontGetStringWidth(SDL_Font* font,char *string)
 
 }
 
-
-int SDL_FontSetColor(SDL_Font *font,unsigned int color)
-{
-    if(font == NULL )//|| font->font == NULL)
-        return 0;
-    font->color=color;
-    return 1;
-}                         
-
-
 int SDL_FontGetHeight(SDL_Font *font)
 {
     if(font != NULL)
@@ -239,6 +251,24 @@ int SDL_FontGetHeight(SDL_Font *font)
         return 0;
 }
 
+SDL_Font *SDL_FontGet(char *fontid)
+{
+    SDL_FontList *font;
+
+    font=LoadedFonts;
+
+    while(font && fontid)
+    {
+        if(!strcmp(fontid,font->FontId))
+        {
+            if(font->Font==NULL)
+                font->Font=SDL_FontInit(font->Filename);
+             return font->Font;
+        }
+        font=font->Next;
+    }
+    return NULL;
+}
 
 
 

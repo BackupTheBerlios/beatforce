@@ -1,7 +1,7 @@
 /*
   Beatforce/ Startup of beatforce
 
-  Copyright (C) 2003 John Beuving (john.beuving@home.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@beatforce.org)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -23,6 +23,7 @@
 
 #include "SDL_Font.h"
 #include "SDL_FontBDF.h"
+#include "SDL_Primitives.h"
 
 //exported API calls
 int  FONT_BDF_IsBDF(char *filename);
@@ -41,7 +42,7 @@ int  drawbdfchar(SDL_Surface *screen,struct BDF_Char *ch,int x, int y,Uint32 col
 //extern prototypes
 extern void DrawPixel(SDL_Surface *screen, int x, int y,unsigned int color2);
 
-#define XVAL(x) (isdigit((x)) ? (x) - '0' : toupper((x)) - 'A' + 10)
+#define XVAL(x) (isdigit((int)(x)) ? (x) - '0' : toupper((x)) - 'A' + 10)
 
 const struct S_Font_FunctionList FONT_BDF_FunctionList =
 {
@@ -148,6 +149,7 @@ void readbdf(FILE *fp,SDL_Font *f)
 
             int i;
             unsigned char *bits;
+
             /* wbytes is the width of the char in bytes. */
             current->wbytes = (current->bbx_x + 7) / 8;
             current->data=malloc(current->wbytes * current->bbx_y);
@@ -155,14 +157,14 @@ void readbdf(FILE *fp,SDL_Font *f)
             bits=current->data;
 					
             /* Read all pixels from file. */
-			for (i = current->bbx_y, bits = current->data; i != 0; i--) 
+            for (i = current->bbx_y, bits = current->data; i != 0; i--) 
             {
-			    readline(fp,buffer);
+                readline(fp,buffer);
                 aux = buffer;
-				while (aux[0] != '\0' && aux[1] != '\0') 
+                while (aux[0] != '\0' && aux[1] != '\0') 
                 {
-				    *bits++ = XVAL(aux[0]) * 16 + XVAL(aux[1]);
-					aux += 2;
+                    *bits++ = XVAL(aux[0]) * 16 + XVAL(aux[1]);
+                    aux += 2;
                 }
             }
 

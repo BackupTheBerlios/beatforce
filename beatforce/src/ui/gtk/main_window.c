@@ -74,6 +74,7 @@ void configopen(void *d)
 static int MAINWINDOW_CreateWindow()
 {
     GtkWidget         *MainWindow;
+    GtkWidget         *fixed;
 //    ThemeConfig       *tc = THEME_GetActive();
 //    ThemeMainWindow   *mw = NULL;
 //    ThemeImage        *Image = NULL;
@@ -81,6 +82,12 @@ static int MAINWINDOW_CreateWindow()
 
  /* create a new window */
     MainWindow = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+    gtk_widget_set_usize(MainWindow,1024,685);
+    fixed = gtk_fixed_new ();
+    gtk_widget_show (fixed);
+    gtk_container_add (GTK_CONTAINER (MainWindow), fixed);
+
+
 #if 0    
     if(tc == NULL)
         return NULL;
@@ -95,6 +102,7 @@ static int MAINWINDOW_CreateWindow()
 
     control_state=0;
     MainWindow = SDL_WidgetNewSurface(s->Width,s->Height,s->BPP);
+
     SDL_SetColorKey(MainWindow,0,0); // disable transparancy
    
 
@@ -113,14 +121,13 @@ static int MAINWINDOW_CreateWindow()
 #endif 
 //    printf("Creating playlist widget\n");
 //    widgets->Playlist=PLAYLISTUI_CreateWindow(MainWindow);
-    printf("Creating player window\n");
-    PLAYERUI_CreateWindow(0,MainWindow);
+    PLAYERUI_CreateWindow(0,fixed);
 #if 0
     PLAYERUI_CreateWindow(1,mw->Player[1]);
 
     w->Mixer = MIXERUI_CreateWindow(mw->Mixer);
 #endif
-    widgets->Songdb = SONGDBUI_CreateWindow(MainWindow);    
+    widgets->Songdb = SONGDBUI_CreateWindow(fixed);    
     SONGDBUI_Redraw(widgets->Songdb);
 #if 0
     OSA_StartTimer(60,MAINWINDOW_RedrawTimeout,NULL);

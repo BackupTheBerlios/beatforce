@@ -32,7 +32,7 @@
 
 
 #include <math.h>
-#include <fftw3.h>
+//#include <fftw3.h>
 
 #include "ringbuffer.h"
 #include "audio_output.h"
@@ -56,8 +56,9 @@ extern BeatforceConfig *cfgfile;
 #define c_re(c) ((c)[0])
 #define c_im(c) ((c)[1])
 
-struct OutChannel *ch[OUTPUT_N_CHANNELS];
-int n_open;
+//ruct OutChannel *ch[OUTPUT_N_CHANNELS];
+
+struct OutChannelList *ChannelList;
 
 struct OutGroup *group[3];
 
@@ -66,8 +67,10 @@ int output_thread_stop;
 
 int runningcount;
 
-fftw_plan fftplan_out;
-fftw_complex *fftw_in, *fftw_out;
+int channel_id;
+
+//fftw_plan fftplan_out;
+//fftw_complex *fftw_in, *fftw_out;
 
 #define _TO_ATT( _dB )		( (_dB > -31) ? ( pow( 10, 0.05 * _dB ) ) : (0) )
 
@@ -89,42 +92,20 @@ ADD_TO_OUTPUT_BUFFER (output_word * _buf, float _ch)
     (output_word) (*_buf) = (output_word) tmp1;
 }
 
+
+
 int AUDIOOUTPUT_Init ()
 {
     int i;
-    TRACE("AUDIO_OUTPUT_Init %d",OUTPUT_N_CHANNELS);
+    TRACE("AUDIO_OUTPUT_Init");
 
     audiocfg=CONFIGFILE_GetCurrentAudioConfig();
 
     if(audiocfg == NULL)
         return 0;
 
-    for (i = 0; i < OUTPUT_N_CHANNELS; i++)
-    {
-        ch[i] = malloc (OUT_CHANNEL_SIZE);
-        if(ch[i] == NULL)
-            return 0;
-        memset (ch[i], 0, OUT_CHANNEL_SIZE);
-
-        ch[i]->buffer = malloc (OUTPUT_BUFFER_SIZE (audiocfg) * 2);
-        if(ch[i]->buffer == NULL)
-            return 0;
-        memset (ch[i]->buffer, 0, OUTPUT_BUFFER_SIZE (audiocfg) * 2);
-
-#if 0
-        ch[i]->buffer2 = malloc (OUTPUT_BUFFER_SIZE (audiocfg));
-        if(ch[i]->buffer2 == NULL)
-            return 0;
-        memset (ch[i]->buffer2, 0, OUTPUT_BUFFER_SIZE (audiocfg));
-#endif
-
-        rb_init (&ch[i]->rb, OUTPUT_RING_SIZE (audiocfg));
-        
-        ch[i]->last_beat = NULL;//g_timer_new ();
-
-        ch[i]->bpm_prescale = 7000;
-        ch[i]->speed = 1.0; /* Normal playback speed */
-    }
+    ChannelList = NULL;
+    channel_id  = 0;
 
 /* Init output */
     if (!OUTPUT_DevInit (audiocfg))
@@ -168,30 +149,84 @@ int AUDIOOUTPUT_Init ()
 
 /* Init FFTW */
 
-    fftw_in  = malloc (sizeof (fftw_complex) * (audiocfg->FragmentSize + 1));
-    fftw_out = malloc (sizeof (fftw_complex) * (audiocfg->FragmentSize + 3));
+//    fftw_in  = malloc (sizeof (fftw_complex) * (audiocfg->FragmentSize + 1));
+//    fftw_out = malloc (sizeof (fftw_complex) * (audiocfg->FragmentSize + 3));
 
-    if(fftw_in == NULL || fftw_out == NULL)
-        return 0;
+//    if(fftw_in == NULL || fftw_out == NULL)
+//        return 0;
 
-    fftplan_out =
-        fftw_plan_dft_1d(audiocfg->FragmentSize,
-                         fftw_in, 
-                         fftw_out, 
-                         FFTW_FORWARD, 
-                         FFTW_ESTIMATE);
+//    fftplan_out =
+//        fftw_plan_dft_1d(audiocfg->FragmentSize,
+//                         fftw_in, 
+//                         fftw_out, 
+//                         FFTW_FORWARD, 
+//                         FFTW_ESTIMATE);
     
 
 
 /* Init output thread */
     output_thread_stop = 0;
-    n_open = 0;
+
     runningcount=0;
     output_thread=i=OSA_CreateThread(AUDIOOUTPUT_Loop,NULL);
 
     return 1;
 }
 
+
+int AUDIOOUTPUT_ChannelNew()
+{
+    struct OutChannel *channel;
+
+    channel = malloc (OUT_CHANNEL_SIZE);
+    memset (channel, 0, OUT_CHANNEL_SIZE);
+    
+
+    channel->buffer = malloc (OUTPUT_BUFFER_SIZE (audiocfg) * 2);
+    if(channel->buffer == NULL)
+        return 0;
+    memset (channel->buffer, 0, OUTPUT_BUFFER_SIZE (audiocfg) * 2);
+
+    channel->id = channel_id;    
+#if 0
+    channel->buffer2 = malloc (OUTPUT_BUFFER_SIZE (audiocfg));
+    if(channel->buffer2 == NULL)
+        return 0;
+    memset (channel->buffer2, 0, OUTPUT_BUFFER_SIZE (audiocfg));
+#endif
+    
+    rb_init (&channel->rb, OUTPUT_RING_SIZE (audiocfg));
+    
+    channel->last_beat = NULL;//g_timer_new ();
+    
+    channel->bpm_prescale = 7000;
+    channel->speed = 1.0;   /* Normal playback speed */
+    channel->fader_dB  = MIXER_DEFAULT_dB;
+    channel_id++;
+    
+    if(ChannelList == NULL)
+    {
+        ChannelList = malloc(sizeof(OutChannelList));
+        memset(ChannelList,0,sizeof(OutChannelList));
+        
+        ChannelList->Channel = channel;
+    }
+    else
+    {
+        struct OutChannelList *l=ChannelList;
+        
+        while(l->Next)
+            l=l->Next;
+
+        l->Next = malloc(sizeof(OutChannelList));
+        memset(l->Next,0,sizeof(OutChannelList));
+        
+        l->Next->Channel = channel;
+
+        
+    }
+    return channel->id;
+}
 
 /* Kills the output thread */
 int AUDIOOUTPUT_Cleanup (void)
@@ -206,25 +241,44 @@ int AUDIOOUTPUT_Cleanup (void)
     return 1;
 }
 
+struct OutChannel *AUDIOOUTPUT_GetChannelByID(int c)
+{
+    struct OutChannelList *l;
 
+    if (c >= channel_id || c < 0)
+    {
+        ERROR("Wrong channel number");
+        return NULL;
+    }
+
+    if(ChannelList == NULL)
+    {
+        ERROR("Channel not initialised");
+        return NULL;
+    }
+    l=ChannelList;
+    
+    while(l)
+    {
+        if(c == l->Channel->id)
+            return l->Channel;
+        l=l->Next;
+    }
+    return NULL;
+}
 /* interface to input plugin */
 int AUDIOOUTPUT_Open(int c, AFormat fmt, int rate, int nch, int *max_bytes)
 {
+    struct OutChannel *Channel;
 
-    if (c >= OUTPUT_N_CHANNELS || c < 0)
-    {
-        ERROR("Wrong channel number");
-        return 0;
-    }
-    if(ch[c] == NULL)
-    {
-        ERROR("Channel not initialised");
-        return 0;
-    }
+    Channel=AUDIOOUTPUT_GetChannelByID(c);
 
-    if (ch[c]->open)
+    if(Channel == NULL)
+        return 0;
+
+    if (Channel->Open)
     {
-        fprintf (stderr,"output_open: someone tries to open channel already open!\n");
+        ERROR("AUDIOOUTPUT_Open: someone tries to open channel already open!");
         return 0;
     }
     if (max_bytes != NULL)
@@ -237,92 +291,77 @@ int AUDIOOUTPUT_Open(int c, AFormat fmt, int rate, int nch, int *max_bytes)
             audiocfg->RingBufferSize;
         DEBUG("Setting max_bytes = %d", *max_bytes);
     }
-    if( c >= 2 )
-    {
-        ch[c]->mask = GROUP_MASTER;
-    }
-    ch[c]->aformat = fmt;
-    ch[c]->rate = rate;
-    ch[c]->n_ch = nch;
-    ch[c]->open = 1;
-    ch[c]->paused = 1;
-    ch[c]->bytes_written = 0;
-    //todo g_timer_start (ch[c]->last_beat);
-    ch[c]->bpm_prescale = 7000;
-    ch[c]->beats = 0;
-    ch[c]->bpm = 0;
-    n_open++;
+//    Channel->mask    = GROUP_MASTER;
+    Channel->aformat = fmt;
+    Channel->rate    = rate;
+    Channel->n_ch    = nch;
+    Channel->Open    = 1;
+    Channel->Paused  = 1;
+    Channel->bytes_written = 0;
+    //todo g_timer_start (Channel->last_beat);
+    Channel->bpm_prescale = 7000;
+    Channel->beats = 0;
+    Channel->bpm = 0;
+
     return 1;
 }
 
 int AUDIOOUTPUT_Close(int c)
 {
-
-    if (c >= OUTPUT_N_CHANNELS || c < 0)
-        return 0;
-    if(ch[c] == NULL)
-        return 0;
+    struct OutChannel *Channel;
+    
+    Channel=AUDIOOUTPUT_GetChannelByID(c);
 
 
-    if (!ch[c]->open)
+    if (!Channel->Open)
         return 0;
-    ch[c]->paused = 1;
-    ch[c]->open = 0;
-    ch[c]->aformat = FMT_UNKNOWN;
-    ch[c]->n_ch = 0;
-    ch[c]->rate = 0;
-    free (ch[c]->buffer2);
-    ch[c]->buffer2 = NULL;
-    ch[c]->buffer2_size = 0;
-    //todo g_timer_stop (ch[c]->last_beat);
+    Channel->Paused = 1;
+    Channel->Open = 0;
+    Channel->aformat = FMT_UNKNOWN;
+    Channel->n_ch = 0;
+    Channel->rate = 0;
+    free (Channel->buffer2);
+    Channel->buffer2 = NULL;
+    Channel->buffer2_size = 0;
+    //todo g_timer_stop (Channel->last_beat);
 #if (ENABLE_CRUDE_BPMCOUNT >= 1)
-    printf ("INFORMAL: BPMCOUNT: prescale was %ld\n", ch[c]->bpm_prescale);
+    printf ("INFORMAL: BPMCOUNT: prescale was %ld\n", Channel->bpm_prescale);
 #endif
-    n_open--;
     /* empty ring buffer */
-//    rb_clear (ch[c]->rb);
-    memset (ch[c]->buffer, 0, OUTPUT_BUFFER_SIZE (audiocfg));
+//    rb_clear (Channel->rb);
+    memset (Channel->buffer, 0, OUTPUT_BUFFER_SIZE (audiocfg));
 
     return 0;
 }
 
-int
-output_read (int channel, unsigned char * buf, int len)
+int output_read (struct OutChannel *Channel,int len)
 {
     int nread,n_to_read;
     unsigned char tempbuf[20000];
     int i,j;
+    unsigned char *buf = (unsigned char *)Channel->buffer;
 
     n_to_read=len;
 
-    if(ch[channel]->speed != 1.0)
+    if(Channel->speed != 1.0)
     {
-        n_to_read = (int)((float)(n_to_read/4)*ch[channel]->speed)*4; //4 bytes for 16 bit stereo
+        n_to_read = (int)((float)(n_to_read/4)*Channel->speed)*4; //4 bytes for 16 bit stereo
     }
 
     memset(buf,0,len);
 
-    if (channel >= OUTPUT_N_CHANNELS || channel < 0)
+    if(Channel == NULL)
         return 0;
-
-    if(ch[channel] == NULL)
-        return 0;
-
-
-
 
     //read n_to_read bytes from the ring buffer into our tempbuf
-    nread = rb_read (ch[channel]->rb, tempbuf, n_to_read);
+    nread = rb_read (Channel->rb, tempbuf, n_to_read);
     if(nread <= 0)
         return 0;
-
-    
-
     // copy the part needed at the speed to the channel output buffer
     // This part is currently for 16 bit stereo
     for(i=0;i<len;i+=4)
     {
-        j =  (int)((float)(i/4)*ch[channel]->speed)*4;
+        j =  (int)((float)(i/4)*Channel->speed)*4;
         
         buf[i]  = tempbuf[j];
         buf[i+1]= tempbuf[j+1];
@@ -335,7 +374,7 @@ output_read (int channel, unsigned char * buf, int len)
      * output thread.
      */
 
-    ch[channel]->bytes_written += nread;
+    Channel->bytes_written += nread;
 
     return len;
 }
@@ -343,49 +382,53 @@ output_read (int channel, unsigned char * buf, int len)
 
 int AUDIOOUTPUT_Write (int c, void* buf, int len)
 {
+    struct OutChannel *Channel;
     int written;
     int newlen;
 
     TRACE("AUDIOOUTPUT_Write");
-    if (c >= OUTPUT_N_CHANNELS || c < 0)
-        return 0;
-    if (ch[c] == NULL)
+
+    Channel=AUDIOOUTPUT_GetChannelByID(c);
+
+    if (Channel == NULL)
         return 0;
 
 
-    if (ch[c]->buffer2_size < len * 2)
+    if (Channel->buffer2_size < len * 2)
     {
-        ch[c]->buffer2 = realloc (ch[c]->buffer2, len * 2);
-        if (ch[c]->buffer2 == NULL)
+        Channel->buffer2 = realloc (Channel->buffer2, len * 2);
+        if (Channel->buffer2 == NULL)
         {
-            ch[c]->buffer2_size = 0;
+            Channel->buffer2_size = 0;
             return 0;
         }
-        ch[c]->buffer2_size = len * 2;
+        Channel->buffer2_size = len * 2;
     }
 
     /* Convert to the internal format */
     newlen =
-        convert_buffer (ch[c]->aformat, ch[c]->n_ch, buf, ch[c]->buffer2, len);
+        convert_buffer (Channel->aformat, Channel->n_ch, buf, Channel->buffer2, len);
 
     /* Write to the ringbuffer */
-    written = rb_write (ch[c]->rb, (unsigned char *) ch[c]->buffer2, newlen);
+    written = rb_write (Channel->rb, (unsigned char *) Channel->buffer2, newlen);
     return written;
 }
 
 long AUDIOOUTPUT_BufferFree(int c)
 {
+    struct OutChannel *Channel;
     long free = -1;
     
     TRACE("AUDIOOUTPUT_BufferFree");
-    if (c >= OUTPUT_N_CHANNELS || c < 0)
+
+    Channel=AUDIOOUTPUT_GetChannelByID(c);
+
+    if(Channel == NULL)
         return 0;
-    if(ch[c] == NULL)
-        return 0;
 
 
 
-    free = rb_free (ch[c]->rb);
+    free = rb_free (Channel->rb);
 
     return free;
 }
@@ -393,11 +436,13 @@ long AUDIOOUTPUT_BufferFree(int c)
 
 int AUDIOOUTPUT_Pause (int c, int pause)
 {
-    TRACE("AUDIOOUTPUT_Pause");
-    if (c >= OUTPUT_N_CHANNELS || c < 0)
-        return 0;
+    struct OutChannel *Channel;
 
-    if(ch[c] == NULL)
+    TRACE("AUDIOOUTPUT_Pause");
+
+    Channel = AUDIOOUTPUT_GetChannelByID(c);
+
+    if(Channel == NULL)
         return 0;
   
     if(pause == 0)
@@ -406,51 +451,59 @@ int AUDIOOUTPUT_Pause (int c, int pause)
         runningcount--;
 
     TRACE("AUDIOOUTPUT_Pause >%d< >%d<\n",c,pause);
-    ch[c]->paused = (int) (pause != 0);
+    Channel->Paused = (int) (pause != 0);
     return 1;
 }
 
 int AUDIOOUTPUT_SetSpeed(int channel, int speed)
 {
-    if (channel >= OUTPUT_N_CHANNELS || channel < 0)
-        return 0;
-    if(ch[channel] == NULL)
+    struct OutChannel *Channel;
+
+    Channel = AUDIOOUTPUT_GetChannelByID(channel);
+    if(Channel == NULL)
         return 0;
   
     
-    ch[channel]->speed = (float)speed/100;
+    Channel->speed = (float)speed/100;
 
     return 0;
 }
 
-long
-AUDIOOUTPUT_GetTime(int c)
+long AUDIOOUTPUT_GetTime(int c)
 {
+    struct OutChannel *Channel;
     double time;
-    if (c >= OUTPUT_N_CHANNELS || c < 0)
-        return 0;
 
-    if(ch[c] == NULL)
+    Channel = AUDIOOUTPUT_GetChannelByID(c);
+
+    if(Channel == NULL)
         return 0;
     
 
 
-    time = ((double) ch[c]->bytes_written) / (2 * ch[c]->rate * ch[c]->n_ch);
+    time = ((double) Channel->bytes_written) / (2 * Channel->rate * Channel->n_ch);
     time = (int) (time * 1000);
     return (long) time;
 }
 
 int AUDIOOUTPUT_GetVolumeLevel(int channel,int *left,int *right)
 {
-    if(ch[channel]->paused)
+    struct OutChannel *Channel;
+
+    Channel = AUDIOOUTPUT_GetChannelByID(channel);
+
+    if(Channel == NULL)
+        return 0;
+
+    if(Channel->Paused)
     {
         *left=0;
         *right=0;
     }
     else
     {
-        *left  = ch[channel]->volumeleft;
-        *right = ch[channel]->volumeright;
+        *left  = Channel->volumeleft;
+        *right = Channel->volumeright;
     }
     return 1;
 }
@@ -458,15 +511,16 @@ int AUDIOOUTPUT_GetVolumeLevel(int channel,int *left,int *right)
 /* interface to mixer */
 int AUDIOOUTPUT_SetVolume(int c, float db)
 {
-    TRACE("AUDIOOUTPUT_SetVolume"); 
-    if (c >= OUTPUT_N_CHANNELS || c < 0)
-        return 0;
-    
-    if(ch[c] == NULL)
-        return 0;
-    
+    struct OutChannel *Channel;
 
-    ch[c]->fader_dB = db;
+    TRACE("AUDIOOUTPUT_SetVolume"); 
+
+    Channel = AUDIOOUTPUT_GetChannelByID(c);
+
+    if(Channel == NULL)
+        return 0;
+
+    Channel->fader_dB = db;
     return 0;
 }
 
@@ -488,24 +542,27 @@ int AUDIOOUTPUT_GetMainVolume(int *value)
 
 int AUDIOOUTPUT_GetChannelVolume(int c, float *db)
 {
-    if (c >= OUTPUT_N_CHANNELS || c < 0)
-        return 0;
-    if(ch[c] == NULL)
+    struct OutChannel *Channel;
+
+    Channel = AUDIOOUTPUT_GetChannelByID(c);
+    if(Channel == NULL)
         return 0;
 
 
-    *db = ch[c]->fader_dB;
+    *db = Channel->fader_dB;
     return 0;
 }
 
 int AUDIOOUTPUT_Mute (int c, int mute)
 {
-    if (c >= OUTPUT_N_CHANNELS || c < 0)
-        return 0;
-    if(ch[c] == NULL)
+    struct OutChannel *Channel;
+
+    Channel = AUDIOOUTPUT_GetChannelByID(c);
+
+    if(Channel == NULL)
         return 0;
 
-    ch[c]->mute = (int) (mute != 0);
+    Channel->Mute = (int) (mute != 0);
     return 0;
 }
 
@@ -546,11 +603,12 @@ static void AUDIOOUTPUT_CalculateVolume(struct OutChannel *ch)
  * Combines the signals of channel 0 and channel 1
  * according to mixer value
  */
-static void AUDIOOUTPUT_Crossfade()
+static void AUDIOOUTPUT_Crossfade(struct OutChannel *Channel1,struct OutChannel *Channel2)
 {
     int sample;
 
-    if (!((ch[0]->fader_dB <= -31) && (ch[1]->fader_dB <= -31)))
+
+    if (!((Channel1->fader_dB <= -31) && (Channel2->fader_dB <= -31)))
     {
         double ch0   = 0;
         double ch1   = 0;
@@ -568,23 +626,23 @@ static void AUDIOOUTPUT_Crossfade()
         
         if (ch0 != 0)
         {
-            ch0 = pow (10,0.05 * (double) ((ch0 * 2 - 1) * 10)) * _TO_ATT (ch[0]->fader_dB);
+            ch0 = pow (10,0.05 * (double) ((ch0 * 2 - 1) * 10)) * _TO_ATT (Channel1->fader_dB);
         }
         
         if (ch1 != 0)
         {
-            ch1 = pow (10,0.05 * (double) ((ch1 * 2 - 1) * 10)) * _TO_ATT (ch[1]->fader_dB);
+            ch1 = pow (10,0.05 * (double) ((ch1 * 2 - 1) * 10)) * _TO_ATT (Channel2->fader_dB);
         }
         for (sample = 0; sample < OUTPUT_BUFFER_SIZE_SAMPLES (audiocfg); sample++)
         {
             double ch0_tmp = 0;
             double ch1_tmp = 0;
             double tmp;
-            if (!ch[0]->paused)
-                ch0_tmp = (double) ch[0]->buffer[sample] * ch0;
+            if (!Channel1->Paused)
+                ch0_tmp = (double) Channel1->buffer[sample] * ch0;
             
-            if (!ch[1]->paused)
-                ch1_tmp = (double) ch[1]->buffer[sample] * ch1;
+            if (!Channel2->Paused)
+                ch1_tmp = (double) Channel2->buffer[sample] * ch1;
             
             tmp = (int) (ch1_tmp + ch0_tmp);
             if (tmp > 32767.0)
@@ -606,6 +664,7 @@ static int AUDIOOUTPUT_Loop(void *arg)
 {
     int channel=0, i=0;
     unsigned int sample=0;
+    struct OutChannelList *ListItem;
     output_word *tmp_buf = malloc (2 * OUTPUT_BUFFER_SIZE (audiocfg));
     
     memset(tmp_buf,0,(2 * OUTPUT_BUFFER_SIZE (audiocfg)));
@@ -614,118 +673,110 @@ static int AUDIOOUTPUT_Loop(void *arg)
 
     while (!output_thread_stop)
     {
-        while(runningcount == 0)
-            OSA_Sleep(50);
-
         for (i = 0; i < 3; i++)
         {
             memset (group[i]->out_buffer, 0, OUTPUT_BUFFER_SIZE (audiocfg));
         }
 
-        for (channel = 0; channel < OUTPUT_N_CHANNELS; channel++)
+        ListItem = ChannelList;
+        while(ListItem)
         {
             int n_read=0;
 
-            if(ch[channel]->paused)
-                continue;
-
-            /* output_read reads at a speed ch[channel]->speed */
-            n_read =
-                output_read (channel, (unsigned char *) ch[channel]->buffer,
-                             OUTPUT_BUFFER_SIZE (audiocfg));
-
-#if 0
-            if(channel==0)
+            if(!ListItem->Channel->Paused)
             {
-                EFFECT_Run(OUTPUT_BUFFER_SIZE(audiocfg));
-            }
-#endif
+                /* output_read reads at a speed ListItem->Channel->speed */
+                n_read = output_read (ListItem->Channel,OUTPUT_BUFFER_SIZE (audiocfg));
 
-            if (n_read < 0)
-            {
-                printf ("Audio read error: 0x%x\n", n_read);
-                n_read = 0;
-            }
-
-            /* if we could not read all 1024 samples, move read to buffer end */
-            if (n_read < OUTPUT_BUFFER_SIZE (audiocfg))
-            {
-                int n_zeroes = OUTPUT_BUFFER_SIZE (audiocfg) - n_read;
-                /* 
-                 * TODO: add padding handler which notifies user if we are padding a lot 
-                 *       in order to advice him to turn up ring buffer size
-                 */
-//                printf ("Channel %d: padding %d zeroes.\n", channel, n_zeroes);
-                memcpy (tmp_buf, ch[channel]->buffer, n_read * 2);
-                memset (ch[channel]->buffer, 0, n_zeroes * 2);
-                memcpy (&ch[channel]->buffer[n_zeroes], tmp_buf, n_read * 2);
-            }
-
-            
-            /* perform fft for beat detection */
-            if (channel == 0 || channel == 1)
-            {
-                do_fft(channel, NULL);
-            }
-
-            /* if channel is muted, we discard the bytes read */
-            if (ch[channel]->mute)
-            {
-                memset (ch[channel]->buffer, 0, OUTPUT_BUFFER_SIZE (audiocfg));
-            }
-
-            if (ch[channel]->fader_dB > -31)
-            {
-
-                if (channel == 0 || channel == 1)
-                    AUDIOOUTPUT_CalculateVolume(ch[channel]);
-                                
-                /* attenuate or amplify by db */
-                for (sample = 0; sample < OUTPUT_BUFFER_SIZE_SAMPLES (audiocfg); sample++)
+                if(ListItem->Channel->id == 0)
                 {
-                    double tmp;
-                    if (ch[channel]->fader_dB < -100.0 || ch[channel]->fader_dB > 100.0)
-                        ch[channel]->fader_dB = 0.0;
-                    tmp =
-                        (double) ch[channel]->buffer[sample] * pow (10,
-                                                                    0.05 * (double) ch[channel]->fader_dB);
-                    tmp = (int) (tmp);
+                    EFFECT_Run(OUTPUT_BUFFER_SIZE(audiocfg));
+                }
 
-                    if (tmp > 32767.0)
-                    {
-                        tmp = 32767.0;
-                        ch[channel]->clipping_count++;
-                    }
-                    if (tmp < -32767.0)
-                    {
-                        tmp = -32767.0;
-                        ch[channel]->clipping_count++;
-                    }
-                    
-                    
-                    /* add to master buffer if selected */
-                    /* ch 0 and ch1 are added later -> CrossFader !!! */
-                    if ((ch[channel]->mask & GROUP_MASTER))
-                    {
-                        ADD_TO_OUTPUT_BUFFER (&group[0]->out_buffer[sample], tmp);
-                    }
-                    
-                    if (ch[channel]->mask & GROUP_MONITOR)
-                    {
-                        ADD_TO_OUTPUT_BUFFER (&group[1]->out_buffer[sample], tmp);
-                    }
-                    
-                    
-                } /* for( 0 to SAMPLES ) */
                 
+                if (n_read < 0)
+                {
+                    printf ("Audio read error: 0x%x\n", n_read);
+                    n_read = 0;
+                }
+                
+                /* if we could not read all 1024 samples, move read to buffer end */
+                if (n_read < OUTPUT_BUFFER_SIZE (audiocfg))
+                {
+                    int n_zeroes = OUTPUT_BUFFER_SIZE (audiocfg) - n_read;
+                    /* 
+                     * TODO: add padding handler which notifies user if we are padding a lot 
+                     *       in order to advice him to turn up ring buffer size
+                     */
+//                printf ("Channel %d: padding %d zeroes.\n", channel, n_zeroes);
+                    memcpy (tmp_buf, ListItem->Channel->buffer, n_read * 2);
+                    memset (ListItem->Channel->buffer, 0, n_zeroes * 2);
+                    memcpy (&ListItem->Channel->buffer[n_zeroes], tmp_buf, n_read * 2);
+                }
+                
+                
+                /* perform fft for beat detection */
+//            if (channel == 0 || channel == 1)
+//            {
+//                do_fft(channel, NULL);
+//            }
+                
+                /* if channel is muted, we discard the bytes read */
+                if (ListItem->Channel->Mute)
+                {
+//                    memset (ListItem->Channel->buffer, 0, OUTPUT_BUFFER_SIZE (audiocfg));
+                }
+                
+                if (ListItem->Channel->fader_dB > -31)
+                {
+                    
+                    if (channel == 0 || channel == 1)
+                        AUDIOOUTPUT_CalculateVolume(ListItem->Channel);
+                    
+                    /* attenuate or amplify by db */
+                    for (sample = 0; sample < OUTPUT_BUFFER_SIZE_SAMPLES (audiocfg); sample++)
+                    {
+                        double tmp;
+                        if (ListItem->Channel->fader_dB < -100.0 || ListItem->Channel->fader_dB > 100.0)
+                            ListItem->Channel->fader_dB = 0.0;
+                        tmp =
+                            (double) ListItem->Channel->buffer[sample] * pow (10,
+                                                                              0.05 * (double) ListItem->Channel->fader_dB);
+                        tmp = (int) (tmp);
+                        
+                        if (tmp > 32767.0)
+                        {
+                            tmp = 32767.0;
+                            ListItem->Channel->clipping_count++;
+                        }
+                        if (tmp < -32767.0)
+                        {
+                            tmp = -32767.0;
+                            ListItem->Channel->clipping_count++;
+                        }
+                        
+                        
+                        /* add to master buffer if selected */
+                        /* ch 0 and ch1 are added later -> CrossFader !!! */
+                        if ((ListItem->Channel->mask & GROUP_MASTER))
+                        {
+                            ADD_TO_OUTPUT_BUFFER (&group[0]->out_buffer[sample], tmp);
+                        }
+                        
+                        if (ListItem->Channel->mask & GROUP_MONITOR)
+                        {
+                            ADD_TO_OUTPUT_BUFFER (&group[1]->out_buffer[sample], tmp);
+                        }
+                    }
+                }
             }
-       
-        
+            ListItem=ListItem->Next;
         }
-        /* for( channel <N_CHANNELS ) */
 
-
-        AUDIOOUTPUT_Crossfade();
+        if(ChannelList && ChannelList->Next)
+        {
+            AUDIOOUTPUT_Crossfade(ChannelList->Channel,ChannelList->Next->Channel);
+        }
 
         /* output pcm data to output plugin */
         {
@@ -753,32 +804,33 @@ do_fft (int c, output_word * buf)
 {
     int j;
     double miliseconds=0;
+    struct OutChannel *Channel;
 #define VAL( x )   (c_re((x)))
 #define CALC_BPM( _msec )	(60000/_msec)
-    if (!(c == 0 || c == 1))
-        return -1;
+
+    Channel=AUDIOOUTPUT_GetChannelByID(c);
 
 
     /* fill the fftw input buffer */
     for (j = 0; j < audiocfg->FragmentSize; j++)
     {
-        VAL (fftw_in[j]) =
-            (ch[c]->buffer[j * 2] >> 1) + (ch[c]->buffer[j * 2 + 1] >> 1);
+//        VAL (fftw_in[j]) =
+//            (Channel->buffer[j * 2] >> 1) + (Channel->buffer[j * 2 + 1] >> 1);
     }
 
     /* Execute the 1d DFT, output is written to fftw_out */
-    fftw_execute(fftplan_out);
+//    fftw_execute(fftplan_out);
 
     /* if the detect_beat  button is toggled i the mixer window */
-//    if (ch[c]->detect_beat)
+//    if (Channel->detect_beat)
     {
         double beat = 0;
         for (j = 1; j < 5; j++)  //de amplitudes van beneden de 2 * 43 Hz
         {
-            beat +=
-                /* real = sqrt(im^2 + re^2) */
-                sqrt (c_re(fftw_out[j]) * c_re(fftw_out[j]) +
-                      c_im(fftw_out[j]) * c_im(fftw_out[j]));
+//            beat +=
+            /* real = sqrt(im^2 + re^2) */
+//                sqrt (c_re(fftw_out[j]) * c_re(fftw_out[j]) +
+//                      c_im(fftw_out[j]) * c_im(fftw_out[j]));
 
             
         }
@@ -794,28 +846,28 @@ do_fft (int c, output_word * buf)
         if (beat >= 1.0)
         {
             double newbpm = CALC_BPM (miliseconds);
-            //todo g_timer_reset (ch[c]->last_beat);
+            //todo g_timer_reset (Channel->last_beat);
             if (miliseconds < 200)
             {
-                if (ch[c]->beats >= 20)
-                    ch[c]->bpm_prescale += 10;
+                if (Channel->beats >= 20)
+                    Channel->bpm_prescale += 10;
                 return 0;
             }
             if (miliseconds > 800)
             {
-                ch[c]->bpm_prescale -= 100;
-                if (ch[c]->bpm_prescale < 2500)
-                    ch[c]->bpm_prescale = 2500;
-                printf ("prescale -= 100: %ld\n", ch[c]->bpm_prescale);
+                Channel->bpm_prescale -= 100;
+                if (Channel->bpm_prescale < 2500)
+                    Channel->bpm_prescale = 2500;
+                printf ("prescale -= 100: %ld\n", Channel->bpm_prescale);
                 return 0;
             }
-            ch[c]->bpm = newbpm;
-            ch[c]->beats++;
+            Channel->bpm = newbpm;
+            Channel->beats++;
             printf ("s: %f\n", (float) miliseconds);
             printf ("bpm: %f\n", (float) newbpm);
 //                                                                                                                                                                                                                                                              mixer_set_beat_widget( c, 1 );
             printf ("%f\n", (float) beat);
-            //todo g_timer_start (ch[c]->last_beat);
+            //todo g_timer_start (Channel->last_beat);
         }
 
     }

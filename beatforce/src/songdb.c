@@ -117,28 +117,20 @@ int parsesubgroup(xmlDocPtr doc, xmlNodePtr cur)
 
 int SONGDB_Init ()
 {
-    if(MainGroup == NULL)
-    {
-        MainGroup=malloc(sizeof(SongDBGroup));
-        memset(MainGroup,0,sizeof(SongDBGroup));
-        
-        search_results = NULL;
-        n_search_results = 0;
-        n_index = 0;
-        
-        srand(time(NULL));
-        SONGDB_LoadXMLDatabase();
-        
-        MainGroup->Changed  = 1;
-        MainGroup->Active   = MainGroup->Subgroup;
-        
-        return 1;
-    }
-    else
-    {
-        ERROR("SONGDB already initialized\n");
-        return 0;
-    }
+    MainGroup=malloc(sizeof(SongDBGroup));
+    memset(MainGroup,0,sizeof(SongDBGroup));
+
+    search_results = NULL;
+    n_search_results = 0;
+    n_index = 0;
+
+    srand(time(NULL));
+    SONGDB_LoadXMLDatabase();
+
+    MainGroup->Changed  = 1;
+    MainGroup->Active   = MainGroup->Subgroup;
+    
+    return 1;
 }
 
 int SONGDB_Exit()
@@ -154,12 +146,12 @@ int SONGDB_SubgroupSetVolatile(struct SongDBSubgroup *subgroup)
 
 int SONGDB_AddSubgroup(struct SongDBGroup *group,char *title)
 {
-    if(title == NULL || group == NULL)
+    if(title == NULL)
         return 0;
 
     group->Subgroup=songdb_AddSubgroup(group->Subgroup,title);
     group->Changed=1;
-    group->SubgroupCount++;
+    group->SubgroupCount ++;
     return 1;
 }
 
@@ -335,7 +327,6 @@ struct SongDBSubgroup *songdb_AddSubgroup(struct SongDBSubgroup *sg,char *title)
         sg->Songcount=0;
         sg->Playlist=NULL;
         sg->Volatile=0;
-        MainGroup->Active=sg;
     }
     else
     {
@@ -351,7 +342,6 @@ struct SongDBSubgroup *songdb_AddSubgroup(struct SongDBSubgroup *sg,char *title)
         last->next->Playlist=NULL;
         last->next->Volatile=0;
         last->next->prev=last;
-        MainGroup->Active=last->next;
         
     }
     return sg;
@@ -372,10 +362,10 @@ struct SongDBEntry *SONGDB_AllocEntry (void)
     return e;
 }
 
-int SONGDB_FreeActiveList()
+void SONGDB_FreeActiveList()
 {
     if(MainGroup->Active == NULL)
-        return 0;
+        return;
     
     while(MainGroup->Active->Playlist)
     {
@@ -383,7 +373,6 @@ int SONGDB_FreeActiveList()
         MainGroup->Active->Playlist = MainGroup->Active->Playlist->next;
     }
     MainGroup->Active->Songcount=0;
-    return 1;
 
 }
 

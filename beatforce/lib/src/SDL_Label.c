@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@beatforce.org)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -70,12 +70,7 @@ SDL_Widget* SDL_LabelCreate(SDL_Rect* rect)
 void SDL_LabelDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
 {
     SDL_Label *Label=(SDL_Label*)widget;
-    char string[255];
     SDL_Rect DrawPosititon;
-    
-    memset(string ,0,255);
-
-    SDL_FontSetColor(Label->Font,Label->fgcolor);
     
     if(Label->bgcolor != TRANSPARANT)
     {
@@ -86,7 +81,7 @@ void SDL_LabelDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
     {
         Label_CalculatePattern(Label,&DrawPosititon);
         
-        SDL_FontDrawStringLimited(dest,Label->Font,Label->Caption,&DrawPosititon,&widget->Rect);
+        SDL_FontDrawStringLimited(dest,Label->Font,Label->Caption,Label->fgcolor,&DrawPosititon,&widget->Rect);
     }
 }
 
@@ -96,13 +91,6 @@ int SDL_LabelProperties(SDL_Widget *widget,int feature,va_list list)
 
     switch(feature)
     {
-    case SET_FONT:
-        Label->Font=va_arg(list,SDL_Font*);
-        break;
-    case SET_CAPTION:
-        printf("Please change code to new API\n");
-        exit(1);
-        break;
     case SET_FG_COLOR:
         Label->fgcolor=va_arg(list,Uint32);
         break;
@@ -110,7 +98,8 @@ int SDL_LabelProperties(SDL_Widget *widget,int feature,va_list list)
     case SET_BG_COLOR:
         Label->bgcolor=va_arg(list,Uint32);
         break;
-
+    default:
+        return 0;
     }
     return 1;
 }
@@ -193,12 +182,31 @@ static void Label_CalculatePattern(SDL_Label *Label,SDL_Rect *Rect)
 
 }
 
+int SDL_LabelSetFont(SDL_Widget *widget,SDL_Font *Font)
+{
+    SDL_Label *Label=(SDL_Label*)widget;
+    
+    if(Font == NULL)
+        return 0;
+    
+    Label->Font = Font;
+    
+    return 1;
+}
+
+
 void SDL_LabelSetText(SDL_Widget *widget,char *text)
 {
     SDL_Label *Label=(SDL_Label*)widget;
 
-    Label->Caption=strdup(text);
-    SDL_WidgetRedrawEvent(widget);
+    if(Label->Caption == NULL || strcmp(Label->Caption,text))
+    {
+        if(Label->Caption != NULL)
+            free(Label->Caption);
+        Label->Caption = strdup(text);
+        
+        SDL_WidgetRedrawEvent(widget);
+    }
 }
 
 void SDL_LabelSetAlignment(SDL_Widget *widget,int Alignment)

@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@beatforce.org)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -19,135 +19,104 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <stdio.h>
 #include <malloc.h>
+#include <stdio.h>
+#include <string.h>
+
 #include <SDL/SDL.h>
 #include <SDL/SDL_thread.h>
-#include "SDL_Window.h"
-#include "SDL_Widget.h"
 
-typedef struct RectList
+#include <SDLTk.h>
+
+static void SDL_WindowRedraw();
+static void SDL_WindowRedrawEvent();
+
+static SDL_Window *SDL_WindowGetTopVisibleWindow();
+static SDL_Window *SDL_WindowGetTopWindow();
+
+static void SDL_WindowAddToWindowList(SDL_Window *Window);
+
+int ScreenWidth;
+int ScreenHeight;
+int ScreenBpp;
+
+#define SDLTK_WIDGET_HIDE     1
+#define SDLTK_WIDGET_SHOW     2
+#define SDLTK_WINDOW_REDRAW   3
+
+SDL_Surface     *VideoSurface;          /* Drawing is done to this surface of the video driver */ 
+SDL_WindowList  *WindowList;            /* List of Windows */
+
+/* Init the video surface information and init the global variables*/
+int SDL_WindowInit(SDL_Surface *surface,int width,int height,int bpp)
 {
-    SDL_Rect *Rect;
-    struct RecList *Next;
-}RectList;
+    WindowList       = NULL;
 
-typedef struct WindowList
-{
-    SDL_Window *Window;
-    struct WindowList *Next;
-    struct WindowList *Prev;
-}WindowList;
-
-unsigned int SDL_WidgetRedraw(unsigned int interval,void *data);
-
-SDL_Surface *screen;
-SDL_Window *CurWindow;
-
-WindowList *WindowManager;
-
-SDL_Surface  *previous_surface; /* Previous active surface */
-
-SDL_Widget *CurrentFocus;       /* Current widget focus    */
-SDL_Screen *ScreenList;         /* List of surfaces/screens */
-SDL_Screen *CreateOnStack;      /* This is the screen where the create functions
-                                   add widgets to */
-SDL_Screen *ActiveScreen;
-RectList  *DrawQueue;
-
-int SDL_WindowInit(SDL_Surface *s)
-{
-    previous_surface = NULL;
-    CurrentFocus     = NULL;
-    ScreenList       = NULL;
-    CreateOnStack    = NULL;
-    ActiveScreen     = NULL;
-    DrawQueue        = NULL;
     /* Initialize global variables */
-    CurWindow       = NULL;
-    WindowManager   = NULL;
-    screen          = s;
+    ScreenWidth     = width;
+    ScreenHeight    = height;
+    ScreenBpp       = bpp;
+
+    VideoSurface    = surface;
+
     SDL_WidgetInit();
     return 1;
 }
 
-/* Allocate a new surface and initialize the widget list */
-int SDL_StackNewScreen(SDL_Surface *surface)
+/* Create a new window, this has to be inside the video surface */
+SDL_Window *SDL_WindowNew(int x,int y,int width,int height)
 {
-    if(ScreenList == NULL)
+    SDL_Window *Window;
+    
+    Window = malloc(sizeof(SDL_Window));
+    memset(Window,0,sizeof(SDL_Window));
+
+    Window->Visible     = 0;
+    Window->FocusWidget = NULL;
+
+    SDL_WindowAddToWindowList(Window);
+
+    return Window;
+}
+
+void SDL_WindowOpen(SDL_Window *Window)
+{
+    if(Window == NULL)
+        return;
+
+    /* Add it to the window list it could be closed in
+       the mean time */
+    SDL_WindowAddToWindowList(Window);
+
+    SDL_WindowRedrawEvent(); /* Post a redraw event */
+}
+
+void SDL_WindowClose()
+{
+    SDL_WindowList *l;
+
+    SDL_Window *window = SDL_WindowGetTopVisibleWindow();
+
+    l = WindowList;
+
+    if(WindowList->Window == window)
     {
-        ScreenList=(SDL_Screen*)malloc(sizeof(SDL_Screen));
-        memset(ScreenList,0,sizeof(SDL_Screen));
-        ScreenList->Surface=surface;
-        CreateOnStack=ScreenList;
+        WindowList = NULL;
     }
     else
     {
-        SDL_Screen *l;
-        l=ScreenList;
-        while(l->next)
-            l=l->next;
-
-        if(l->next == NULL)
+        while(l)
         {
-            l->next=(SDL_Screen*)malloc(sizeof(SDL_Screen));
-            memset(l->next,0,sizeof(SDL_Screen));
-            l->next->Surface=surface;
-            CreateOnStack=l->next;
+            if(l->Next->Window == window)
+            {
+                l->Next = NULL;
+                SDL_WindowRedrawEvent();
+            }
+            l=l->Next;
         }
-        else
-        {
-            printf("ERROR %s %d\n",__FILE__,__LINE__);
-        }
-        return 0;
     }
-    return 1;
 }
 
-
-int 
-SDL_ActiveSurface(SDL_Surface *surface)
-{
-    SDL_Screen *surfaces;
-    surfaces=ScreenList;
-
-    while(surfaces)
-    {
-        if(surfaces->Surface == surface)
-        {
-            ActiveScreen=surfaces;
-            CreateOnStack=ActiveScreen;
-            SDL_WidgetRedraw(0,NULL);
-            return 1;
-        }
-        surfaces=surfaces->next;
-
-    }
-    return 0;
-}
-
-SDL_Surface *SDL_GetSurfaceStack()
-{
-    SDL_Screen *surfaces;
-    surfaces=ScreenList;
-    while(surfaces)
-    {
-        if(surfaces == ActiveScreen)
-        {
-            return surfaces->Surface;
-        }
-        surfaces=surfaces->next;
-
-    }
-    return NULL;
-
-}
-
-SDL_Surface *SDL_GetPreviousStack()
-{
-    return previous_surface;
-
-}
 /*
  * A function to calculate the intersection of two rectangles:
  * return true if the rectangles intersect, false otherwise
@@ -200,23 +169,33 @@ int SDL_RectInside(const SDL_Rect *A, const SDL_Rect *B)
 
 void SDL_StoreWidget(SDL_Widget *widget)
 {
-    if(CreateOnStack->WidgetList==NULL)
-    {
-        CreateOnStack->WidgetList=malloc(sizeof(SDL_WidgetList));
-        memset(CreateOnStack->WidgetList,0,sizeof(SDL_WidgetList));
+    SDL_WindowList *WindowListItem;
 
-        CreateOnStack->WidgetList->Widget  = widget;
-        CreateOnStack->WidgetList->Next    = NULL;
-        CreateOnStack->WidgetList->Parent  = NULL;
+    WindowListItem = WindowList;
+
+
+    while(WindowListItem->Next)
+        WindowListItem=WindowListItem->Next;
+
+    if(WindowListItem->Window->WidgetList==NULL)
+    {
+        WindowListItem->Window->WidgetList=malloc(sizeof(SDL_WidgetList));
+        memset(WindowListItem->Window->WidgetList,0,sizeof(SDL_WidgetList));
+
+        WindowListItem->Window->WidgetList->Widget  = widget;
+        WindowListItem->Window->WidgetList->Next    = NULL;
+        WindowListItem->Window->WidgetList->Parent  = NULL;
 
         /* Set the focus to the new widget if edit widget */
         if(widget->Focusable && SDL_StackGetFocus() == NULL)
-            SDL_StackSetFocus(widget);
+        {
+            WindowListItem->Window->FocusWidget=widget;
+        }
     }
     else
     {
         SDL_WidgetList *temp;
-        temp=CreateOnStack->WidgetList;
+        temp=WindowListItem->Window->WidgetList;
         
 
         while(temp->Next)
@@ -229,127 +208,48 @@ void SDL_StoreWidget(SDL_Widget *widget)
         temp->Next=NULL;
 
         if(widget->Focusable && SDL_StackGetFocus() == NULL)
-            SDL_StackSetFocus(widget);
+        {
+            WindowListItem->Window->FocusWidget=widget;
+        }
     }
 
 
 }
 
-SDL_WidgetList *SDL_StackGetLastItem()
+/* Return the widget list of the top visible (active) window */
+SDL_WidgetList *SDL_WindowGetWidgetList()
 {
-    SDL_WidgetList *tmp=CreateOnStack->WidgetList;
-    while(tmp->Next)
-        tmp=tmp->Next;
-    return tmp;
-}
+    SDL_WindowList *surfaces;
+    SDL_Window     *Win;
+    surfaces=WindowList;
 
-
-SDL_WidgetList *SDL_StackGetStack(SDL_Surface *surface)
-{
-    SDL_Screen *surfaces;
-    surfaces=ScreenList;
-
-    if(surface == NULL)
+    Win=SDL_WindowGetTopVisibleWindow();
+    if(Win)
     {
-        return ActiveScreen->WidgetList;
+        return Win->WidgetList;
     }
     else
     {
-        while(surfaces)
-        {
-            if(surfaces->Surface == surface)
-                return surfaces->WidgetList;
-            
-            surfaces=surfaces->next;
-        }
-
+        return NULL;
     }
-    return NULL;
 }
 
 void SDL_StackSetFocus(SDL_Widget *focus_widget)
 {
-    CurrentFocus=focus_widget;
+    SDL_WindowGetTopVisibleWindow()->FocusWidget=focus_widget;
 }
 
 SDL_Widget *SDL_StackGetFocus()
 {
-    return CurrentFocus;
+    return SDL_WindowGetTopVisibleWindow()->FocusWidget;
 }
 
-
-void SDL_WindowClose()
-{
-    WindowList *l;
-
-    l=WindowManager;
-
-    if(l->Next)
-    {
-        CurWindow=l->Window;
-        free(l->Next);
-        l->Next=NULL;
-    }
-    else
-    {
-        free(WindowManager);
-        WindowManager=NULL;
-        CurWindow=NULL;
-    }
-    if(CurWindow && CurWindow->Surface)
-        SDL_WidgetUseSurface(CurWindow->Surface);
-}
-
-
-void SDL_WindowOpen(SDL_Window *window)
-{
-    WindowList *l;
-
-    if(WindowManager == NULL)
-    {
-        WindowManager = malloc(sizeof(WindowList));
-        memset(WindowManager,0,sizeof(WindowList));
-        WindowManager->Window=window;
-    }
-    else
-    {
-        l=WindowManager;
-        while(l->Next)
-            l=l->Next;
-     
-        l->Next=malloc(sizeof(WindowList));
-        memset(l->Next,0,sizeof(WindowList));
-        
-        l->Next->Window=window;
-    }
-    CurWindow=window;
-    SDL_WidgetUseSurface(CurWindow->Surface);
-    
-}
-
-unsigned int SDL_WidgetRedraw(unsigned int interval,void *data)
-{
-    if(CurWindow)
-    {
-        if(CurWindow->NotifyRedraw)
-            CurWindow->NotifyRedraw(CurWindow);
-
-        SDL_DrawAllWidgets(screen);
-        return 60; //redraw every 50ms 
-    }
-    else
-    {
-        /* WindowManager is finished, no windows to draw */
-        return 0; 
-    }
-
-}
 
 
 
 int SDLTK_Main()
 {
-    SDL_Event test_event;
+    SDL_Event Event;
     SDL_Event e;
     int handled;
     int retval =0;
@@ -360,134 +260,169 @@ int SDLTK_Main()
 
     SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY,SDL_DEFAULT_REPEAT_INTERVAL);
 
-    while(CurWindow)
+    while(WindowList)
     {
-        while(SDL_WaitEvent(&test_event)) 
+        while(SDL_WaitEvent(&Event)) 
         {
             handled=0;
-            switch(test_event.type) 
+            switch(Event.type) 
             {
             case SDL_QUIT:
-                CurWindow=NULL;
-                break;
-            case SDL_USEREVENT:
+                while(WindowList)
                 {
-                    SDL_Widget *widget;
-                    widget = test_event.user.data1;
-                    if(test_event.user.code == 2)
-                        widget->Visible = 1;
-
-                    if(test_event.user.code == 1)
-                        widget->Visible = 0;
-
-                    if(SDL_WidgetActive(widget))
-                        SDL_WidgetDraw(widget,&widget->Rect);
-
+                    SDL_WindowClose();
                 }
                 break;
+            case SDLTK_WIDGET_EVENT:
+            {
+                SDL_Widget *widget;
+                SDL_Rect   *rect;
+
+                switch(Event.user.code)
+                {
+                case SDLTK_WIDGET_HIDE:
+                    widget = Event.user.data1;
+                    if(SDL_WidgetActive(widget))
+                    {
+                        if(widget->Visible == 1)
+                        {
+                            widget->Visible = 0;
+                            SDL_SignalEmit(widget,"hide");
+                            SDL_WidgetDraw(widget,&widget->Rect);
+                        }
+                    }
+                    break;
+
+                case SDLTK_WIDGET_SHOW:
+                    widget = Event.user.data1;
+                    if(SDL_WidgetActive(widget))
+                    {
+                        if(widget->Visible == 0)
+                        {
+                            widget->Visible = 1;
+                            SDL_SignalEmit(widget,"show");
+                            if(SDL_WindowGetTopWindow()->Visible)
+                                SDL_WidgetDraw(widget,&widget->Rect);
+                        }
+                    }
+                    break;
+                case SDLTK_WINDOW_REDRAW:
+                    SDL_WindowRedraw();
+                    break;
+
+                case 4:
+                    widget = Event.user.data1;
+                    rect   = Event.user.data2;
+                    if(SDL_WidgetActive(widget))
+                        SDL_WidgetDraw(widget,&widget->Rect);
+                    break;
+                }
+                
+            }
+            break;
             default:
                 break;
             }
      
-            if(CurWindow == NULL)
+            if(WindowList == NULL)
                 break;
 
             /* Remove all mouse motion events from the queue */
             while(SDL_PeepEvents(&e, 1, SDL_GETEVENT, SDL_MOUSEMOTIONMASK) > 0);
 
 
-    switch(test_event.type)
-    {
-
-    case SDL_MOUSEBUTTONDOWN:
-    {
-        focus_widget=SDL_StackGetStack(NULL);
-        
-        while(focus_widget)
-        {
-            SDL_Widget *w=(SDL_Widget*)focus_widget->Widget;
-            if(SDL_WidgetIsInside(w,test_event.motion.x,test_event.motion.y))
+            switch(Event.type)
             {
-                if(focus_widget->Widget->Focusable)
+            case SDL_MOUSEBUTTONDOWN:
+            {
+                focus_widget = SDL_WindowGetWidgetList();
+        
+                while(focus_widget)
                 {
-                    SDL_StackSetFocus(focus_widget->Widget);
-                }
-                // Bug found when there are overlapping widgets the focus is set to the wrong widget
+                    SDL_Widget *w=(SDL_Widget*)focus_widget->Widget;
+                    if(SDL_WidgetIsInside(w,Event.motion.x,Event.motion.y))
+                    {
+                        if(focus_widget->Widget->Focusable)
+                        {
+                            SDL_StackSetFocus(focus_widget->Widget);
+                        }
+                        // Bug found when there are overlapping widgets the focus is set to the wrong widget
 //                break;
-            }
-            focus_widget=focus_widget->Next;
-        }
-
-    }   
-    break;
-
-    case SDL_KEYDOWN:
-        switch( test_event.key.keysym.sym ) 
-        {
-        case SDLK_TAB:
-        {
-            SDL_Widget     *FocusWidget;
-            SDL_WidgetList *WidgetList;
-            SDL_Widget     *FirstFocusWidget=NULL;
-            int store=0;
-
-            WidgetList=SDL_StackGetStack(NULL);
-            FocusWidget=SDL_StackGetFocus();
-            
-            while(WidgetList)
-            {
-                if(FocusWidget == NULL)
-                {
-                    if(WidgetList->Widget->Focusable)
-                    {
-                        SDL_StackSetFocus(WidgetList->Widget);
-                        break;
                     }
+                    focus_widget=focus_widget->Next;
                 }
-                else
-                {
-                    if(WidgetList->Widget->Focusable && FirstFocusWidget == NULL)
-                        FirstFocusWidget=WidgetList->Widget;
 
-                    if(store && WidgetList->Widget->Focusable)
-                    {
-                        SDL_StackSetFocus(WidgetList->Widget);
-                        break;
-                    }
-                    if(WidgetList->Widget == FocusWidget)
-                        store=1;
-
-                }
-                WidgetList = WidgetList->Next;
-            
-            }
-            if(WidgetList == NULL)
-                SDL_StackSetFocus(FirstFocusWidget);
-            
-        }
-        break;
-
-        default:
+            }   
             break;
-        }
-        break;
+
+            case SDL_KEYDOWN:
+                switch( Event.key.keysym.sym ) 
+                {
+                case SDLK_TAB:
+                {
+                    SDL_Widget     *FocusWidget;
+                    SDL_WidgetList *WidgetList;
+                    SDL_Widget     *FirstFocusWidget=NULL;
+                    int store=0;
+
+                    WidgetList=SDL_WindowGetWidgetList();
+                    FocusWidget=SDL_StackGetFocus();
+            
+                    while(WidgetList)
+                    {
+                        if(FocusWidget == NULL)
+                        {
+                            if(WidgetList->Widget->Focusable)
+                            {
+                                SDL_StackSetFocus(WidgetList->Widget);
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            if(WidgetList->Widget->Focusable && FirstFocusWidget == NULL)
+                                FirstFocusWidget=WidgetList->Widget;
+
+                            if(store && WidgetList->Widget->Focusable)
+                            {
+                                SDL_StackSetFocus(WidgetList->Widget);
+                                break;
+                            }
+                            if(WidgetList->Widget == FocusWidget)
+                                store=1;
+
+                        }
+                        WidgetList = WidgetList->Next;
+            
+                    }
+                    if(WidgetList == NULL)
+                    {
+                        SDL_StackSetFocus(FirstFocusWidget);
+                    }
+            
+                }
+                break;
+
+                default:
+                    break;
+                }
+                break;
         
-    }
-            /* If the widgets don't handle the event pass
-               the event to the event handler of the window */
-            WidgetList=SDL_StackGetStack(NULL);
+            }
+    
+            WidgetList=SDL_WindowGetWidgetList();
 
             while(WidgetList)
             {
                 SDL_Widget *Widget=(SDL_Widget*)WidgetList->Widget;
                 if(Widget->Visible)
                 {
-                    if(SDL_WidgetEvent(Widget,&test_event) == 0)
+                    if(SDL_WidgetEvent(Widget,&Event) == 1)
                     {
                         eh = WidgetTable[Widget->Type]->eventhandler;
                         if(eh)
                         {
-                            if(eh(Widget,&test_event))
+                            if(eh(Widget,&Event))
                             {
                                 retval=1;
                             }
@@ -496,11 +431,16 @@ int SDLTK_Main()
                 }
                 WidgetList=WidgetList->Next;
             }
-            
+            /* If the widgets don't handle the event pass
+               the event to the event handler of the window */
             {
-                if(CurWindow && CurWindow->EventHandler)
+                SDL_Window *Win;
+
+                Win=SDL_WindowGetTopVisibleWindow();
+                
+                if(Win && Win->EventHandler)
                 {
-                    handled=CurWindow->EventHandler(test_event);
+                    handled=Win->EventHandler(Event);
                 }
             }
         }   
@@ -508,16 +448,78 @@ int SDLTK_Main()
     return 1;
 }
 
+/* Get the top most visible window.
+   On this window the drawing of widgets is done (window has the focus) */
+static SDL_Window *SDL_WindowGetTopVisibleWindow()
+{
+    SDL_WindowList *WindowListItem = WindowList;
+    while(WindowListItem && WindowListItem->Next && WindowListItem->Window->Visible)
+        WindowListItem=WindowListItem->Next;
+   
+    if(WindowListItem)
+        return WindowListItem->Window;
+    else
+        return NULL;
+}
+
+/* Get the top most window, regardless if it is visible or not 
+   On this window new widgets are created */
+static SDL_Window *SDL_WindowGetTopWindow()
+{
+    SDL_WindowList *WindowListItem = WindowList;
+
+    while(WindowListItem->Next)
+        WindowListItem=WindowListItem->Next;
+    
+    if(WindowListItem)
+        return WindowListItem->Window;
+    else
+        return NULL;
+}
+
+/* Post a redraw event, this event will trigger a redraw of the top most visible window */
+static void SDL_WindowRedrawEvent()
+{
+    SDL_Event event;
+
+    event.type       = SDLTK_WIDGET_EVENT;
+    event.user.code  = SDLTK_WINDOW_REDRAW;
+    event.user.data1 = 0;
+    event.user.data2 = 0;
+    SDL_PushEvent(&event);
+}
+
+/* Redraw the entire top most visible window */
+static void SDL_WindowRedraw()
+{
+    SDL_Window *Win;
+
+    Win=SDL_WindowGetTopVisibleWindow();
+        
+    Win->Visible = 1;
+    if(Win->NotifyRedraw)
+    {
+        Win->NotifyRedraw(Win);
+    }
+    SDL_DrawAllWidgets(VideoSurface);
+}
+
 int SDL_WidgetActive(SDL_Widget *widget)
 {
+    SDL_Window *Win;
     SDL_WidgetList *temp;
-    temp=ActiveScreen->WidgetList;
 
-    while(temp)
+    Win=SDL_WindowGetTopVisibleWindow();
+    if(Win)
     {
-        if(temp->Widget == widget)
-            return 1;
-        temp=temp->Next;
+        temp=Win->WidgetList;
+        
+        while(temp)
+        {
+            if(temp->Widget == widget)
+                return 1;
+            temp=temp->Next;
+        }
     }
     return 0;
 }
@@ -525,35 +527,75 @@ int SDL_WidgetActive(SDL_Widget *widget)
 void SDL_WidgetDraw(SDL_Widget *widget,SDL_Rect *Rect)
 {
     SDL_WidgetList *temp;
-    T_Widget_Draw draw; /* Draw function prototype */
+    T_Widget_Draw  draw; /* Draw function prototype */
     SDL_Rect intersection;
 
-    temp=ActiveScreen->WidgetList;
+    temp= SDL_WindowGetWidgetList();
 
     while(temp)
     {
         if(temp->Widget->Visible)
         {
             if(//(temp->Widget->Type == SDL_PANEL  ) &&
-               SDL_IntersectRect(Rect,&temp->Widget->Rect,&intersection))
+                SDL_IntersectRect(Rect,&temp->Widget->Rect,&intersection))
             {
                 draw=WidgetTable[temp->Widget->Type]->draw;
-                draw(temp->Widget,screen,&intersection);
+                draw(temp->Widget,VideoSurface,&intersection);
             
             }
             else if(SDL_RectInside(Rect,&temp->Widget->Rect))
             {
                 draw=WidgetTable[temp->Widget->Type]->draw;
-                draw(temp->Widget,screen,Rect);
+                draw(temp->Widget,VideoSurface,Rect);
             }
             else if(SDL_RectInside(&temp->Widget->Rect,Rect))
             {
                 draw=WidgetTable[temp->Widget->Type]->draw;
-                draw(temp->Widget,screen,Rect);
+                draw(temp->Widget,VideoSurface,Rect);
             }
         }
         temp=temp->Next;
     }
-    SDL_UpdateRect(screen,Rect->x,Rect->y,Rect->w,Rect->h);
+    SDL_UpdateRect(VideoSurface,Rect->x,Rect->y,Rect->w,Rect->h);
     
+}
+
+
+static void SDL_WindowAddToWindowList(SDL_Window *Window)
+{
+    if(WindowList == NULL)
+    {
+        WindowList=(SDL_WindowList*)malloc(sizeof(SDL_WindowList));
+        memset(WindowList,0,sizeof(SDL_WindowList));
+        
+        WindowList->Window=Window;
+    }
+    else
+    {
+        SDL_WindowList *l;
+        l=WindowList;
+
+        while(l)
+        {
+            /* If the window is already in the list 
+               than don't add it */
+            if(l->Window == Window)
+                return;
+            l=l->Next;
+        }
+
+        l=WindowList;
+
+        while(l->Next)
+            l=l->Next;
+
+        /* Add the window to the end of the list*/
+        if(l->Next == NULL)
+        {
+            l->Next=(SDL_WindowList*)malloc(sizeof(SDL_WindowList));
+            memset(l->Next,0,sizeof(SDL_WindowList));
+
+            l->Next->Window=Window;
+        }
+    }
 }

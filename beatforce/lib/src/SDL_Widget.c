@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@beatforce.org)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -41,6 +41,8 @@ int fadeh;
 int fadeon;
 static SDL_mutex *MyMutex;
 
+SDL_Rect r;
+
 void EnableFade()
 {
     fadey=0;
@@ -63,6 +65,7 @@ int SDL_WidgetInit()
     SDL_SignalNew("keydown",1);
     SDL_SignalNew("hide",0);
     SDL_SignalNew("show",0);
+
     /* Button */
     SDL_SignalNew("clicked",0); 
     /* Tab */
@@ -80,34 +83,17 @@ int SDL_WidgetInit()
     return 1;
 }
 
-SDL_Surface *SDL_WidgetNewSurface(int width,int height,int bpp)
+void SDL_WidgetMove(SDL_Widget *widget,int x, int y)
 {
-    SDL_Surface *s;
+    r.x = widget->Rect.x;
+    r.y = widget->Rect.y;
+    r.w = widget->Rect.w;
+    r.h = widget->Rect.h;
 
-    s=SDL_CreateRGBSurface(SDL_SWSURFACE,width,height,bpp,
-                           0xff0000,0x00ff00,0x0000ff,0x000000);
-    SDL_StackNewScreen(s);
-    return s;
-
-}
-
-int SDL_WidgetUseSurface(SDL_Surface *surface)
-{
-    SDL_ActiveSurface(surface);
-    return 1;
-}
-
-SDL_Surface *SDL_WidgetGetActiveSurface()
-{
-    return SDL_GetSurfaceStack();
-}
-
-int SDL_WidgetClearSurface(SDL_Surface *surface)
-{
-    SDL_WidgetList* current_widget;
-    
-    current_widget=SDL_StackGetStack(surface);
-    return 1;
+    SDL_WidgetRedrawEvent(widget);
+    widget->Rect.x=x;
+    widget->Rect.y=y;
+    SDL_WidgetRedrawEvent(widget);
 }
 
 SDL_Widget* SDL_WidgetCreate(E_Widget_Type widget,int x,int y, int w, int h)
@@ -134,7 +120,7 @@ SDL_Widget* SDL_WidgetCreateR(E_Widget_Type WidgetType,SDL_Rect dest)
         {
             NewWidget=create(&dest);
 
-            NewWidget->Visible = 1;
+            NewWidget->Visible = 0;
             SDL_StoreWidget(NewWidget);
             return NewWidget;
         }
@@ -172,7 +158,7 @@ int SDL_WidgetClose(SDL_Widget *Widget)
 {
     SDL_WidgetList *current_widget,*prev;
 
-    current_widget=SDL_StackGetStack(NULL);
+    current_widget=SDL_WindowGetWidgetList();
     prev=NULL;
 
     while(current_widget)
@@ -199,13 +185,14 @@ int SDL_DrawAllWidgets(SDL_Surface *screen)
     SDL_Surface    *active_surface = NULL;
     SDL_Widget     *Widget;
 
+#if 0
     SDL_Rect dest;
     SDL_Rect src;
 
     if(target_surface == NULL && screen)
         target_surface = screen;
 
-    active_surface=SDL_GetSurfaceStack();
+    active_surface = SDL_GetSurfaceStack();
     if(active_surface == NULL)
         return 0;
 
@@ -227,8 +214,8 @@ int SDL_DrawAllWidgets(SDL_Surface *screen)
         src.w=active_surface->w;
         src.h=active_surface->h;
     }
-
-    WidgetList=SDL_StackGetStack(NULL);
+#endif
+    WidgetList=SDL_WindowGetWidgetList();
 
     
 //    if(current_widget == NULL)
@@ -287,9 +274,7 @@ int SDL_WidgetEvent(SDL_Widget *widget,SDL_Event *event)
    default:
        break;
    }
- 
-
-    return 0;
+   return 1;
 }
 
 int SDL_WidgetSetFocus(SDL_Widget *widget)
@@ -322,10 +307,10 @@ void SDL_WidgetRedrawEvent(SDL_Widget *widget)
     if(widget == NULL)
         return;
 
-    event.type = SDL_USEREVENT;
-    event.user.code = 0;
+    event.type = SDLTK_WIDGET_EVENT;
+    event.user.code  = 4;
     event.user.data1 = widget;
-    event.user.data2 = 0;
+    event.user.data2 = &r;
     SDL_PushEvent(&event);
 }
 
@@ -336,12 +321,11 @@ void SDL_WidgetHide(SDL_Widget *widget)
     if(widget == NULL)
         return;
 
-    event.type = SDL_USEREVENT;
+    event.type = SDLTK_WIDGET_EVENT;
     event.user.code = 1;
     event.user.data1 = widget;
     event.user.data2 = 0;
     SDL_PushEvent(&event);
-    SDL_SignalEmit(widget,"hide");
 }
 
 
@@ -352,12 +336,12 @@ void SDL_WidgetShow(SDL_Widget *widget)
     if(widget == NULL)
         return;
     
-    event.type = SDL_USEREVENT;
+    event.type = SDLTK_WIDGET_EVENT;
     event.user.code = 2;
     event.user.data1 = widget;
     event.user.data2 = 0;
     SDL_PushEvent(&event);
-    SDL_SignalEmit(widget,"show");
+
 }
 
 

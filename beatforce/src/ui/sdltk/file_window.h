@@ -1,7 +1,7 @@
 /*
   Beatforce/ Startup of beatforce
 
-  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@beatforce.org)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -20,7 +20,8 @@
 
 #ifndef __FILE_WINDOW_H__
 #define __FILE_WINDOW_H__
+
 void FILEWINDOW_Init();
 void FILEWINDOW_Open();
 
-#endif __FILE_WINDOW_H__
+#endif /* __FILE_WINDOW_H__ */

@@ -26,8 +26,6 @@
 #include <string.h>
 #include <sys/stat.h>
 
-#include <SDL/SDL.h>
-
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
 
@@ -35,8 +33,6 @@
 #include "config.h"
 #include "osa.h"
 #include "configfile.h"
-
-#include "SDL_Font.h"
 
 
 #define MODULE_ID THEME
@@ -85,10 +81,10 @@ ThemeImage *XML_ParseImage(ThemeImage *image,xmlDocPtr doc, xmlNodePtr cur)
         StorePropertyAsString(cur,"filename",&pImage->filename);
         RebuildFilename(&pImage->filename);
         
-        StorePropertyAsShort(cur,"x",&pImage->Rect.x);
-        StorePropertyAsShort(cur,"y",&pImage->Rect.y);
-        StorePropertyAsShort(cur,"w",&pImage->Rect.w);
-        StorePropertyAsShort(cur,"h",&pImage->Rect.h);
+        StorePropertyAsShort(cur,"x",&pImage->x);
+        StorePropertyAsShort(cur,"y",&pImage->y);
+        StorePropertyAsShort(cur,"w",&pImage->w);
+        StorePropertyAsShort(cur,"h",&pImage->h);
         return pImage;
     }
     else
@@ -103,10 +99,10 @@ ThemeImage *XML_ParseImage(ThemeImage *image,xmlDocPtr doc, xmlNodePtr cur)
         
         StorePropertyAsString(cur,"filename",&last->next->filename);
         RebuildFilename(&last->next->filename);
-        StorePropertyAsShort(cur,"x",&last->next->Rect.x);
-        StorePropertyAsShort(cur,"y",&last->next->Rect.y);
-        StorePropertyAsShort(cur,"w",&last->next->Rect.w);
-        StorePropertyAsShort(cur,"h",&last->next->Rect.h);
+        StorePropertyAsShort(cur,"x",&last->next->x);
+        StorePropertyAsShort(cur,"y",&last->next->y);
+        StorePropertyAsShort(cur,"w",&last->next->w);
+        StorePropertyAsShort(cur,"h",&last->next->h);
         return image;    
     }
     
@@ -121,12 +117,13 @@ int THEME_Load(char *theme)
     xmlChar *key;
     ThemeConfig *current;
 
-
     current=(ThemeConfig*)malloc(sizeof(ThemeConfig));
     memset(current,0,sizeof(ThemeConfig));
 
     if(theme == NULL)
+    {
         return 0;
+    }
 
     sprintf(path,"%s/%s/skin.xml",THEME_DIR,theme);
 
@@ -518,10 +515,10 @@ ThemeClock *XML_ParseClock(xmlDocPtr doc, xmlNodePtr cur)
     clock=malloc(sizeof(ThemeClock));
     memset(clock,0,sizeof(ThemeClock));
 
-    StorePropertyAsShort(cur,"x",&clock->Rect.x);
-    StorePropertyAsShort(cur,"y",&clock->Rect.y);
-    StorePropertyAsShort(cur,"w",&clock->Rect.w);
-    StorePropertyAsShort(cur,"h",&clock->Rect.h);
+    StorePropertyAsShort(cur,"x",&clock->x);
+    StorePropertyAsShort(cur,"y",&clock->y);
+    StorePropertyAsShort(cur,"w",&clock->w);
+    StorePropertyAsShort(cur,"h",&clock->h);
 
     StorePropertyAsString(cur,"bgcolor",&color);
     clock->bgcolor=getcolor(color);
@@ -546,10 +543,10 @@ ThemeTree *XML_ParseTree(xmlDocPtr doc, xmlNodePtr cur)
     tree=malloc(sizeof(ThemeTree));
     memset(tree,0,sizeof(ThemeTree));
 
-    StorePropertyAsShort(cur,"x",&tree->Rect.x);
-    StorePropertyAsShort(cur,"y",&tree->Rect.y);
-    StorePropertyAsShort(cur,"w",&tree->Rect.w);
-    StorePropertyAsShort(cur,"h",&tree->Rect.h);
+    StorePropertyAsShort(cur,"x",&tree->x);
+    StorePropertyAsShort(cur,"y",&tree->y);
+    StorePropertyAsShort(cur,"w",&tree->w);
+    StorePropertyAsShort(cur,"h",&tree->h);
 
 #if 0
     StorePropertyAsString(cur,"bgcolor",&color);
@@ -574,10 +571,10 @@ ThemeEdit *XML_ParseEdit(ThemeEdit *edit,xmlDocPtr doc, xmlNodePtr cur)
         edit=malloc(sizeof(ThemeEdit));
         memset(edit,0,sizeof(ThemeEdit));
                     
-        StorePropertyAsShort(cur,"x",&edit->Rect.x);
-        StorePropertyAsShort(cur,"y",&edit->Rect.y);
-        StorePropertyAsShort(cur,"w",&edit->Rect.w);
-        StorePropertyAsShort(cur,"h",&edit->Rect.h);
+        StorePropertyAsShort(cur,"x",&edit->x);
+        StorePropertyAsShort(cur,"y",&edit->y);
+        StorePropertyAsShort(cur,"w",&edit->w);
+        StorePropertyAsShort(cur,"h",&edit->h);
         
     }
     else
@@ -590,10 +587,10 @@ ThemeEdit *XML_ParseEdit(ThemeEdit *edit,xmlDocPtr doc, xmlNodePtr cur)
         last->next=malloc(sizeof(ThemeEdit));
         memset(last->next,0,sizeof(ThemeEdit));
 
-        StorePropertyAsShort(cur,"x",&last->next->Rect.x);
-        StorePropertyAsShort(cur,"y",&last->next->Rect.y);
-        StorePropertyAsShort(cur,"w",&last->next->Rect.w);
-        StorePropertyAsShort(cur,"h",&last->next->Rect.h);
+        StorePropertyAsShort(cur,"x",&last->next->x);
+        StorePropertyAsShort(cur,"y",&last->next->y);
+        StorePropertyAsShort(cur,"w",&last->next->w);
+        StorePropertyAsShort(cur,"h",&last->next->h);
         
     }
     return edit;
@@ -644,10 +641,10 @@ ThemeButton *XML_ParseButton(ThemeButton *button,xmlDocPtr doc, xmlNodePtr cur)
             free(action);
         }
 
-        StorePropertyAsShort(cur,"x",&button->Rect.x);
-        StorePropertyAsShort(cur,"y",&button->Rect.y);
-        StorePropertyAsShort(cur,"w",&button->Rect.w);
-        StorePropertyAsShort(cur,"h",&button->Rect.h);
+        StorePropertyAsShort(cur,"x",&button->x);
+        StorePropertyAsShort(cur,"y",&button->y);
+        StorePropertyAsShort(cur,"w",&button->w);
+        StorePropertyAsShort(cur,"h",&button->h);
     }
     else
     {
@@ -695,10 +692,10 @@ ThemeButton *XML_ParseButton(ThemeButton *button,xmlDocPtr doc, xmlNodePtr cur)
             free(action);
         }
 
-        StorePropertyAsShort(cur,"x",&last->next->Rect.x);
-        StorePropertyAsShort(cur,"y",&last->next->Rect.y);
-        StorePropertyAsShort(cur,"w",&last->next->Rect.w);
-        StorePropertyAsShort(cur,"h",&last->next->Rect.h);
+        StorePropertyAsShort(cur,"x",&last->next->x);
+        StorePropertyAsShort(cur,"y",&last->next->y);
+        StorePropertyAsShort(cur,"w",&last->next->w);
+        StorePropertyAsShort(cur,"h",&last->next->h);
 
     }
     return button;        
@@ -743,10 +740,10 @@ ThemeText *XML_ParseText(ThemeText *text,xmlDocPtr doc, xmlNodePtr cur)
             color=NULL;
         }
 
-        StorePropertyAsShort(cur,"x",&text->Rect.x);
-        StorePropertyAsShort(cur,"y",&text->Rect.y);
-        StorePropertyAsShort(cur,"w",&text->Rect.w);
-        StorePropertyAsShort(cur,"h",&text->Rect.h);
+        StorePropertyAsShort(cur,"x",&text->x);
+        StorePropertyAsShort(cur,"y",&text->y);
+        StorePropertyAsShort(cur,"w",&text->w);
+        StorePropertyAsShort(cur,"h",&text->h);
 
         
         
@@ -792,10 +789,10 @@ ThemeText *XML_ParseText(ThemeText *text,xmlDocPtr doc, xmlNodePtr cur)
             color=NULL;
         }
 
-        StorePropertyAsShort(cur,"x",&last->next->Rect.x);
-        StorePropertyAsShort(cur,"y",&last->next->Rect.y);
-        StorePropertyAsShort(cur,"w",&last->next->Rect.w);
-        StorePropertyAsShort(cur,"h",&last->next->Rect.h);
+        StorePropertyAsShort(cur,"x",&last->next->x);
+        StorePropertyAsShort(cur,"y",&last->next->y);
+        StorePropertyAsShort(cur,"w",&last->next->w);
+        StorePropertyAsShort(cur,"h",&last->next->h);
     }
     return text;    
 }
@@ -824,10 +821,10 @@ ThemeVolumeBar *XML_ParseVolumeBar(ThemeVolumeBar *volumebar, xmlDocPtr doc,
         }
         
 
-        StorePropertyAsShort(cur,"x",&volumebar->Rect.x);
-        StorePropertyAsShort(cur,"y",&volumebar->Rect.y);
-        StorePropertyAsShort(cur,"w",&volumebar->Rect.w);
-        StorePropertyAsShort(cur,"h",&volumebar->Rect.h);
+        StorePropertyAsShort(cur,"x",&volumebar->x);
+        StorePropertyAsShort(cur,"y",&volumebar->y);
+        StorePropertyAsShort(cur,"w",&volumebar->w);
+        StorePropertyAsShort(cur,"h",&volumebar->h);
 
         
         
@@ -854,10 +851,10 @@ ThemeVolumeBar *XML_ParseVolumeBar(ThemeVolumeBar *volumebar, xmlDocPtr doc,
             display=NULL;
         }
         
-        StorePropertyAsShort(cur,"x",&last->next->Rect.x);
-        StorePropertyAsShort(cur,"y",&last->next->Rect.y);
-        StorePropertyAsShort(cur,"w",&last->next->Rect.w);
-        StorePropertyAsShort(cur,"h",&last->next->Rect.h);
+        StorePropertyAsShort(cur,"x",&last->next->x);
+        StorePropertyAsShort(cur,"y",&last->next->y);
+        StorePropertyAsShort(cur,"w",&last->next->w);
+        StorePropertyAsShort(cur,"h",&last->next->h);
     }
     return volumebar;    
 
@@ -871,10 +868,10 @@ ThemeProgressBar *XML_ParseProgressBar(xmlDocPtr doc, xmlNodePtr cur)
     memset(progressbar,0,sizeof(ThemeProgressBar));
 
 
-    StorePropertyAsShort(cur,"x",&progressbar->Rect.x);
-    StorePropertyAsShort(cur,"y",&progressbar->Rect.y);
-    StorePropertyAsShort(cur,"w",&progressbar->Rect.w);
-    StorePropertyAsShort(cur,"h",&progressbar->Rect.h);
+    StorePropertyAsShort(cur,"x",&progressbar->x);
+    StorePropertyAsShort(cur,"y",&progressbar->y);
+    StorePropertyAsShort(cur,"w",&progressbar->w);
+    StorePropertyAsShort(cur,"h",&progressbar->h);
     
     return progressbar;
 }
@@ -905,10 +902,10 @@ ThemeSlider *XML_ParseSlider(ThemeSlider *slider,xmlDocPtr doc, xmlNodePtr cur)
             free(action);
         }
 
-        StorePropertyAsShort(cur,"x",&slider->Rect.x);
-        StorePropertyAsShort(cur,"y",&slider->Rect.y);
-        StorePropertyAsShort(cur,"w",&slider->Rect.w);
-        StorePropertyAsShort(cur,"h",&slider->Rect.h);
+        StorePropertyAsShort(cur,"x",&slider->x);
+        StorePropertyAsShort(cur,"y",&slider->y);
+        StorePropertyAsShort(cur,"w",&slider->w);
+        StorePropertyAsShort(cur,"h",&slider->h);
     }
     else
     {
@@ -937,10 +934,10 @@ ThemeSlider *XML_ParseSlider(ThemeSlider *slider,xmlDocPtr doc, xmlNodePtr cur)
                 last->next->action=SLIDER_PITCH;
             free(action);
         }
-        StorePropertyAsShort(cur,"x",&last->next->Rect.x);
-        StorePropertyAsShort(cur,"y",&last->next->Rect.y);
-        StorePropertyAsShort(cur,"w",&last->next->Rect.w);
-        StorePropertyAsShort(cur,"h",&last->next->Rect.h);
+        StorePropertyAsShort(cur,"x",&last->next->x);
+        StorePropertyAsShort(cur,"y",&last->next->y);
+        StorePropertyAsShort(cur,"w",&last->next->w);
+        StorePropertyAsShort(cur,"h",&last->next->h);
     }
     
     return slider;
@@ -1047,10 +1044,10 @@ ThemeTable *XML_ParseTable(ThemeTable *table,xmlDocPtr doc, xmlNodePtr cur)
         table=malloc(sizeof(ThemeTable));
         memset(table,0,sizeof(ThemeTable));
 
-        StorePropertyAsShort(cur,"x",&table->Rect.x);
-        StorePropertyAsShort(cur,"y",&table->Rect.y);
-        StorePropertyAsShort(cur,"w",&table->Rect.w);
-        StorePropertyAsShort(cur,"h",&table->Rect.h);
+        StorePropertyAsShort(cur,"x",&table->x);
+        StorePropertyAsShort(cur,"y",&table->y);
+        StorePropertyAsShort(cur,"w",&table->w);
+        StorePropertyAsShort(cur,"h",&table->h);
 
         StorePropertyAsInt(cur,"columns",&table->Columns);
         StorePropertyAsInt(cur,"rows"   ,&table->Rows);
@@ -1079,10 +1076,10 @@ ThemeTable *XML_ParseTable(ThemeTable *table,xmlDocPtr doc, xmlNodePtr cur)
         last->next=malloc(sizeof(ThemeTable));
         memset(last->next,0,sizeof(ThemeTable));
 
-        StorePropertyAsShort(cur,"x",&last->next->Rect.x);
-        StorePropertyAsShort(cur,"y",&last->next->Rect.y);
-        StorePropertyAsShort(cur,"w",&last->next->Rect.w);
-        StorePropertyAsShort(cur,"h",&last->next->Rect.h);
+        StorePropertyAsShort(cur,"x",&last->next->x);
+        StorePropertyAsShort(cur,"y",&last->next->y);
+        StorePropertyAsShort(cur,"w",&last->next->w);
+        StorePropertyAsShort(cur,"h",&last->next->h);
 
         StorePropertyAsInt(cur,"columns",&last->next->Columns);
         StorePropertyAsInt(cur,"rows"   ,&last->next->Rows);
@@ -1187,15 +1184,15 @@ ThemeFont *THEME_AddFont(ThemeFont *font,xmlDocPtr doc, xmlNodePtr cur)
     {
         ThemeFont *last;
         last=font;
-        while(last->next)
-            last=last->next;
+        while(last->Next)
+            last=last->Next;
 
-        last->next=malloc(sizeof(ThemeFont));
-        memset(last->next,0,sizeof(ThemeFont));
+        last->Next=malloc(sizeof(ThemeFont));
+        memset(last->Next,0,sizeof(ThemeFont));
 
-        StorePropertyAsString(cur,"id",&last->next->id);
-        StorePropertyAsString(cur,"filename",&last->next->filename);
-        RebuildFilename(&last->next->filename);
+        StorePropertyAsString(cur,"id",&last->Next->id);
+        StorePropertyAsString(cur,"filename",&last->Next->filename);
+        RebuildFilename(&last->Next->filename);
     }
     return font;
 }
@@ -1228,29 +1225,8 @@ ThemeFont *XML_ParseFont(xmlDocPtr doc, xmlNodePtr cur)
 
 } 
 
-SDL_Font *THEME_Font(char *fontid)
-{
-    ThemeFont* font=THEME_GetActive()->Font;
-    
-    while(font && fontid)
-    {
-        if(!strcmp(fontid,font->id))
-        {
-            if(font->font==NULL)
-                font->font=SDL_FontInit(font->filename);
 
-            if(font->font==NULL)
-            {
-                ERROR("Font not found %s",font->filename);
-            }
-            return font->font;
-        }
-        font=font->next;
-    }
-    printf("ERROR font not found\n");
-    return NULL;
 
-}
 
 
 

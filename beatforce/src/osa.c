@@ -18,8 +18,6 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-#include <SDL/SDL.h>
-#include <SDL/SDL_thread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -28,7 +26,10 @@
 #include <string.h>
 #include <dlfcn.h>
 #include <time.h>
+//#include <thread.h>
 
+#include <SDL/SDL.h>
+#include <SDL/SDL_thread.h>
 #include "osa.h"
 
 
@@ -48,9 +49,9 @@ void OSA_Init()
 {
     int i=0;
     for(i=0;i<NO_OF_THREADS;i++)
-        threads[i]=NULL;
+        threads[i] = NULL;
     for(i=0;i<NO_OF_TIMERS;i++)
-        timers[i]=0;
+        timers[i]  = 0;
 }
 
 char *OSA_GetSharedLibExtension()
@@ -207,6 +208,11 @@ void *OSA_GetFunctionAddress(void *h,char *function)
 void OSA_CloseLibrary(void *h)
 {
     dlclose (h);
+}
+
+char *OSA_GetError()
+{
+    return dlerror();
 }
 
 unsigned int OSA_StartTimer(unsigned int interval,void *function,void *data)

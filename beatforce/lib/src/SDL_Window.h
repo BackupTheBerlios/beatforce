@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003 John Beuving (john.beuving@home.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@beatforce.org)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -24,54 +24,70 @@
 #include <SDL/SDL.h> 
 #include "SDL_Widget.h"
 
-/* Window specified by the use */
-typedef struct SDL_Window
-{
-    int (*EventHandler)(SDL_Event event);
-    int (*NotifyRedraw)();
 
-    SDL_Surface *Surface;
-    void *TransferData;
-}SDL_Window;
+#define SDLTK_WIDGET_EVENT SDL_USEREVENT
+
 
 /* Widget list for a specific surface */
 typedef struct SDL_WidgetList
 {
     SDL_Widget *Widget;
     struct SDL_WidgetList *Parent;
+
     struct SDL_WidgetList *Child;
     struct SDL_WidgetList *Next;
 }SDL_WidgetList;
 
 
-/* Surface with widget settings */
-typedef struct SDL_Screen
+/* Window specified by the use */
+typedef struct SDL_Window
 {
-    SDL_Surface      *Surface;
-    SDL_WidgetList   *WidgetList;
-    SDL_Surface      *parent;
-    struct SDL_Screen *next;
-}SDL_Screen;
+    SDL_Rect Dimensions;
+    int (*EventHandler)(SDL_Event event);
+    int (*NotifyRedraw)();
 
+    void *TransferData;
+
+    int Visible;
+    SDL_Widget       *FocusWidget;
+    SDL_WidgetList   *WidgetList;
+}SDL_Window;
+
+
+/* Surface with widget settings */
+typedef struct SDL_WindowList
+{
+    SDL_Surface      *parent;
+
+    SDL_Window       *Window;
+    struct SDL_WindowList *Next;
+}SDL_WindowList;
+
+/* Initialize the main video window */
+int SDL_WindowInit(SDL_Surface *s,int width,int height,int bpp);
+
+/* Create a new window */
+SDL_Window *SDL_WindowNew(int x,int y,int width,int height);
+
+/* Open the newly created window */
+void SDL_WindowOpen(SDL_Window *window);
+
+/* Close the top most window */
+void SDL_WindowClose();
+
+/* Main function , a window has to be created before calling this */
 int SDLTK_Main();
 
-int SDL_WindowInit(SDL_Surface *s);
-int SDL_StackNewScreen(SDL_Surface *surface);
-int SDL_ActiveSurface(SDL_Surface *surface);
 
-int SDL_NewSurfaceStack(SDL_Surface *surface);
-SDL_Surface* SDL_GetSurfaceStack();
-SDL_WidgetList *SDL_StackGetSurfaceStack(SDL_Surface *surface);
+
+//SDL_Surface* SDL_GetSurfaceStack();
+//SDL_WidgetList *SDL_StackGetSurfaceStack(SDL_Window *window);
+int SDL_WidgetActive(SDL_Widget *widget);
+SDL_WidgetList *SDL_WindowGetWidgetList();
 
 void SDL_StoreWidget(SDL_Widget *widget);
-SDL_WidgetList *SDL_StackGetStack(SDL_Surface *surface);
-SDL_WidgetList *SDL_StackGetLastItem();
 void SDL_StackSetFocus(SDL_Widget *focus_widget);
 SDL_Widget *SDL_StackGetFocus();
-
-
-void SDL_WindowOpen(SDL_Window *window);
-void SDL_WindowClose();
 
 void SDL_WidgetDraw(SDL_Widget *widget,SDL_Rect *Rect);
 

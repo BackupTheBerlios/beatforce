@@ -2,7 +2,7 @@
   Beatforce/ Playlist + Tab user interface
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@beatforce.org)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -24,6 +24,7 @@
 #include <malloc.h>
 
 #include "config.h"
+#include "event.h"
 #include "SDLTk.h"
 #include "songdb.h"
 #include "songdb_ui.h"
@@ -44,7 +45,7 @@
 
 /* Prototypes for functions for buttosn below */
 static void SONGDBUI_ChangeGroupClicked(void *data);
-
+void SONGDBUI_PlayCallback(int poster,void *data);
 
 void songdbstring(long row,int column,char *dest);
 
@@ -105,17 +106,18 @@ void *SONGDBUI_CreateWindow(ThemeSongdb *ts)
     sw=malloc(sizeof(SongdbWidgets));
     Button=ts->Button;
     Widgets=sw;
-    
+    SONGDB_Init ();
 
     if(ts)
     {
         /* Create the notebook/tab section below the table*/
-        sw->Tabs=SDL_WidgetCreate(SDL_TAB,ts->Table->Rect.x-1,ts->Table->Rect.y,
-                                  ts->Table->Rect.w+2,18+ts->Table->Rect.h);
-        SDL_WidgetPropertiesOf(sw->Tabs,SET_FONT,THEME_Font("normal"));
+        sw->Tabs=SDL_WidgetCreate(SDL_TAB,ts->Table->x-1,ts->Table->y,
+                                  ts->Table->w+2,18+ts->Table->h);
+        SDL_WidgetPropertiesOf(sw->Tabs,SET_FONT,SDL_FontGet("normal"));
         SDL_WidgetPropertiesOf(sw->Tabs,SET_BG_COLOR,0x93c0d5);
 
         SDL_SignalConnect(sw->Tabs,"switch-tab",SONGDB_ChangeDatabase,sw->Tabs);
+        SDL_WidgetShow(sw->Tabs);
     }
 
     /* Create buttons which change the tabs */
@@ -125,17 +127,18 @@ void *SONGDBUI_CreateWindow(ThemeSongdb *ts)
         {
             SDL_Widget *w;
         case BUTTON_CHANGE_DIR:
-            w=SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
+            w=SDL_WidgetCreate(SDL_BUTTON,Button->x,Button->y,Button->w,Button->h);
             SDL_WidgetPropertiesOf(w,SET_NORMAL_IMAGE,IMG_Load(Button->normal));
             SDL_WidgetPropertiesOf(w,SET_PRESSED_IMAGE,IMG_Load(Button->pressed));
             SDL_SignalConnect(w,"clicked",SONGDBUI_ChangeGroupClicked,NULL);        
+            SDL_WidgetShow(w);
             break;
         }
         Button=Button->next;
     }
     activesong[0]=-1;
     activesong[1]=-1;
-
+    EVENT_Connect(EVENT_PLAYER_PLAY,SONGDBUI_PlayCallback,NULL);
     return sw;
 }
 
@@ -156,8 +159,8 @@ void SONGDBUI_Redraw(void *w)
         
         while(sg)
         {
-            table = SDL_WidgetCreateR(SDL_TABLE,ts->Table->Rect);/*x y w h */
-            SDL_WidgetPropertiesOf(table,SET_FONT,THEME_Font("small"));
+            table = SDL_WidgetCreate(SDL_TABLE,ts->Table->x,ts->Table->y,ts->Table->w,ts->Table->h);
+            SDL_WidgetPropertiesOf(table,SET_FONT,SDL_FontGet("small"));
             SDL_WidgetPropertiesOf(table,SET_VISIBLE_COLUMNS,3);
             
             SDL_TableSetColumnTitle(table,0,"ID");
@@ -189,6 +192,7 @@ void SONGDBUI_Redraw(void *w)
                 for(c=0;c<3;c++)
                     free(titles[c]);
             }
+            SDL_WidgetShow(table);
             SDL_NotebookAppendTab(widgets->Tabs,table,sg->Name);
             sg=sg->next;
         }
@@ -200,13 +204,14 @@ void SONGDBUI_Redraw(void *w)
     
 }
 
-void SONGDBUI_Play(int player_nr)
+void SONGDBUI_PlayCallback(int poster,void *data)
 {
     int tab;
     struct SongDBEntry *e;
+    
     tab = SDL_NotebookGetCurrentPage(Widgets->Tabs);
 
-    PLAYER_GetPlayingEntry(player_nr,&e);
+    PLAYER_GetPlayingEntry(poster,&e);
     tab = SONGDB_FindSubgroup(e);
     SDL_NotebookSetCurrentTab(Widgets->Tabs,tab);
     if(e)

@@ -2,7 +2,7 @@
   Beatforce/Main windows user interface
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@beatforce.org)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -40,13 +40,18 @@
 #include "search_window.h"
 #include "config_window.h"
 
+#include "mixer_ui.h"
+#include "player_ui.h"
+#include "playlist_ui.h"
+#include "songdb_ui.h"
+
 int control_state;
 static int MAINWINDOW_EventHandler(SDL_Event event);
-static SDL_Surface *MAINWINDOW_CreateWindow();
+static void MAINWINDOW_CreateWindow();
 static int MAINWINDOW_KeyHandler(unsigned int key);
 static int MAINWINDOW_RedrawTimeout();
 
-SDL_Window MAINWINDOW={ MAINWINDOW_EventHandler , NULL , NULL, NULL };
+SDL_Window *MAINWINDOW;
 MainwindowWidgets *widgets;
 
 #define BF_CONTROL         0xf000
@@ -59,14 +64,12 @@ MainwindowWidgets *widgets;
 
 void MAINWINDOW_Open()
 {
-    if(MAINWINDOW.Surface == NULL)
+    if(MAINWINDOW == NULL)
     {
-        
-        widgets=malloc(sizeof(MainwindowWidgets));
-        MAINWINDOW.Surface=MAINWINDOW_CreateWindow(widgets);
-        MAINWINDOW.TransferData=widgets;
+        MAINWINDOW_CreateWindow();
     }
-    SDL_WindowOpen(&MAINWINDOW);
+
+    SDL_WindowOpen(MAINWINDOW);
 }
 
 void configopen(void *d)
@@ -74,51 +77,60 @@ void configopen(void *d)
     CONFIGWINDOW_Open();
 }
 
-static SDL_Surface *MAINWINDOW_CreateWindow(MainwindowWidgets *w)
+static void MAINWINDOW_CreateWindow()
 {
-    SDL_Surface       *MainWindow;
     ThemeConfig       *tc = THEME_GetActive();
     ThemeMainWindow   *mw = NULL;
     ThemeImage        *Image = NULL;
     ThemeScreen       *s=tc->Screen;
+    ThemeFont         *f=tc->Font;
     
+    widgets=malloc(sizeof(MainwindowWidgets));
+
     if(tc == NULL)
-        return NULL;
+        return;
     
     mw=tc->MainWindow;
     
     if(mw == NULL)
-        return NULL;
+        return;
 
     Image=mw->Image;
 
+    while(f)
+    {
+        SDL_FontLoad(f->id,f->filename);
+        f=f->Next;
+    }
 
     control_state=0;
-    MainWindow = SDL_WidgetNewSurface(s->Width,s->Height,s->BPP);
-    SDL_SetColorKey(MainWindow,0,0); // disable transparancy
-   
+    MAINWINDOW = SDL_WindowNew(0,0,s->Width,s->Height);
 
     while(Image)
     {
         SDL_Widget *image;
-        image=SDL_WidgetCreateR(SDL_PANEL,Image->Rect);
+        image=SDL_WidgetCreate(SDL_PANEL,Image->x,Image->y,Image->w,Image->h);
         SDL_PanelSetImage(image,IMG_Load(Image->filename));
+        SDL_WidgetShow(image);
         Image=Image->next;
     }
 
 
-    w->Clock=CLOCK_Create(mw->Clock);
+    widgets->Clock=CLOCK_Create(mw->Clock);
 
-    w->Playlist=PLAYLISTUI_CreateWindow(mw->Playlist);
+    widgets->Playlist = PLAYLISTUI_CreateWindow(mw->Playlist);
+
     PLAYERUI_CreateWindow(0,mw->Player[0]);
     PLAYERUI_CreateWindow(1,mw->Player[1]);
 
-    w->Mixer = MIXERUI_CreateWindow(mw->Mixer);
-    w->Songdb = SONGDBUI_CreateWindow(mw->Songdb);    
+    
+    widgets->Mixer  = MIXERUI_CreateWindow(mw->Mixer);
+    widgets->Songdb = SONGDBUI_CreateWindow(mw->Songdb);    
 
-    OSA_StartTimer(60,MAINWINDOW_RedrawTimeout,NULL);
+    OSA_StartTimer(10,MAINWINDOW_RedrawTimeout,NULL);
 
-    return MainWindow;
+    MAINWINDOW->TransferData = widgets;
+    MAINWINDOW->EventHandler = MAINWINDOW_EventHandler;
 }
 
 
@@ -205,7 +217,6 @@ int MAINWINDOW_KeyHandler(unsigned int key)
                 if(PLAYER_SetSong(0,0))
                 {
                     MIXER_DoFade(1,0);
-                    SONGDBUI_Play(0);
                     Handled=1;
                 }
             }
@@ -214,7 +225,6 @@ int MAINWINDOW_KeyHandler(unsigned int key)
                 if(PLAYER_SetSong(1,0))
                 {
                     MIXER_DoFade(1,0);
-                    SONGDBUI_Play(1);
                     Handled=1;
                 }
             }
@@ -228,14 +238,11 @@ int MAINWINDOW_KeyHandler(unsigned int key)
 
 static int MAINWINDOW_RedrawTimeout()
 {
-    if(SDL_GetSurfaceStack() == MAINWINDOW.Surface)
-    {
-        CLOCK_Redraw(widgets->Clock);
-        MIXERUI_Redraw(widgets->Mixer);
-        PLAYERUI_Redraw();
-        SONGDBUI_Redraw(widgets->Songdb);
-        PLAYLISTUI_Redraw(widgets->Playlist);
-    }
+    CLOCK_Redraw(widgets->Clock);
+    MIXERUI_Redraw(widgets->Mixer);
+    PLAYERUI_Redraw();
+    SONGDBUI_Redraw(widgets->Songdb);
+    PLAYLISTUI_Redraw(widgets->Playlist);
     return 60;
 }
 

@@ -18,18 +18,11 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-#include <stdarg.h>
 #include <malloc.h>
+#include <stdarg.h>
 #include <string.h>
 
-#include <SDL/SDL.h>
-
-#include "SDL_Widget.h"
-#include "SDL_Table.h"
-
-#include "SDL_Scrollbar.h"  /* used for the scrollbar */
-#include "SDL_WidTool.h" /* used for background backup */ 
-#include "SDL_Signal.h"
+#include <SDLTk.h>
 
 static void SDL_TableAttachScrollbar(SDL_Table *table);
 static void SDL_TableDrawRow(SDL_Surface *dest,SDL_Table *Table,SDL_TableRow *Row,int row);
@@ -107,6 +100,7 @@ SDL_Widget* SDL_TableCreate(SDL_Rect* rect)
 
     SDL_SignalConnect(Widget,"hide",SDL_TableHideCB,Widget);
     SDL_SignalConnect(Widget,"show",SDL_TableShowCB,Widget);
+
     return (SDL_Widget*)Table;
 }
 
@@ -117,6 +111,7 @@ void SDL_TableDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
 
     if(Table->Scrollbar)
         Table->FirstVisibleRow = SDL_ScrollbarGetCurrentValue(Table->Scrollbar);
+
     /*
      * Complete redraw of the entire table
      */
@@ -138,7 +133,6 @@ void SDL_TableDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
             int fv=Table->FirstVisibleRow;
             int i;
             tmp=Table->RowData;
-
 
             row=0;
             while(fv)
@@ -174,7 +168,7 @@ int SDL_TableProperties(SDL_Widget *widget,int feature,va_list list)
         if(Table->Columns)
         {
             Table->Column = calloc(sizeof(SDL_TableColumn)*Table->Columns,
-                                       Table->Columns);
+                                   Table->Columns);
             for(i=0;i<Table->Columns;i++)
             {
                 Table->Column[i].Width  = widget->Rect.w/Table->Columns;
@@ -214,7 +208,7 @@ int SDL_TableProperties(SDL_Widget *widget,int feature,va_list list)
         if(Table->Scrollbar)
         {
             row=(double)Table->ActiveEntry - (Table->VisibleRows/2);
-            SDL_WidgetPropertiesOf(Table->Scrollbar,SET_CUR_VALUE,row);
+            SDL_ScrollbarSetCurrentValue(Table->Scrollbar,row);
         }
         break;
     case CLEAR_SELECTED:
@@ -236,7 +230,6 @@ int SDL_TableProperties(SDL_Widget *widget,int feature,va_list list)
             if(Table->Selected == NULL)
             {
                 Table->CurrentRow=0;
-                
                 /* Add to selected */
                 SDL_TableAddSelected(Table);
             }
@@ -260,28 +253,43 @@ int SDL_TableEventHandler(SDL_Widget *widget,SDL_Event *event)
     switch(event->type)
     {
     case SDL_MOUSEMOTION:
-        if(SDL_WidgetIsInside(widget,event->motion.x,event->motion.y))
+        if(Table->RowData)
         {
-            if(Table->Scrollbar && (event->motion.x > (widget->Rect.x + widget->Rect.w - Table->ScrollbarWidth)))
+            if(SDL_WidgetIsInside(widget,event->motion.x,event->motion.y))
             {
-                /* Event are for the scrollbar */
-                break;
-            }
-            else if(event->motion.y > (widget->Rect.y + Table->ButtonHeight))
-            {
-                y=widget->Rect.y + Table->ButtonHeight;
-                for(i=0;i<Table->VisibleRows;i++)
+                if(Table->Scrollbar && (event->motion.x > (widget->Rect.x + widget->Rect.w - Table->ScrollbarWidth)))
                 {
-                    if(event->motion.y > y && event->motion.y < y+Table->RowHeight)
-                    {
-                        if(Table->TablePreviousHighlightedRow!=i)
-                            Table->TableSelectionChanged=1;
-                            
-                        Table->HighlightedRow=i;
-                        break;
-                    }
-                    y+=Table->RowHeight;
+                    /* Event are for the scrollbar */
+                    break;
                 }
+                else if(event->motion.y > (widget->Rect.y + Table->ButtonHeight))
+                {
+                    y = widget->Rect.y + Table->ButtonHeight;
+
+                    for(i=0;i<Table->VisibleRows;i++)
+                    {
+                        if(event->motion.y > y && event->motion.y < y+Table->RowHeight)
+                        {
+                            if(Table->TablePreviousHighlightedRow!=i)
+                            {
+                                /* If there is data avaible than show the row */
+                                Table->TableSelectionChanged=1;
+                            }   
+                            Table->HighlightedRow=i;
+                            break;
+                        }
+                        y+=Table->RowHeight;
+                    }
+                }
+                else
+                {
+                    if(Table->TablePreviousHighlightedRow != -1)
+                    {
+                        Table->TableSelectionChanged=1;
+                    }
+                    Table->HighlightedRow=-1;
+                }
+            
             }
             else
             {
@@ -290,28 +298,20 @@ int SDL_TableEventHandler(SDL_Widget *widget,SDL_Event *event)
             
                 Table->HighlightedRow=-1;
             }
-            
-        }
-        else
-        {
-            if(Table->TablePreviousHighlightedRow != -1)
-                Table->TableSelectionChanged=1;
-            
-            Table->HighlightedRow=-1;
-        }
-        if(Table->TableSelectionChanged)
-        {
-            SDL_Rect r;
-            if(Table->Scrollbar)
+            if(Table->TableSelectionChanged)
             {
-                r.x = widget->Rect.x;
-                r.y = widget->Rect.y;
-                r.w = widget->Rect.w - Table->ScrollbarWidth;
-                r.h = widget->Rect.h;
-                SDL_WidgetDraw(widget,&r);
+                SDL_Rect r;
+                if(Table->Scrollbar)
+                {
+                    r.x = widget->Rect.x;
+                    r.y = widget->Rect.y;
+                    r.w = widget->Rect.w - Table->ScrollbarWidth;
+                    r.h = widget->Rect.h;
+                    SDL_WidgetDraw(widget,&r);
+                }
+                else
+                    SDL_WidgetDraw(widget,&widget->Rect);
             }
-            else
-                SDL_WidgetDraw(widget,&widget->Rect);
         }
 
         break;
@@ -511,7 +511,7 @@ static void SDL_TableDrawRow(SDL_Surface *dest,SDL_Table *Table,SDL_TableRow *Ro
     SDL_Rect la;
     int column;
     char string[255];
-    
+    unsigned int color;
 
     memset(string,0,255);
     RowDims.w = Widget->Rect.w - Table->ScrollbarWidth;
@@ -536,23 +536,27 @@ static void SDL_TableDrawRow(SDL_Surface *dest,SDL_Table *Table,SDL_TableRow *Ro
     if(row == Table->HighlightedRow)
     {
         SDL_FillRect(dest,&RowDims,SDL_MapRGB(dest->format,255,55,0));
-        SDL_FontSetColor(Table->font,Row->fgcolor);
+        //SDL_FontSetColor(Table->font,Row->fgcolor);
+        color= Row->fgcolor;
     }
     else if(Table->SelectMode && SDL_TableIsRowSelected(Table,row))
     {
         SDL_FillRect(dest,&RowDims,0x00ff00);
+        color = 0x00ff00;
     }
     else
     {
         if(Table->bgcolor != TRANSPARANT)
             SDL_FillRect(dest,&RowDims,Table->bgcolor);
 
-        SDL_FontSetColor(Table->font,Row->fgcolor);
+        color = Row->fgcolor;
+//        SDL_FontSetColor(Table->font,Row->fgcolor);
     }
 
     if(Table->ActiveEntry == row + Table->FirstVisibleRow)
     {
-        SDL_FontSetColor(Table->font,0x0000ff);
+        color = 0x0000ff;
+        //      SDL_FontSetColor(Table->font,0x0000ff);
     }
 
     if (Row)
@@ -570,7 +574,7 @@ static void SDL_TableDrawRow(SDL_Surface *dest,SDL_Table *Table,SDL_TableRow *Ro
 
             if(strlen(string))
             {
-                SDL_FontDrawStringRect(dest,Table->font,string,&la);
+                SDL_FontDrawStringRect(dest,Table->font,string,color,&la);
             }
             RowDims.x +=Table->Column[column].Width;
         }
@@ -597,13 +601,7 @@ static void t(SDL_Table *table)
 
 }
 
-void SDL_TableSetSelected(SDL_Widget *table,int row)
-{
-    SDL_Table *Table=(SDL_Table*)table;
 
-    Table->CurrentRow = row;
-    SDL_TableAddSelected(Table);
-}
 
 static void SDL_TableAddSelected(SDL_Table *table)
 {
@@ -802,10 +800,14 @@ int SDL_TableSetColumnTitle(SDL_Widget *widget,int column, char *title)
     Table->ButtonHeight=18;
     Table->VisibleRows = (widget->Rect.h - Table->ButtonHeight) / Table->RowHeight;
     if(Table->Column[column].Button == NULL)
+    {
         Table->Column[column].Button = SDL_WidgetCreate(SDL_BUTTON,widget->Rect.x + x,
-                                                   widget->Rect.y,
-                                                   Table->Column[column].Width,
-                                                   Table->ButtonHeight);
+                                                        widget->Rect.y,
+                                                        Table->Column[column].Width,
+                                                        Table->ButtonHeight);
+        SDL_WidgetShow(Table->Column[column].Button);
+
+    }
 
     SDL_ButtonSetLabel(Table->Column[column].Button,title);
 

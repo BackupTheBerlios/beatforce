@@ -20,10 +20,8 @@
 #ifndef __THEME_H__
 #define __THEME_H__
 
-#include "SDL_Font.h"
 int THEME_Init();
 
-SDL_Font *THEME_Font(char *fontid);
 
 enum
 {
@@ -100,13 +98,12 @@ typedef struct ThemeFont
 {
     char *id;
     char *filename;
-    SDL_Font *font;
-    struct ThemeFont *next;
+    struct ThemeFont *Next;
 }ThemeFont;
 
 typedef struct ThemeText
 {
-    SDL_Rect Rect;
+    short x,y,w,h;
     int display;
     char *font;
     unsigned int fgcolor;
@@ -115,7 +112,7 @@ typedef struct ThemeText
 
 typedef struct ThemeButton
 {
-    SDL_Rect Rect;
+    short x,y,w,h;
     int action;
     char *normal;         /* filename */
     char *highlighted;    /* filename */
@@ -126,7 +123,7 @@ typedef struct ThemeButton
 
 typedef struct ThemeImage
 {
-    SDL_Rect Rect;
+    short x,y,w,h;
     char *filename;        /* filename */
     struct ThemeImage *next;
     
@@ -149,14 +146,14 @@ typedef struct ThemeColumn
 
 typedef struct ThemeEdit
 {
-    SDL_Rect Rect;
+    short x,y,w,h;
     int display;
     struct ThemeEdit *next;
 }ThemeEdit;
 
 typedef struct ThemeTable
 {
-    SDL_Rect Rect;
+    short x,y,w,h;
     int Rows;
     int Columns;
     int ContentType;
@@ -169,7 +166,7 @@ typedef struct ThemeTable
 
 typedef struct ThemeTree
 {
-    SDL_Rect Rect;
+    short x,y,w,h;
     char *Font;
     unsigned int fgcolor;
     unsigned int bgcolor;
@@ -177,19 +174,19 @@ typedef struct ThemeTree
 
 typedef struct ThemeVolumeBar
 {
-    SDL_Rect Rect;
+    short x,y,w,h;
     int display;
     struct ThemeVolumeBar *next;
 }ThemeVolumeBar;
 
 typedef struct ThemeProgressBar
 {
-    SDL_Rect Rect;
+    short x,y,w,h;
 }ThemeProgressBar;
 
 typedef struct ThemeSlider
 {
-    SDL_Rect Rect;
+    short x,y,w,h;
     int action;
     char *button; /* filename of the button */
     struct ThemeSlider *next;
@@ -219,7 +216,7 @@ typedef struct
 
 typedef struct ThemeClock
 {
-    SDL_Rect Rect;
+    short x,y,w,h;
     char *font;
     unsigned int fgcolor;
     unsigned int bgcolor;

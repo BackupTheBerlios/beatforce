@@ -1,7 +1,7 @@
 /*
   Beatforce/Config window user interface
 
-  Copyright (C) 2004 John Beuving (john.beuving@wanadoo.nl)
+  Copyright (C) 2004 John Beuving (john.beuving@beatforce.org)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -28,43 +28,41 @@
 #include "clock.h"
 
 static int CONFIGWINDOW_EventHandler(SDL_Event event);
-static SDL_Surface *CONFIGWINDOW_CreateWindow();
+static void CONFIGWINDOW_CreateWindow();
 static int CONFIGWINDOW_NotifyHandler(SDL_Window *Win);
 
 void *ConfigWindowClock;
 
-SDL_Window CONFIGWINDOW={ CONFIGWINDOW_EventHandler, CONFIGWINDOW_NotifyHandler, NULL, NULL };
+SDL_Window *CONFIGWINDOW = NULL;
 
 void CONFIGWINDOW_Open()
 {
-    if(CONFIGWINDOW.Surface == NULL)
+    if(CONFIGWINDOW == NULL)
     {
-        CONFIGWINDOW.Surface=CONFIGWINDOW_CreateWindow();
+        CONFIGWINDOW_CreateWindow();
     }
-    SDL_WindowOpen(&CONFIGWINDOW);
+    SDL_WindowOpen(CONFIGWINDOW);
 }
 
-static SDL_Surface *CONFIGWINDOW_CreateWindow()
+static void CONFIGWINDOW_CreateWindow()
 {
-    SDL_Surface       *ConfigWindow;
     ThemeConfig       *tc = THEME_GetActive();
     ThemeConfigWindow *cw = NULL;
     ThemeImage        *Image = NULL;
     ThemeScreen       *s=tc->Screen;
     
     if(tc == NULL)
-        return NULL;
+        return;
     
     cw=tc->ConfigWindow;
     
     if(cw == NULL)
-        return NULL;
+        return;
 
     Image=cw->Image;
 
 
-    ConfigWindow = SDL_WidgetNewSurface(s->Width,s->Height,s->BPP);
-    SDL_SetColorKey(ConfigWindow,0,0); // disable transparancy
+    CONFIGWINDOW = SDL_WindowNew(0,0,s->Width,s->Height);
    
 #if 0
     while(Image)
@@ -82,8 +80,8 @@ static SDL_Surface *CONFIGWINDOW_CreateWindow()
 
     ConfigWindowClock=CLOCK_Create(cw->Clock);
 #endif
-    
-    return ConfigWindow;
+    CONFIGWINDOW->EventHandler = CONFIGWINDOW_EventHandler;
+    CONFIGWINDOW->NotifyRedraw = CONFIGWINDOW_NotifyHandler;
 }
 
 

@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003 John Beuving (john.beuving@wanadoo.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@beatforce.org)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -24,15 +24,7 @@
 
 #include <stdarg.h>
 
-#include <SDL/SDL.h>
-#include "SDL_Widget.h"
-
-typedef enum
-{
-    SDL_BUTTON_DOWN,
-    SDL_BUTTON_UP,
-    SDL_BUTTON_HIGHLIGHTED
-}SDL_ButtonState;
+#include <SDLTk.h>
 
 typedef struct SDL_ToggleButton
 {

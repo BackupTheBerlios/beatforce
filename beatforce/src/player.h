@@ -44,7 +44,8 @@ typedef int PlayerState;
 struct PlayerPrivate
 {
     int playlist_id;             /* no of song playing ( in playlist ) 0, if not in playlist */
-    
+
+    int  channel;
     struct SongDBEntry *e;
     ePlayerState State;           /* State of the player */
     
@@ -52,7 +53,6 @@ struct PlayerPrivate
     int pitch_on;                 /* 1, if pitch on */
     int pitch_range;              /* pitch range: 1, 2, 3 */
     
-    int shuffle;                  /* shuffle after song ? */
     int repeat;                   /* repeat playlist */
 
     int auto_remove;              /* auto remove played songs */
@@ -60,8 +60,8 @@ struct PlayerPrivate
     BFList *ip_plugins;            /* linked list of initialised input plugins */
     InputPluginData *current_plugin;        /* pointer to current plugin in list */
 
-    int ch_id;
-    
+    int PlayerID;
+        
     int eof;
 
 };

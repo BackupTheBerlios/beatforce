@@ -1,7 +1,7 @@
 /*
   Beatforce/ Startup of beatforce
 
-  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@beatforce.org)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -35,4 +35,6 @@ int   MIXERUI_Redraw(void *w);
 /* for main window */
 int MIXERUI_DecreaseMainVolume();
 int MIXERUI_IncreaseMainVolume();
-#endif __MIXER_UI_H__
+
+#endif /* __MIXER_UI_H__ */
+

@@ -2,7 +2,7 @@
   Beatforce/ Playlist/Waitlist user interface
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@beatforce.org)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -53,10 +53,10 @@ SDL_Widget* PLAYLISTUI_CreateWindow(ThemePlaylist *pl)
 
     if(pl)
     {
-        pui=SDL_WidgetCreateR(SDL_TABLE,pl->Table->Rect);
+        pui=SDL_WidgetCreate(SDL_TABLE,pl->Table->x,pl->Table->y,pl->Table->w,pl->Table->h);
         SDL_WidgetPropertiesOf(pui,SET_VISIBLE_COLUMNS, 1);
         SDL_WidgetPropertiesOf(pui,SET_FG_COLOR,WHITE);
-        SDL_WidgetPropertiesOf(pui,SET_FONT,THEME_Font("normal"));
+        SDL_WidgetPropertiesOf(pui,SET_FONT,SDL_FontGet("normal"));
         //SDL_WidgetPropertiesOf(pui,SET_CALLBACK,SDL_CLICKED,PLAYLISTUI_EntryClicked,NULL);
     }
     return pui;

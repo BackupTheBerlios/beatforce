@@ -1,7 +1,7 @@
 /*
   Beatforce/ Startup of beatforce
 
-  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@beatforce.org)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -22,7 +22,7 @@
 
 #include "theme.h"
 
-void* PLAYLISTUI_CreateWindow(ThemePlaylist *pl);
+SDL_Widget* PLAYLISTUI_CreateWindow(ThemePlaylist *pl);
 void PLAYLISTUI_Redraw(void *w);
 
 #endif /* __PLAYLIST_UI_H__ */

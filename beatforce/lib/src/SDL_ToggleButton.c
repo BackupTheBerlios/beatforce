@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@beatforce.org)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -18,16 +18,10 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-
-#include <SDL/SDL.h>
-#include "SDL_ToggleButton.h"
-#include "SDL_Widget.h"
-#include "SDL_Window.h"
-#include "SDL_WidTool.h"
-#include "SDL_Signal.h"
-
-#include <stdlib.h>
 #include <stdarg.h>
+#include <stdlib.h>
+
+#include <SDLTk.h>
 
 static void SDL_ToggleButtonPaint(SDL_Widget *Widget,SDL_Surface *screen);
 void SDL_ToggleButtonMouseButtonDownCB(SDL_Widget *widget,SDL_Event *event);

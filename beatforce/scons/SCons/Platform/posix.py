@@ -212,7 +212,7 @@ def generate(env):
 
     if not env.has_key('ENV'):
         env['ENV']        = {}
-    env['ENV']['PATH']    = '/usr/local/bin:/bin:/usr/bin'
+    env['ENV']['PATH']    = '/usr/local/bin:/bin:/usr/bin:/usr/ccs/bin'
     env['OBJPREFIX']      = ''
     env['OBJSUFFIX']      = '.o'
     env['SHOBJPREFIX']    = '$OBJPREFIX'

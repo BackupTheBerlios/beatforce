@@ -1,7 +1,7 @@
 /*
   Beatforce/ Startup of beatforce
 
-  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@beatforce.org)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -19,6 +19,7 @@
 */
 #include <SDL/SDL.h>
 #include "SDL_Widget.h"
+
 
 #if 0
 SDL_Surface* SDL_WidgetGetBackground(SDL_Surface *dest,SDL_Rect *srcrect)

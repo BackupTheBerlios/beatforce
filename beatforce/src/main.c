@@ -17,22 +17,24 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <signal.h>
+#include <string.h>
 
 #include "configfile.h"
-#include "plugin.h"
-#include "songdb.h"
+#include "effect.h"
+#include "event.h"
 #include "input.h"
-#include "player.h"
-#include "output.h"
 #include "mixer.h"
 #include "osa.h"
 #include "osa_cdrom.h"
+#include "output.h"
+#include "player.h"
+#include "plugin.h"
 #include "sampler.h"
-#include "effect.h"
+#include "songdb.h"
+#include "theme.h"
 #include "ui.h"
 
 void MAIN_ParseArgs(int argc,char **argv);
@@ -41,17 +43,19 @@ void MAIN_SegfaultHandler(int sig);
 int main(int argc, char *argv[])
 {
 
+    MAIN_ParseArgs(argc,argv);
+
     signal(SIGSEGV, MAIN_SegfaultHandler);
 
     OSA_Init();
-    
+    EVENT_Init();
     CONFIGFILE_OpenDefaultFile();
+    
 
     THEME_Init();     
 
     
     FILEWINDOW_Init();
-
 
     UI_Init(argc,argv);
 
@@ -60,30 +64,24 @@ int main(int argc, char *argv[])
     PLUGIN_Init (PLUGIN_TYPE_INPUT);
     PLUGIN_Init (PLUGIN_TYPE_OUTPUT);
     PLUGIN_Init (PLUGIN_TYPE_EFFECT);
-    
-    /* Initialize the player functionality */
-    PLAYER_Init(0);
-    PLAYER_Init(1);
-
     AUDIOOUTPUT_Init ();
     EFFECT_Init();
     MIXER_Init  ();
     SAMPLER_Init();
 
 //    OSACDROM_Init();
-    SONGDB_Init ();
+
+    
     MAINWINDOW_Open();
 
-    MAIN_ParseArgs(argc,argv);
-    
-    /* beatforce UI */
+    /*beatforce UI*/
+
     UI_Main(); /* main loop */
 
- 
-   AUDIOOUTPUT_Cleanup();
+
+    AUDIOOUTPUT_Cleanup();
 
     SONGDB_Exit();
-
     EFFECT_Cleanup();
     PLUGIN_Cleanup();
 
@@ -118,51 +116,13 @@ void MAIN_ParseArgs(int argc,char **argv)
                 {
                     FILE *fp;
                     char *line;
-                    char *filename;
-                    struct SongDBSubgroup *sg;
                     fp=fopen(argv[i],"r");
                     line=malloc(1024);
-                    while(fgets(line,1024,fp))
-                    {
-                        if(!strncmp(line,"#EXTM3U",7))
-                        {
-                            filename=strrchr(argv[i],'.');
-                            if(filename != NULL)
-                            {
-                                *filename=0;
-                                filename=strrchr(argv[i],'/');
-                                if(filename != NULL)
-                                {
-                                    filename++;
-                                    SONGDB_AddSubgroup(SONGDB_GetActiveGroup(),filename);
-                                }
-                                else
-                                {
-                                    SONGDB_AddSubgroup(SONGDB_GetActiveGroup(),"M3U");
-                                }
-                            }
-                            else
-                            {
-                                SONGDB_AddSubgroup(SONGDB_GetActiveGroup(),"M3U");
-                            }
-                            sg=SONGDB_GetActiveSubgroup();
-                            continue;
-                        }
-
-                        if(line[0]=='/')
-                        {
-                            if(sg == NULL)
-                                exit(3);
-                            while (line[strlen(line) - 1] == '\r' ||
-                                   line[strlen(line) - 1] == '\n')
-                                line[strlen(line) - 1] = '\0';
-                            printf("%s\n",line);
-                            
-                            SONGDB_AddFileToSubgroup(sg,line);
-                        }
-                    }
+                    fread(line,1024,1,fp);
                     fclose(fp);
+                    printf("%s\n",line);
                     free(line);
+                    
                 }
             }
         }

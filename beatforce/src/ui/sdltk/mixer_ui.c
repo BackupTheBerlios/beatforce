@@ -2,7 +2,7 @@
   Beatforce/ Mixer user interface
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@beatforce.org)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -19,6 +19,7 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 #include <config.h>
+#include <malloc.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -68,21 +69,23 @@ void* MIXERUI_CreateWindow(ThemeMixer *tm)
     Slider    = tm->Slider;
     Button    = tm->Button;
     
-    w=malloc(sizeof(MixerWidgets));
+    w = (MixerWidgets*)malloc(sizeof(MixerWidgets));
     memset(w,0,sizeof(MixerWidgets));
     
     while(Image)
     {
         SDL_Widget *ss;
-        ss=SDL_WidgetCreateR(SDL_PANEL,Image->Rect);
+        ss=SDL_WidgetCreate(SDL_PANEL,Image->x,Image->y,Image->w,Image->h);
         SDL_PanelSetImage(ss,IMG_Load(Image->filename));
+        SDL_WidgetShow(ss);
         Image=Image->next;
     }
 
     while(VolumeBar)
     {
-        w->MainVolumeIndicator=SDL_WidgetCreateR(SDL_VOLUMEBAR,VolumeBar->Rect);
-        SDL_WidgetPropertiesOf(w->MainVolumeIndicator,SET_CUR_VALUE,100.0);
+        w->MainVolumeIndicator=SDL_WidgetCreate(SDL_VOLUMEBAR,VolumeBar->x,VolumeBar->y,VolumeBar->w,VolumeBar->h);
+        SDL_VolumeBarSetCurrentValue(w->MainVolumeIndicator,100.0);
+        SDL_WidgetShow(w->MainVolumeIndicator);
         VolumeBar=VolumeBar->next;
     }
 
@@ -93,24 +96,26 @@ void* MIXERUI_CreateWindow(ThemeMixer *tm)
         {
         case SLIDER_MAIN_VOLUME:
             // Main volume 
-            w->MainVolume=SDL_WidgetCreateR(SDL_SLIDER,Slider->Rect);
+            w->MainVolume=SDL_WidgetCreate(SDL_SLIDER,Slider->x,Slider->y,Slider->w,Slider->h);
             SDL_WidgetPropertiesOf(w->MainVolume,SET_BUTTON_IMAGE,IMG_Load(Slider->button));
             SDL_WidgetPropertiesOf(w->MainVolume,SET_MAX_VALUE,100);
             SDL_WidgetPropertiesOf(w->MainVolume,SET_MIN_VALUE,0);
             SDL_WidgetPropertiesOf(w->MainVolume,SET_NORMAL_STEP_SIZE,1);
             SDL_SignalConnect(w->MainVolume,"value-changed",MIXERUI_MainVolumeChanged,w);
+            SDL_WidgetShow(w->MainVolume);
             break;
         case SLIDER_FADER:
             /* fade slider */
-            w->Fader=SDL_WidgetCreateR(SDL_SLIDER,Slider->Rect);
+            w->Fader=SDL_WidgetCreate(SDL_SLIDER,Slider->x,Slider->y,Slider->w,Slider->h);
             SDL_SignalConnect(w->Fader,"value-changed",MIXERUI_FaderChanged,w->Fader);
             SDL_WidgetPropertiesOf(w->Fader,SET_BUTTON_IMAGE,IMG_Load(Slider->button));
             MIXER_SetFaderValue(0);
             MIXER_GetFaderValue (&val);
             SDL_WidgetPropertiesOf(w->Fader,SET_MAX_VALUE,1000);
             SDL_WidgetPropertiesOf(w->Fader,SET_MIN_VALUE,0);
-            SDL_WidgetPropertiesOf(w->Fader,SET_CUR_VALUE,val);
             SDL_WidgetPropertiesOf(w->Fader,SET_NORMAL_STEP_SIZE,100);
+            SDL_SliderSetCurrentValue(w->Fader,val);
+            SDL_WidgetShow(w->Fader);
             break;
         }
         Slider=Slider->next;
@@ -121,8 +126,9 @@ void* MIXERUI_CreateWindow(ThemeMixer *tm)
         if(Button->action == BUTTON_RESET_FADER)
         {
             SDL_Widget *ss;
-            ss=SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
-            SDL_SignalConnect(ss,"clicked",MIXERUI_AutoFadeButtonClicked,NULL);
+            ss=SDL_WidgetCreate(SDL_BUTTON,Button->x,Button->y,Button->w,Button->h);
+            SDL_SignalConnect(ss,"clicked",MIXERUI_AutoFadeButtonClicked,ss);
+            SDL_WidgetShow(ss);
         }
         Button=Button->next;
     }
@@ -147,9 +153,9 @@ int MIXERUI_Redraw(void *w)
     {
         AUDIOOUTPUT_GetMainVolume(&volume);    
         
-        SDL_WidgetPropertiesOf(mw->MainVolumeIndicator,SET_CUR_VALUE,(double) volume);
+        SDL_VolumeBarSetCurrentValue(mw->MainVolumeIndicator,(double) volume);
         volume= 100 - volume;
-        SDL_WidgetPropertiesOf(mw->MainVolume   ,SET_CUR_VALUE, volume);
+        SDL_SliderSetCurrentValue(mw->MainVolume,volume);
     }
     if(mw->Fader)
     {
@@ -158,7 +164,7 @@ int MIXERUI_Redraw(void *w)
         {
             if(MIXER_GetFaderValue(&value))
             {
-                SDL_WidgetPropertiesOf(mw->Fader,SET_CUR_VALUE,value);    
+                SDL_SliderSetCurrentValue(mw->Fader,value);
             }
         }
     }
@@ -170,9 +176,9 @@ int MIXERUI_Redraw(void *w)
 
 static void MIXERUI_AutoFadeButtonClicked(void *data)
 {
+    SDL_WidgetMove((SDL_Widget*)data,100,100);
     if(!MIXER_FadeInProgress())
         MIXER_DoFade(1,0);  //param 1 is autofade param2 is instant
-
 }
 
 static void MIXERUI_FaderChanged(void *data)
@@ -190,7 +196,7 @@ void MIXERUI_MainVolumeChanged(void *data)
     int volume;
 
     volume=slider->MaxValue - slider->CurrentValue;
-    SDL_WidgetPropertiesOf(w->MainVolumeIndicator,SET_CUR_VALUE,(double)volume);
+    SDL_VolumeBarSetCurrentValue(w->MainVolumeIndicator,(double) volume);
     AUDIOOUTPUT_SetMainVolume(volume);
     
 }

@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@beatforce.org)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -62,7 +62,7 @@ typedef enum E_Widget_Properties
   
     SET_MAX_VALUE,      
     SET_MIN_VALUE,
-    SET_CUR_VALUE,
+//    SET_CUR_VALUE,
     SET_LINE_IMAGE,
     SET_BUTTON_IMAGE,
     SET_NORMAL_STEP_SIZE,
@@ -175,9 +175,9 @@ static const struct S_Widget_FunctionList * const WidgetTable[] =
 
 
 int SDL_WidgetInit();
-int   SDL_WidgetUseSurface(SDL_Surface *surface);
+void SDL_WidgetMove(SDL_Widget *widget,int x,int y);
+
 SDL_Surface *SDL_WidgetGetActiveSurface();
-SDL_Surface *SDL_WidgetNewSurface(int width,int height,int bpp);
 int SDL_WidgetForceRedraw(SDL_Surface *surface);
 
 SDL_Widget* SDL_WidgetCreate(E_Widget_Type widget,int x,int y, int w, int h);

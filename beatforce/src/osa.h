@@ -53,3 +53,4 @@ int OSA_GetTime(int *hours,int *minutes);
 
 
 void OSA_Sleep(int us);
+char *OSA_GetError();

@@ -1,7 +1,7 @@
 /*
   Beatforce/ Startup of beatforce
 
-  Copyright (C) 2003 John Beuving (john.beuving@home.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@beatforce.org)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -19,14 +19,15 @@
 */
 #include <string.h>
 #include <malloc.h>
-#include "SDL_Font.h"
+
+#include <SDLTk.h>
 #include "SDL_FontFNT.h"
 
 int  FONT_FNT_IsFNT(char *filename);
-int FONT_FNT_Read(char *filename,SDL_Font *font);
+int  FONT_FNT_Read(char *filename,SDL_Font *font);
 void FONT_FNT_DrawString(SDL_Surface *screen,SDL_Font *font,char *string,int x, int y);
-int FONT_FNT_DrawChar(SDL_Surface *dest,SDL_Font *font,
-                      char character,SDL_Rect *pos,SDL_Rect *clip);
+int  FONT_FNT_DrawChar(SDL_Surface *dest,SDL_Font *font,
+                       char character,SDL_Rect *pos,SDL_Rect *clip);
 
 //local prototypes
 void FNT_ReadFont(FILE *fp,SDL_Font *font);

@@ -64,6 +64,7 @@ OUTPUT_PluginInit(struct OutGroup *grp, AudioConfig * cfg, int i)
     list = PLUGIN_GetList (PLUGIN_TYPE_OUTPUT);
     if(list == NULL)
     {
+        ERROR("OUTPUT_PluginInit: no output plugins");
         return 0;
     }
 
@@ -272,7 +273,7 @@ OUTPUT_PluginCleanup(struct OutGroup *grp)
 
     if(grp == NULL || grp->dev == NULL)
     {
-        ERROR("Invalid arguments");
+        ERROR("OUTPUT_PluginCleanup: Invalid arguments (grp == NULL)");
         return 0;
     }
     
@@ -283,14 +284,14 @@ OUTPUT_PluginCleanup(struct OutGroup *grp)
 
     if (grp->dev->op->cleanup == NULL)
     {
-        ERROR("Not supported");
+        ERROR("OUTPUT_PluginCleanup: Cleanup function not supported");
         return 0;
     }
 
     err = grp->dev->op->cleanup(grp->dev->priv);
     if (err)
     {
-        printf("Unable to set volume: error 0x%x\n", -err);
+        ERROR("OUTPUT_PluginCleanup: Cleanup function failed");
     }
     return err;
 }

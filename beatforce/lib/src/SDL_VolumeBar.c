@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@beatforce.org)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -107,30 +107,32 @@ void SDL_VolumeBarDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
 
 int SDL_VolumeBarProperties(SDL_Widget *Widget,int feature,va_list list)
 {
-    SDL_VolumeBar *VolumeBar=(SDL_VolumeBar*)Widget;
-    double val;
-
     switch(feature)
     {
     case SET_MAX_VALUE:
         break;
     case SET_MIN_VALUE:
         break;
-    case SET_CUR_VALUE:
-        val=va_arg(list,double);
-        if(val != VolumeBar->CurrentValue)
-        {
-            VolumeBar->CurrentValue = val; 
-            VolumeBar->CurrentLine  = (val * Widget->Rect.h) / (VolumeBar->MaxValue - VolumeBar->MinValue); 
-            SDL_WidgetRedrawEvent(Widget);
-        }
-        break;
     default:
+        return 0;
         break;
     }
     return 1;
 }
 
+
+int SDL_VolumeBarSetCurrentValue(SDL_Widget *Widget,double value)
+{
+    SDL_VolumeBar *VolumeBar=(SDL_VolumeBar*)Widget;
+
+    if(value != VolumeBar->CurrentValue)
+    {
+        VolumeBar->CurrentValue = value; 
+        VolumeBar->CurrentLine  = (value * Widget->Rect.h) / (VolumeBar->MaxValue - VolumeBar->MinValue); 
+        SDL_WidgetRedrawEvent(Widget);
+    }
+    return 1;
+}
 
 /* Internal Helper functions */
 

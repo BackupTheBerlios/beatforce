@@ -91,8 +91,7 @@ void SDL_TreeDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
     int row=0;
     int n=0;
 
-    SDL_FontSetColor(Tree->Font,Tree->fgcolor);
-    
+   
     if(Tree->bgcolor != TRANSPARANT)
     {
         SDL_FillRect(dest,&widget->Rect,Tree->bgcolor);
@@ -153,11 +152,9 @@ void SDL_TreeDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
                 r.w = widget->Rect.w;
                
                 if(Item == Tree->Selected)
-                    SDL_FontSetColor(Tree->Font,0xff0000);
+                    SDL_FontDrawStringRect(dest,Tree->Font,Item->Label,0x000000,&r);
                 else
-                    SDL_FontSetColor(Tree->Font,Tree->fgcolor);
-
-                SDL_FontDrawStringRect(dest,Tree->Font,Item->Label,&r);
+                    SDL_FontDrawStringRect(dest,Tree->Font,Item->Label,Tree->fgcolor,&r);
             }
         }
     }

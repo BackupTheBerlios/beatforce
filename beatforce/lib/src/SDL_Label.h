@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@beatforce.org)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -22,13 +22,14 @@
 #ifndef __SDL_LABEL_H__
 #define __SDL_LABEL_H__
 
-#include "SDL_Widget.h"
-#include "SDL_Font.h"
+#include <SDLTk.h>
 
 typedef struct SDL_Label
 {
     SDL_Widget Widget;
     SDL_Font *Font;
+
+    SDL_TimerID RedrawTimer;
     
     Uint32  bgcolor;
     Uint32  fgcolor;
@@ -57,7 +58,9 @@ SDL_Widget* SDL_LabelCreate(SDL_Rect *rect);
 void        SDL_LabelDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area);
 int         SDL_LabelProperties(SDL_Widget *widget,int feature,va_list list);
 
-void SDL_LabelSetText(SDL_Widget *widget,char *text);
-void SDL_LabelSetAlignment(SDL_Widget *widget,int Alignment);
+void SDL_LabelSetAlignment (SDL_Widget *widget,int Alignment);
+int  SDL_LabelSetFont      (SDL_Widget *widget,SDL_Font *Font);
+void SDL_LabelSetText      (SDL_Widget *widget,char *text);
+
 
 #endif /* __SDL_LABEL_H__ */

@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003 John Beuving (john.beuving@home.nl)
+  Copyright (C) 2003 John Beuving (john.beuving@beatforce.org)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -44,14 +44,8 @@ typedef struct SDL_Button
     SDL_ButtonState  State;
 
     SDL_Widget *Label;
-
-
 }SDL_Button;
 
-/*
-void UpdateButtons(SDL_Surface *dest,int x, int y, int pressed);
-void CreateButton(int x, int y);
-*/
 
 SDL_Widget* SDL_ButtonCreate(SDL_Rect *rect);
 void        SDL_ButtonDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area);

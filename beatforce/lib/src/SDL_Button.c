@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@beatforce.org)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -19,15 +19,11 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <SDL/SDL.h>
-#include "SDL_Button.h"
-#include "SDL_Widget.h"
-#include "SDL_Window.h"
-#include "SDL_WidTool.h"
-#include "SDL_Signal.h"
-
 #include <stdlib.h>
 #include <stdarg.h>
+
+#include <SDLTk.h>
+
 
 static void SDL_ButtonPaint(SDL_Widget *Widget,SDL_Surface *screen);
 void SDL_ButtonMouseButtonDownCB(SDL_Widget *widget,SDL_Event *event);
@@ -141,7 +137,7 @@ void SDL_ButtonDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
     }
 
     if(drawbutton == NULL)
-        drawbutton=button->normal;
+        drawbutton = button->normal;
 
     if(drawbutton)
         SDL_BlitSurface(drawbutton,&src,dest,&widget->Rect);
@@ -209,7 +205,10 @@ int SDL_ButtonEventHandler(SDL_Widget *widget,SDL_Event *event)
             if(Button->State == SDL_BUTTON_UP)
             {
                 Button->State = SDL_BUTTON_HIGHLIGHTED;
-                SDL_WidgetDraw(widget,&widget->Rect);
+                if(Button->highlighted != NULL)
+                {
+                    SDL_WidgetDraw(widget,&widget->Rect);
+                }
             }
         }
         else
@@ -220,7 +219,10 @@ int SDL_ButtonEventHandler(SDL_Widget *widget,SDL_Event *event)
         if(SDL_WidgetIsInside(widget,event->motion.x,event->motion.y))
         {
             Button->State = SDL_BUTTON_HIGHLIGHTED;
-            SDL_WidgetDraw(widget,&widget->Rect);
+            if(Button->highlighted != NULL)
+            {
+                SDL_WidgetDraw(widget,&widget->Rect);
+            }
         }
         else
             Button->State = SDL_BUTTON_UP;
@@ -298,8 +300,11 @@ void SDL_ButtonSetLabel(SDL_Widget *widget,char *title)
     SDL_Button *Button=(SDL_Button*)widget;
     
     if(Button->Label == NULL)
+    {
         Button->Label=SDL_WidgetCreate(SDL_LABEL,widget->Rect.x,widget->Rect.y,
-                                                 widget->Rect.w,widget->Rect.h);
+                                       widget->Rect.w,widget->Rect.h);
+        SDL_WidgetShow(Button->Label);
+    }
 
     SDL_LabelSetText(Button->Label,title);
 }

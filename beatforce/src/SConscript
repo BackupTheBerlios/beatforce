@@ -9,7 +9,11 @@ if env['ui'] == 'sdltk':
         env.Append(CCFLAGS = '-Isrc/ui/sdltk/')
         env.Append(CCFLAGS = '-Isrc')
         env.Append(CCFLAGS = '-I/usr/include/libxml2')
-        env.Program('beatforce',
+        env.Append(CCFLAGS = '-Wall')
+        env.Append(CCFLAGS = '-g')
+        env.Append(CCFLAGS = '-pg')
+        env.Append(LINKFLAGS = '-pg')
+        beatforce=env.Program('beatforce',
                 [
                         'playlist.c',
                         'songdb.c',
@@ -27,12 +31,23 @@ if env['ui'] == 'sdltk':
                         'output.c',
                         'plugin.c',
                         'theme.c',
+                        'event.c',
                         'configfile.c'
                 ],
-                        LIBS=['m','SDL','fftw3','SDL_image','xml2','ui','sdltk'],
-                        LIBPATH=['/usr/lib/gtk/','../lib/src/','ui/sdltk'])      
+                        LIBS=['SDL','SDL_image','xml2','ui','sdltk','dl','m'],
+                        LIBPATH=['../lib/src/','ui/sdltk'])      
 elif env['ui'] == 'gtk':
         print "Using 'gtk' as main user interface!"
+        config = env.Configure()
+                
+        env.ParseConfig('gtk-config --cflags --libs')                   
+        
+        # check for gtk/gtk.h
+        if not config.CheckCHeader('gtk/gtk.h'):
+           print "You need 'gtk/gtk.h' to compile this program"
+           Exit(1)
+        env=config.Finish()
+
         env.SConscript(['ui/gtk/SConscript'])    
         env.Append(CCFLAGS = '-Isrc/ui/gtk/')
         env.Append(CCFLAGS = '-Isrc')
@@ -40,7 +55,8 @@ elif env['ui'] == 'gtk':
         env.Append(CCFLAGS = '-I/usr/include/gtk-1.2')
         env.Append(CCFLAGS = '-I/usr/include/glib-1.2')
         env.Append(CCFLAGS = '-I/usr/lib/glib/include')
-        env.Program('beatforce',
+
+        beatforce=env.Program('beatforce',
                 [
                         'playlist.c',
                         'songdb.c',
@@ -56,22 +72,70 @@ elif env['ui'] == 'gtk':
                         'sampler.c',
                         'input.c',
                         'output.c',
+                        'event.c',
                         'plugin.c',
                         'configfile.c'
                 ],
-                        LIBS=['m','SDL','fftw3','xml2','ui','gtk','gdk'],
+                        LIBS=['m','xml2','ui','gtk','gdk','glib','dl','SDL'],
                         LIBPATH=['/usr/lib/gtk/','ui/gtk/'])      
+elif env['ui'] == 'gtk-2.0':
+        print "Using 'gtk-2.0' as main user interface!"
+        config = env.Configure()
+                
+#        env.ParseConfig('gtk-config --cflags --libs')                   
+        
+        # check for gtk/gtk.h
+#        if not config.CheckCHeader('gtk/gtk.h'):
+#           print "You need 'gtk/gtk.h' to compile this program"
+#           Exit(1)
+#        env=config.Finish()
+
+        env.SConscript(['ui/gtk-2.0/SConscript'])    
+        env.Append(CCFLAGS = '-Isrc/ui/gtk-2.0/')
+        env.Append(CCFLAGS = '-Isrc')
+        env.Append(CCFLAGS = '-I/usr/include/libxml2')
+        env.Append(CCFLAGS = '-I/usr/include/atk-1.0')
+        env.Append(CCFLAGS = '-I/usr/include/gtk-2.0')
+        env.Append(CCFLAGS = '-I/usr/include/glib-2.0')
+        env.Append(CCFLAGS = '-I/usr/include/pango-1.0')
+        env.Append(CCFLAGS = '-I/usr/lib/glib-2.0/include/')
+        env.Append(CCFLAGS = '-I/usr/lib/gtk-2.0/include/')
+
+        beatforce=env.Program('beatforce',
+                [
+                        'playlist.c',
+                        'songdb.c',
+                        'main.c',
+                        'effect.c',
+                        'player.c',
+                        'mixer.c',
+                        'debug.c',
+                        'osa.c',
+                        'audio_output.c',
+                        'llist.c',
+                        'ringbuffer.c',
+                        'sampler.c',
+                        'event.c',
+                        'input.c',
+                        'output.c',
+                        'theme.c',
+                        'plugin.c',
+                        'configfile.c'
+                ],
+                        LIBS=['m','xml2','ui','gtk-x11-2.0','gdk-x11-2.0','glib-2.0','gobject-2.0','dl'],
+                        LIBPATH=['/usr/lib/gtk-2.0/','ui/gtk-2.0/'])      
 elif env['ui'] == 'qt':
         print "Using 'qt' as main user interface!"
         env.SConscript(['ui/qt/SConscript'])    
         env.Append(CCFLAGS = '-Isrc/ui/qt/')
         env.Append(CCFLAGS = '-Isrc')
         env.Append(CCFLAGS = '-I/usr/include/libxml2')
-        env.Program('beatforce',
+        beatforce=env.Program('beatforce',
                 [
                         'playlist.c',
                         'songdb.c',
                         'main.c',
+                        'event.c',
                         'effect.c',
                         'player.c',
                         'mixer.c',
@@ -92,8 +156,7 @@ elif env['ui'] == 'qt':
 
 
 
+Default(beatforce)
 
-env.Alias(target = "install", source=env.Install(dir="/usr/bin/", 
-          source="beatforce"))    
 
 

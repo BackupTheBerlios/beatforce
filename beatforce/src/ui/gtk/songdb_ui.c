@@ -123,11 +123,15 @@ void *SONGDBUI_CreateWindow(void *ts)
 
     sw=malloc(sizeof(SongdbWidgets));
 
+    SONGDB_Init ();
+
     /* Create the notebook/tab section below the table*/
     sw->Tabs=gtk_notebook_new ();
     gtk_notebook_set_tab_pos (GTK_NOTEBOOK (sw->Tabs), GTK_POS_BOTTOM);
-    gtk_container_add (GTK_CONTAINER (ts), sw->Tabs);
+    gtk_fixed_put(GTK_FIXED(ts),sw->Tabs,30,270);
+    gtk_widget_set_usize(sw->Tabs,500,310);
     gtk_widget_show (sw->Tabs);
+    
 #if 0
         SDL_SignalConnect(sw->Tabs,"switch-tab",SONGDB_ChangeDatabase,sw->Tabs);
 #endif
@@ -140,6 +144,14 @@ void *SONGDBUI_CreateWindow(void *ts)
         {
             SDL_Widget *w;
         case BUTTON_CHANGE_DIR:
+#endif
+        {
+            GtkWidget *w;
+            w=gtk_button_new_with_label("Edit Group");
+            gtk_fixed_put(GTK_FIXED(ts),w,50,610);
+            gtk_widget_show(w);
+        }
+#if 0
             w=SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
             SDL_WidgetPropertiesOf(w,SET_NORMAL_IMAGE,IMG_Load(Button->normal));
             SDL_WidgetPropertiesOf(w,SET_PRESSED_IMAGE,IMG_Load(Button->pressed));
@@ -164,15 +176,15 @@ void SONGDBUI_Redraw(void *w)
     GtkWidget *label;
     gchar *titles[3] = { "ID","Song","Time" };
 
-    if(SONGDB_GroupChanged())
+//    if(SONGDB_GroupChanged())
     {
-        sg=SONGDB_GetSubgroupList();
+//        sg=SONGDB_GetSubgroupList();
 
         /* Remove all tabs */
         //SDL_NotebookClear(widgets->Tabs);
         
-        while(sg)
-        {
+//        while(sg)
+//        {
             table = gtk_clist_new_with_titles( 3, titles);
             
             gtk_clist_set_column_width (GTK_CLIST(table), 0, 30);
@@ -191,12 +203,12 @@ void SONGDBUI_Redraw(void *w)
                 for(c=0;c<3;c++)
                     songinfo[c]=malloc(255);
 
-                SONGDB_SetActiveSubgroup(sg);
-                for(r=0;r< sg->Songcount;r++)
+//                SONGDB_SetActiveSubgroup(sg);
+                for(r=0;r< 3;r++)
                 {
                     for(c=0;c<3;c++)
                     {
-                        songdbstring(r,c,songinfo[c]);
+                        sprintf(songinfo[c],"Hello%d",c);
                     }
                     gtk_clist_append( (GtkCList *)table, songinfo);
                 }
@@ -204,12 +216,12 @@ void SONGDBUI_Redraw(void *w)
                     free(songinfo[c]);
             }
             gtk_widget_show(table);
-            label = gtk_label_new (sg->Name);
+            label = gtk_label_new ("AAA");
             gtk_notebook_append_page (GTK_NOTEBOOK (widgets->Tabs), table, label);
-            sg=sg->next;
-        }
-        sg=SONGDB_GetSubgroupList();
-        SONGDB_SetActiveSubgroup(sg);
+            //          sg=sg->next;
+//        }
+//        sg=SONGDB_GetSubgroupList();
+//        SONGDB_SetActiveSubgroup(sg);
 //        SDL_WidgetSetFocus(SDL_NotebookGetChildWidget(Widgets->Tabs));
 //        SDL_WidgetRedrawEvent(widgets->Tabs);
     }

@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003 John Beuving (john.beuving@home.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@beatforce.org)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -61,6 +61,7 @@ int         SDL_ProgressBarEventHandler(SDL_Widget *widget,SDL_Event *event);
 int         SDL_ProgressBarProperties(SDL_Widget *widget,int feature,va_list list);
 
 
+int SDL_ProgressBarSetCurrentValue(SDL_Widget *widget,int value);
 double SDL_ProgressBarGetCurrentValue(SDL_Widget *widget);
 
 #endif /* __SDL_PROGRESSBAR_H__ */

@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@beatforce.org)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -60,21 +60,10 @@ void SDL_PanelDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
     SDL_Panel *Panel=(SDL_Panel*)widget;
     SDL_Rect src;
 
-    src.x=0;
-    src.y=0;
-    if(widget->Rect.w == 0 && Panel->Image)
-        src.w=Panel->Image->w;
-    else
-        src.w=widget->Rect.w;
-    
-    if(widget->Rect.h == 0 && Panel->Image)
-        src.h=Panel->Image->h;
-    else
-        src.h=widget->Rect.h;
-    
-    
     if(Panel->Image)
     {
+        
+
         if(Area != NULL)
         {
             src.x = Area->x - widget->Rect.x;
@@ -85,7 +74,15 @@ void SDL_PanelDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
             SDL_BlitSurface(Panel->Image,&src,dest,Area);
         }
         else
+        {
+            src.x = 0;
+            src.y = 0;
+            src.w = widget->Rect.w;
+            src.h = widget->Rect.h;
+
             SDL_BlitSurface(Panel->Image,&src,dest,&widget->Rect);            
+        }
+
            
     }
     else
@@ -101,18 +98,11 @@ int SDL_PanelProperties(SDL_Widget *widget,int feature,va_list list)
 
     switch(feature)
     {
-    case SET_IMAGE:
-        if(Panel->Image == NULL)
-        {
-            printf("obsolete SET_IMAGE\n");
-            exit(1);
-        }
-        break;
     case SET_BG_COLOR:
         Panel->color=va_arg(list,Uint32);
         break;
     default:
-        break;
+        return 0;
     }
     return 1;
 }
@@ -131,6 +121,13 @@ void SDL_PanelSetImage(SDL_Widget *widget,SDL_Surface *image)
     {
         Panel->Image = image;
         SDL_SetColorKey(Panel->Image,SDL_SRCCOLORKEY,TRANSPARANT);
+
+        if(widget->Rect.w == 0 && Panel->Image)
+            widget->Rect.w=Panel->Image->w;
+        
+        if(widget->Rect.h == 0 && Panel->Image)
+            widget->Rect.h=Panel->Image->h;
+
     }
 }
 

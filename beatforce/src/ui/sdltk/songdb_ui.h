@@ -33,6 +33,6 @@ typedef struct SongdbWidgets
 void  SONGDBUI_Redraw(void *w);
 void* SONGDBUI_CreateWindow(ThemeSongdb *ts);
 
-void SONGDBUI_Play(int player_nr);
+
 
 #endif /* __SONGDB_UI_H__ */

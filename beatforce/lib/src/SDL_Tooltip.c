@@ -2,7 +2,7 @@
   Beatforce/SDLTk
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@beatforce.org)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -22,11 +22,7 @@
 #include <malloc.h>
 #include <string.h>
 
-#include "SDL_Widget.h"
-#include "SDL_WidTool.h"
-#include "SDL_Tooltip.h"
-#include "SDL_Font.h"
-#include "SDL_Signal.h"
+#include <SDLTk.h>
 
 static void SDL_TooltipMouseMotionCB(SDL_Widget *Widget,SDL_Event *event);
 static void SDL_TooltipHideCB(SDL_Widget *Widget);
@@ -91,13 +87,13 @@ void SDL_TooltipDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
         r.y = widget->Rect.y;
         r.w = widget->Rect.w;
         r.h = widget->Rect.h / 2;
-        SDL_FontDrawStringRect(dest,Tooltip->Font,Tooltip->string,&r);
+        SDL_FontDrawStringRect(dest,Tooltip->Font,Tooltip->string,0x000000,&r);
         r.x = widget->Rect.x + 4;
         r.y = widget->Rect.y + r.h;
         r.w = widget->Rect.w;
         r.h = widget->Rect.h / 2;
         str2 = Tooltip->string + strlen(Tooltip->string)/2;
-        SDL_FontDrawStringRect(dest,Tooltip->Font,str2,&r);
+        SDL_FontDrawStringRect(dest,Tooltip->Font,str2,0x000000,&r);
 
     }
     else
@@ -106,7 +102,7 @@ void SDL_TooltipDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
         r.y = widget->Rect.y;
         r.w = widget->Rect.w;
         r.h = widget->Rect.h;
-        SDL_FontDrawStringRect(dest,Tooltip->Font,Tooltip->string,&r);
+        SDL_FontDrawStringRect(dest,Tooltip->Font,Tooltip->string,0x000000,&r);
     }
 
 }
