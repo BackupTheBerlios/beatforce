@@ -2,7 +2,7 @@
    BeatForce
    configfile.c  - config & config file stuff
    
-   Copyright (C) 2004 John Beuving (john.beuving@wanadoo.nl)
+   Copyright (C) 2004 John Beuving (john.beuving@beatforce.org)
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public Licensse as published by

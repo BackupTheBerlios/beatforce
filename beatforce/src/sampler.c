@@ -2,7 +2,7 @@
   BeatForce
   sampler.c Sampler implementation
    
-  Copyright (c) 2004, John Beuving (john.beuving@wanadoo.nl)
+  Copyright (c) 2004, John Beuving (john.beuving@beatforce.org)
   
 
   This program is free software; you can redistribute it and/or modify

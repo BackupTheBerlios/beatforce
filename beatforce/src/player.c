@@ -2,7 +2,7 @@
    BeatForce
    player.c  -	player
    
-   Copyright (c) 2003-2004, John Beuving (john.beuving@wanadoo.nl)
+   Copyright (c) 2003-2004, John Beuving (john.beuving@beatforce.org)
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public Licensse as published by

@@ -59,7 +59,7 @@ elif env['ui'] == 'gtk':
                         'plugin.c',
                         'configfile.c'
                 ],
-                        LIBS=['m','SDL','fftw3','SDL_image','xml2','ui','gtk','gdk'],
+                        LIBS=['m','SDL','fftw3','xml2','ui','gtk','gdk'],
                         LIBPATH=['/usr/lib/gtk/','ui/gtk/'])      
 elif env['ui'] == 'qt':
         print "Using 'qt' as main user interface!"
