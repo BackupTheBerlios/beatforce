@@ -65,9 +65,9 @@ typedef struct SDL_Tree
 SDL_Widget* SDL_TreeCreate(SDL_Rect *rect);
 void        SDL_TreeDraw(SDL_Widget *widget,SDL_Surface *dest);
 int         SDL_TreeProperties(SDL_Widget *widget,int feature,va_list list);
-void        SDL_TreeEventHandler(SDL_Widget *widget,SDL_Event *event);
+int         SDL_TreeEventHandler(SDL_Widget *widget,SDL_Event *event);
 
 void *SDL_TreeInsertItem(void *tree,void *root,char *string);
-
+TreeNode *SDL_TreeGetSelectedItem(void *tree);
 
 #endif /* __SDL_TREE_H__ */

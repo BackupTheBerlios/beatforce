@@ -34,8 +34,8 @@ const struct S_Widget_FunctionList SDL_Edit_FunctionList =
 };
 
 
-void SDL_EditSetCallback(void *widget,int event,void *function,void *data);
-void SDL_EditCallback(void *widget,int event);
+static void SDL_EditSetCallback(SDL_Widget *widget,int event,void *function,void *data);
+void SDL_EditCallback(SDL_Widget *widget,int event);
 
 
 SDL_Widget *SDL_EditCreate(SDL_Rect* rect)
@@ -57,10 +57,8 @@ SDL_Widget *SDL_EditCreate(SDL_Rect* rect)
     memset(Edit->Caption,0,1024);
 
     Edit->Font    = NULL;
-    Edit->Redraw  = 1;
     Edit->Shift   = 0;
 
-    Edit->Focus   = 0;
     Edit->bgcolor = 0xfffff7;
     Edit->fgcolor = 0x000000;
 
@@ -123,7 +121,7 @@ void  SDL_EditDraw(SDL_Widget *widget,SDL_Surface *dest)
     
     /* draw cursor */
     
-    if(SDL_WidgetHasFocus(widget) || Edit->Focus)
+    if(SDL_WidgetHasFocus(widget))
     {
         StringWidth=SDL_FontGetStringWidth(Edit->Font,Edit->Caption);
         if(StringWidth > widget->Rect.w)
@@ -149,15 +147,12 @@ int SDL_EditProperties(SDL_Widget *widget,int feature,va_list list)
         break;
     case SET_CAPTION:
         sprintf(Edit->Caption,"%s",va_arg(list,char*));
-        Edit->Redraw = 1;
         break;
     case SET_FG_COLOR:
         Edit->fgcolor = va_arg(list,Uint32);
-        Edit->Redraw  = 1;
         break;
     case SET_BG_COLOR:
         Edit->bgcolor = va_arg(list,Uint32);
-        Edit->Redraw = 1;
         break;
     case SET_CALLBACK:
     {
@@ -170,12 +165,6 @@ int SDL_EditProperties(SDL_Widget *widget,int feature,va_list list)
     case GET_CAPTION:
         sprintf(va_arg(list,char*),"%s",Edit->Caption);
         break;
-    case SET_ALWAYS_FOCUS:
-        Edit->Focus = va_arg(list,int);
-        break;
-    case FORCE_REDRAW:
-        Edit->Redraw = 1;
-        break;
     }
     return 1;
 }
@@ -186,8 +175,8 @@ int SDL_EditEventHandler(SDL_Widget *widget,SDL_Event *event)
     SDL_Edit *Edit=(SDL_Edit*)widget;
     char key;
 
-    if(!SDL_WidgetHasFocus(widget) && !Edit->Focus)
-        return;
+    if(!SDL_WidgetHasFocus(widget))
+        return 0;
     
     switch(event->type) 
     {
@@ -196,13 +185,13 @@ int SDL_EditEventHandler(SDL_Widget *widget,SDL_Event *event)
         {
         case SDLK_BACKSPACE:
             Edit->Caption[strlen(Edit->Caption)-1]='\0';
-            Edit->Redraw=1;
             if(Edit->AnyKeyPressCallback)
                 Edit->AnyKeyPressCallback(Edit->AnyKeyData);
 
             break;
         case SDLK_ESCAPE:
             SDL_WidgetLoseFocus();
+            retval=1;
             break;
         case SDLK_LSHIFT:
         case SDLK_RSHIFT:
@@ -211,6 +200,8 @@ int SDL_EditEventHandler(SDL_Widget *widget,SDL_Event *event)
         case SDLK_RETURN:
             if(Edit->ReturnPressCallback)
                 Edit->ReturnPressCallback(Edit->ReturnKeyData);
+            
+            retval=1;
             SDL_WidgetLoseFocus();
             break;
         default:
@@ -228,7 +219,6 @@ int SDL_EditEventHandler(SDL_Widget *widget,SDL_Event *event)
                 }
             }
             sprintf(Edit->Caption,"%s%c",Edit->Caption,key);
-            Edit->Redraw=1;
             if(Edit->AnyKeyPressCallback)
                 Edit->AnyKeyPressCallback();
             break;
@@ -250,9 +240,9 @@ int SDL_EditEventHandler(SDL_Widget *widget,SDL_Event *event)
     return retval;
 }
 
-void SDL_EditSetCallback(void *edit,int event,void *function,void *data)
+static void SDL_EditSetCallback(SDL_Widget *widget,int event,void *function,void *data)
 {
-    SDL_Edit *Edit=(SDL_Edit*)edit;
+    SDL_Edit *Edit=(SDL_Edit*)widget;
 
     if(event ==  SDL_KEYDOWN_RETURN)
     {
@@ -267,11 +257,12 @@ void SDL_EditSetCallback(void *edit,int event,void *function,void *data)
 
 }
 
-void SDL_EditCallback(void *edit,int event)
+void SDL_EditCallback(SDL_Widget *widget,int event)
 {
-    SDL_Edit *Edit=(SDL_Edit*)edit;
+    SDL_Edit *Edit=(SDL_Edit*)widget;
     if(event ==  SDL_KEYDOWN_RETURN)
     {
         Edit->ReturnPressCallback(NULL);
     }
 }
+

@@ -200,7 +200,7 @@ int SDL_TabProperties(SDL_Widget *widget,int feature,va_list list)
     return retval;
 }
 
-void SDL_TabEventHandler(SDL_Widget* widget,SDL_Event *event)
+int SDL_TabEventHandler(SDL_Widget* widget,SDL_Event *event)
 {
     SDL_Tab *Tab=(SDL_Tab*)widget;
     SDL_TabList *tl = Tab->tabs;
@@ -252,7 +252,7 @@ void SDL_TabEventHandler(SDL_Widget* widget,SDL_Event *event)
     default:
         break;
     }
-
+    return 0;
 }
 
 void Tab_AddArrows(SDL_Tab *tab)

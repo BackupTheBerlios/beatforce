@@ -19,6 +19,9 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#ifndef __SDL_SLIDER_H__
+#define __SDL_SLIDER_H__
+
 #include "SDL_Widget.h"
 
 
@@ -66,7 +69,7 @@ typedef struct SDL_Slider
 /* prototypes */
 SDL_Widget* SDL_SliderCreate(SDL_Rect *rect);
 void        SDL_SliderDraw(SDL_Widget *widget,SDL_Surface *dest);
-void        SDL_SliderEventHandler (SDL_Widget *widget,SDL_Event *event);
+int         SDL_SliderEventHandler (SDL_Widget *widget,SDL_Event *event);
 int         SDL_SliderProperties(SDL_Widget *widget,int feature,va_list list);
 
 // internal enums
@@ -84,3 +87,7 @@ enum
     NORMAL_STEP,
     LARGE_STEP
 };
+
+
+
+#endif /* __SDL_SLIDER_H__ */

@@ -34,7 +34,7 @@ const struct S_Widget_FunctionList SDL_VolumeBar_FunctionList =
     SDL_VolumeBarCreate,
     SDL_VolumeBarDraw,
     SDL_VolumeBarProperties,
-    SDL_VolumeBarEventHandler,
+    NULL,
     NULL,
 };
 
@@ -141,12 +141,6 @@ int SDL_VolumeBarProperties(SDL_Widget *widget,int feature,va_list list)
         break;
     }
     return 1;
-}
-
-void SDL_VolumeBarEventHandler(SDL_Widget *widget,SDL_Event *event)
-{
-
-
 }
 
 

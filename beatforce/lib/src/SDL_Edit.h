@@ -30,9 +30,7 @@ typedef struct SDL_Edit
     SDL_Font   *Font;
 
     char    *Caption;
-    int      Redraw;
     int      Shift;
-    int      Focus;
 
     void (*AnyKeyPressCallback)();
     void *AnyKeyData;

@@ -39,7 +39,5 @@ typedef struct SDL_Panel
 // prototypes
 SDL_Widget*  SDL_PanelCreate(SDL_Rect *rect);
 void         SDL_PanelDraw(SDL_Widget *widget,SDL_Surface *dest);
-void         SDL_PanelHandler(SDL_Widget *widget,SDL_Event *event);
 int          SDL_PanelProperties(SDL_Widget *widget,int feature,va_list list);
-void         SDL_PanelEventHandler(SDL_Widget *widget,SDL_Event *event);
 

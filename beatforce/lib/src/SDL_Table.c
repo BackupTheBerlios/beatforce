@@ -96,7 +96,7 @@ SDL_Widget* SDL_TableCreate(SDL_Rect* rect)
    
     Table->Selected          = NULL;
     Table->SelectedCount     = 0;
-    Table->Selectable        = 0;
+    Table->SelectMode        = TABLE_MODE_NONE;
     Table->FirstVisibleRow   = 0;
     Table->HighlightedRow    = -1;
     Table->editcaption       = NULL;
@@ -319,11 +319,11 @@ int SDL_TableProperties(SDL_Widget *widget,int feature,va_list list)
             }
         }
         break;
-    case SET_SELECTABLE:
-        Table->Selectable = va_arg(list,int);
+    case SET_SELECTION_MODE:
+        Table->SelectMode = va_arg(list,int);
         
         /* At least one item has to be selected */
-        if(Table->Selectable == 2)
+        if(Table->SelectMode == TABLE_MODE_BROWSE)
         {
             if(Table->Selected == NULL)
             {
@@ -364,7 +364,7 @@ int SDL_TableProperties(SDL_Widget *widget,int feature,va_list list)
                         SDL_WidgetProperties(SET_BG_COLOR,Table->bgcolor);
                         SDL_WidgetProperties(SET_FG_COLOR,BLACK);
                         SDL_WidgetProperties(SET_CAPTION,label);
-                        SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_RETURN , Table_EditReturnKeyPressed , Table);
+                        SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_RETURN,Table_EditReturnKeyPressed,Table);
                     }
                  }
             }
@@ -439,7 +439,7 @@ int SDL_TableEventHandler(SDL_Widget *widget,SDL_Event *event)
                         memset(string,0,255);
                         Table->Table_GetString(Table->CurrentRow,0,(char*)&string);
                      
-                        if(strlen(string) && Table->Selectable)
+                        if(strlen(string) && Table->SelectMode)
                         {
                             /* Add to selected */
                             SDL_TableAddSelected(Table);
@@ -538,7 +538,7 @@ static void SDL_TableDrawRow(SDL_Surface *dest,SDL_Table *Table,int row)
         SDL_FillRect(dest,&RowDims,SDL_MapRGB(dest->format,255,55,0));
         SDL_FontSetColor(Table->font,Table->fgcolor);
     }
-    else if(Table->Selectable && SDL_TableIsRowSelected(Table,row))
+    else if(Table->SelectMode && SDL_TableIsRowSelected(Table,row))
     {
         SDL_FillRect(dest,&RowDims,0x00ff00);
     }
@@ -632,7 +632,7 @@ static void SDL_TableAddSelected(SDL_Table *table)
             {
                 /* Remove the item when it is not in browse mode 
                    in browse mode at least one has to be selected */
-                if(table->Selectable != 2)
+                if(table->SelectMode != TABLE_MODE_BROWSE)
                 { 
                     table->Selected[i]=-1;
                     t(table);
@@ -641,13 +641,13 @@ static void SDL_TableAddSelected(SDL_Table *table)
             }
         }
 
-        if(table->SelectedCount < table->Selectable || table->Selectable < 0)
+        if(table->SelectMode == TABLE_MODE_MULTIPLE)
         {
             table->SelectedCount++;
             table->Selected=realloc(table->Selected,table->SelectedCount*sizeof(int*));
             table->Selected[table->SelectedCount-1]=table->CurrentRow;
         }
-        else if (table->Selectable == 1)
+        else if (table->SelectMode == TABLE_MODE_BROWSE)
         {
             table->Selected[0]=table->CurrentRow;
         }
@@ -674,6 +674,7 @@ static void Table_EditReturnKeyPressed(void *data)
 
     SDL_WidgetPropertiesOf((SDL_Widget*)Table->edit,GET_CAPTION,&string);
     SDL_WidgetClose(Table->edit);
+    free(Table->edit);
     Table->edit=NULL;
 
     if(Table->editcaption)

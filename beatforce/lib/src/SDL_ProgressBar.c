@@ -186,8 +186,9 @@ int  SDL_ProgressBarProperties(SDL_Widget *widget,int feature,va_list list)
     return 1;
 }
 
-void SDL_ProgressBarEventHandler(SDL_Widget *widget, SDL_Event *event)
+int SDL_ProgressBarEventHandler(SDL_Widget *widget, SDL_Event *event)
 {
+    int handled;
     SDL_ProgressBar *ProgressBar=(SDL_ProgressBar*)widget;
     
     switch(event->type)
@@ -235,7 +236,7 @@ void SDL_ProgressBarEventHandler(SDL_Widget *widget, SDL_Event *event)
     default:
         break;
     }
-
+    return 0;
 
 }
 

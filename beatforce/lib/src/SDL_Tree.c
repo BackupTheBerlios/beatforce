@@ -227,7 +227,7 @@ int SDL_TreeProperties(SDL_Widget *widget,int feature,va_list list)
     return 1;
 }
 
-void SDL_TreeEventHandler(SDL_Widget *widget,SDL_Event *event)
+int SDL_TreeEventHandler(SDL_Widget *widget,SDL_Event *event)
 {
     SDL_Tree *Tree=(SDL_Tree*)widget;
     
@@ -280,7 +280,7 @@ void SDL_TreeEventHandler(SDL_Widget *widget,SDL_Event *event)
         break;
     }
     
-
+    return 0;
 }
 
 

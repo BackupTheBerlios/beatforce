@@ -33,7 +33,7 @@ const struct S_Widget_FunctionList SDL_Label_FunctionList =
     SDL_LabelCreate,
     SDL_LabelDraw,
     SDL_LabelProperties,
-    SDL_LabelEventHandler,
+    NULL,
     NULL,
 };
 
@@ -132,12 +132,6 @@ int SDL_LabelProperties(SDL_Widget *widget,int feature,va_list list)
 
     }
     return 1;
-}
-
-void SDL_LabelEventHandler(SDL_Widget *widget,SDL_Event *event)
-{
-
-
 }
 
 

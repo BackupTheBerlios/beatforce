@@ -61,7 +61,7 @@ typedef enum E_Widget_Properties
     COLUMN_WIDTH,        // int
     GET_SELECTED,         // void *
     CLEAR_SELECTED,
-    SET_SELECTABLE,  // to enable selection
+    SET_SELECTION_MODE,  // to enable selection
 
     SET_PERCENTAGE,       // int, slider specific
     SET_MAX_VALUE,      
@@ -105,16 +105,16 @@ typedef enum E_Widget_Event
 
 typedef enum E_Widget_Type
 {
-    SDL_BUTTON,
-    SDL_TAB,
-    SDL_TABLE,
-    SDL_SLIDER,
-    SDL_LABEL,
-    SDL_EDIT,
-    SDL_PANEL,
-    SDL_VOLUMEBAR,
-    SDL_PROGRESSBAR,
-    SDL_TREE
+    SDL_BUTTON,             /* 0 */
+    SDL_TAB,                /* 1 */
+    SDL_TABLE,              /* 2 */
+    SDL_SLIDER,             /* 3 */
+    SDL_LABEL,              /* 4 */
+    SDL_EDIT,               /* 5 */
+    SDL_PANEL,              /* 6 */
+    SDL_VOLUMEBAR,          /* 7 */
+    SDL_PROGRESSBAR,        /* 8 */
+    SDL_TREE                /* 9 */
 }E_Widget_Type;
 
 typedef struct SDL_Widget

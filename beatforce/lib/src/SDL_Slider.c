@@ -96,7 +96,8 @@ void SDL_SliderDraw(SDL_Widget *widget,SDL_Surface *dest)
     if(Slider->Visible == 0)
         return;
 
-
+    if(Slider->SliderButton == NULL)
+        return;
     
     if(Slider->StoreBackground || Slider->state == SLIDER_DRAG)
     {
@@ -254,7 +255,7 @@ int SDL_SliderProperties(SDL_Widget *widget,int feature,va_list list)
 }
 
 
-void SDL_SliderEventHandler(SDL_Widget *widget,SDL_Event *event)
+int SDL_SliderEventHandler(SDL_Widget *widget,SDL_Event *event)
 {
     SDL_Slider *Slider=(SDL_Slider*)widget;
 
@@ -359,6 +360,7 @@ void SDL_SliderEventHandler(SDL_Widget *widget,SDL_Event *event)
             Slider->OnSliderChanged(Slider->OnSliderChangedData);
         Slider->changed=0;
     }
+    return 0;
 }
 
 

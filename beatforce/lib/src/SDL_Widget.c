@@ -346,7 +346,10 @@ int SDL_WidgetEvent(SDL_Event *event)
         if(eh)
         {
             if(eh(Widget,event))
+            {
+
                 retval=1;
+            }
         }
         WidgetList=WidgetList->next;
     }

@@ -29,7 +29,7 @@ const struct S_Widget_FunctionList SDL_Panel_FunctionList =
     SDL_PanelCreate,
     SDL_PanelDraw,
     SDL_PanelProperties,
-    SDL_PanelEventHandler,
+    NULL,
     NULL,
 };
 
@@ -125,11 +125,7 @@ int SDL_PanelProperties(SDL_Widget *widget,int feature,va_list list)
     return 1;
 }
 
-void SDL_PanelEventHandler(SDL_Widget *widget,SDL_Event *event)
-{
 
-
-}
 
 
 

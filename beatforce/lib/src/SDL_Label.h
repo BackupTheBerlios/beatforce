@@ -55,4 +55,4 @@ enum LabelPattern
 SDL_Widget* SDL_LabelCreate(SDL_Rect *rect);
 void        SDL_LabelDraw(SDL_Widget *widget,SDL_Surface *dest);
 int         SDL_LabelProperties(SDL_Widget *widget,int feature,va_list list);
-void        SDL_LabelEventHandler(SDL_Widget *widget,SDL_Event *event);
+

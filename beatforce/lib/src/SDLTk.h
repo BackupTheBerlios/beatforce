@@ -19,36 +19,22 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#ifndef __SDLTK_H__
+#define __SDLTK_H__
+
 #include "SDL_Widget.h"
-#include "SDL_Font.h"
+#include "SDL_Window.h"
 
-typedef struct SDL_VolumeBar
-{
-    SDL_Widget Widget;
-    SDL_Font *Font;
-    
-    Uint32  color1;
-    Uint32  color2;
-    Uint32  color3;
-    Uint32  color4;
-    
-    int Redraw;
-    int Visible;
+#include "SDL_Button.h"
+#include "SDL_Label.h"
+#include "SDL_Panel.h"
+#include "SDL_ProgressBar.h"
+#include "SDL_Slider.h"
+#include "SDL_Tab.h"
+#include "SDL_Table.h"
+#include "SDL_Tree.h"
+#include "SDL_VolumeBar.h"
 
-    int MinValue;
-    int MaxValue;
-    int CriticalValue;
-    int CurrentValue;
+#endif /* __SDLTK_H__ */
 
-    /* Settings for internal draw functions */
-    int CriticalLine;  /* The "Red" zone */
-    int CurrentLine;   /* line where the volume is at */
-
-}SDL_VolumeBar;
-
-
-// prototypes
-SDL_Widget* SDL_VolumeBarCreate(SDL_Rect *rect);
-void        SDL_VolumeBarDraw(SDL_Widget *widget,SDL_Surface *dest);
-int         SDL_VolumeBarProperties(SDL_Widget *widget,int feature,va_list list);
 

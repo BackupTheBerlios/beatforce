@@ -19,11 +19,22 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#ifndef __SDL_TABLE_H__
+#define __SDL_TABLE_H__
+
 #include <SDL/SDL.h>
 
 #include "SDL_Widget.h"
 #include "SDL_Font.h"
 #include "SDL_Edit.h"
+
+
+typedef enum
+{
+    TABLE_MODE_NONE,       /* No selection possible             */
+    TABLE_MODE_BROWSE,     /* Only one can be selected          */
+    TABLE_MODE_MULTIPLE    /* Multiple entries can be selected  */
+}E_TableMode;
 
 typedef struct SDL_Table
 {
@@ -55,7 +66,7 @@ typedef struct SDL_Table
     int CurrentRow;
     int CurrentColumn;
 
-    int Selectable;
+    E_TableMode SelectMode;
 
     //helper variables
     int TablePreviousHighlightedRow;
@@ -124,3 +135,5 @@ int         SDL_TableProperties(SDL_Widget *widget,int feature,va_list list);
 
 int  SDL_TableEventHandler(SDL_Widget *widget,SDL_Event *event);
 
+
+#endif /* __SDL_TABLE_H__ */

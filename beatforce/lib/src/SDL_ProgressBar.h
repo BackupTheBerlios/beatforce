@@ -19,6 +19,9 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#ifndef __SDL_PROGRESSBAR_H__
+#define __SDL_PROGRESSBAR_H__
+
 #include "SDL_Widget.h"
 #include "SDL_Font.h"
 
@@ -60,7 +63,8 @@ typedef struct SDL_ProgressBar
 // prototypes
 SDL_Widget* SDL_ProgressBarCreate(SDL_Rect *rect);
 void        SDL_ProgressBarDraw(SDL_Widget *widget,SDL_Surface *dest);
-void        SDL_ProgressBarEventHandler(SDL_Widget *widget,SDL_Event *event);
+int         SDL_ProgressBarEventHandler(SDL_Widget *widget,SDL_Event *event);
 int         SDL_ProgressBarProperties(SDL_Widget *widget,int feature,va_list list);
 
 
+#endif /* __SDL_PROGRESSBAR_H__ */

@@ -18,6 +18,10 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
+
+#ifndef __SDL_BUTTON_H__
+#define __SDL_BUTTON_H__
+
 #include <stdarg.h>
 
 #include <SDL/SDL.h>
@@ -58,3 +62,6 @@ int         SDL_ButtonProperties(SDL_Widget *widget,int feature,va_list list);
 int         SDL_ButtonEventHandler(SDL_Widget *widget,SDL_Event *event);
 void        SDL_ButtonClose(SDL_Widget *widget);
 
+
+
+#endif /* __BUTTON_H__ */
