@@ -112,7 +112,7 @@ typedef enum E_Widget_Type
  */
 typedef void*             (*T_Widget_Create)       (SDL_Rect*);
 typedef void              (*T_Widget_Draw)         (void*,SDL_Surface *);
-typedef void              (*T_Widget_Properties)   (void*,int,va_list ap);
+typedef int               (*T_Widget_Properties)   (void*,int,va_list ap);
 typedef void              (*T_Widget_EventHandler) (void*,SDL_Event*);
 typedef void              (*T_Widget_Close)        (void*);
 

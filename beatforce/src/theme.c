@@ -462,6 +462,14 @@ ThemeButton *XML_ParseButton(ThemeButton *button,xmlDocPtr doc, xmlNodePtr cur)
                 button->action=PAUSE;
             if(!strcmp(action,"RESET_FADER"))
                 button->action=RESET_FADER;
+            if(!strcmp(action,"CHANGE_DIR"))
+                button->action=CHANGE_DIR;
+            if(!strcmp(action,"REMOVE"))
+                button->action=REMOVE;
+            if(!strcmp(action,"ADD"))
+                button->action=ADD;
+            if(!strcmp(action,"RENAME"))
+                button->action=RENAME;
             free(action);
         }
 
@@ -469,7 +477,6 @@ ThemeButton *XML_ParseButton(ThemeButton *button,xmlDocPtr doc, xmlNodePtr cur)
         StorePropertyAsShort(cur,"y",&button->Rect.y);
         StorePropertyAsShort(cur,"w",&button->Rect.w);
         StorePropertyAsShort(cur,"h",&button->Rect.h);
-        return button;
     }
     else
     {
@@ -497,6 +504,14 @@ ThemeButton *XML_ParseButton(ThemeButton *button,xmlDocPtr doc, xmlNodePtr cur)
                 last->next->action=PAUSE;
             if(!strcmp(action,"RESET_FADER"))
                 last->next->action=RESET_FADER;
+            if(!strcmp(action,"CHANGE_DIR"))
+                last->next->action=CHANGE_DIR;
+            if(!strcmp(action,"REMOVE"))
+                last->next->action=REMOVE;
+            if(!strcmp(action,"ADD"))
+                last->next->action=ADD;
+            if(!strcmp(action,"RENAME"))
+                last->next->action=RENAME;
             free(action);
         }
 
@@ -505,9 +520,8 @@ ThemeButton *XML_ParseButton(ThemeButton *button,xmlDocPtr doc, xmlNodePtr cur)
         StorePropertyAsShort(cur,"w",&last->next->Rect.w);
         StorePropertyAsShort(cur,"h",&last->next->Rect.h);
 
-        return button;    
     }
-    
+    return button;        
 }
 
 ThemeText *XML_ParseText(ThemeText *text,xmlDocPtr doc, xmlNodePtr cur)
@@ -871,6 +885,10 @@ ThemeSongdb *XML_ParseSongdb(xmlDocPtr doc, xmlNodePtr cur)
             if ((!xmlStrcmp(cur->name, (const xmlChar *)"table"))) 
             {
                 songdb->Table=XML_ParseTable(doc,cur);
+            }
+            if((!xmlStrcmp(cur->name, (const xmlChar *)"button"))) 
+            {
+                songdb->Button=XML_ParseButton(songdb->Button,doc,cur);
             }
             cur=cur->next;
         }

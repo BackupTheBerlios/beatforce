@@ -84,7 +84,7 @@ typedef struct SDL_Table
 
 void* SDL_TableCreate(SDL_Rect* rect);
 void  SDL_TableDraw (void *table,SDL_Surface *dest);
-void  SDL_TableProperties(void *table,int feature,va_list list);
+int  SDL_TableProperties(void *table,int feature,va_list list);
 
 /*
   Currently implemented properties:

@@ -91,7 +91,7 @@ void SDL_ButtonDraw(void *data,SDL_Surface *dest)
                          button->rect.w,button->rect.h);
 }
 
-void SDL_ButtonProperties(void *button,int feature,va_list list)
+int SDL_ButtonProperties(void *button,int feature,va_list list)
 {
     SDL_Button *but=(SDL_Button*)button;
 
@@ -133,6 +133,7 @@ void SDL_ButtonProperties(void *button,int feature,va_list list)
         break;
     }
     }
+    return 1;
 }
 
 void SDL_ButtonEventHandler(void * button,SDL_Event *event)

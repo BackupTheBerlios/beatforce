@@ -37,4 +37,5 @@ int PLAYLIST_Init (int player_nr);
 int PLAYLIST_GetNoOfEntries(int player_nr);
 struct PlEntry *PLAYLIST_GetSong (int player_nr, int no);
 void PLAYLIST_SetEntry(int player_nr, struct SongDBEntry *e);
+int PLAYLIST_Remove(int player_nr,long songdb_id);
 #endif

@@ -149,7 +149,7 @@ void SDL_TableDraw(void *table,SDL_Surface *dest)
 }
 
 
-void SDL_TableProperties(void *table,int feature,va_list list)
+int SDL_TableProperties(void *table,int feature,va_list list)
 {
     SDL_Table *Table=(SDL_Table*)table;
     int column,width;
@@ -241,6 +241,7 @@ void SDL_TableProperties(void *table,int feature,va_list list)
             }
         }
     }
+    return 1;
 }
 
 void SDL_TableEventHandler(void *table,SDL_Event *event)

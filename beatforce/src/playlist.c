@@ -19,9 +19,7 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifdef HAVE_CONFIG_H
-#  include <config.h>
-#endif
+#include <config.h>
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -119,7 +117,7 @@ int PLAYLIST_Remove(int player_nr,long songdb_id)
 {
     struct PlEntry *newlist = playlist[0];
     struct PlEntry *pe = newlist;
-    printf("PLAYLIST_Remove songsb %d\n",songdb_id);
+    printf("PLAYLIST_Remove songsb %ld\n",songdb_id);
 
     while(newlist)
     {
@@ -135,6 +133,7 @@ int PLAYLIST_Remove(int player_nr,long songdb_id)
     }
     playlist[0]=newlist;
 
+    return 1;
 }
 
 struct PlEntry *

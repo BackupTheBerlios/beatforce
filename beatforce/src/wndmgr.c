@@ -51,7 +51,6 @@ int wndmgr_Redraw(void *data);
 
 void WNDMGR_CloseWindow()
 {
-    EnableFade();
     MAINWINDOW_Open();//Always go back to main window
 }
 

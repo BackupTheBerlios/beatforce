@@ -83,8 +83,12 @@ void eventhandler(SDL_Table *table)
 
 void SONGDBUI_CreateWindow(ThemeSongdb *ts)
 {
+    ThemeButton *Button = NULL;
+
     if(ts == NULL)
         return;
+
+    Button=ts->Button;
 
     if(ts)
     {
@@ -130,21 +134,40 @@ void SONGDBUI_CreateWindow(ThemeSongdb *ts)
     SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_RETURN,UI_SongdbRenameFinished);
 
     /* Create buttons which change the tabs */
-    //add dir to highlighted tab
-    SDL_WidgetCreate(SDL_BUTTON,30,610,20,20);
-    SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,UI_SongdbChangeDirClicked,NULL);        
+    while(Button)
+    {
+        switch(Button->action)
+        {
+        case CHANGE_DIR:
+            //add dir to highlighted tab
+            SDL_WidgetCreate(SDL_BUTTON,30,610,20,20);
+            SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,UI_SongdbChangeDirClicked,NULL);        
+            break;
+        case RENAME:
+            //rename highlighted tab
+            SDL_WidgetCreate(SDL_BUTTON,60,610,20,20);
+            SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,UI_SongdbRenameClicked,NULL);        
+            break;
+        case ADD:
+            //add a empty tab button
+            SDL_WidgetCreate(SDL_BUTTON,90,610,20,20);
+            SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,UI_SongdbAddTabClicked,NULL);        
+            break;
+        case REMOVE:
+            //remove the active tab
+            SDL_WidgetCreate(SDL_BUTTON,120,610,20,20);
+            SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,songdbui_RemoveTab,NULL);        
+            break;
+        }
+        Button=Button->next;
 
-    //rename highlighted tab
-    SDL_WidgetCreate(SDL_BUTTON,60,610,20,20);
-    SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,UI_SongdbRenameClicked,NULL);        
+    }
 
-    //add a empty tab button
-    SDL_WidgetCreate(SDL_BUTTON,90,610,20,20);
-    SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,UI_SongdbAddTabClicked,NULL);        
 
-    //remove the active tab
-    SDL_WidgetCreate(SDL_BUTTON,120,610,20,20);
-    SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,songdbui_RemoveTab,NULL);        
+
+
+
+
     
 }
 
@@ -156,7 +179,7 @@ void SONGDBUI_ChangeDatabase(char *string)
     t=(SDL_Tab *)tabwidget;
     SONGDB_SetActiveList(t->hl->index);
     SDL_WidgetPropertiesOf(table,ROWS,SONGDB_GetNoOfEntries());
-
+    
     if(string)
     {
         if(t->hl->index < songdbcfg->Tabs)
@@ -215,7 +238,10 @@ void UI_SongdbAddTabClicked(void *data)
 
 void songdbui_RemoveTab(void *data)
 {
-    TRACE("Remove tab:Not implemented");
+    if(SDL_WidgetPropertiesOf(tabwidget,TAB_REMOVE,NULL))
+    {
+        songdbcfg->Tabs--;
+    }
 }
 
 void songdbstring(long row,int column,char *dest)

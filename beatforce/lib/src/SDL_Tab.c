@@ -35,7 +35,7 @@
 
 static void Tab_AddArrows(SDL_Tab *tab);
 static void Tab_AddTab(SDL_Tab *tab,char *string);
-static void Tab_RemoveTab(SDL_Tab *tab);
+static int  Tab_RemoveTab(SDL_Tab *tab);
 static void Tab_Recalculate(SDL_Tab *tab);
 static int  Tab_DrawTabWithCaption(SDL_Surface *dest,SDL_Tab *tab,
                                    SDL_TabList * tl, int high);
@@ -125,10 +125,11 @@ void SDL_TabDraw(void *data,SDL_Surface *dest)
     }
 }
 
-void SDL_TabProperties(void *tab,int feature,va_list list)
+int SDL_TabProperties(void *tab,int feature,va_list list)
 {
     SDL_Tab *Tab=(SDL_Tab*)tab;
-    
+    int retval=1;
+
     switch(feature)
     {
     case SET_FONT:
@@ -140,7 +141,7 @@ void SDL_TabProperties(void *tab,int feature,va_list list)
         break;
 
     case TAB_REMOVE:
-        Tab_RemoveTab((SDL_Tab *)tab);
+        retval=Tab_RemoveTab((SDL_Tab *)tab);
         break;
 
     case SET_BG_COLOR:
@@ -191,6 +192,7 @@ void SDL_TabProperties(void *tab,int feature,va_list list)
     }
     
     }
+    return retval;
 }
 
 void SDL_TabEventHandler(void * tab,SDL_Event *event)
@@ -509,10 +511,35 @@ static void Tab_Recalculate(SDL_Tab *tab)
         tab->startx = 0;
 }
 
-static void Tab_RemoveTab(SDL_Tab *tab)
+static int Tab_RemoveTab(SDL_Tab *tab)
 {
+    SDL_TabList *remove;
 
-
+    if(tab->NoOfTabs)
+    {
+        remove=tab->hl;    
+        tab->hl=tab->hl->prev;        
+            
+        if(remove->next)
+            remove->next->prev=remove->prev;
+        if(remove->prev)
+        {
+            remove->prev->next=remove->next;
+        }
+        else
+        {
+            tab->tabs=remove->next; /* move the root node */
+            tab->hl=tab->tabs;      /* highlight the first node */
+        }
+        
+        if(remove->caption)
+            free(remove->caption);
+        free(remove->rect);
+        free(remove);
+        tab->NoOfTabs--; 
+        return 1;
+    }
+    return 0;
 }
 
 

@@ -30,7 +30,11 @@ enum
 {
     PLAY=1,
     PAUSE,
-    RESET_FADER
+    RESET_FADER,
+    CHANGE_DIR,
+    RENAME,
+    ADD,
+    REMOVE
 }eButtonAction;
 
 enum
@@ -151,7 +155,8 @@ typedef struct
 
 typedef struct 
 {
-    ThemeTable *Table;
+    ThemeTable  *Table;
+    ThemeButton *Button;
 }ThemeSongdb;
 
 typedef struct 

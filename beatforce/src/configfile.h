@@ -132,6 +132,14 @@ typedef struct
 }
 AudioConfig;
 
+
+typedef struct TabEntry
+{
+    char *TabTitle;
+    char *TabString;
+    struct TabEntry *next;
+}TabEntry;
+
 typedef struct
 {
     int Tabs;

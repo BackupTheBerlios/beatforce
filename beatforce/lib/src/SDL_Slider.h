@@ -63,7 +63,7 @@ typedef struct SDL_Slider
 void* SDL_SliderCreate(SDL_Rect *rect);
 void SDL_SliderDraw(void *slider,SDL_Surface *dest);
 void SDL_SliderEventHandler (void * slider,SDL_Event *event);
-void SDL_SliderProperties(void *slider,int feature,va_list list);
+int  SDL_SliderProperties(void *slider,int feature,va_list list);
 
 // internal enums
 enum

@@ -130,7 +130,7 @@ void SDL_SliderDraw(void *slider,SDL_Surface *dest)
 
 }
 
-void SDL_SliderProperties(void *slider,int feature,va_list list)
+int SDL_SliderProperties(void *slider,int feature,va_list list)
 {
     SDL_Slider *Slider=(SDL_Slider*)slider;
     double val;
