@@ -44,9 +44,6 @@ void playliststring(long row,int column,char *dest)
 
     dest[0]='\0';
 
-    if(SONGDB_GetNoOfEntries()<row)
-        return;
-
     if(PLAYLIST_GetNoOfEntries(PLAYER1) < row)
         return;
         

@@ -26,8 +26,6 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
-//static SDL_Surface *SDL_CreateDefaultButtonSurface(SDL_Rect *rect);
-
 const struct S_Widget_FunctionList SDL_Button_FunctionList =
 {
     SDL_ButtonCreate,
@@ -65,7 +63,6 @@ void SDL_ButtonDraw(void *data,SDL_Surface *dest)
 
     if(button->normal==NULL)
     {
-//        printf("SDL_Button: Can't draw without an image\n");
         SDL_FillRect(dest,&button->rect,0xfff000);
         return;
     }
