@@ -297,9 +297,12 @@ int GetSubDir(int count,char *string)
     BFList *dirss;
     char *t;
     int c;
+    int p;
 
     dirss=OSA_FindDirectories(directory);    
 
+    p=LLIST_NoOfEntries(dirss);
+//    printf("directory %s %d\n",directory,p);
     c=count;
     while(dirss)
     {
@@ -324,7 +327,7 @@ int GetSubDir(int count,char *string)
     {
         return 0;
     }
-    return LLIST_NoOfEntries(dirss);
+    return p;
 }
 
 static void FILEWINDOW_GetDirectories(int row,int column,char *string)
@@ -409,11 +412,13 @@ static void FILEWINDOW_DirectoryClicked(void *data)
     int nw2=0;
 
     memset(newdir,0,255);
-
+    memset(str,0,255);
     /* Get the rownumber which is clicked */
     c=t->CurrentRow;
-    
+
+//    printf("str %s %d\n",str,__LINE__);
     nw=GetDir(0,str);
+//    printf("new %d\n",nw);
     if(c == 0)
     {
         if(!strcmp(directory,"/"))
@@ -437,16 +442,19 @@ static void FILEWINDOW_DirectoryClicked(void *data)
         {
             GetDir(i,str);
             sprintf(newdir,"%s%s",newdir,str);
+//            printf("newdir %s\n",newdir);
         }
         nw2=GetSubDir(c-nw,str);
         sprintf(directory,"%s%s",newdir,str);
+//        printf("directory %s\n",directory);
+//        printf("nw2 %d\n",nw2);
     }
     files=OSA_FindFiles(directory,".mp3",0);
     files2=OSA_FindFiles(directory,".ogg",0);
     
     files=LLIST_Combine(files,files2);
 
-    SDL_WidgetPropertiesOf(t,ROWS,nw2);
+    SDL_WidgetPropertiesOf(t,ROWS,LLIST_NoOfEntries(OSA_FindDirectories(directory)));
 
     /* Correct the rowcount for the files in directory table (for scrollbar) */
     SDL_WidgetPropertiesOf(TableFilesInDirectory,ROWS,LLIST_NoOfEntries(files));

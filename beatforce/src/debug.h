@@ -112,8 +112,8 @@ void printid(char *id,int line,char *message);
 #endif
 
 #if MODULE_ID == OSA
-#define TRACE TRACE_ON
-#define DEBUG DEBUG_ON
+#define TRACE TRACE_OFF
+#define DEBUG DEBUG_OFF
 #endif
 
 #if MODULE_ID == OUTPUT
