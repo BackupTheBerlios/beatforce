@@ -309,7 +309,10 @@ int player_load (int player_nr)
         p->State = PLAYER_PAUSE;
         e   =  SONGDB_GetEntryID (p->songdb_id);
         if(e)
-            err =  INPUT_LoadFile (player_nr, e);
+        {
+            printf("LoadFile %s\n",e->filename);
+            err =  INPUT_LoadFile (player_nr, p->e);
+        }
         else
             ERROR("No such entry");
         if (err)

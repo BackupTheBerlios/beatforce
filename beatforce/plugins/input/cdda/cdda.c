@@ -255,9 +255,20 @@ cdda_get_tag (Private * h, char *path, struct SongDBEntry *e)
     int mins;
     int secnds;
     int centi_secnds;
-    int i=1;
-    
-    readtoc();
+    int i=0;
+    char *drive;
+    char *set;
+
+    drive=strdup(path);
+    set=strrchr(drive,'/');
+    *set=0;    
+
+    set+=8;
+    *set=0;
+    set-=2;
+    i = atoi(set);
+    i--;
+    readtoc(drive);
     dw = (unsigned long) (ourtoc[i+1].dwStartSector - ourtoc[i].dwStartSector /* + 150 - 150 */);
 
     printf("Song startsector %ld - %ld\n",ourtoc[i+1].dwStartSector,ourtoc[i].dwStartSector);
@@ -285,6 +296,8 @@ cdda_load_file (Private * h, char *filename)
 {
     mp3Private *private = (mp3Private *) h;
     int length=private->length;
+    char *drive;
+    char *set;
 
     printf("CDDA_LOAD_FILE %s\n",filename);
     
@@ -296,11 +309,22 @@ cdda_load_file (Private * h, char *filename)
         printf("This is not our file cdda\n");
 	return ERROR_UNKNOWN_FILE;
     }
+    
+    drive=strdup(filename);
+    set=strrchr(drive,'/');
+    *set=0;
 
-    private->fd = open("/dev/hdb",O_RDONLY);
+    set+=8;
+    *set=0;
+    set-=2;
+    printf("Drive to open %s\n",drive);
+
+    private->track = atoi(set);
+    printf("Track to open %d\n",private->track);
+    private->fd    = open(drive,O_RDONLY);
     if (private->fd < 0) 
     {
-        fprintf(stderr, "while opening %s :", "/dev/hdb");
+        fprintf(stderr, "while opening %s :", drive);
         perror("ioctl cdrom device open error: ");
     }
     else
@@ -321,7 +345,6 @@ cdda_load_file (Private * h, char *filename)
             printf("Can not open audio\n");
             return ERROR_OUTPUT_ERROR;
         }
-        printf("Restarting thread %p\n",private);
         private->decode_thread=OSA_CreateThread(cdda_play_loop, (void *)private);
     }
 
@@ -339,19 +362,16 @@ cdda_close_file (Private * h)
     if( h == NULL )
         return ERROR_INVALID_ARG;
   
-    printf("Closing file\n");
-    printf("Closing file\n");
-    printf("Closing file\n");
-#if 0
     if (private->going && private->fd >= 0)
     {
 	private->going = 0;
         OSA_RemoveThread(private->decode_thread);
 	cdda_if.output_close (private->ch_id);
 	private->fd = -1;
+        private->position=0;
 	return 0;
     }
-#endif
+
 
     return ERROR_NOT_OPEN;
 }
@@ -365,13 +385,12 @@ cdda_play_loop (void *param)
     unsigned int input_length = 0, output_length = 0;
     int resolution = 16;
     unsigned int *buffer;
-    int lba=32;
+    int lba=ourtoc[private->track-1].dwStartSector;
     int filedes=private->fd;
 
     buffer=malloc(sizeof(unsigned int) * 2352 * 75);
-    printf("Starting thread %p %d\n",param,private->fd);
    
-    while (1)
+    while (private->going)
     {
         if(private->going)
         {
@@ -386,7 +405,7 @@ cdda_play_loop (void *param)
                 {
                     printf("Error\n");
                 }
-                while(cdda_if.output_buffer_free (private->ch_id) < (2352*5))
+                while(cdda_if.output_buffer_free (private->ch_id) < (2352*5) && private->going)
                     SDL_Delay(5);
 
                 {
@@ -395,11 +414,11 @@ cdda_play_loop (void *param)
                     private->position+=67;
                 }
             }
-//            printf("Read %d\t",private->fd);
         }
        
     }
-    
+    free(buffer);
+
     return 0;
 }
 
@@ -731,18 +750,17 @@ scan_header (FILE * fd, struct mad_header *header, struct xing *xing)
 
 
 
-void readtoc()
+void readtoc(char *dev)
 {
     int fd,i;
     int tracks;
     
-    fd = open("/dev/hdb",O_RDONLY);
+    fd = open(dev,O_RDONLY);
 
     if (fd < 0) 
     {
-        fprintf(stderr, "while opening %s :", "/dev/hdb");
+        fprintf(stderr, "while opening %s :", dev);
         perror("ioctl cdrom device open error: ");
-        exit(1);
     }
 
     ioctl( fd, CDROMREADTOCHDR, &hdr );

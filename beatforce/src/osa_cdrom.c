@@ -22,6 +22,7 @@ typedef struct TOC {	/* structure of table of contents (cdrom) */
 TOC *g_toc;
 int cdtracks;
 
+int OSACDROM_TestDrive(char *dev);
 void DisplayToc ( );
 extern SongDBGroup *MainGroup;
 static struct cdrom_read_audio arg;
@@ -53,68 +54,78 @@ static unsigned int OSACDROM_CalcCDDBId()
 }
 
 long GetStartSector ( p_track )
-	unsigned long p_track;
+    unsigned long p_track;
 {
-  unsigned long i;
+    unsigned long i;
 
-  for (i = 0; i < cdtracks; i++) {
-    if (g_toc [i].bTrack == p_track) {
-      unsigned long dw = g_toc [i].dwStartSector;
-      if ((g_toc [i].bFlags & CDROM_DATA_TRACK) != 0)
-	return -1;
-      return dw;
+    for (i = 0; i < cdtracks; i++) {
+        if (g_toc [i].bTrack == p_track) {
+            unsigned long dw = g_toc [i].dwStartSector;
+            if ((g_toc [i].bFlags & CDROM_DATA_TRACK) != 0)
+                return -1;
+            return dw;
+        }
     }
-  }
 
-  return -1;
+    return -1;
 }
 
 long GetEndSector ( p_track )
-	unsigned long p_track;
+    unsigned long p_track;
 {
-  unsigned long i;
+    unsigned long i;
 
-  for ( i = 1; i <= cdtracks; i++ ) {
-    if ( g_toc [i-1].bTrack == p_track ) {
-      unsigned long dw = g_toc [i].dwStartSector;
-      return dw-1;
+    for ( i = 1; i <= cdtracks; i++ ) {
+        if ( g_toc [i-1].bTrack == p_track ) {
+            unsigned long dw = g_toc [i].dwStartSector;
+            return dw-1;
+        }
     }
-  }
 
-  return -1;
+    return -1;
 }
 
-void OSACDROM_Init()
+int OSACDROM_Init()
 {
-    struct stat statstruct;
-    int fd=0;
-    static struct cdrom_tochdr hdr;
-    static struct cdrom_tocentry entry[100];
-    struct SongDBSubgroup *sg;
-    int i,err,tracks;
-    TOC toc[90];
-    int id;
+    int i;
     
     /* Find out how many CD-ROM drives are connected to the system */
     printf("Drives available: %d\n", SDL_CDNumDrives());
     for ( i=0; i<SDL_CDNumDrives(); ++i ) 
     {
         printf("Drive %d:  \"%s\"\n", i, SDL_CDName(i));
+        OSACDROM_TestDrive(SDL_CDName(i));
+    
+
     }
+}
 
+int OSACDROM_TestDrive(char *dev)
+{
+    struct stat statstruct;
+    int fd=0;
+    static struct cdrom_tochdr hdr;
+    static struct cdrom_tocentry entry[100];
+    struct SongDBSubgroup *sg;
+    int i,j,err,tracks;
+    TOC toc[90];
+    int id;
+    
+    printf("testing %s\n",dev);
 
-    if (stat("/dev/hdb", &statstruct)) 
+    if (stat(dev, &statstruct)) 
     {
-        fprintf(stderr, "cannot stat cd (%s)\n", "/dev/hdb");
-        exit(1);
+        fprintf(stderr, "cannot stat cd (%s)\n", dev);
+        return 0;
     }
 
     if(!S_ISCHR(statstruct.st_mode) &&
        !S_ISBLK(statstruct.st_mode))
     {
         printf("not a device\n");
-        return ;
+        return 0;
     }
+
     switch ((int) (statstruct.st_rdev >> 8L)) 
     {
     case SCSI_GENERIC_MAJOR:	/* generic */
@@ -127,54 +138,51 @@ void OSACDROM_Init()
         break;
     case SCSI_CDROM_MAJOR:      /* scsi cd */
     default:
-	if (!S_ISBLK(statstruct.st_mode)) 
+        if (!S_ISBLK(statstruct.st_mode)) 
         {
-	    fprintf(stderr, " is not a block device\n");
-	    exit(1);
-	}
+            fprintf(stderr, "%s is not a block device\n",SDL_CDName(i));
+            return 0;
+        }
         printf("Cooked ioctl\n");
         break;
     }
-    fd = open("/dev/hdb",O_RDONLY);
+    fd = open(dev,O_RDONLY);
     if (fd < 0) 
     {
-        fprintf(stderr, "while opening %s :", "/dev/hdd");
-        perror("ioctl cdrom device open error: ");
-        exit(1);
+        return 0;
     }
 
     /* read toc */
     ioctl( fd, CDROMSTOP,  NULL );
     ioctl( fd, CDROMSTART, NULL );
     ioctl( fd, CDROMREADTOCHDR, &hdr );
-
-    for ( i = 0; i < hdr.cdth_trk1; i++ ) 
+        
+    for ( j = 0; j < hdr.cdth_trk1; j++ ) 
     {
-	entry[i].cdte_track = 1+i;
-	entry[i].cdte_format = CDROM_LBA;
-	err = ioctl(fd, CDROMREADTOCENTRY, &entry[i] );
-	if ( err != 0 ) 
+        entry[j].cdte_track = 1+j;
+        entry[j].cdte_format = CDROM_LBA;
+        err = ioctl(fd, CDROMREADTOCENTRY, &entry[j] );
+        if ( err != 0 ) 
         {
-	    /* error handling */
-	    fprintf( stderr, "can't get TocEntry #%d (error %d).\n", i+1, err );
-	    exit( -1 );
-	}
+            /* error handling */
+            fprintf( stderr, "can't get TocEntry #%d (error %d).\n", j+1, err );
+        }
     }
-    entry[i].cdte_track = CDROM_LEADOUT;
-    entry[i].cdte_format = CDROM_LBA;
-    err = ioctl( fd, CDROMREADTOCENTRY, &entry[i] );
+    entry[j].cdte_track = CDROM_LEADOUT;
+    entry[j].cdte_format = CDROM_LBA;
+    err = ioctl( fd, CDROMREADTOCENTRY, &entry[j] );
     if ( err != 0 ) 
     {
-	/* error handling */
-	fprintf( stderr, "can't get TocEntry LEADOUT (error %d).\n", err );
-	exit( -1 );
+        /* error handling */
+        fprintf( stderr, "can't get TocEntry LEADOUT (error %d).\n", err );
+        return 0;
     }
     tracks = hdr.cdth_trk1+1;
-    for (i = 0; i < tracks; i++) 
+    for (j = 0; j < tracks; j++) 
     {
-        toc[i].bFlags = (entry[i].cdte_adr << 4) | (entry[i].cdte_ctrl & 0x0f);
-        toc[i].bTrack = entry[i].cdte_track;
-        toc[i].dwStartSector = entry[i].cdte_addr.lba;
+        toc[j].bFlags = (entry[j].cdte_adr << 4) | (entry[j].cdte_ctrl & 0x0f);
+        toc[j].bTrack = entry[j].cdte_track;
+        toc[j].dwStartSector = entry[j].cdte_addr.lba;
     }
     g_toc=toc;
     printf("Number of tracks %d\n",tracks);
@@ -188,7 +196,7 @@ void OSACDROM_Init()
     if(tracks > 0)
     {
         char trackname[255];
-        SONGDB_AddSubgroup(MainGroup,"CDROM");
+        SONGDB_AddSubgroup(MainGroup,dev);
         sg=SONGDB_GetSubgroup();
         /* Go the the last added subgroup */
         while(sg->next)
@@ -196,7 +204,8 @@ void OSACDROM_Init()
 
         for(i=1;i<=tracks;i++)
         {
-            sprintf(trackname,"/dev/hdd/track%02d.cdda",i);
+            printf("Adding tracknames %s\n",dev);
+            sprintf(trackname,"%s/track%02d.cdda",dev,i);
             SONGDB_AddFileToSubgroup(sg,trackname);
         }
 
@@ -233,8 +242,9 @@ void OSACDROM_Init()
        
     }
 #endif
-}
 
+
+}
 
 void DisplayToc ( )
 {
@@ -281,15 +291,15 @@ void DisplayToc ( )
             if (g_toc[i].bFlags & 4) {
                 fputs( " DATAtrack recorded      copy-permitted tracktype\n" , stderr);
                 fprintf(stderr, "     %2d-%2d %13.13s %14.14s      data\n",from,g_toc [i].bTrack,
-			g_toc [i].bFlags & 1 ? "incremental" : "uninterrupted", /* how recorded */
-			g_toc [i].bFlags & 2 ? "yes" : "no" /* copy-perm */
+                        g_toc [i].bFlags & 1 ? "incremental" : "uninterrupted", /* how recorded */
+                        g_toc [i].bFlags & 2 ? "yes" : "no" /* copy-perm */
                     );
             } else { 
                 fputs( "AUDIOtrack pre-emphasis  copy-permitted tracktype channels\n" , stderr);
                 fprintf(stderr, "     %2d-%2d %12.12s  %14.14s     audio    %1c\n",from,g_toc [i].bTrack,
-			g_toc [i].bFlags & 1 ? "yes" : "no", /* pre-emph */
-			g_toc [i].bFlags & 2 ? "yes" : "no", /* copy-perm */
-			g_toc [i].bFlags & 8 ? '4' : '2'
+                        g_toc [i].bFlags & 1 ? "yes" : "no", /* pre-emph */
+                        g_toc [i].bFlags & 2 ? "yes" : "no", /* copy-perm */
+                        g_toc [i].bFlags & 8 ? '4' : '2'
                     );
                 count_audio_trks++;
             }

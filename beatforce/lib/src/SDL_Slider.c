@@ -90,7 +90,6 @@ void SDL_SliderDraw(void *slider,SDL_Surface *dest)
     if(Slider->SliderButton == NULL)
         return;
 
-#if 0
     /*
      * If there is no line image loaded use the current background as a line
      */
@@ -101,10 +100,10 @@ void SDL_SliderDraw(void *slider,SDL_Surface *dest)
 
     if(SDL_BlitSurface(Slider->background,NULL,dest,&Slider->rect)<0)
         fprintf(stderr, "BlitSurface error: %s\n", SDL_GetError());
+    
+    //free(Slider->background);
+//    Slider->background=0;
 
-    free(Slider->background);
-    Slider->background=0;
-#endif   
 
         
 
