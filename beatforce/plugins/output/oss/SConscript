@@ -1,0 +1,10 @@
+
+
+Import('env')
+
+
+env.SharedLibrary('oss',['oss.c'])
+
+
+env.Alias(target = "install", source=env.Install(dir="/usr/share/beatforce/plugins/output/", 
+               source="liboss.so"))
