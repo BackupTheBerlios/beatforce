@@ -27,6 +27,7 @@
 static void SDL_SliderStep(SDL_Slider *slider,int direction,int step);
 static void SDL_SliderPixeloffset(SDL_Slider *Slider);
 static void SDL_SliderCurrentValue(SDL_Slider *Slider);
+static void SDL_SliderPaint(SDL_Slider *Slider);
 
 const struct S_Widget_FunctionList SDL_Slider_FunctionList =
 {
@@ -66,12 +67,12 @@ SDL_Widget* SDL_SliderCreate(SDL_Rect* rect)
     slider->changed = 0;
 
     // default range settings
-    slider->MinValue          = 0;
-    slider->MaxValue          = 100;
-    slider->CurrentValue      = 0.0;
-    slider->CurrentPercentage = 0.0;
-    slider->ValueLocked       = 0;
-    slider->StoreBackground   = 1;
+    slider->MinValue           = 0;
+    slider->MaxValue           = 100;
+    slider->CurrentValue       = 0.0;
+    slider->CurrentPercentage  = 0.0;
+    slider->ValueLocked        = 0;
+    slider->StoreBackground    = 1;
 
     slider->NormalStepSize    = 1.0;
 
@@ -95,8 +96,6 @@ void SDL_SliderDraw(SDL_Widget *widget,SDL_Surface *dest)
     if(Slider->Visible == 0)
         return;
 
-    if(Slider->SliderButton == NULL)
-        return;
 
     
     if(Slider->StoreBackground || Slider->state == SLIDER_DRAG)
@@ -131,15 +130,21 @@ void SDL_SliderDraw(SDL_Widget *widget,SDL_Surface *dest)
         x_offset = (widget->Rect.w - Slider->SliderButton->w) / 2 ;
     }
 
-    button.x = widget->Rect.x + x_offset;
-    button.y = widget->Rect.y + y_offset;
-    button.w = Slider->SliderButton->w;
-    button.h = Slider->SliderButton->h;
-
-    
-    if(SDL_BlitSurface(Slider->SliderButton,NULL,dest,&button)<0)
-        fprintf(stderr, "BlitSurface error: %s\n", SDL_GetError());
-            
+    if(Slider->SliderButton == NULL)
+    {
+        SDL_SliderPaint(Slider);
+    }
+    else
+    {
+        button.x = widget->Rect.x + x_offset;
+        button.y = widget->Rect.y + y_offset;
+        button.w = Slider->SliderButton->w;
+        button.h = Slider->SliderButton->h;
+        
+        
+        if(SDL_BlitSurface(Slider->SliderButton,NULL,dest,&button)<0)
+            fprintf(stderr, "BlitSurface error: %s\n", SDL_GetError());
+    }
 
 
 }
@@ -438,4 +443,10 @@ static void SDL_SliderCurrentValue(SDL_Slider *Slider)
                 / (double)(widget->Rect.h - Slider->SliderButton->h);
         }
     }
+}
+
+static void SDL_SliderPaint(SDL_Slider *Slider)
+{
+
+
 }

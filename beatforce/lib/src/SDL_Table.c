@@ -374,7 +374,7 @@ int SDL_TableProperties(SDL_Widget *widget,int feature,va_list list)
     return 1;
 }
 
-void SDL_TableEventHandler(SDL_Widget *widget,SDL_Event *event)
+int SDL_TableEventHandler(SDL_Widget *widget,SDL_Event *event)
 {
     SDL_Table *Table=(SDL_Table*)widget;
     char string[255];
@@ -477,6 +477,7 @@ void SDL_TableEventHandler(SDL_Widget *widget,SDL_Event *event)
     default:
         break;
     }
+    return 0;
 }
 
 static void SDL_TableAttachScrollbar(SDL_Table *Table)

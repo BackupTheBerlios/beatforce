@@ -5,7 +5,7 @@ noinst_LIBRARIES = libSDLTk.a
 AM_CPPFLAGS = -Wall
 
 libSDLTk_a_SOURCES = \
- SDL_Stack.c        SDL_Stack.h       \
+ SDL_Window.c       SDL_Window.h      \
  SDL_Widget.c       SDL_Widget.h      \
  SDL_WidTool.c      SDL_WidTool.h     \
  SDL_Table.c        SDL_Table.h       \

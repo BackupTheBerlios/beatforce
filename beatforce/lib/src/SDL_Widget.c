@@ -23,7 +23,7 @@
 #include <stdarg.h>
 
 #include "SDL_Widget.h"
-#include "SDL_Stack.h"
+#include "SDL_Window.h"
 
 T_Widget_EventHandler user_eventhandler;
 int StackLock;
@@ -51,16 +51,16 @@ int SDL_WidgetInit()
     target_surface = NULL;
     StackLock = 0;
     MyMutex=SDL_CreateMutex();
-    SDL_StackInit();
     return 1;
 }
 
 SDL_Surface *SDL_WidgetNewSurface(int width,int height,int bpp)
 {
     SDL_Surface *s;
+
     s=SDL_CreateRGBSurface(SDL_SWSURFACE,width,height,bpp,
                            0xff0000,0x00ff00,0x0000ff,0x000000);
-    SDL_StackNewSurface(s);
+    SDL_StackNewScreen(s);
     return s;
 
 }
@@ -68,7 +68,7 @@ SDL_Surface *SDL_WidgetNewSurface(int width,int height,int bpp)
 int SDL_WidgetUseSurface(SDL_Surface *surface)
 {
     SDL_WidgetForceRedraw(surface);
-    SDL_SurfaceStack(surface);
+    SDL_ActiveSurface(surface);
     return 1;
 }
 
@@ -79,7 +79,7 @@ SDL_Surface *SDL_WidgetGetActiveSurface()
 
 int SDL_WidgetClearSurface(SDL_Surface *surface)
 {
-    Stack* current_widget;
+    SDL_WidgetList* current_widget;
     
     current_widget=SDL_StackGetStack(surface);
     return 1;
@@ -97,18 +97,18 @@ SDL_Widget* SDL_WidgetCreate(E_Widget_Type widget,int x,int y, int w, int h)
     return SDL_WidgetCreateR(widget,dest);
 }
 
-SDL_Widget* SDL_WidgetCreateR(E_Widget_Type widget,SDL_Rect dest)
+SDL_Widget* SDL_WidgetCreateR(E_Widget_Type WidgetType,SDL_Rect dest)
 {
     T_Widget_Create create;
     SDL_Widget *NewWidget;
 
-    if(WidgetTable[widget])
+    if(WidgetTable[WidgetType])
     {
-        create=WidgetTable[widget]->create;
+        create=WidgetTable[WidgetType]->create;
         
         NewWidget=create(&dest);
 
-        SDL_AddToStack(widget,&dest,NewWidget);
+        SDL_StoreWidget(NewWidget);
         return NewWidget;
     }
     else
@@ -121,15 +121,15 @@ int SDL_WidgetProperties(int feature,...)
 {
     va_list ap;
     T_Widget_Properties properties;
-    Stack* current_widget;
-    SDL_Widget *widget;
+    SDL_WidgetList* List;
+    SDL_Widget *Widget;
 
     va_start(ap,feature);
-    current_widget=SDL_StackGetLastItem();
+    List=SDL_StackGetLastItem();
 
-    widget=(SDL_Widget*)current_widget->data;
-    properties=WidgetTable[widget->Type]->properties;
-    properties(widget,feature,ap);
+    Widget=(SDL_Widget*)List->Widget;
+    properties=WidgetTable[Widget->Type]->properties;
+    properties(Widget,feature,ap);
 
     return 1;
 }
@@ -159,14 +159,14 @@ int SDL_WidgetPropertiesOf(SDL_Widget *widget,int feature,...)
  */
 int SDL_WidgetClose(void *widget)
 {
-    Stack *current_widget,*prev;
+    SDL_WidgetList *current_widget,*prev;
     return 0;
     current_widget=SDL_StackGetStack(NULL);
     prev=NULL;
 
     while(current_widget)
     {
-        if(current_widget->data == widget)
+        if(current_widget->Widget == widget)
         {
             prev->next = current_widget->next;
             break;
@@ -185,10 +185,10 @@ int SDL_WidgetClose(void *widget)
  */
 int SDL_DrawAllWidgets(SDL_Surface *screen)
 {
-    T_Widget_Draw draw;
-    Stack* current_widget;
-    SDL_Surface *active_surface = NULL;
-    SDL_Widget *widget;
+    T_Widget_Draw draw; /* Draw function prototype */
+    SDL_WidgetList *WidgetList;
+    SDL_Surface    *active_surface = NULL;
+    SDL_Widget     *Widget;
 
     SDL_Rect dest;
     SDL_Rect src;
@@ -219,21 +219,19 @@ int SDL_DrawAllWidgets(SDL_Surface *screen)
         src.h=active_surface->h;
     }
 
-    SDL_WidgetLOCK();
-
-    current_widget=SDL_StackGetStack(NULL);
+    WidgetList=SDL_StackGetStack(NULL);
 
     
 //    if(current_widget == NULL)
 //        printf("Nothing to draw\n");
 
     SDL_mutexP(MyMutex);
-    while(current_widget)
+    while(WidgetList)
     {
-        widget=(SDL_Widget*)current_widget->data;
-        draw=WidgetTable[widget->Type]->draw;
-        draw(widget,screen);
-        current_widget=current_widget->next;
+        Widget=(SDL_Widget*)WidgetList->Widget;
+        draw=WidgetTable[Widget->Type]->draw;
+        draw(Widget,screen);
+        WidgetList=WidgetList->next;
     }
     SDL_Flip(screen);
 //    SDL_UpdateRect(screen,0,0,0,0);                
@@ -253,11 +251,12 @@ int SDL_DrawAllWidgets(SDL_Surface *screen)
     return 1;
 }
 
-void  SDL_WidgetEvent(SDL_Event *event)
+int SDL_WidgetEvent(SDL_Event *event)
 {
+    int retval =0;
     T_Widget_EventHandler eh;
-    Stack* current_widget;
-    Stack* focus_widget=NULL;
+    SDL_WidgetList* WidgetList;
+    SDL_WidgetList* focus_widget=NULL;
 
     switch(event->type)
     {
@@ -268,50 +267,98 @@ void  SDL_WidgetEvent(SDL_Event *event)
         
         while(focus_widget)
         {
-            SDL_Widget *w=(SDL_Widget*)focus_widget;
-            if(SDL_WidgetIsInside(&focus_widget->dest,event->motion.x,event->motion.y))
+            SDL_Widget *w=(SDL_Widget*)focus_widget->Widget;
+            if(SDL_WidgetIsInside(&w->Rect,event->motion.x,event->motion.y))
             {
-                SDL_StackSetFocus(focus_widget);
+                if(focus_widget->Widget->Type == SDL_EDIT)
+                {
+                    SDL_StackSetFocus(focus_widget->Widget);
+                }
                 // Bug found when there are overlapping widgets the focus is set to the wrong widget
 //                break;
             }
             focus_widget=focus_widget->next;
         }
 
-    }    
+    }   
     break;
 
+    case SDL_KEYDOWN:
+        switch( event->key.keysym.sym ) 
+        {
+        case SDLK_TAB:
+        {
+            SDL_Widget     *FocusWidget;
+            SDL_WidgetList *WidgetList;
+            SDL_Widget     *FirstEditWidget=NULL;
+            int store=0;
+
+            WidgetList=SDL_StackGetStack(NULL);
+            FocusWidget=SDL_StackGetFocus();
+            
+            while(WidgetList)
+            {
+                if(FocusWidget == NULL)
+                {
+                    if(WidgetList->Widget->Type == SDL_EDIT)
+                    {
+                        SDL_StackSetFocus(WidgetList->Widget);
+                        break;
+                    }
+                }
+                else
+                {
+                    if(WidgetList->Widget->Type == SDL_EDIT &&
+                       FirstEditWidget == NULL)
+                        FirstEditWidget=WidgetList->Widget;
+
+                    if(store && WidgetList->Widget->Type == SDL_EDIT)
+                    {
+                        SDL_StackSetFocus(WidgetList->Widget);
+                        break;
+                    }
+                    if(WidgetList->Widget == FocusWidget)
+                        store=1;
+
+
+                }
+                WidgetList = WidgetList->next;
+            
+            }
+            if(WidgetList == NULL)
+                SDL_StackSetFocus(FirstEditWidget);
+            
+        }   
+        break;
+        default:
+            break;
+        }
+        break;
+        
     }
 
-    current_widget=SDL_StackGetStack(NULL);
+    WidgetList=SDL_StackGetStack(NULL);
 
-    while(current_widget)
+    while(WidgetList)
     {
-        SDL_Widget *w=(SDL_Widget*)current_widget->data;
-        eh=WidgetTable[w->Type]->eventhandler;
+        SDL_Widget *Widget=(SDL_Widget*)WidgetList->Widget;
+        eh=WidgetTable[Widget->Type]->eventhandler;
         if(eh)
         {
-            eh(w,event);
+            if(eh(Widget,event))
+                retval=1;
         }
-        current_widget=current_widget->next;
+        WidgetList=WidgetList->next;
     }
-    
+
+    return retval;
 }
 
 
-int SDL_WidgetHasFocus(void *widget)
+int SDL_WidgetHasFocus(SDL_Widget *widget)
 {
-    Stack* current_widget;
-    SDL_Widget *w;
-
-    current_widget=SDL_StackGetFocus();
-
-    if(current_widget != NULL)
-    {
-        w=(SDL_Widget*)current_widget->data;
-        if(widget == w)
-            return 1;
-    }
+    if(SDL_StackGetFocus() == widget)
+        return 1;
     return 0;
 }
 
@@ -324,8 +371,8 @@ int SDL_WidgetLoseFocus()
 int SDL_WidgetForceRedraw(SDL_Surface *surface)
 {
     T_Widget_Properties properties;
-    Stack* current_widget;
-    SDL_Widget *widget;
+    SDL_WidgetList* current_widget;
+    SDL_Widget *widget=NULL;
 
     current_widget=SDL_StackGetStack(surface);
     
@@ -334,7 +381,7 @@ int SDL_WidgetForceRedraw(SDL_Surface *surface)
     
     while(current_widget)
     {
-        widget=(SDL_Widget*)current_widget->data;
+        widget=(SDL_Widget*)current_widget->Widget;
         properties=WidgetTable[widget->Type]->properties;
         if(properties)
         {
@@ -345,15 +392,6 @@ int SDL_WidgetForceRedraw(SDL_Surface *surface)
     return 1;
 }
 
-int SDL_WidgetLOCK()
-{
-    return 1;
-}
-
-int SDL_WidgetUNLOCK()
-{
-    return 1;
-}
 
 
 

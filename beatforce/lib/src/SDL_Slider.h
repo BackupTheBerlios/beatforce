@@ -36,6 +36,7 @@ typedef struct SDL_Slider
     SDL_Surface *SliderButton;
     SDL_Surface *background;
 
+
     int orientation;  // hor or vert
     int percentage;   // percentage on scale
     int pixeloffset;  // pixeloffset runs from 0 to (Slider height - SliderButton height) left nd top

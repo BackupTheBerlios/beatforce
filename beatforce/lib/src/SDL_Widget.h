@@ -129,7 +129,7 @@ typedef struct SDL_Widget
 typedef SDL_Widget*       (*T_Widget_Create)       (SDL_Rect*);
 typedef void              (*T_Widget_Draw)         (SDL_Widget*,SDL_Surface *);
 typedef int               (*T_Widget_Properties)   (SDL_Widget*,int,va_list ap);
-typedef void              (*T_Widget_EventHandler) (SDL_Widget*,SDL_Event*);
+typedef int               (*T_Widget_EventHandler) (SDL_Widget*,SDL_Event*);
 typedef void              (*T_Widget_Close)        (SDL_Widget*);
 
 /**
@@ -189,22 +189,20 @@ int SDL_WidgetForceRedraw(SDL_Surface *surface);
 
 SDL_Widget* SDL_WidgetCreate(E_Widget_Type widget,int x,int y, int w, int h);
 SDL_Widget* SDL_WidgetCreateR(E_Widget_Type widget,SDL_Rect dest);
-
+int SDL_WidgetMain();
 int   SDL_WidgetProperties(int feature,...);
 int   SDL_WidgetPropertiesOf(SDL_Widget* widget, int feature,...);
 
 int   SDL_DrawAllWidgets(SDL_Surface *screen);
 int   SDL_WidgetEventCallback(void *function,E_Widget_Event event);
-void  SDL_WidgetEvent(SDL_Event *event);
+int   SDL_WidgetEvent(SDL_Event *event);
 int   SDL_WidgetIsInside(SDL_Rect *rect,int x, int y);
-int   SDL_WidgetHasFocus(void *widgetdata);
+int   SDL_WidgetHasFocus(SDL_Widget *widget);
 int   SDL_WidgetLoseFocus();
 
 int SDL_WidgetNeedsRedraw();
 int SDL_WidgetClose(void *widget);
 
-int SDL_WidgetLOCK();
-int SDL_WidgetUNLOCK();
 #endif //__SDL_WIDGET_H
 
 

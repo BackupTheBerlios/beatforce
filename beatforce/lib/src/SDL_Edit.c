@@ -180,8 +180,9 @@ int SDL_EditProperties(SDL_Widget *widget,int feature,va_list list)
     return 1;
 }
 
-void SDL_EditEventHandler(SDL_Widget *widget,SDL_Event *event)
+int SDL_EditEventHandler(SDL_Widget *widget,SDL_Event *event)
 {
+    int retval = 0;
     SDL_Edit *Edit=(SDL_Edit*)widget;
     char key;
 
@@ -218,6 +219,7 @@ void SDL_EditEventHandler(SDL_Widget *widget,SDL_Event *event)
             {
                 if(key>=SDLK_a && key <= SDLK_z)
                 {
+                    retval = 1;
                     key -= 32;
                 }
                 if(key == SDLK_SEMICOLON)
@@ -245,6 +247,7 @@ void SDL_EditEventHandler(SDL_Widget *widget,SDL_Event *event)
         break;
         
     }
+    return retval;
 }
 
 void SDL_EditSetCallback(void *edit,int event,void *function,void *data)

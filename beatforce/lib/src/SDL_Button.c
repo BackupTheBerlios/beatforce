@@ -173,12 +173,12 @@ int SDL_ButtonProperties(SDL_Widget *widget,int feature,va_list list)
     return 1;
 }
 
-void SDL_ButtonEventHandler(SDL_Widget *widget,SDL_Event *event)
+int SDL_ButtonEventHandler(SDL_Widget *widget,SDL_Event *event)
 {
     SDL_Button *Button=(SDL_Button*)widget;
 
     if(Button->Visible == 0)
-        return;
+        return 0;
 
     switch(event->type)
     {
@@ -210,6 +210,7 @@ void SDL_ButtonEventHandler(SDL_Widget *widget,SDL_Event *event)
     default:
         break;
     }
+    return 0;
 }
 
 

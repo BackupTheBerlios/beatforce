@@ -122,5 +122,5 @@ int         SDL_TableProperties(SDL_Widget *widget,int feature,va_list list);
 */
 
 
-void  SDL_TableEventHandler(SDL_Widget *widget,SDL_Event *event);
+int  SDL_TableEventHandler(SDL_Widget *widget,SDL_Event *event);
 
