@@ -70,7 +70,7 @@ int FONT_FNT_Read(char *filename,SDL_Font *font)
     fclose(fp);
     return 1;
 }
-
+ 
 void FONT_FNT_DrawString(SDL_Surface *screen,SDL_Font *font,char *string,int x, int y)
 {
 
@@ -110,14 +110,18 @@ int FONT_FNT_DrawChar(SDL_Surface *dest,SDL_Font *font,
     
     bit=fnt->font[start];
 
+    /* run through all bytes (from left to right) */
     for(it=0;it<3;it++)
     {
+        /*run through the font height */
         for(y1=0;y1<font->height;y1++)
         {
+            /*run through the current byte */
             for(x1=0;x1<8;x1++)
             {
                 newx=x1+it*8;
                 newy=y1;
+                /* if we reach the current width we are finished */
                 if(newx>=width)
                     break;
                 if(bit & 0x80)

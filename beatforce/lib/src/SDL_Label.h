@@ -30,11 +30,24 @@ typedef struct SDL_Label
     Uint32  bgcolor;
     Uint32  fgcolor;
 
+    int offset;
+    int increase;
+
+    int Pattern;
+
     char    *Caption;
     SDL_Surface *Background;
 
 }SDL_Label;
 
+
+enum LabelPattern
+{
+    LABEL_NORMAL,
+    LABEL_BOUNCE,
+    LABEL_SCROLL_LEFT,
+    LABEL_SCROLL_RIGHT,
+}LabelPattern;
 
 // prototypes
 void* SDL_LabelCreate(SDL_Rect *rect);

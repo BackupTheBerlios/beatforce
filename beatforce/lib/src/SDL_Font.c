@@ -154,14 +154,11 @@ int SDL_FontDrawStringLimited(SDL_Surface *dest,SDL_Font *font,
 
     for(i=0;i<size;i++)
     {
-        if(SDL_FontGetCharWidth(font,string[i]) + xoffset > rect->w)
-            return 0;
-
-        pos.x=xoffset+rect->x;
-        pos.y=rect->y;
-        pos.w=rect->w;
-        pos.h=rect->h;
-        xoffset+=SDL_FontDrawChar(dest,font,string[i],&pos,NULL);
+        pos.x = xoffset+rect->x;
+        pos.y = rect->y;
+        pos.w = rect->w;
+        pos.h = rect->h;
+        xoffset+=SDL_FontDrawChar(dest,font,string[i],&pos,clip);
     }
 
     return 1;

@@ -26,6 +26,8 @@
 #include "SDL_WidTool.h"
 #include "SDL_Label.h"
 
+static void Label_CalculatePattern(SDL_Label *Label,SDL_Rect *Rect);
+
 const struct S_Widget_FunctionList SDL_Label_FunctionList =
 {
     SDL_LabelCreate,
@@ -52,7 +54,10 @@ void* SDL_LabelCreate(SDL_Rect* rect)
 
     label->fgcolor = 0x000000;
     label->bgcolor = TRANSPARANT;
-    
+    label->offset   = 0;
+    label->increase = 1;
+
+    label->Pattern    = LABEL_BOUNCE;
     label->Background = NULL;
 
     return label;
@@ -61,10 +66,10 @@ void* SDL_LabelCreate(SDL_Rect* rect)
 void SDL_LabelDraw(void *label,SDL_Surface *dest)
 {
     SDL_Label *Label=(SDL_Label*)label;
-    int StringWidth;
     char string[255];
+    SDL_Rect DrawPosititon;
 
-    int counter=0;
+    int Length=0;
 
     memset(string ,0,255);
 
@@ -87,19 +92,9 @@ void SDL_LabelDraw(void *label,SDL_Surface *dest)
 
     if(Label->Caption)
     {
-        /* Calculate the total size of the string in pixels */
-        StringWidth=SDL_FontGetStringWidth(Label->Font,Label->Caption);
+        Label_CalculatePattern(Label,&DrawPosititon);
         
-        counter=strlen(Label->Caption);
-        strncpy(string,Label->Caption,counter);
-    
-        while((StringWidth > Label->rect.w) && counter) 
-        {
-            StringWidth = SDL_FontGetStringWidth(Label->Font,string);
-            memset(string,0,255);
-            strncpy(string,Label->Caption,counter--);
-        }
-        SDL_FontDrawStringRect(dest,Label->Font,string,&Label->rect);
+        SDL_FontDrawStringLimited(dest,Label->Font,Label->Caption,&DrawPosititon,&Label->rect);
     }
    
 }
@@ -137,3 +132,66 @@ void SDL_LabelEventHandler(void *label,SDL_Event *event)
 
 }
 
+
+static void Label_CalculatePattern(SDL_Label *Label,SDL_Rect *Rect)
+{
+    int StringWidth;
+
+    /* Calculate the total size of the string in pixels */
+    StringWidth=SDL_FontGetStringWidth(Label->Font,Label->Caption);
+
+    if(StringWidth > Label->rect.w)
+    {
+        switch(Label->Pattern)
+        {
+        case LABEL_NORMAL:
+            Rect->x = Label->rect.x;
+            Rect->y = Label->rect.y;
+            Rect->w = Label->rect.w;
+            Rect->h = Label->rect.h;
+            break;
+        case LABEL_BOUNCE:
+            Rect->x = Label->rect.x-Label->offset;
+            Rect->y = Label->rect.y;
+            Rect->w = Label->rect.w+Label->offset;
+            Rect->h = Label->rect.h;
+            if(Label->increase == 1)
+                Label->offset++;
+            else 
+                Label->offset--;
+            if(StringWidth < Rect->w)
+                Label->increase = 0;
+            
+            if(Label->offset == -1)
+                Label->increase=1;
+            break;
+        case LABEL_SCROLL_LEFT:
+            Rect->x = Label->rect.x-Label->offset;
+            Rect->y = Label->rect.y;
+            Rect->w = Label->rect.w+Label->offset;
+            Rect->h = Label->rect.h;
+            Label->offset++;
+            if(StringWidth + Label->rect.w < Label->rect.w + Label->offset)
+            Label->offset = -Label->rect.w;
+            break;
+        case LABEL_SCROLL_RIGHT:
+            Rect->x = Label->rect.x - Label->offset;
+            Rect->y = Label->rect.y;
+            Rect->w = Label->rect.w + Label->offset;
+            Rect->h = Label->rect.h;
+            Label->offset--;
+            if(Label->offset + Label->rect.w < 0)
+                Label->offset = StringWidth;
+            break;
+        }
+    }
+    else
+    {
+        Rect->x = Label->rect.x;
+        Rect->y = Label->rect.y;
+        Rect->w = Label->rect.w;
+        Rect->h = Label->rect.h;
+    }
+    
+
+}
