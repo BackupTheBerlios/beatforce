@@ -137,13 +137,22 @@ int THEME_Init()
             doc = xmlParseFile(path);
             if (doc)
             {
-                printf("File %s parsed succesfully\n");
+                DEBUG("Document %s parsed succesfully",path);
                 break;
             }
             else
                 ERROR("xmlParsefile failed while the file exists and can be opened %s",path);
         }
+        else
+        {
+            ERROR("Cannot open skin.xml in %s",path);
+        }
         dir=dir->next;
+    }
+    if(doc == NULL)
+    {
+        ERROR("No theme could be loaded: Exiting .....");
+        exit(0);
     }
     if(doc)
     {
