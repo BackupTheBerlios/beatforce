@@ -177,7 +177,7 @@ int AUDIOOUTPUT_SetMainVolume(int value);
 int AUDIOOUTPUT_GetMainVolume(int *value);
 int output_get_volume (int, float *);
 int output_set_group (int, int, int);
-int output_mute (int, int);
+int AUDIOOUTPUT_Mute (int, int);
 int output_set_beatcount (int, int);
 
 /* to player + mixer */

@@ -24,6 +24,7 @@
 
 #include "theme.h"
 
+void SONGDBUI_Redraw();
 void SONGDBUI_CreateWindow(ThemeSongdb *ts);
 void SONGDBUI_ChangeDatabase(char *string);
 

@@ -129,14 +129,12 @@ mixer_Master (int ch, int on)
     return output_set_group (ch, GROUP_MASTER, on);
 }
 
-int
-mixer_mute (int ch, int mute)
+int MIXER_Mute (int ch, int mute)
 {
-    return output_mute (ch, mute);
+    return AUDIOOUTPUT_Mute (ch, mute);
 }
 
-int
-mixer_mute_group (int group, int mute)
+int MIXER_MuteGroup (int group, int mute)
 {
     if (group > 2 || group < 0)
         return ERROR_UNKNOWN_CHANNEL;

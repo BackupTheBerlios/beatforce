@@ -40,10 +40,11 @@ typedef struct
     int (*about) (void);          /* Show the about box */
     int (*configure) (struct SongDBEntry *e);  /* Set the configuration parameters bitrate/samplerate */
 
-                                                int (*is_our_file) (void *, char *filename);       /* Return 1 if the plugin can handle the file */
+    int (*is_our_file) (void *, char *filename);       /* Return 1 if the plugin can handle the file */
 
     int (*get_tag) (void *, char *filename, struct SongDBEntry * e);   /* get artist, title, ... */
     int (*get_add_info) (void *, char *filename, struct SongAddInfo * e);      /* get add. info (bitrate,...) */
+    int (*write_tag) (void *,char *filename, struct SongDBEntry *e);
 
     int (*load_file) (void *, char *); /* load file for playing - DO NOT START TO PLAY ! */
     int (*close_file) (void *);        /* close file */

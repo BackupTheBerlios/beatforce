@@ -53,6 +53,7 @@ LLIST_Append (BFList *list,void* data)
         last = LLIST_Last (list);
         last->next = new_list;
         new_list->prev = last;
+        new_list->next = NULL;
         return list;
     }
     else

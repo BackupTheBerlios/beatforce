@@ -65,7 +65,7 @@ void printid(char *id,int line,char *message);
 #endif
 
 #if MODULE_ID == FILEWINDOW
-#define TRACE TRACE_OFF
+#define TRACE TRACE_ON
 #define DEBUG DEBUG_OFF
 #endif
 

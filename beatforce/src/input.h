@@ -27,11 +27,12 @@
 #include "songdb.h"
 #include "input_plugin.h"
 
-int INPUT_Init (int, BFList *);
+BFList *INPUT_Init (int player_nr, BFList * plugin_list);
 
-InputPluginData *input_whose_file (BFList *, char *);
 
-int INPUT_GetTag(int player_nr, char *filename, struct SongDBEntry *e);
+InputPluginData *INPUT_WhoseFile (BFList *, char *);
+
+int INPUT_GetTag(BFList *input_list,char *filename, struct SongDBEntry *e);
 int input_get_add_info (int, char *, struct SongAddInfo *);
 
 int INPUT_LoadFile (int player_nr,struct SongDBEntry *e);

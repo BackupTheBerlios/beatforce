@@ -138,8 +138,7 @@ Output_PluginOpen (struct OutGroup *grp, AudioConfig * cfg, int i, int ch,
 }
 
 
-int
-output_plugin_close (struct OutGroup *grp)
+int OUTPUT_PluginClose(struct OutGroup *grp)
 {
     int err;
 
@@ -156,7 +155,6 @@ output_plugin_close (struct OutGroup *grp)
     {
         printf("Unable to close output: error 0x%x\n", -err);
     }
-
     return err;
 
 }
@@ -211,8 +209,7 @@ output_plugin_pause (struct OutGroup *grp, int pause)
 
 }
 
-int
-output_plugin_get_volume (struct OutGroup *grp)
+int OUTPUT_PluginGetVolume (struct OutGroup *grp)
 {
     int err;
 

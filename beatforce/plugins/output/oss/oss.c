@@ -217,6 +217,10 @@ oss_write (Private * P, void *data, int count)
     return fwrite (data, 1, count, p->oss_fd);
 }
 
+int oss_get_volume(Private * P, float volume)
+{
+
+}
 
 int oss_set_volume(Private * P, float volume)
 {
@@ -267,7 +271,7 @@ static OutputPlugin oss_output = {
     oss_write,
     oss_pause,
 
-    NULL,
+    oss_get_volume,
     oss_set_volume,					/*oss_set_volume */
 
     oss_cleanup,

@@ -82,13 +82,13 @@ int PLAYER_Init(int player_nr, PlayerConfig * cfg)
     
     player_SetData(player_nr,player);
 
-    INPUT_Init (player_nr, PLUGIN_GetList(PLUGIN_TYPE_INPUT));
+    player->ip_plugins=INPUT_Init (player_nr, PLUGIN_GetList(PLUGIN_TYPE_INPUT));
     PLAYLIST_Init (player_nr);
   
     return 0;
 }
 
-int PLAYER_Finalize(int player_nr)
+int PLAYER_Exit(int player_nr)
 {
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
     if(p==NULL)
@@ -310,6 +310,17 @@ int PLAYER_Pause(int player_nr)
     return 1;
 }
 
+int PLAYER_Cue(int player_nr)
+{
+    struct PlayerPrivate *p = PLAYER_GetData(player_nr);
+    if(p == NULL)
+        return 0;
+    TRACE("PLAYER_Cue %d",player_nr);
+
+    return 1;
+
+}
+
 int PLAYER_IsPlaying (int player_nr)
 {
     struct PlayerPrivate *p=PLAYER_GetData(player_nr);
@@ -361,7 +372,7 @@ void player_set_song (int player_nr, int no)
     p->playlist_id     = no;
     
    
-    INPUT_GetTag(PLAYER1,pe->e->filename,pe->e);
+    INPUT_GetTag(p->ip_plugins,pe->e->filename,pe->e);
     p->songdb_id = pe->e->id;
     err = player_load (player_nr);
     if (err)

@@ -157,6 +157,7 @@ static void FILEWINDOW_AddSelected(void *data)
     SDL_TableRow *lSubgroup;
     char string[255];
 
+    TRACE("FILEWINDOW_AddSelected");
     memset(string,0,255);
 
     SDL_WidgetPropertiesOf(TableFilesInDirectory,GET_SELECTED,&row);
@@ -184,6 +185,25 @@ static void FILEWINDOW_AddSelected(void *data)
     else
     {
 //        printf("Nothing selected\n");
+    }
+}
+
+static void FILEWINDOW_AddAll(void *data)
+{
+    BFList *l;
+    SDL_TableRow *lSubgroup;
+    
+    TRACE("FILEWINDOW_AddAll");
+
+    SDL_WidgetPropertiesOf(TableSubgroup,GET_SELECTED,&lSubgroup);
+    if(lSubgroup)
+    {
+        l=files;
+        while(l)
+        {   
+            SONGDB_AddFileTo(lSubgroup->index,(char*)l->data);
+            l=l->next;
+        }
     }
 }
 
@@ -356,6 +376,34 @@ static void FILEWINDOW_DirectoryClicked(void *data)
 
 }
 
+void FILEWINDOW_DeleteSelected(void *data)
+{
+    struct SongDBSubgroup *list;
+    SDL_TableRow *lSubgroup;
+    SDL_TableRow *row;
+    char string[255];
+    
+    SDL_WidgetPropertiesOf(TableSubgroup,GET_SELECTED,&lSubgroup);
+    if(lSubgroup)
+        list=SONGDB_GetSubgroup(lSubgroup->index);
+    else
+    {
+//        ERROR("No subgroup selected");
+        return;
+    }
+
+    SDL_WidgetPropertiesOf(TableFilesInDirectory,GET_SELECTED,&row);
+    if(row)    
+    {
+        while(row)
+        {
+            FILEWINDOW_GetFilesInDirectory(row->index,0,string);
+//            SONGDB_RemoveFileFrom(row->index,string);
+            row=row->next;
+        }
+    }
+}
+
 void FILEWINDOW_GetFilesInSubgroup(int row,int column,char *string)
 {
     struct SongDBSubgroup *list;
@@ -450,10 +498,18 @@ SDL_Surface *Window_CreateFileWindow()
             SDL_WidgetProperties(SET_PRESSED_IMAGE,Button->pressed);
             SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,FILEWINDOW_AddSelected,NULL);        
             break;
+        case BUTTON_ADDALL:
+            /* add all displayed files to selected subgroup */
+            SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
+            SDL_WidgetProperties(SET_NORMAL_IMAGE,Button->normal);
+            SDL_WidgetProperties(SET_PRESSED_IMAGE,Button->pressed);
+            SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,FILEWINDOW_AddAll,NULL);        
+            break;
         case BUTTON_DELETESELECTED:
             SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
             SDL_WidgetProperties(SET_NORMAL_IMAGE,Button->normal);
             SDL_WidgetProperties(SET_PRESSED_IMAGE,Button->pressed);
+            SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,FILEWINDOW_DeleteSelected,NULL);
             break;
 
         }
@@ -521,13 +577,6 @@ SDL_Surface *Window_CreateFileWindow()
     return FileWindow;
 
 }
-
-void filewindow_Search(void *data)
-{
-    
-
-}
-
 
 int FILEWINDOW_EventHandler(SDL_Event event)
 {

@@ -17,7 +17,8 @@ input.o: input.c ../config.h /usr/include/stdlib.h \
  /usr/include/bits/stdio_lim.h /usr/include/bits/stdio.h \
  /usr/include/errno.h /usr/include/bits/errno.h \
  /usr/include/linux/errno.h /usr/include/asm/errno.h songdb.h \
- configfile.h llist.h input_plugin.h err.h types.h player.h debug.h
+ configfile.h llist.h input_plugin.h err.h types.h player.h plugin.h \
+ debug.h
 input.c :
 ../config.h :
 /usr/include/stdlib.h :
@@ -63,4 +64,5 @@ input_plugin.h :
 err.h :
 types.h :
 player.h :
+plugin.h :
 debug.h :

@@ -168,6 +168,7 @@ void songdbstring(long row,int column,char *dest)
     
     if(row < SONGDB_GetNoOfEntries())
     {
+        //SONGDB_GetActivePlaylistEntry(row);
         e = MainGroup->Active->Playlist[row];
     }
     

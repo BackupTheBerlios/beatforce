@@ -69,6 +69,8 @@ struct SongDBEntry
     struct SongAddInfo *AddInfo; /* additional info */
     
     int played;			/* played ? */
+
+    struct SongDBEntry *next;
 };
 
 typedef struct SongDBTest
@@ -93,7 +95,7 @@ typedef struct SongDBSubgroup
 {
     char *Name;
     int Songcount;
-    struct SongDBEntry **Playlist;
+    struct SongDBEntry *Playlist;
     struct SongDBSubgroup *next;
     struct SongDBSubgroup *prev;
 }SongDBSubgroup;
@@ -105,6 +107,9 @@ typedef struct SongDBSubgroup
 #define SONGDB_ID_UNKNOWN	0xffffff00	/* id not specified in songdb_search */
 
 int SONGDB_Init (SongDBConfig * our_cfg);
+int SONGDB_Exit();
+
+
 void SONGDB_FreeActiveList();
 struct SongDBEntry *SONGDB_GetEntryID(long id);
 struct SongDBEntry *SONGDB_GetSearchEntry(long id);

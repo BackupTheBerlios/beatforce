@@ -52,11 +52,13 @@ long n_search_results;
 long n_index;
 
 /* local prototypes */
-struct SongDBEntry *songdb_AllocEntry (void);
+struct SongDBEntry *SONGDB_AllocEntry (void);
 void songdb_FreeEntry (struct SongDBEntry *e);
 int songdb_JumpToFileMatch(char* song, char * keys[], int nw);
 struct SongDBSubgroup *songdb_AddSubgroup(struct SongDBSubgroup *sg,char *title);
 static int count;
+BFList *tagplugins;
+
 
 int parsesubgroup(xmlDocPtr doc, xmlNodePtr cur)
 {
@@ -77,7 +79,7 @@ int parsesubgroup(xmlDocPtr doc, xmlNodePtr cur)
         cur=cur->next;
     }
     count++;
-
+    return 1;
 }
 
 int parxml()
@@ -137,7 +139,7 @@ int parxml()
         if(cur)
         cur=cur->next;
     }
-
+    return 1;
 }
 
 int SONGDB_Init (SongDBConfig * our_cfg)
@@ -161,10 +163,9 @@ int SONGDB_Init (SongDBConfig * our_cfg)
 int SONGDB_Exit()
 {
     xmlDocPtr doc = NULL;       /* document pointer */
-    xmlNodePtr root_node = NULL, node = NULL, node1 = NULL;/* node pointers */
+    xmlNodePtr root_node = NULL;
     xmlNodePtr maingroup = NULL, subgroup = NULL, file = NULL;
-    char buff[256];
-    int i, j;
+    int i;
 
     LIBXML_TEST_VERSION;
     /* 
@@ -188,7 +189,7 @@ int SONGDB_Exit()
         for(i=0;i<MainGroup->Subgroup->Songcount;i++)
         {
             file=xmlNewChild(subgroup,NULL,"song",NULL);
-            xmlNewProp(file, BAD_CAST "filename", BAD_CAST MainGroup->Subgroup->Playlist[i]->filename);
+            xmlNewProp(file, BAD_CAST "filename", BAD_CAST MainGroup->Subgroup->Playlist->filename);
         }
         MainGroup->Subgroup=MainGroup->Subgroup->next;
     }
@@ -321,12 +322,12 @@ int SONGDB_AddFileTo(int which,char *filename)
     {
         struct SongDBEntry *e;
         
-        e = songdb_AllocEntry ();
+        e = SONGDB_AllocEntry ();
         
         e->filename = strdup (filename);
         e->id       = sg->Songcount++;
         
-        if (input_whose_file (PLAYER_GetData(0)->ip_plugins, filename) != NULL)
+        if (INPUT_WhoseFile (PLAYER_GetData(0)->ip_plugins, filename) != NULL)
         {
             /* Add the created entry to the active database */
             sg->Playlist = realloc (sg->Playlist, sg->Songcount * DBENTRY_PTR_LEN);
@@ -379,7 +380,7 @@ struct SongDBSubgroup *songdb_AddSubgroup(struct SongDBSubgroup *sg,char *title)
     return sg;
 }
 
-struct SongDBEntry *songdb_AllocEntry (void)
+struct SongDBEntry *SONGDB_AllocEntry (void)
 {
     struct SongDBEntry *e;
 

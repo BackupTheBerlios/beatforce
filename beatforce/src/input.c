@@ -20,15 +20,11 @@
 
  */
 
-#ifdef HAVE_CONFIG_H
-#  include <config.h>
-#endif
-
+#include <config.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-
 
 #include <stdio.h>
 #include <errno.h>
@@ -40,11 +36,12 @@
 #include "err.h"
 #include "types.h"
 #include "player.h"
+#include "plugin.h"
 
 #define MODULE_ID INPUT
 #include "debug.h"
 
-int INPUT_Init (int player_nr, BFList * plugin_list)
+BFList *INPUT_Init (int player_nr, BFList * plugin_list)
 {
     BFList *ip_plugins = NULL;
     InputPluginData *ipd;
@@ -54,9 +51,8 @@ int INPUT_Init (int player_nr, BFList * plugin_list)
     if (plugin_list == NULL)
     {
         ERROR("input_init: plugin_list == NULL");
-        return -1;
+        return NULL;
     }
-    
     next = plugin_list;
     if(next==NULL)
     {
@@ -67,7 +63,7 @@ int INPUT_Init (int player_nr, BFList * plugin_list)
     {
         ipd = malloc (INPUT_PLUGIN_DATA_LEN);
         if (ipd == NULL)
-            return -1;
+            return NULL;
         memset (ipd, 0, INPUT_PLUGIN_DATA_LEN);
         
         ipd->ip = (InputPlugin *) next->data;
@@ -79,68 +75,92 @@ int INPUT_Init (int player_nr, BFList * plugin_list)
     }
     if(ip_plugins == NULL)
         exit(1);
-
-    PLAYER_GetData(player_nr)->ip_plugins = ip_plugins;
     
-    return 0;
+    return ip_plugins;
 }
 
+
 InputPluginData *
-input_whose_file (BFList *plugins, char *filename)
+INPUT_WhoseFile(BFList *input_plugins, char *filename)
 {
     InputPluginData *ipd;
     BFList *next;
 
+    TRACE("INPUT_WhoseFile %s",filename);
     if (filename == NULL)
     {
         return NULL;
     }
 
-    next = plugins;
+    next = input_plugins;
   
     if(next==NULL)
     {
-        printf("No input plugins\n");
+        ERROR("No plugins loaded");
         exit(1);
     }
     while (next)
     {
         ipd = (InputPluginData *) next->data;
-        if (ipd->ip->is_our_file (ipd->priv, filename) == TRUE)
+        if(ipd->ip->is_our_file)
         {
-            return next->data;
+            if (ipd->ip->is_our_file(ipd->priv, filename) == TRUE)
+            {
+                return next->data;
+            }
+        }
+        else
+        {
+            ERROR("No function implemented");
+            return NULL;
         }
         next = next->next;
     }
 
-    printf ("Unknown File: %s\n", filename);
+    ERROR("Unknown File format: %s\n", filename);
 
     return NULL;
 }
 
-int INPUT_GetTag(int player_nr, char *filename, struct SongDBEntry *e)
+int INPUT_GetTag(BFList *input_list,char *filename, struct SongDBEntry *e)
 {
     InputPluginData *l;
 
     TRACE("INPUT_GetTag enter %s",filename);
     
-    l = input_whose_file (PLAYER_GetData(player_nr)->ip_plugins, e->filename);
+    l = INPUT_WhoseFile(input_list, e->filename);
     if (l == NULL)
+    {
+        ERROR("No File format registred");
         return -10;
-
+    }
     return l->ip->get_tag (l->priv, filename, e);
 }
 
-int
-input_get_add_info (int player_nr, char *filename, struct SongAddInfo *info)
+int input_get_add_info (char *filename, struct SongAddInfo *info)
 {
     InputPluginData *l;
     
-    l = input_whose_file (PLAYER_GetData(player_nr)->ip_plugins, filename);
+    l = INPUT_WhoseFile (PLUGIN_GetList(PLUGIN_TYPE_INPUT), filename);
     if (l == NULL)
         return ERROR_NOT_SUPPORTED;
     
     return l->ip->get_add_info (l->priv, filename, info);
+}
+
+int INPUT_WriteTag(char *filename,struct SongDBEntry *e)
+{
+    InputPluginData *l;
+ 
+    TRACE("INPUT_WriteTag enter %s",filename);
+    
+    l = INPUT_WhoseFile(PLUGIN_GetList(PLUGIN_TYPE_INPUT), e->filename);
+    if (l == NULL)
+        return -10;
+
+    return l->ip->write_tag (l->priv, filename, e);
+
+
 }
 
 int INPUT_LoadFile (int player_nr,struct SongDBEntry *e)
@@ -149,7 +169,7 @@ int INPUT_LoadFile (int player_nr,struct SongDBEntry *e)
     
     TRACE("INPUT_LoadFile %d %s",player_nr,e->filename);
 
-    l = input_whose_file (PLAYER_GetData(player_nr)->ip_plugins, e->filename);
+    l = INPUT_WhoseFile (PLAYER_GetData(player_nr)->ip_plugins, e->filename);
     if (l == NULL)
     {
         printf("Impossible\n");
@@ -179,7 +199,7 @@ int INPUT_Play (InputPluginData * current_plugin)
 {
     if (current_plugin == NULL)
         return 0;
-
+    
     return current_plugin->ip->play (current_plugin->priv);
 }
 

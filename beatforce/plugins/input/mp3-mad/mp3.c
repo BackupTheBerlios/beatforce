@@ -76,7 +76,7 @@ InputPlugin mp3_ip = {
 
     mp3_get_tag,
     mp3_get_add_info,
-
+    NULL,                   // write_tag
     mp3_load_file,
     mp3_close_file,
     mp3_play,

@@ -58,12 +58,11 @@ int n_open;
 
 struct OutGroup *group[3];
 
-//pthread_t output_thread;
 int output_thread;
 int output_thread_stop;
 
 
-fftw_plan pfft_out;
+fftw_plan fftplan_out;
 fftw_complex *fftw_in, *fftw_out;
 
 BFList *output_plugin_ch;
@@ -188,7 +187,7 @@ int AUDIOOUTPUT_Init (AudioConfig * audio_cfg)
     //((audio_cfg->FFTW_Policy ==
 //      0) ? ("estimating") : ("measuring")),
 ///        ((audio_cfg->FFTW_UseWisdom == 0) ? ("") : ("w/ wisdom")));
-    pfft_out =
+    fftplan_out =
         fftw_plan_dft_1d(audiocfg->FragmentSize,
                          fftw_in, 
                          fftw_out, 
@@ -352,14 +351,11 @@ output_read (int channel, unsigned char * buf, int len)
 }
 
 
-int
-output_write (int c, void* buf, int len)
+int output_write (int c, void* buf, int len)
 {
     int written;
     int newlen;
-#ifdef DEBUG_OUTPUT_TRACE_PLUGIN_CALLS_WRITE
-    printf ("output_write( %d, 0x%lx, %d )\n", c, (long) buf, len);
-#endif
+
     if (c >= OUTPUT_N_CHANNELS || c < 0)
         return ERROR_UNKNOWN_CHANNEL;
     if (ch[c] == NULL)
@@ -368,7 +364,7 @@ output_write (int c, void* buf, int len)
     output_magic_check (ch[c], ERROR_INVALID_ARG);
     if (ch[c]->buffer2_size < len * 2)
     {
-        printf( "output_write: buffer-realloc from %d to %d!\n", ch[c]->buffer2_size, len*2 );
+        printf( "audioutput_write: buffer-realloc from %d to %d!\n", ch[c]->buffer2_size, len*2 );
 
         ch[c]->buffer2 = realloc (ch[c]->buffer2, len * 2);
         if (ch[c]->buffer2 == NULL)
@@ -383,20 +379,6 @@ output_write (int c, void* buf, int len)
         convert_buffer (ch[c]->aformat, ch[c]->n_ch, buf, ch[c]->buffer2, len);
     written = rb_write (ch[c]->rb, (unsigned char *) ch[c]->buffer2, newlen);
     return written;
-}
-
-int
-output_write_blocking (int c, void* buf, int len)
-{
-
-#ifdef DEBUG_OUTPUT_TRACE_PLUGIN_CALLS_WRITE
-    printf ("output_write_blocking( %d, 0x%lx, %d )\n", c, (long) buf, len);
-#endif
-    if (len > OUTPUT_BUFFER_SIZE (audiocfg))
-        return ERROR_FRAG_TO_LARGE;
-    //todowhile (output_buffer_free (c) < len)
-    //beatforce_usleep (1000);
-    return output_write (c, buf, len);
 }
 
 long
@@ -516,8 +498,7 @@ int AUDIOOUTPUT_GetMainVolume(int *value)
     return 1;
 }
 
-int
-output_get_volume (int c, float *db)
+int output_get_volume (int c, float *db)
 {
     if (c >= OUTPUT_N_CHANNELS || c < 0)
         return ERROR_UNKNOWN_CHANNEL;
@@ -549,8 +530,7 @@ output_set_group (int c, int group, int on)
     return 0;
 }
 
-int
-output_mute (int c, int mute)
+int AUDIOOUTPUT_Mute (int c, int mute)
 {
     if (c >= OUTPUT_N_CHANNELS || c < 0)
         return ERROR_UNKNOWN_CHANNEL;
@@ -760,12 +740,12 @@ output_loop (void *arg)
             {
                 ch0 = pow (10,0.05 * (double) ((ch0 * 2 - 1) * 30)) * _TO_ATT (ch[0]->fader_dB);
             }
-//            printf("Fader value3 %g %g %g\n",value,ch0,ch1);
+
             if (ch1 != 0)
             {
                 ch1 = pow (10,0.05 * (double) ((ch1 * 2 - 1) * 30)) * _TO_ATT (ch[1]->fader_dB);
             }
-//            printf("Fader value4 %g %g %g\n",value,ch0,ch1);
+
 
 
 
@@ -836,7 +816,7 @@ do_fft (int c, output_word * buf)
     }
 
     /* Execute the 1d DFT, output is written to fftw_out */
-    fftw_execute(pfft_out);
+    fftw_execute(fftplan_out);
 
     /* if the detect_beat  button is toggled i the mixer window */
 //    if (ch[c]->detect_beat)
@@ -844,7 +824,7 @@ do_fft (int c, output_word * buf)
         double beat = 0;
         for (j = 1; j < 5; j++)  //de amplitudes van beneden de 2 * 43 Hz
         {
-            beat =
+            beat +=
                 /* real = sqrt(im^2 + re^2) */
                 sqrt (c_re(fftw_out[j]) * c_re(fftw_out[j]) +
                       c_im(fftw_out[j]) * c_im(fftw_out[j]));
@@ -853,30 +833,14 @@ do_fft (int c, output_word * buf)
         }
         
 
-        beat = beat / 20; //de gemiddelde amplitude
+        beat = beat / 5; //de gemiddelde amplitude
 
         beat = beat / audiocfg->FragmentSize * 2;  
-        beat = beat / ch[c]->bpm_prescale; //7000
+        beat = beat / 18;
 
 
-        //todo g_timer_stop (ch[c]->last_beat);
-        miliseconds = 50;//todo g_timer_elapsed (ch[c]->last_beat, NULL) * 1000;
-        if (miliseconds > 800)
-        {
-            printf("Really long time\n");
-            ch[c]->bpm_prescale -= 100;
-            if (ch[c]->bpm_prescale < 2500)
-                ch[c]->bpm_prescale = 2500;
-            printf ("prescale -= 100: %ld\n", ch[c]->bpm_prescale);
-            //todo g_timer_reset (ch[c]->last_beat);
-            //todo g_timer_start (ch[c]->last_beat);
-            return 0;
-        }
+//        printf("BEAT %f %d\n",beat,(int)beat);
 
-/*	  
-          if( beat > 1.0 )
-          beat = 1.0;
-*/
         if (beat >= 1.0)
         {
             double newbpm = CALC_BPM (miliseconds);

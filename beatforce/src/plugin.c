@@ -36,8 +36,8 @@
 #include "debug.h"
 
 
-BFList *input_list;
-BFList *output_list;
+static BFList *input_list;
+static BFList *output_list;
 
 
 /* Local prototypes */

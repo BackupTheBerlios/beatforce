@@ -114,6 +114,7 @@ int PLAYER_GetSamplerate(int player_nr);
 
 
 
+int PLAYER_Cue(int player_nr);
 int PLAYER_Play(int player_nr);
 int PLAYER_Pause(int player_nr);
 
