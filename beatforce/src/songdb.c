@@ -504,12 +504,11 @@ void SONGDB_FindEntry(char *search_string)
 {
     char *ptr;
     int nw=0;
-    int entry;
     int i=0;
     char *words[20];
 
     struct SongDBEntry *e = NULL;
-
+    struct SongDBEntry *Playlist = NULL;
     
     /* lowercase the string */
     for(ptr=search_string;*ptr;ptr++)
@@ -539,18 +538,21 @@ void SONGDB_FindEntry(char *search_string)
     free(search_results);
     search_results = NULL;
 
-    for(entry=0; entry < MainGroup->Active->Songcount; entry++)
+    if(MainGroup->Active)
+        Playlist=MainGroup->Active->Playlist;
+
+    while(Playlist)
     {
         int match = 0; 
-        e = MainGroup->Active->Playlist;
-        
+        e = Playlist;
+      
+        printf("filename %s\n",e->filename);
         if (nw == 0   ||        /* No words yet */
             (nw == 1 && words[0][0] == '\0') || /* empty word */
             (nw == 1 && strlen(words[0]) == 1 && /* only one character */
              ((e->title &&
               strchr(e->title,words[0][0])) || strchr(e->filename,words[0][0]))))
         {
-
             match=1;
         }
         else
@@ -560,7 +562,7 @@ void SONGDB_FindEntry(char *search_string)
         {
             char song[256];
  
-           for(ptr = e->title,i=0   ; ptr && *ptr && i < 254; i++, ptr++)
+            for(ptr = e->title,i=0   ; ptr && *ptr && i < 254; i++, ptr++)
                 song[i]=tolower(*ptr);
             for(ptr= e->filename,i=0 ; ptr && *ptr && i < 254; i++, ptr++)
                 song[i]=tolower(*ptr);
@@ -574,6 +576,7 @@ void SONGDB_FindEntry(char *search_string)
             search_results = realloc (search_results, n_search_results * DBENTRY_PTR_LEN);
             search_results[n_search_results - 1] = e;
         }
+        Playlist=Playlist->next;
     }
 }
 
