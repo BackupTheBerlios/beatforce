@@ -20,6 +20,10 @@
 	<column id="2" width="490"/>
 	<column id="3" width="80"/>
       </table>
+      <button x="30" y="640" w="20" h="20" action="CHANGE_DIR"/>
+      <button x="60" y="640" w="20" h="20" action="RENAME"/>
+      <button x="90" y="640" w="20" h="20" action="ADD"/>
+      <button x="120" y="640" w="20" h="20" action="REMOVE"/>
     </songdb>
 
 
