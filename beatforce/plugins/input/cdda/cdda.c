@@ -46,7 +46,7 @@
 #define MP3_INPUT_BUFFER_SIZE	(40000*2)
 #define MP3_OUTPUT_BUFFER_SIZE	((575+1152)*4*2)
 
-void *cdda_play_loop (void *);
+int cdda_play_loop (void *);
 
 struct config *cfg;
 
@@ -81,27 +81,29 @@ TOC *ourtoc;
 TOC toc[90];
 int ourtracks;
 
-char *str_mpeg1_l1=NULL;
-static int err;
-char *str_mpeg1_l2=NULL;
-char *str_mpeg1_l3=NULL;
-char *str_mpeg25_l3=NULL;
-
 void readtoc();
 
+typedef struct trackinfo
+{
+    char *name;
+    char *title;
+}trackinfo;
+
+struct trackinfo ti[100];
+
 InputPlugin cdda_ip = {
-    NULL, 						/* handle, BeatForce fills it */
-    NULL, 						/* filename, BeatForce filled */
+    NULL,                       /* handle, BeatForce fills it */
+    NULL,                       /* filename, BeatForce filled */
     "cdda input plugin ",	/* Description */
 
-    cdda_init,
+    CDDA_Init,
     NULL,
     NULL,
     cdda_is_our_file,
 
     cdda_get_tag,
     cdda_get_add_info,
-    NULL,                   // write_tag
+    NULL,                        /* write_tag */
     cdda_load_file,
     cdda_close_file,
     cdda_play,
@@ -145,58 +147,48 @@ get_input_info (InputInterface *api)
 
 /*ch_id is equal to player_nr */
 int
-cdda_init (Private ** p, int ch_id)
+CDDA_Init(Private ** p, int ch_id)
 {
-    mp3Private *mp3_priv;
+    cddaPrivate *cdda_priv;
 
 
     if(p == NULL)
-        return ERROR_INVALID_ARG;
+        return 0;
 
-
-    if( !str_mpeg1_l1 )
-	str_mpeg1_l1 = strdup ("MPEG 1, Layer I");
-    if( !str_mpeg1_l2 )
-	str_mpeg1_l2 = strdup ("MPEG 1, Layer II");
-    if( !str_mpeg1_l3 )
-	str_mpeg1_l3 = strdup ("MPEG 1, Layer III");
-    if( !str_mpeg25_l3 )
-	str_mpeg25_l3 = strdup("MPEG 2.5, Layer III");
-
-
-    mp3_priv = malloc (sizeof (mp3Private));
-    if (mp3_priv == NULL)
+    cdda_priv = malloc (sizeof (cddaPrivate));
+    if (cdda_priv == NULL)
 	return ERROR_NO_MEMORY;
-    memset (mp3_priv, 0, sizeof (mp3Private));
+    memset (cdda_priv, 0, sizeof (cddaPrivate));
 
-    mp3_priv->input_buffer  = malloc (MP3_INPUT_BUFFER_SIZE);
-    mp3_priv->output_buffer = malloc (MP3_OUTPUT_BUFFER_SIZE);
-    if (!mp3_priv->input_buffer || !mp3_priv->output_buffer)
+    cdda_priv->input_buffer  = malloc (MP3_INPUT_BUFFER_SIZE);
+    cdda_priv->output_buffer = malloc (MP3_OUTPUT_BUFFER_SIZE);
+    if (!cdda_priv->input_buffer || !cdda_priv->output_buffer)
     {
-	free (mp3_priv->input_buffer);
-	free (mp3_priv->output_buffer);
+	free (cdda_priv->input_buffer);
+	free (cdda_priv->output_buffer);
 	return ERROR_NO_MEMORY;
     }
-    memset (mp3_priv->input_buffer, 0, MP3_INPUT_BUFFER_SIZE);
-    memset (mp3_priv->output_buffer, 0, MP3_OUTPUT_BUFFER_SIZE);
+    memset (cdda_priv->input_buffer, 0, MP3_INPUT_BUFFER_SIZE);
+    memset (cdda_priv->output_buffer, 0, MP3_OUTPUT_BUFFER_SIZE);
 
-    mp3_priv->output_size = MP3_OUTPUT_BUFFER_SIZE;
-    mp3_priv->input_size = MP3_INPUT_BUFFER_SIZE;
-    mp3_priv->fd = -1;
+    cdda_priv->output_size = MP3_OUTPUT_BUFFER_SIZE;
+    cdda_priv->input_size = MP3_INPUT_BUFFER_SIZE;
+    cdda_priv->fd = -1;
+    cdda_priv->cachedid=0;
 
     cfg = malloc (sizeof (struct config));
     
     if (cfg == NULL)
-	return ERROR_NO_MEMORY;
+	return 0;
     memset (cfg, 0, sizeof (struct config));
     cfg->lengthcalc = 0;
 
-    mp3_priv->ch_id = ch_id;
+    cdda_priv->ch_id = ch_id;
 
     //to be done
-    mp3_priv->going     =1 ;
-//    mp3_priv->decode_thread=OSA_CreateThread(cdda_play_loop, (void *)mp3_priv);    
-    *p = (Private *) mp3_priv;
+    cdda_priv->going     =1 ;
+//    cdda_priv->decode_thread=OSA_CreateThread(cdda_play_loop, (void *)cdda_priv);    
+    *p = (Private *) cdda_priv;
 
     return 0;
 }
@@ -210,13 +202,13 @@ int cdda_configure(Private *p,struct SongDBEntry *e)
 int
 cdda_cleanup (Private * p)
 {
-    mp3Private *mp3_priv = (mp3Private *) p;
+    cddaPrivate *cdda_priv = (cddaPrivate *) p;
 
     if(p == NULL)
         return ERROR_INVALID_ARG;
 
  
-    free (mp3_priv);
+    free (cdda_priv);
     free (cfg);
 
     return 0;
@@ -243,7 +235,7 @@ cdda_is_our_file (Private * h, char *filename)
 int
 cdda_get_tag (Private * h, char *path, struct SongDBEntry *e)
 { 
-    
+    cddaPrivate *cdda_priv = (cddaPrivate *) h;    
     int t,tt;
     char tm[20];
     char *s;
@@ -273,6 +265,102 @@ cdda_get_tag (Private * h, char *path, struct SongDBEntry *e)
     centi_secnds = ( 4 * ( dw %      75 ) + 1 ) / 3;
 
     e->time=mins*60*1000+secnds*1000+centi_secnds*10;
+#if 0
+    {
+        int totaltime;
+        char temp[255];
+
+        totaltime=(g_toc[cdtracks].dwStartSector+150) /(75);
+        printf("time %d\n",totaltime);
+	sprintf(temp,
+		"GET /~cddb/cddb.cgi?cmd=cddb+query+%08x+%d+%s+%d%s&proto=%d HTTP/1.0\r\n\r\n",
+		id, 
+                cdtracks,
+		cddb_generate_offset_string(),
+                totaltime,
+		"&hello=nobody+localhost+beatforce+0.0.1",
+                2);
+        
+        printf("\nstrind %s\n\n",temp);
+#endif
+        {
+            
+            char temp[255];
+            char buffer[256];
+            char what[255];
+            int sock;
+            char *getstr;
+
+            if(cdda_priv->cachedid == 0)
+            {
+
+                cdda_priv->cachedid = CDDB_CalcID(ourtoc,ourtracks);
+                sprintf(temp,
+                        "GET /~cddb/cddb.cgi?cmd=cddb+read+%s+%08x%s&proto=%d HTTP/1.0\r\n\r\n",
+                        "misc", CDDB_CalcID(ourtoc,ourtracks),"&hello=nobody+localhost+beatforce+0.0.1",2);
+                
+                sock=HTTP_OpenConnection("www.freedb.org",80);
+                if(sock <= 0)
+                    printf("Could not connect\n");
+                
+                getstr=strdup(temp);
+                
+                send(sock, getstr, strlen(getstr),0);
+                free(getstr);
+                while(HTTP_ReadFirstLine(sock, buffer, 256) > 0)
+                {
+                    if(strstr(buffer,"DTITLE"))
+                    {
+                        getstr=strrchr(buffer,'/');
+                        if(getstr)
+                            *getstr=0;
+                        getstr=strrchr(buffer,'=');
+                        if(getstr)
+                        {
+                            int k;
+                            for(k=0;k<ourtracks;k++)
+                            {
+                                ti[k].name=strdup(getstr+1);
+                            }
+                            e->artist=strdup(getstr+1);
+                        }
+                    }
+                    
+                    if(strstr(buffer,"TTITLE"))
+                    {
+                        char *b;
+                        int getal;
+                        b=strstr(buffer,"=");
+                        *b=0;
+                        getal=atoi(getstr);
+                        
+                        b++;
+                        if(getal < 0 || getal > 100)
+                            break;
+                        else
+                            ti[getal].title=strdup(b);
+                        if(getal == i)
+                        {
+                            e->title=strdup(b);
+                        }
+                    }
+                    
+                }
+                HTTP_CloseConnection(sock);
+            }
+            else
+            {
+                if(i<ourtracks)
+                {
+                    if(ti[i].name)
+                        e->artist=strdup(ti[i].name);
+                    if(ti[i].title)
+                        e->title=strdup(ti[i].title);
+                }
+
+            }
+        }
+
     return 1;
 
 }
@@ -290,7 +378,7 @@ cdda_get_add_info (Private * h, char *filename, struct SongAddInfo *info)
 int
 cdda_load_file (Private * h, char *filename)
 {
-    mp3Private *private = (mp3Private *) h;
+    cddaPrivate *private = (cddaPrivate *) h;
     int length=private->length;
     char *drive;
     char *set;
@@ -318,7 +406,8 @@ cdda_load_file (Private * h, char *filename)
     private->track = atoi(set);
 
     private->fd    = open(drive,O_RDONLY);
-    if (private->fd < 0) 
+    
+    if (private->fd < 0)
     {
 
     }
@@ -335,47 +424,41 @@ cdda_load_file (Private * h, char *filename)
             (private->ch_id,
              FMT_S16_NE, private->rate, private->channels, &private->max_bytes))
         {
-            fclose (private->fd);
+            close (private->fd);
             private->fd = -1;
 
-            return ERROR_OUTPUT_ERROR;
+            return 0;
         }
         private->decode_thread=OSA_CreateThread(cdda_play_loop, (void *)private);
     }
-
-
-    
-
-    return 0;
+    return 1;
 }
 
 int
 cdda_close_file (Private * h)
 {
-    mp3Private *private = (mp3Private *) h;
+    cddaPrivate *private = (cddaPrivate *) h;
 
     if( h == NULL )
-        return ERROR_INVALID_ARG;
+        return 0;
   
-    if (private->going && private->fd >= 0)
+    if (private->going && private->fd >= 0 )
     {
 	private->going = 0;
         OSA_RemoveThread(private->decode_thread);
 	cdda_if.output_close (private->ch_id);
 	private->fd = -1;
         private->position=0;
-	return 0;
+	return 1;
     }
-
-
-    return ERROR_NOT_OPEN;
+    return 0;
 }
 
 
-void *
+int
 cdda_play_loop (void *param)
 {
-    mp3Private *private = param;
+    cddaPrivate *private = param;
 
     unsigned int input_length = 0, output_length = 0;
     int resolution = 16;
@@ -443,7 +526,7 @@ cdda_play_loop (void *param)
 int
 cdda_play (Private * h)
 {
-    mp3Private *private = (mp3Private *) h;
+    cddaPrivate *private = (cddaPrivate *) h;
 
     if( h == NULL)
         return 0;
@@ -455,7 +538,7 @@ cdda_play (Private * h)
 int
 cdda_pause (Private * h)
 {
-    mp3Private *private = (mp3Private *) h;
+    cddaPrivate *private = (cddaPrivate *) h;
     if( h == NULL )
         return ERROR_INVALID_ARG;
   
@@ -466,7 +549,7 @@ cdda_pause (Private * h)
 int
 cdda_seek (Private * h, long msecs)
 {
-    mp3Private *private = (mp3Private *) h;
+    cddaPrivate *private = (cddaPrivate *) h;
    
     if( h == NULL )
         return ERROR_INVALID_ARG;
@@ -480,7 +563,7 @@ cdda_seek (Private * h, long msecs)
 long
 cdda_get_time (Private * h)
 {
-    mp3Private *private = (mp3Private *) h;
+    cddaPrivate *private = (cddaPrivate *) h;
 
     if( h == NULL)
         return ERROR_INVALID_ARG;
@@ -518,21 +601,11 @@ void readtoc(char *dev)
     {
         entry[i].cdte_track = 1+i;
         entry[i].cdte_format = CDROM_LBA;
-        err = ioctl(fd, CDROMREADTOCENTRY, &entry[i] );
-        if ( err != 0 ) 
-        {
-            /* error handling */
-
-        }
+        ioctl(fd, CDROMREADTOCENTRY, &entry[i] );
     }
     entry[i].cdte_track = CDROM_LEADOUT;
     entry[i].cdte_format = CDROM_LBA;
-    err = ioctl( fd, CDROMREADTOCENTRY, &entry[i] );
-    if ( err != 0 ) 
-    {
-        /* error handling */
-
-    }
+    ioctl( fd, CDROMREADTOCENTRY, &entry[i] );
     tracks = hdr.cdth_trk1+1;
     for (i = 0; i < tracks; i++) 
     {

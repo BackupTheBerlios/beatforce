@@ -48,7 +48,6 @@ MixerConfig    *mixercfg;
 
 int main(int argc, char *argv[])
 {
-
     OSA_Init();
     
     cfgfile = bf_cfg_open_default_file ();
@@ -73,8 +72,10 @@ int main(int argc, char *argv[])
     SDL_WidgetInit();
     WNDMGR_Init(); 
 
+    /* Create lists of all available plugins */
     PLUGIN_Init (PLUGIN_TYPE_INPUT);
     PLUGIN_Init (PLUGIN_TYPE_OUTPUT);
+    PLUGIN_Init (PLUGIN_TYPE_EFFECT);
 
     AUDIOOUTPUT_Init (audiocfg);
     MIXER_Init  ();
@@ -87,6 +88,7 @@ int main(int argc, char *argv[])
     OSACDROM_Init();
 
     MAINWINDOW_Open();
+
     /*beatforce UI*/
     WNDMGR_Main(); /* main loop */
 

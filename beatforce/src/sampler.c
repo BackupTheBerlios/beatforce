@@ -23,11 +23,16 @@
 
 #include <malloc.h>
 #include <string.h>
+#include <ladspa.h>
+#include <stdio.h>
 
 #include "player.h"
 #include "songdb.h"
 #include "input.h"
 #include "plugin.h"
+
+#define MODULE_ID SAMPLER
+#include "debug.h"
 
 struct SongDBEntry *sample;
 BFList *SamplerPlugins[2];
@@ -43,8 +48,10 @@ int SAMPLER_Init()
     return 1;
 }
 
+
 int SAMPLER_Play(int s)
 {
+
     InputPluginData *l;
 
     if(s < 0 || s > 1)
@@ -54,10 +61,7 @@ int SAMPLER_Play(int s)
     INPUT_CloseFile(l);
     INPUT_LoadFile(l,sample->filename);
     INPUT_Play (l);
-    
     return 1;
 }
-
-
 
 

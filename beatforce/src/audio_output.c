@@ -190,7 +190,6 @@ int AUDIOOUTPUT_Init (AudioConfig * audio_cfg)
     output_thread_stop = 0;
     n_open = 0;
     output_thread=i=OSA_CreateThread(AUDIOOUTPUT_Loop,NULL);
-   
 
     return 0;
 }
@@ -233,9 +232,7 @@ int AUDIOOUTPUT_Open(int c, AFormat fmt, int rate, int nch, int *max_bytes)
               || fmt ==
               FMT_U8) ? (1) : (2)) * audiocfg->FragmentSize *
             audiocfg->RingBufferSize;
-#ifdef DEBUG_OUTPUT_TRACE_PLUGIN_CALLS
-        printf ("setting max_bytes = %d\n", *max_bytes);
-#endif
+        DEBUG("Setting max_bytes = %d", *max_bytes);
     }
 
     if( c >= 2 )
@@ -828,11 +825,11 @@ convert_output (int format, int nch, output_word * buf, int samples)
         gint16 *buf_out_s16 = (gint16 *) buf;
         for (i = 0; i < convert; i++)
         {
-            printf( "a%lx\n", buf_in[i] );
+//            printf( "a%lx\n", buf_in[i] );
             buf_out_s16[i] = (gint16) (buf_in[i] >> 16);
-            printf( "b%x\n", buf_out_s16[i] );
+//            printf( "b%x\n", buf_out_s16[i] );
         }
-        printf( "%d\n", convert * sizeof(gint16));
+//        printf( "%d\n", convert * sizeof(gint16));
         return (convert * sizeof (gint16));
     }
     else if (snd_pcm_format_width (format) == 24)
@@ -981,7 +978,7 @@ convert_buffer (AFormat afmt, int nch,
         {
             out_buf[i] = /*GINT16_FROM_LE*/ (ptr[i]);
 
-            printf( "%x:%x  ", out_buf[i], ptr[i] );
+            //printf( "%x:%x  ", out_buf[i], ptr[i] );
         }
     }
     if (afmt == FMT_S16_NE)

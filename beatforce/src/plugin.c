@@ -34,6 +34,7 @@
 
 static BFList *input_list;
 static BFList *output_list;
+static BFList *effect_list;
 
 /* Local prototypes */
 static void PLUGIN_ScanPlugins (char *dirname, int type, BFList ** plugins);
@@ -59,13 +60,17 @@ int PLUGIN_Init(int type)
         output_list = NULL;
         list = &output_list;
         break;
+        
+    case PLUGIN_TYPE_EFFECT:
+        sprintf(dirname,"/usr/lib/ladspa/");
+        effect_list = NULL;
+        list = &effect_list;
+        break;
 
     default:
         return -1;
     }
-
     PLUGIN_ScanPlugins (dirname, type, list);
-
     return 0;
 }
 
@@ -78,6 +83,9 @@ BFList *PLUGIN_GetList (int type)
 
     case PLUGIN_TYPE_OUTPUT:
         return output_list;
+
+    case PLUGIN_TYPE_EFFECT:
+        return effect_list;
 
     default:
         return NULL;
@@ -95,37 +103,42 @@ PLUGIN_AddPlugin(char * filename, int type, BFList ** plugins)
     TRACE("PLUGIN_AddPlugin %s",filename);
     if ((h = OSA_LoadLibrary(filename)) != NULL)
     {
-        if ((gpi = OSA_GetFunctionAddress(h, "get_input_info")) != NULL && type == PLUGIN_TYPE_INPUT)
+        switch(type)
         {
-            InputPlugin *p;
+        case PLUGIN_TYPE_INPUT:
+            if ((gpi = OSA_GetFunctionAddress(h, "get_input_info")) != NULL)
+            {
+                InputPlugin *p;
+                
+                DEBUG("...is input plugin");
+                p = (InputPlugin *) gpi (&beatforce_if);
+                p->handle = h;
+                p->filename = (char*)strdup (filename);
+                DEBUG("....desc: %s", p->description);
+                *plugins = LLIST_Append (*plugins, (void*) p);
+            }
+            break;
+        case PLUGIN_TYPE_OUTPUT:
+            if ((gpo = OSA_GetFunctionAddress (h, "get_output_info")) != NULL)
+            {
+                OutputPlugin *p;
+                
+                DEBUG("...is output plugin");
+                p = (OutputPlugin *) gpo ();
+                p->handle = h;
+                p->filename = (char*)strdup (filename);
+                DEBUG("....desc: %s", p->description);
 
-            DEBUG("...is input plugin");
-            p = (InputPlugin *) gpi (&beatforce_if);
-            p->handle = h;
-            p->filename = (char*)strdup (filename);
-            DEBUG("....desc: %s", p->description);
-            *plugins = LLIST_Append (*plugins, (void*) p);
-
-        }
-        else if ((gpo = OSA_GetFunctionAddress (h, "get_output_info")) != NULL
-                 && type == PLUGIN_TYPE_OUTPUT)
-        {
-            OutputPlugin *p;
-
-            DEBUG("...is output plugin");
-            p = (OutputPlugin *) gpo ();
-            p->handle = h;
-            p->filename = (char*)strdup (filename);
-            DEBUG("....desc: %s", p->description);
-
-            *plugins = LLIST_Append (*plugins, (void*) p);
-
-        }
-        else
-        {
+                *plugins = LLIST_Append (*plugins, (void*) p);
+            }
+            break;
+        case PLUGIN_TYPE_EFFECT:
             OSA_CloseLibrary(h);
+            break;
+        default:
+            OSA_CloseLibrary(h);
+            break;
         }
-
     }
     else
     {

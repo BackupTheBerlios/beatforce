@@ -41,6 +41,7 @@
 
 #define PLUGIN_TYPE_INPUT		1
 #define PLUGIN_TYPE_OUTPUT		2
+#define PLUGIN_TYPE_EFFECT              3
 
 int PLUGIN_Init(int type);
 BFList *PLUGIN_GetList (int type);

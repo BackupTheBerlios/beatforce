@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <memory.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #include <SDL/SDL.h>
 #include <libxml/xmlmemory.h>
@@ -34,6 +35,7 @@
 #include "config.h"
 #include "osa.h"
 #include "configfile.h"
+
 
 
 #define MODULE_ID THEME
@@ -130,12 +132,16 @@ int THEME_Init()
     while(dir)
     {
         char path[255];
+        FILE *fd;
         sprintf(path,"%s/skin.xml",(char*)dir->data);
-        doc = xmlParseFile(path);
-        if (doc)
-            break;
+        if((fd=fopen(path,"rb")))
+        {  
+            fclose(fd);
+            doc = xmlParseFile(path);
+            if (doc)
+                break;
+        }
         dir=dir->next;
-
     }
     if(doc)
     {

@@ -273,6 +273,10 @@ int SONGDB_AddFileToSubgroup(struct SongDBSubgroup *sg,char *filename)
                 e->id       = sg->Songcount++;
                 e->next     = NULL;
                 
+                /* If this is a cd try to get the tag immediatly */
+                if(sg->Volatile)
+                    INPUT_GetTag(PLAYER_GetData(0)->ip_plugins, filename,e);
+
                 /* Add the created entry to the active database */
                 if(sg->Playlist == NULL)
                     sg->Playlist = e;

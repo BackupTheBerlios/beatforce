@@ -1,8 +1,8 @@
 /*
    BeatForce plugin
-   mp3.h - mpeg layer 2/3 ouput plugin	(libmad)
+   cdda.h - cdda decoding thread reads audio data from cdrom
    
-   Copyright (c) 2001, Patrick Prasse (patrick.prasse@gmx.net)
+   Copyright (c) 2004, John Beuving (john.beuving@home.nl)
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public Licensse as published by
@@ -20,10 +20,10 @@
 
  */
 
-#ifndef _CDDA_H__
-#define _CDDA_H__
+#ifndef __CDDA_H__
+#define __CDDA_H__
 
-#define FRAG_SIZE 512
+//#define FRAG_SIZE 512
 
 
 enum channel
@@ -33,21 +33,6 @@ enum channel
     CHANNEL_LEFT = 2,
     CHANNEL_RIGHT = 3,
     CHANNEL_REVERSE = 4
-};
-
-struct stats
-{
-    int vbr;
-    unsigned int bitrate;
-    unsigned long frames;
-    unsigned long vbr_rate;
-    unsigned long clipped;
-    unsigned long sync_errors;
-    unsigned long crc_errors;
-    unsigned long other_errors;
-    unsigned long ms_joint;
-    unsigned long i_joint;
-    unsigned long ms_i_joint;
 };
 
 struct config
@@ -64,7 +49,6 @@ typedef struct
 {
     char *filename;				/* currently playing path/URL */
     int fd;
-
     long size;					/* file size in bytes */
     int length;					/* total playing time in ms */
     int bitrate;					/* average bitrate in kbps */
@@ -77,8 +61,7 @@ typedef struct
     int track;
     enum channel channel; 		/* channel selection */
 
-    struct stats stats;			/* statistics */
-
+    unsigned int cachedid;              /* cddb id */
     int ch_id;
     int rate;
     int channels;
@@ -98,24 +81,9 @@ typedef struct
     int output_size;
 
 }
-mp3Private;
+cddaPrivate;
 
-struct id3tag
-{
-    char tag[3];
-    char title[30];
-    char artist[30];
-    char album[30];
-    char year[4];
-    char comment[30];
-    unsigned char genre;
-};
-
-
-
-//InputPlugin *get_input_info (void);
-
-int cdda_init (Private **, int);
+int CDDA_Init (Private **, int);
 int cdda_cleanup (Private *);
 int cdda_about (Private *);
 int cdda_is_our_file (Private *, char *);
@@ -134,4 +102,4 @@ long cdda_get_time (Private *);
 
 
 
-#endif
+#endif /* __CDDA_H__ */

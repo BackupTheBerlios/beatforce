@@ -23,35 +23,27 @@ typedef struct TOC {	/* structure of table of contents (cdrom) */
 TOC *g_toc;
 int cdtracks;
 
+static char * cddb_generate_offset_string()
+{
+	char *buffer;
+	int i;
+
+	buffer = malloc((cdtracks-1) * 7 + 1);
+
+        
+	sprintf(buffer, "%d", g_toc[0].dwStartSector+150);
+
+	for (i = 1; i < cdtracks; i++)
+		sprintf(buffer, "%s+%d", buffer, g_toc[i].dwStartSector+150);
+
+	return buffer;
+}
+
 int OSACDROM_TestDrive(char *dev);
 void DisplayToc ( );
 extern SongDBGroup *MainGroup;
-static int cddb_sum(n)
-    int n;
-{
-    int ret;
 
-    for (ret = 0; n > 0; n /= 10) {
-        ret += (n % 10);
-    }
 
-    return ret;
-}
-static unsigned int OSACDROM_CalcCDDBId()
-{
-    unsigned int i;
-    unsigned int t = 0;
-    unsigned int n = 0;
-
-    for (i = 0; i < cdtracks; i++) 
-    {
-        n += cddb_sum(g_toc[i].dwStartSector/75 + 2);
-    }
-    
-    t = g_toc[i].dwStartSector/75 - g_toc[0].dwStartSector/75;
-
-    return (n % 0xff) << 24 | (t << 8) | cdtracks;
-}
 
 long GetStartSector ( p_track )
     unsigned long p_track;
@@ -90,7 +82,6 @@ int OSACDROM_Init()
     int i;
     
     /* Find out how many CD-ROM drives are connected to the system */
-//    printf("No Of drives %d\n",SDL_CDNumDrives());
     for ( i=0; i<SDL_CDNumDrives(); ++i ) 
     {
         OSACDROM_TestDrive((char*)SDL_CDName(i));
@@ -181,9 +172,33 @@ int OSACDROM_TestDrive(char *dev)
     g_toc=toc;
     cdtracks=tracks-1;
     
-    id=OSACDROM_CalcCDDBId();
-    
-    
+#if 0
+    {
+        int totaltime;
+        char temp[255];
+
+        totaltime=(g_toc[cdtracks].dwStartSector+150) /(75);
+        printf("time %d\n",totaltime);
+	sprintf(temp,
+		"GET /~cddb/cddb.cgi?cmd=cddb+query+%08x+%d+%s+%d%s&proto=%d HTTP/1.0\r\n\r\n",
+		id, 
+                cdtracks,
+		cddb_generate_offset_string(),
+                totaltime,
+		"&hello=nobody+localhost+beatforce+0.0.1",
+                2);
+        
+        printf("\nstrind %s\n\n",temp);
+
+        sprintf(temp,
+        "GET /~cddb/cddb.cgi?cmd=cddb+read+%s+%08x%s&proto=%d HTTP/1.0\r\n\r\n",
+                "misc", id,"&hello=nobody+localhost+beatforce+0.0.1",2);
+        printf("\nstrind %s\n\n",temp);
+
+
+    }
+#endif
+
     if(tracks > 0)
     {
         char trackname[255];
@@ -195,13 +210,20 @@ int OSACDROM_TestDrive(char *dev)
             sg=sg->next;
 
         SONGDB_SubgroupSetVolatile(sg);
-        for(i=1;i<=tracks;i++)
+        
+        for(i=1;i<=cdtracks;i++)
         {
             sprintf(trackname,"%s/track%02d.cdda",dev,i);
             SONGDB_AddFileToSubgroup(sg,trackname);
         }
 
     }
+
     return 1;
 }
+
+
+
+
+
 
