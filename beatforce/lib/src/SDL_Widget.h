@@ -180,6 +180,7 @@ int   SDL_WidgetEventCallback(void *function,E_Widget_Event event);
 void  SDL_WidgetEvent(SDL_Event *event);
 int   SDL_WidgetIsInside(SDL_Rect *rect,int x, int y);
 int   SDL_WidgetHasFocus(void *widget);
+int   SDL_WidgetLoseFocus();
 
 int SDL_WidgetNeedsRedraw();
 int SDL_WidgetClose(void *widget);

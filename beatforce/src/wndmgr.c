@@ -34,16 +34,19 @@
 #define MODULE_ID WNDMGR
 #include "debug.h" 
 
+
+/************** global variables ****************/
+
 SDL_Surface *screen;
 Window *CurWindow;
 int WNDMGR_Running;
 
-/* global variables */
+
 int gEventsAllowed;
 int windowswitch;
 
 /* Local prototypes */
-int wndmgr_Redraw(void *data);
+int WNDMGR_Redraw(void *data);
 
 
 void WNDMGR_CloseWindow()
@@ -88,6 +91,7 @@ void WNDMGR_Init()
 
     SDL_WM_SetCaption("Beatforce",NULL);
     windowswitch=0;
+    CurWindow=NULL;
 }
 
 void WNDMGR_Open(Window *window)
@@ -106,7 +110,7 @@ int WNDMGR_Main()
     WNDMGR_Running = 1;
     gEventsAllowed = 1;
 
-    timer=OSA_StartTimer(50,wndmgr_Redraw,NULL);
+    timer=OSA_StartTimer(50,WNDMGR_Redraw,NULL);
 
     while(WNDMGR_Running)
     {
@@ -132,7 +136,6 @@ int WNDMGR_Main()
     }
 
     OSA_RemoveTimer(timer);
-    //SDL_Quit();
     return 1;
 }
 
@@ -141,7 +144,7 @@ void WNDMGR_Exit()
     WNDMGR_Running=0;
 }
 
-int wndmgr_Redraw(void *data)
+int WNDMGR_Redraw(void *data)
 {
     if(CurWindow->NotifyRedraw)
         CurWindow->NotifyRedraw();

@@ -49,7 +49,6 @@ void* SDL_LabelCreate(SDL_Rect* rect)
 
     label->Caption = NULL;
     label->Font    = NULL;
-    label->Redraw  = 1;
 
     label->fgcolor = 0x000000;
     label->bgcolor = TRANSPARANT;
@@ -70,48 +69,39 @@ void SDL_LabelDraw(void *label,SDL_Surface *dest)
     memset(string ,0,255);
 
 
-    if(Label->Redraw || SDL_WidgetNeedsRedraw())
+    SDL_FontSetColor(Label->Font,Label->fgcolor);
+    
+    if(Label->bgcolor == TRANSPARANT)
     {
-        SDL_FontSetColor(Label->Font,Label->fgcolor);
-
-        if(Label->bgcolor == TRANSPARANT)
+        if(Label->Background == NULL)
         {
-            if(Label->Background == NULL)
-            {
-                Label->Background = SDL_WidgetGetBackground(dest,&Label->rect);
-            }
-            if(SDL_BlitSurface(Label->Background,NULL,dest,&Label->rect)<0)
-                fprintf(stderr, "BlitSurface error: %s\n", SDL_GetError());
+            Label->Background = SDL_WidgetGetBackground(dest,&Label->rect);
         }
-        else
-        {
-            SDL_FillRect(dest,&Label->rect,Label->bgcolor);
-        }
+        if(SDL_BlitSurface(Label->Background,NULL,dest,&Label->rect)<0)
+            fprintf(stderr, "BlitSurface error: %s\n", SDL_GetError());
+    }
+    else
+    {
+        SDL_FillRect(dest,&Label->rect,Label->bgcolor);
+    }
 
+    if(Label->Caption)
+    {
+        /* Calculate the total size of the string in pixels */
         StringWidth=SDL_FontGetStringWidth(Label->Font,Label->Caption);
-
-        if(Label->Caption)
-            counter=strlen(Label->Caption);
-
+        
+        counter=strlen(Label->Caption);
         strncpy(string,Label->Caption,counter);
-
-        while(StringWidth > Label->rect.w && counter) 
+    
+        while((StringWidth > Label->rect.w) && counter) 
         {
-            StringWidth=SDL_FontGetStringWidth(Label->Font,string);
+            StringWidth = SDL_FontGetStringWidth(Label->Font,string);
             memset(string,0,255);
             strncpy(string,Label->Caption,counter--);
         }
-
         SDL_FontDrawStringRect(dest,Label->Font,string,&Label->rect);
-        
-        SDL_UpdateRect(dest,
-                       Label->rect.x,
-                       Label->rect.y,
-                       Label->rect.w,
-                       Label->rect.h);
-
-        Label->Redraw = 0;
     }
+   
 }
 
 int SDL_LabelProperties(void *label,int feature,va_list list)
@@ -128,7 +118,6 @@ int SDL_LabelProperties(void *label,int feature,va_list list)
             free(Label->Caption);
         
         Label->Caption=(char*)strdup(va_arg(list,char*));
-        Label->Redraw = 1;
         break;
     case SET_FG_COLOR:
         Label->fgcolor=va_arg(list,Uint32);

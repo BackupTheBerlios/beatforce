@@ -31,8 +31,6 @@ typedef struct SDL_Label
     Uint32  fgcolor;
 
     char    *Caption;
-    int      Redraw;
-
     SDL_Surface *Background;
 
 }SDL_Label;

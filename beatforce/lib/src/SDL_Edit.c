@@ -102,9 +102,11 @@ void  SDL_EditDraw(void *edit,SDL_Surface *dest)
     else
     {
         caption=Edit->Caption;
+
         while(SDL_FontGetStringWidth(Edit->Font,caption) > Edit->rect.w)
             caption++;
-        SDL_FontDrawString(dest,Edit->Font,caption,Edit->rect.x,StringPos.y);
+
+        SDL_FontDrawStringRect(dest,Edit->Font,caption,&StringPos);
     }
     
     /* draw cursor */
@@ -118,8 +120,8 @@ void  SDL_EditDraw(void *edit,SDL_Surface *dest)
             cursor.x = Edit->rect.x + SDL_FontGetStringWidth(Edit->Font,Edit->Caption)+2;
         cursor.y = StringPos.y;
         cursor.w = 1;
-            cursor.h = Edit->Font->height;
-            SDL_FillRect(dest,&cursor,0x000007);
+        cursor.h = Edit->Font->height;
+        SDL_FillRect(dest,&cursor,0x000007);
     }
     
 }
@@ -186,6 +188,9 @@ void SDL_EditEventHandler(void *edit,SDL_Event *event)
                 Edit->AnyKeyPressCallback(Edit->AnyKeyData);
 
             break;
+        case SDLK_ESCAPE:
+            SDL_WidgetLoseFocus();
+            break;
         case SDLK_LSHIFT:
         case SDLK_RSHIFT:
             Edit->Shift=1;
@@ -193,7 +198,7 @@ void SDL_EditEventHandler(void *edit,SDL_Event *event)
         case SDLK_RETURN:
             if(Edit->ReturnPressCallback)
                 Edit->ReturnPressCallback(Edit->ReturnKeyData);
-
+            SDL_WidgetLoseFocus();
             break;
         default:
             key=event->key.keysym.sym;

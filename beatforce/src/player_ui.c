@@ -196,7 +196,7 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
     {
         UI_Players[nr].EditTitle=SDL_WidgetCreateR(SDL_EDIT,pt->Edit->Rect);
         SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
-        SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_RETURN,PLAYERUI_EditTitleReturn);
+        SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_RETURN,PLAYERUI_EditTitleReturn,&UI_Players[nr]);
     }
 }
 
@@ -230,6 +230,11 @@ void PLAYERUI_Redraw()
     playerui_UpdateState(0);
     playerui_UpdateState(1);
 
+    if(SDL_WidgetHasFocus(UI_Players[0].EditTitle) ||
+       SDL_WidgetHasFocus(UI_Players[0].EditTitle))
+        WNDMGR_DisableEventhandler();
+    else
+        WNDMGR_EnableEventhandler();
 }
 
 /* 
@@ -406,7 +411,11 @@ void playerui_UpdateFileInfo(int player)
 
 static void PLAYERUI_EditTitleReturn(void *data)
 {
-    PLAYER_SetTitle(0,"john");
+    char caption[255];
+    PlayerDisplay *cur=(PlayerDisplay*)data;
+
+    SDL_WidgetPropertiesOf(cur->EditTitle,GET_CAPTION,&caption);
+    PLAYER_SetTitle(cur->PlayerNr,caption);
 }        
   
 void playerui_UpdateState(int player)

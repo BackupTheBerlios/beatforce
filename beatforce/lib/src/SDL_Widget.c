@@ -316,6 +316,12 @@ int SDL_WidgetHasFocus(void *widget)
     return 0;
 }
 
+int SDL_WidgetLoseFocus()
+{
+    SDL_StackSetFocus(NULL);
+    return 1;
+}
+
 int SDL_WidgetNeedsRedraw()
 {
     return forceredraw;
