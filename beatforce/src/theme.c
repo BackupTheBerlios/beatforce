@@ -136,7 +136,10 @@ int THEME_Init()
             fclose(fd);
             doc = xmlParseFile(path);
             if (doc)
+            {
+                printf("File %s parsed succesfully\n");
                 break;
+            }
             else
                 ERROR("xmlParsefile failed while the file exists and can be opened %s",path);
         }
