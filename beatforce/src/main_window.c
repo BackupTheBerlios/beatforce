@@ -34,9 +34,10 @@
 #include "player.h"
 #include "songdb.h"
 #include "playlist.h"
+#include "player.h"
 
 #include "theme.h"
-
+#include "clock.h"
 
 
 #include "wndmgr.h"
@@ -44,14 +45,14 @@
 
 int control_state;
 static int MAINWINDOW_EventHandler(SDL_Event event);
-int mainwindow_NotifyHandler();
-SDL_Surface *mainwindow_CreateWindow();
-int mainwindow_HandleKeys(unsigned int key);
+static int MAINWINDOW_NotifyHandler(Window *Win);
+static SDL_Surface *MAINWINDOW_CreateWindow();
+static int MAINWINDOW_KeyHandler(unsigned int key);
 
 SDL_Surface *MainWindow;
 void *timewidget;
 
-Window MAINWINDOW={ MAINWINDOW_EventHandler , mainwindow_NotifyHandler };
+Window MAINWINDOW={ MAINWINDOW_EventHandler , MAINWINDOW_NotifyHandler , NULL };
 
 #define BF_CONTROL         0xf000
 #define BF_QUIT            SDLK_ESCAPE
@@ -59,7 +60,7 @@ Window MAINWINDOW={ MAINWINDOW_EventHandler , mainwindow_NotifyHandler };
 #define BF_NEXTSONG        SDLK_b
 #define BF_MAINVOLUMEDOWN  SDLK_PERIOD
 #define BF_MAINVOLUMEUP    SDLK_SLASH
-
+#define BF_AUTOFADE        SDLK_f
 
 void MAINWINDOW_Init()
 {
@@ -71,13 +72,14 @@ void MAINWINDOW_Open()
 {
     if(MainWindow == NULL)
     {
-        MainWindow=mainwindow_CreateWindow();
+        MainWindow=MAINWINDOW_CreateWindow();
     }
     SDL_WidgetUseSurface(MainWindow);
+    MAINWINDOW.TransferData=timewidget;
     WNDMGR_Open(&MAINWINDOW);
 }
 
-SDL_Surface *mainwindow_CreateWindow()
+static SDL_Surface *MAINWINDOW_CreateWindow()
 {
     SDL_Surface       *MainWindow;
     ThemeConfig       *tc = THEME_GetActive();
@@ -110,10 +112,8 @@ SDL_Surface *mainwindow_CreateWindow()
         Image=Image->next;
     }
 
-    timewidget=SDL_WidgetCreateR(SDL_LABEL,mw->Clock->Rect);
-    SDL_WidgetProperties(SET_BG_COLOR,mw->Clock->bgcolor);
-    SDL_WidgetProperties(SET_FG_COLOR,mw->Clock->fgcolor);
-    SDL_WidgetProperties(SET_FONT,THEME_Font(mw->Clock->font));
+    timewidget=CLOCK_Create(mw->Clock);
+
 
     SONGDBUI_CreateWindow(mw->Songdb);
     PLAYLISTUI_CreateWindow(mw->Playlist);
@@ -144,7 +144,7 @@ static int MAINWINDOW_EventHandler(SDL_Event event)
             key=event.key.keysym.sym;
             if(control_state)
                 key |= BF_CONTROL;
-            mainwindow_HandleKeys(key);
+            MAINWINDOW_KeyHandler(key);
             break;
             
         }
@@ -165,7 +165,7 @@ static int MAINWINDOW_EventHandler(SDL_Event event)
     return 0;
 }
 
-int mainwindow_HandleKeys(unsigned int key)
+int MAINWINDOW_KeyHandler(unsigned int key)
 {
     switch(key)
     {
@@ -185,15 +185,30 @@ int mainwindow_HandleKeys(unsigned int key)
         MIXERUI_DecreaseMainVolume();
         break;
 
+    case BF_AUTOFADE:
+        MIXER_DoFade(1,0);
+        break;
+
     case BF_NEXTSONG:
         if(PLAYLIST_GetSong(0,0))
         {
-            player_set_song(0,0);
-            MIXER_DoFade(1,0);
-        }
-        else
-        {
-            PLAYLIST_AddEntry(0,SONGDB_GetEntryID(0));
+            if(PLAYER_IsPlaying(1) && PLAYER_IsPlaying(0)==0)
+            {
+                if(PLAYER_SetSong(0,0))
+                {
+                    MIXER_DoFade(1,0);
+                    SONGDBUI_Play(0);
+                }
+            }
+            else if(PLAYER_IsPlaying(0) && PLAYER_IsPlaying(1)==0)
+            {
+                if(PLAYER_SetSong(1,0))
+                {
+                    MIXER_DoFade(1,0);
+                    SONGDBUI_Play(1);
+                }
+            }
+
         }
         break;
 
@@ -204,15 +219,9 @@ int mainwindow_HandleKeys(unsigned int key)
 
 }
 
-int mainwindow_NotifyHandler()
+static int MAINWINDOW_NotifyHandler(Window *Win)
 {
-    char time[6];
-    int min=0,hour=0;
-
-    OSA_GetTime(&hour,&min);
-    sprintf(time,"%02d:%02d",hour,min);
-    SDL_WidgetPropertiesOf(timewidget,SET_CAPTION,time);
-
+    CLOCK_Redraw(Win->TransferData);
     MIXERUI_Redraw();
     PLAYERUI_Redraw();
     SONGDBUI_Redraw();

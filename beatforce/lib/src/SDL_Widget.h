@@ -171,7 +171,7 @@ static const struct S_Widget_FunctionList * const WidgetTable[] =
 int SDL_WidgetInit();
 int   SDL_WidgetUseSurface(SDL_Surface *surface);
 SDL_Surface *SDL_WidgetGetActiveSurface();
-
+int SDL_WidgetForceRedraw();
 
 void* SDL_WidgetCreate(E_Widget_Type widget,int x,int y, int w, int h);
 void* SDL_WidgetCreateR(E_Widget_Type widget,SDL_Rect dest);

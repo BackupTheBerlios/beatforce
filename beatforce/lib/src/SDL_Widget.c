@@ -58,10 +58,6 @@ int SDL_WidgetUseSurface(SDL_Surface *surface)
 {
     int retval;
     retval=SDL_SurfaceStack(surface);
-    if(retval == 0)//surface was already present so force a redraw
-    {
-        forceredraw=1;
-    }
     return 1;
 }
 
@@ -211,18 +207,18 @@ int SDL_DrawAllWidgets(SDL_Surface *screen)
         fadeon=1;
     }
 
-        dest.x=0;
-        dest.y=0;
-        dest.w=0;
-        dest.h=0;
+    dest.x=0;
+    dest.y=0;
+    dest.w=0;
+    dest.h=0;
 
-        if(active_surface)
-        {
-            src.x=0;
-            src.y=0;
-            src.w=active_surface->w;
-            src.h=active_surface->h;
-        }
+    if(active_surface)
+    {
+        src.x=0;
+        src.y=0;
+        src.w=active_surface->w;
+        src.h=active_surface->h;
+    }
 
     SDL_WidgetLOCK();
     
@@ -247,7 +243,7 @@ int SDL_DrawAllWidgets(SDL_Surface *screen)
     //   SDL_BlitSurface(active_surface,NULL,screen,NULL);
 ///    SDL_BlitSurface(last_surface,&src,screen,&dest);
         
-    SDL_UpdateRect(screen,0,0,00,0);
+    SDL_UpdateRect(screen,0,0,0,0);
     
     if(forceredraw)
         forceredraw=0;
@@ -328,18 +324,19 @@ int SDL_WidgetNeedsRedraw()
     return forceredraw;
 }
 
+int SDL_WidgetForceRedraw()
+{
+    forceredraw=1;
+    return 1;
+}
+
 int SDL_WidgetLOCK()
 {
-    StackLock++;
     return 1;
 }
 
 int SDL_WidgetUNLOCK()
 {
-    StackLock--;
-    if(StackLock < 0)
-        StackLock=0;
-
     return 1;
 }
 

@@ -75,6 +75,7 @@ void* SDL_ProgressBarCreate(SDL_Rect* rect)
 
     /* Force initial redraw */
     progressbar->Redraw  = 1;
+    progressbar->Visible = 1;
 
     return progressbar;
 }
@@ -86,6 +87,9 @@ void SDL_ProgressBarDraw(void *progressbar,SDL_Surface *dest)
     int highlight=0;
     int Maxline=0;
     
+    if(ProgressBar->Visible == 0)
+        return;
+
     if(ProgressBar->Orientation == VERTICAL)
         Maxline = ProgressBar->rect.h;
     else if(ProgressBar->Orientation == HORIZONTAL)
@@ -166,8 +170,13 @@ int  SDL_ProgressBarProperties(void *progressbar,int feature,va_list list)
         }
         break;
     }
-    break;
-
+    case SET_VISIBLE:
+        ProgressBar->Visible=va_arg(list,int);
+        break;
+            
+    default:
+        break;          
+    
     }
     return 1;
 }

@@ -23,6 +23,7 @@
 #define __PLAYER_UI_H__
 
 #include "theme.h"
+#include "llist.h"
 /* Public routines */
 
 /* 
@@ -33,6 +34,11 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt);
 
 void PLAYERUI_Redraw();
 
+enum 
+{
+    PLAYERUI_STATE_NORMAL,
+    PLAYERUI_STATE_INFO
+};
 
 
 /* Player ui data structures */
@@ -40,6 +46,7 @@ void PLAYERUI_Redraw();
 typedef struct PlayerDisplay
 {
     int PlayerNr;
+    int State;
 
     void *ButtonPause;
     void *ButtonPlay;
@@ -49,7 +56,7 @@ typedef struct PlayerDisplay
 
     void *Title;
     void *Artist;
-    void *State;
+    void *PlayerState;
     void *Samplerate;
     void *Bitrate;
     void *SongProgress; 
@@ -59,6 +66,8 @@ typedef struct PlayerDisplay
     void *Pitch;
 
     void *EditTitle;
+    BFList *Images;
+    
 }PlayerDisplay;
 
 

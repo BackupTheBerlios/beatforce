@@ -1,5 +1,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/ioctl.h>
 #include <linux/major.h>
 #include <linux/cdrom.h>
 #include <fcntl.h>
@@ -25,7 +26,6 @@ int cdtracks;
 int OSACDROM_TestDrive(char *dev);
 void DisplayToc ( );
 extern SongDBGroup *MainGroup;
-static struct cdrom_read_audio arg;
 static int cddb_sum(n)
     int n;
 {
@@ -93,10 +93,9 @@ int OSACDROM_Init()
 //    printf("No Of drives %d\n",SDL_CDNumDrives());
     for ( i=0; i<SDL_CDNumDrives(); ++i ) 
     {
-        OSACDROM_TestDrive(SDL_CDName(i));
-    
-
+        OSACDROM_TestDrive((char*)SDL_CDName(i));
     }
+    return 1;
 }
 
 int OSACDROM_TestDrive(char *dev)
@@ -106,7 +105,7 @@ int OSACDROM_TestDrive(char *dev)
     static struct cdrom_tochdr hdr;
     static struct cdrom_tocentry entry[100];
     struct SongDBSubgroup *sg;
-    int i,j,err,tracks;
+    int i=0,j,err,tracks;
     TOC toc[90];
     int id;
     
@@ -203,5 +202,6 @@ int OSACDROM_TestDrive(char *dev)
         }
 
     }
+    return 1;
 }
 

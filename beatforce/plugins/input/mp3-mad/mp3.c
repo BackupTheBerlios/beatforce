@@ -564,7 +564,8 @@ mp3_load_file (Private * h, char *filename)
     private->fd = fopen (filename, "rb");
     if (private->fd == NULL)
     {
-	return ERROR_OPEN_ERROR;
+        ERROR("Opening file");
+	return 0;
     }
 
     if (scan_header (private->fd, &header, NULL) == -1)

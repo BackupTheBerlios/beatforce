@@ -130,7 +130,7 @@ player_next_track (int player_nr)
         return;
 
     new_no = p->playlist_id + 1;
-    player_set_song (player_nr, new_no);
+    PLAYER_SetSong (player_nr, new_no);
 }
 
 int PLAYER_Play(int player_nr)
@@ -214,7 +214,7 @@ int PLAYER_IsPlaying (int player_nr)
 }
 
 /* set song with playing id no as actrive (load it) */
-void player_set_song (int player_nr, int no)
+int PLAYER_SetSong (int player_nr, int no)
 {
     struct PlEntry *pe;
     struct PlayerPrivate *p;
@@ -223,29 +223,27 @@ void player_set_song (int player_nr, int no)
     TRACE("PLAYER_SetSong enter %d,%d",player_nr,no);
     p = PLAYER_GetData(player_nr);
     if(p==NULL)
-        return;
+        return 0;
 
     ent =  PLAYLIST_GetNoOfEntries(player_nr);
     if (ent == 0)
     {
-        p->songdb_id     = SONGDB_ID_UNKNOWN;
+        p->songdb_id       = SONGDB_ID_UNKNOWN;
         p->playlist_id     = 0;
         player_load (player_nr);
-        return;
+        return 1;
     }
 
     if (ent < no)
     {
-        player_set_song (player_nr, 1);
-        return;
+        return PLAYER_SetSong(player_nr, 0);
     }
 
     pe = PLAYLIST_GetSong (player_nr, no);
     if(pe == NULL)
     {
         ERROR("Nothing loaded");
-        exit(1);
-        return;
+        return 0;
     }
     p->playlist_id     = no;
     
@@ -258,14 +256,6 @@ void player_set_song (int player_nr, int no)
     {
         printf ("player_set_song: error loading song ID %ld. Retrying...\n",
                 pe->e->id);
-        printf ("player_set_song: error loading song ID %ld. Retrying...\n",
-                pe->e->id);
-        printf ("player_set_song: error loading song ID %ld. Retrying...\n",
-                pe->e->id);
-        printf ("player_set_song: error loading song ID %ld. Retrying...\n",
-                pe->e->id);
-        printf ("player_set_song: error loading song ID %ld. Retrying...\n",
-                pe->e->id);
         err = player_load (player_nr);	/* 2nd try */
     }
 
@@ -275,7 +265,7 @@ void player_set_song (int player_nr, int no)
 
         if (PLAYLIST_GetNoOfEntries (player_nr) > 1)
         {
-            player_set_song (player_nr, no + 1);
+            PLAYER_SetSong (player_nr, no + 1);
             printf ("trying next!\n");
         }
         else
@@ -283,7 +273,7 @@ void player_set_song (int player_nr, int no)
 
     }
     TRACE("PLAYER_SetSong <- %d",player_nr);
-
+    return 1;
 }
 
 /* loads a song set by playing_id */
@@ -292,7 +282,6 @@ int player_load (int player_nr)
     int err = 0;
     int cerr = 0;
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
-    struct SongDBEntry *e;
 
     TRACE("player_load enter");
     if(p==NULL)
@@ -306,17 +295,18 @@ int player_load (int player_nr)
     if (! (cerr = input_close_file (p->current_plugin)) )
     {
         p->State = PLAYER_PAUSE;
-        e   =  SONGDB_GetEntryID (p->songdb_id);
-        if(e)
+        if(p->e)
         {
             err =  INPUT_LoadFile (player_nr, p->e);
         }
         else
+        {
             ERROR("No such entry");
+        }
         if (err)
         {
             fprintf (stderr, "Error 0x%x(%d) loading song id %ld: %s\n", err, err,
-                     p->songdb_id, e->filename);
+                     p->songdb_id, p->e->filename);
             return -1;
         }
     }

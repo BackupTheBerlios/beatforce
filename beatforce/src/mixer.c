@@ -46,7 +46,7 @@
 
 
 /* Local protoypes */
-int mixer_FadeTimeout (void* ptr);      /* Timer function */
+static int MIXER_FadeTimeout();      /* Timer function */
 
 
 #ifdef __USE_FADER_MUTEX__
@@ -58,9 +58,6 @@ int fader_mutex;
 #define mutex_lock( m )
 #endif
 
-
-extern MixerConfig *mixercfg;
-extern struct OutChannel *ch[OUTPUT_N_CHANNELS];
 
 int mixer_timeout (void*);
 CrossFader *cfader;
@@ -79,9 +76,9 @@ int MIXER_Init ()
     memset( cfader, 0, sizeof(CrossFader));
 
     for (i = 0; i < OUTPUT_N_CHANNELS; i++)
-        ch[i]->fader_dB = MIXER_DEFAULT_dB;
-    /*if (mixer_read_config () != 0)
-        mixer_write_config ();*/
+    {
+        AUDIOOUTPUT_SetVolume(i,MIXER_DEFAULT_dB);
+    }
 
     cfader->value = 0;
     cfader->timer = 0;
@@ -98,8 +95,6 @@ int MIXER_Init ()
 int mixer_finalize ()
 {
     mutex_unlock (fader_mutex);
-
-    //mixer_write_config( );
     return 0;
 }
 
@@ -146,7 +141,6 @@ int mixer_dB (int ch, float dB)
 
 int MIXER_DoFade(int autofade, int instant)
 {
-    void *win =NULL;
     int from = -1;
     int to   = -1;
     
@@ -158,7 +152,7 @@ int MIXER_DoFade(int autofade, int instant)
         if (from != -1)
         {
             LOG("autofade: 2 players are playing, can't decide which to fade");
-            return -1;
+            return 0;
         }
         from = 1;
     }
@@ -166,7 +160,7 @@ int MIXER_DoFade(int autofade, int instant)
     if (from == -1)
     {
         LOG("autofade: no player playing!");
-        return -1;
+        return 0;
     }
     
     if (from == 1)
@@ -194,28 +188,33 @@ int MIXER_DoFade(int autofade, int instant)
         {
             MIXER_GetFaderValue (&cfader->value);
             cfader->inc = ((to == 1) ? (step_width) : (-step_width));
-            PLAYER_Play(to);
-            cfader->in_progress = TRUE;
-            cfader->autofade = autofade;
-            if(cfader->fade_time == 0)
-                cfader->fade_time = MIXER_DEFAULT_CF_FadeTime *10;
+            if(PLAYER_Play(to))
+            {
+                cfader->in_progress = TRUE;
+                cfader->autofade = autofade;
+                if(cfader->fade_time == 0)
+                    cfader->fade_time = MIXER_DEFAULT_CF_FadeTime *10;
 
-            cfader->timer =
-                //SDL_AddTimer(250,fade_timeout,NULL);
-                OSA_StartTimer(cfader->fade_time / (long) (1 / step_width),
-                               mixer_FadeTimeout, (void*) win);
+#if 0
+                cfader->timer =
+                    OSA_StartTimer(cfader->fade_time / (long) (1 / step_width),
+                                   MIXER_FadeTimeout, (void*) win);
+#endif
+                cfader->timer = OSA_StartTimer(1, MIXER_FadeTimeout, NULL);
+
+            }
         }
         else
         {
-            printf ("fade in progress.\n");
+            ERROR("Fade already in progress");
+            return 0;
         }
 
     }
-
-    return 0;
+    return 1;
 }
 
-int mixer_FadeTimeout (void* ptr)
+static int MIXER_FadeTimeout ()
 {
     int end = 0;
 

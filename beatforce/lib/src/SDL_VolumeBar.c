@@ -66,6 +66,7 @@ void* SDL_VolumeBarCreate(SDL_Rect* rect)
     volumebar->CurrentLine   = 0;
     
     volumebar->Redraw  = 1;
+    volumebar->Visible = 1;
 
     return volumebar;
 }
@@ -75,8 +76,11 @@ void SDL_VolumeBarDraw(void *volumebar,SDL_Surface *dest)
     SDL_VolumeBar *VolumeBar=(SDL_VolumeBar*)volumebar;
     int line;
     int highlight=0;
+    
+    if(VolumeBar->Visible == 0)
+        return;
 
-    if(VolumeBar->Redraw)
+    if(VolumeBar->Redraw || SDL_WidgetNeedsRedraw())
     {
         SDL_FillRect(dest,&VolumeBar->rect,0x000000);
 
@@ -123,6 +127,11 @@ int SDL_VolumeBarProperties(void *volumebar,int feature,va_list list)
         VolumeBar->CurrentValue = val; 
         VolumeBar->CurrentLine  = (val * VolumeBar->rect.h) / (VolumeBar->MaxValue - VolumeBar->MinValue); 
         VolumeBar->Redraw       = 1;
+        break;
+    case SET_VISIBLE:
+        VolumeBar->Visible=va_arg(list,int);
+        break;
+    default:
         break;
     }
     return 1;

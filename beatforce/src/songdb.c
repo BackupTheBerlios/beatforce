@@ -480,7 +480,7 @@ int SONGDB_FindSubgroup(struct SongDBEntry *e)
         count++;
         Subgroup=Subgroup->next;
     }
-
+    return 0;
 }
 
 
@@ -529,44 +529,46 @@ void SONGDB_FindEntry(char *search_string)
 
     while(Subgroup)
     {
-        Playlist=Subgroup->Playlist;
-
-    
-        while(Playlist)
+        if(Subgroup->Volatile == 0)
         {
-            int match = 0; 
-            e = Playlist;
-      
-            if (nw == 0   ||        /* No words yet */
-                (nw == 1 && words[0][0] == '\0') || /* empty word */
-                (nw == 1 && strlen(words[0]) == 1 && /* only one character */
-                 ((e->title &&
-                   strchr(e->title,words[0][0])) || strchr(e->filename,words[0][0]))))
+            Playlist=Subgroup->Playlist;
+            
+            while(Playlist)
             {
-                match=1;
-            }
-            else
-                if (nw == 1 && strlen(words[0]) == 1)
-                    match=0;
-                else
+                int match = 0; 
+                e = Playlist;
+                
+                if (nw == 0   ||        /* No words yet */
+                    (nw == 1 && words[0][0] == '\0') || /* empty word */
+                    (nw == 1 && strlen(words[0]) == 1 && /* only one character */
+                     ((e->title &&
+                       strchr(e->title,words[0][0])) || strchr(e->filename,words[0][0]))))
                 {
-                    char song[256];
- 
-                    for(ptr = e->title,i=0   ; ptr && *ptr && i < 254; i++, ptr++)
-                        song[i]=tolower(*ptr);
-                    for(ptr= e->filename,i=0 ; ptr && *ptr && i < 254; i++, ptr++)
-                        song[i]=tolower(*ptr);
-                    song[i] = '\0';
-                    match=SONGDB_JumpToFileMatch(song,words,nw);
+                    match=1;
                 }
+                else
+                    if (nw == 1 && strlen(words[0]) == 1)
+                        match=0;
+                    else
+                    {
+                        char song[256];
+ 
+                        for(ptr = e->title,i=0   ; ptr && *ptr && i < 254; i++, ptr++)
+                            song[i]=tolower(*ptr);
+                        for(ptr= e->filename,i=0 ; ptr && *ptr && i < 254; i++, ptr++)
+                            song[i]=tolower(*ptr);
+                        song[i] = '\0';
+                        match=SONGDB_JumpToFileMatch(song,words,nw);
+                    }
 
-            if(match)
-            {
-                n_search_results++;
-                search_results = realloc (search_results, n_search_results * DBENTRY_PTR_LEN);
-                search_results[n_search_results - 1] = e;
+                if(match)
+                {
+                    n_search_results++;
+                    search_results = realloc (search_results, n_search_results * DBENTRY_PTR_LEN);
+                    search_results[n_search_results - 1] = e;
+                }
+                Playlist=Playlist->next;
             }
-            Playlist=Playlist->next;
         }
         Subgroup=Subgroup->next;
     }

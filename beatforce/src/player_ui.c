@@ -59,10 +59,27 @@ static void PLAYERUI_UpdateFileInfo(int player);
 static void PLAYERUI_UpdateVolume(int player);
 static void PLAYERUI_UpdateState(int player);
 
+#if 0
 /* Callback for edit title */
 static void PLAYERUI_EditTitleReturn(void *data);
+#endif
 
- /* Exported functions */
+void hide(void *data)
+{
+    if(UI_Players[0].State == PLAYERUI_STATE_NORMAL)
+    {
+        UI_Players[0].State = PLAYERUI_STATE_INFO;
+    }
+    else
+    {
+        UI_Players[0].State = PLAYERUI_STATE_NORMAL;
+    }
+
+
+
+}
+
+/* Exported functions */
 void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
 {
     ThemeImage     *Image     = NULL;
@@ -70,7 +87,8 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
     ThemeText      *Text      = NULL;
     ThemeVolumeBar *VolumeBar = NULL;
     ThemeEdit      *Edit      = NULL;
-    
+    void *t;
+
     if(pt == NULL)
         return;
     
@@ -81,15 +99,22 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
     Edit      = pt->Edit;
 
     UI_Players[nr].PlayerNr=nr;
+    UI_Players[nr].Images=NULL;
 
     /* Background window */
     while(Image)
     {
-        SDL_WidgetCreateR(SDL_PANEL,Image->Rect);
+        t=SDL_WidgetCreateR(SDL_PANEL,Image->Rect);
         SDL_WidgetProperties(SET_NORMAL_IMAGE,Image->filename);
+        UI_Players[nr].Images=LLIST_Append(UI_Players[nr].Images,t);
         Image=Image->next;
+        
     }        
-
+    if(nr == 0)
+    {
+        SDL_WidgetCreate(SDL_BUTTON,290,34,20,20);
+        SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,hide,NULL);
+    }
     while(Button)
     {
         switch(Button->action)
@@ -149,7 +174,7 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
 
         case TEXT_PLAYER_STATE:
             /* Draw the state of the player  as a string */
-            UI_Players[nr].State=SDL_WidgetCreateR(SDL_LABEL,Text->Rect);
+            UI_Players[nr].PlayerState=SDL_WidgetCreateR(SDL_LABEL,Text->Rect);
             SDL_WidgetProperties(SET_FONT,THEME_Font(Text->font));
             SDL_WidgetProperties(SET_FG_COLOR,Text->fgcolor);
             break;
@@ -216,19 +241,70 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
         SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_RETURN,PLAYERUI_EditTitleReturn,&UI_Players[nr]);
     }
 #endif
+    
+    UI_Players[nr].State = PLAYERUI_STATE_NORMAL;
 }
 
 void PLAYERUI_Redraw()
 {
+#if 0
     /* Automaticly load a song when no player is playing */
     if(PLAYER_IsPlaying(0) == 0 &&
        PLAYER_IsPlaying(1) == 0 &&
        PLAYLIST_GetSong(0,0))
     {
-        player_set_song(0,0);
+        PLAYER_SetSong(0,0);
         PLAYER_Play(0);
         SONGDBUI_Play(0);
     }
+#endif
+
+    if(UI_Players[0].State == PLAYERUI_STATE_INFO)
+    {
+        BFList *l=UI_Players[0].Images;
+        SDL_WidgetPropertiesOf(UI_Players[0].ButtonPlay,SET_VISIBLE,0);
+        SDL_WidgetPropertiesOf(UI_Players[0].ButtonPause,SET_VISIBLE,0);
+        SDL_WidgetPropertiesOf(UI_Players[0].SongProgress,SET_VISIBLE,0);        
+        SDL_WidgetPropertiesOf(UI_Players[0].Artist,SET_VISIBLE,0);
+        SDL_WidgetPropertiesOf(UI_Players[0].Title,SET_VISIBLE,0);
+        SDL_WidgetPropertiesOf(UI_Players[0].PlayerState,SET_VISIBLE,0);
+        SDL_WidgetPropertiesOf(UI_Players[0].Pitch,SET_VISIBLE,0);
+        SDL_WidgetPropertiesOf(UI_Players[0].TimeRemaining,SET_VISIBLE,0);
+        SDL_WidgetPropertiesOf(UI_Players[0].TimeElapsed,SET_VISIBLE,0);
+        SDL_WidgetPropertiesOf(UI_Players[0].Bitrate,SET_VISIBLE,0);
+        SDL_WidgetPropertiesOf(UI_Players[0].Samplerate,SET_VISIBLE,0);
+        SDL_WidgetPropertiesOf(UI_Players[0].VolumeLeft,SET_VISIBLE,0);
+        SDL_WidgetPropertiesOf(UI_Players[0].VolumeRight,SET_VISIBLE,0);
+        while(l)
+        {
+            SDL_WidgetPropertiesOf(l->data,SET_VISIBLE,0);        
+            l=l->next;
+        }
+        SDL_WidgetForceRedraw();
+        return;
+    }
+    else
+    {
+        BFList *l=UI_Players[0].Images;
+        SDL_WidgetPropertiesOf(UI_Players[0].SongProgress,SET_VISIBLE,1);        
+        SDL_WidgetPropertiesOf(UI_Players[0].Artist,SET_VISIBLE,1);
+        SDL_WidgetPropertiesOf(UI_Players[0].Title,SET_VISIBLE,1);
+        SDL_WidgetPropertiesOf(UI_Players[0].PlayerState,SET_VISIBLE,1);
+        SDL_WidgetPropertiesOf(UI_Players[0].Pitch,SET_VISIBLE,1);
+        SDL_WidgetPropertiesOf(UI_Players[0].TimeRemaining,SET_VISIBLE,1);
+        SDL_WidgetPropertiesOf(UI_Players[0].TimeElapsed,SET_VISIBLE,1);
+        SDL_WidgetPropertiesOf(UI_Players[0].Bitrate,SET_VISIBLE,1);
+        SDL_WidgetPropertiesOf(UI_Players[0].Samplerate,SET_VISIBLE,1);
+        SDL_WidgetPropertiesOf(UI_Players[0].VolumeLeft,SET_VISIBLE,1);
+        SDL_WidgetPropertiesOf(UI_Players[0].VolumeRight,SET_VISIBLE,1);
+        while(l)
+        {
+            SDL_WidgetPropertiesOf(l->data,SET_VISIBLE,1);        
+            l=l->next;
+        }
+        SDL_WidgetForceRedraw();
+    }
+
 
 
     PLAYERUI_UpdateArtist(0);
@@ -249,28 +325,31 @@ void PLAYERUI_Redraw()
     PLAYERUI_UpdateState(0);
     PLAYERUI_UpdateState(1);
 
-    if(PLAYER_IsPlaying(0))
+    if(UI_Players[0].State == PLAYERUI_STATE_NORMAL)
     {
-        SDL_WidgetPropertiesOf(UI_Players[0].ButtonPlay,SET_VISIBLE,0);
-        SDL_WidgetPropertiesOf(UI_Players[0].ButtonPause,SET_VISIBLE,1);
-    }    
-    else
-    {
-        SDL_WidgetPropertiesOf(UI_Players[0].ButtonPause , SET_VISIBLE,0);
-        SDL_WidgetPropertiesOf(UI_Players[0].ButtonPlay  , SET_VISIBLE,1);
-    }
-
-    if(UI_Players[1].ButtonPause)
-    {
-        if(PLAYER_IsPlaying(1))
+        if(PLAYER_IsPlaying(0))
         {
-            SDL_WidgetPropertiesOf(UI_Players[1].ButtonPlay,SET_VISIBLE,0);
-            SDL_WidgetPropertiesOf(UI_Players[1].ButtonPause,SET_VISIBLE,1);
-        }
+            SDL_WidgetPropertiesOf(UI_Players[0].ButtonPlay,SET_VISIBLE,0);
+            SDL_WidgetPropertiesOf(UI_Players[0].ButtonPause,SET_VISIBLE,1);
+        }    
         else
         {
-            SDL_WidgetPropertiesOf(UI_Players[1].ButtonPlay,SET_VISIBLE,1);
-            SDL_WidgetPropertiesOf(UI_Players[1].ButtonPause,SET_VISIBLE,0);
+            SDL_WidgetPropertiesOf(UI_Players[0].ButtonPause , SET_VISIBLE,0);
+            SDL_WidgetPropertiesOf(UI_Players[0].ButtonPlay  , SET_VISIBLE,1);
+        }
+        
+        if(UI_Players[1].ButtonPause)
+        {
+            if(PLAYER_IsPlaying(1))
+            {
+                SDL_WidgetPropertiesOf(UI_Players[1].ButtonPlay,SET_VISIBLE,0);
+                SDL_WidgetPropertiesOf(UI_Players[1].ButtonPause,SET_VISIBLE,1);
+            }
+            else
+            {
+                SDL_WidgetPropertiesOf(UI_Players[1].ButtonPlay,SET_VISIBLE,1);
+                SDL_WidgetPropertiesOf(UI_Players[1].ButtonPause,SET_VISIBLE,0);
+            }
         }
     }
 
@@ -399,7 +478,7 @@ static void PLAYERUI_UpdateTime(int player)
         {
             if(PLAYLIST_GetSong(player,0))
             {
-                player_set_song(!player,0);
+                PLAYER_SetSong(!player,0);
                 MIXER_DoFade(1,0);
                 SONGDBUI_Play(!player);
                 totaltime = 0;
@@ -417,7 +496,7 @@ static void PLAYERUI_UpdateTime(int player)
                 id=rand()%SONGDB_GetNoOfEntries();
                 e=SONGDB_GetEntryID(id);
                 PLAYLIST_AddEntry(!player,e);
-                player_set_song(!player,0);  /* when set_entry is excecuted we only have 1 item thus 0 */
+                PLAYER_SetSong(!player,0);  /* when set_entry is excecuted we only have 1 item thus 0 */
                 MIXER_DoFade(1,0);
                 SONGDBUI_Play(!player);
             }
@@ -456,7 +535,7 @@ static void PLAYERUI_UpdateFileInfo(int player)
     SDL_WidgetPropertiesOf(UI_Players[player].Bitrate,SET_CAPTION,label);
 }
 
-
+#if 0
 static void PLAYERUI_EditTitleReturn(void *data)
 {
     char caption[255];
@@ -465,7 +544,8 @@ static void PLAYERUI_EditTitleReturn(void *data)
     SDL_WidgetPropertiesOf(cur->EditTitle,GET_CAPTION,&caption);
     PLAYER_SetTitle(cur->PlayerNr,caption);
 }        
-  
+#endif
+
 static void PLAYERUI_UpdateState(int player)
 {
     char label[255];
@@ -490,7 +570,7 @@ static void PLAYERUI_UpdateState(int player)
         sprintf(label,"INTERNAL ERROR");
         break;
     }
-    SDL_WidgetPropertiesOf(UI_Players[player].State,SET_CAPTION,label);
+    SDL_WidgetPropertiesOf(UI_Players[player].PlayerState,SET_CAPTION,label);
 }
 
 static void PLAYERUI_PlayButton(void *data)
@@ -514,6 +594,7 @@ static void PLAYERUI_PlayButton(void *data)
     else
     {
         PLAYER_Play  (current->PlayerNr);
+        SONGDBUI_Play(current->PlayerNr);
     }
 }
 

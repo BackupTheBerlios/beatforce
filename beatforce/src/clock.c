@@ -1,7 +1,6 @@
 /*
-  Beatforce/SDLTk
+  Beatforce/ Clock widget
 
-  one line to give the program's name and an idea of what it does.
   Copyright (C) 2003 John Beuving (john.beuving@home.nl)
 
   This program is free software; you can redistribute it and/or
@@ -20,36 +19,41 @@
 */
 
 #include "SDL_Widget.h"
-#include "SDL_Font.h"
+#include "theme.h"
+#include "osa.h"
 
-typedef struct SDL_VolumeBar
+#define MODULE_ID CLOCK
+#include "debug.h"
+
+void *CLOCK_Create(ThemeClock *Clock)
 {
-    SDL_Font *Font;
-    SDL_Rect rect;
+    void *widget=NULL;
     
-    Uint32  color1;
-    Uint32  color2;
-    Uint32  color3;
-    Uint32  color4;
+    TRACE("CLOCK_Create");
     
-    int Redraw;
-    int Visible;
-
-    int MinValue;
-    int MaxValue;
-    int CriticalValue;
-    int CurrentValue;
-
-    /* Settings for internal draw functions */
-    int CriticalLine;  /* The "Red" zone */
-    int CurrentLine;   /* line where the volume is at */
-
-}SDL_VolumeBar;
+    if(Clock->font)
+    {
+        widget=SDL_WidgetCreateR(SDL_LABEL,Clock->Rect);
+        SDL_WidgetProperties(SET_BG_COLOR,Clock->bgcolor);
+        SDL_WidgetProperties(SET_FG_COLOR,Clock->fgcolor);
+        SDL_WidgetProperties(SET_FONT,THEME_Font(Clock->font));
+    }
+    return widget;
+}
 
 
-// prototypes
-void* SDL_VolumeBarCreate(SDL_Rect *rect);
-void  SDL_VolumeBarDraw(void *label,SDL_Surface *dest);
-void  SDL_VolumeBarEventHandler(void * label,SDL_Event *event);
-int   SDL_VolumeBarProperties(void *label,int feature,va_list list);
+void CLOCK_Redraw(void *clock)
+{
+    char time[6];
+    int min=0,hour=0;
+
+    TRACE("CLOCK_Redraw");
+    if(clock)
+    {
+        OSA_GetTime(&hour,&min);
+        sprintf(time,"%02d:%02d",hour,min);
+        SDL_WidgetPropertiesOf(clock,SET_CAPTION,time);
+    }
+}
+
 

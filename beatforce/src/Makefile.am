@@ -29,6 +29,7 @@ player_ui.c     player_ui.h     \
 songdb_ui.c     songdb_ui.h     \
 playlist_ui.c   playlist_ui.h   \
 mixer_ui.c      mixer_ui.h      \
+clock.c         clock.h         \
                                 \
 file_window.c   file_window.h   \
 main_window.c   main_window.h   \

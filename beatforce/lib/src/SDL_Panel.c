@@ -49,7 +49,7 @@ void* SDL_PanelCreate(SDL_Rect* rect)
     panel->redraw = 1;
     panel->image  = NULL;
 
-
+    panel->Visible = 1;
     return panel;
 }
 
@@ -57,6 +57,9 @@ void SDL_PanelDraw(void *panel,SDL_Surface *dest)
 {
     SDL_Panel *Panel=(SDL_Panel*)panel;
     SDL_Rect src;
+
+    if(Panel->Visible == 0)
+        return;
 
     src.x=0;
     src.y=0;
@@ -108,6 +111,12 @@ int SDL_PanelProperties(void *panel,int feature,va_list list)
         break;
     case FORCE_REDRAW:
         Panel->redraw=1;
+        break;
+    case SET_VISIBLE:
+        Panel->Visible=va_arg(list,int);
+        break;
+
+    default:
         break;
     }
     return 1;

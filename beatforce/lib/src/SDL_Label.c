@@ -60,6 +60,7 @@ void* SDL_LabelCreate(SDL_Rect* rect)
     label->Pattern    = LABEL_BOUNCE;
     label->Background = NULL;
 
+    label->Visible    = 1;
     return label;
 }
 
@@ -68,6 +69,9 @@ void SDL_LabelDraw(void *label,SDL_Surface *dest)
     SDL_Label *Label=(SDL_Label*)label;
     char string[255];
     SDL_Rect DrawPosititon;
+    
+    if(Label->Visible == 0)
+        return;
 
     memset(string ,0,255);
 
@@ -118,6 +122,9 @@ int SDL_LabelProperties(void *label,int feature,va_list list)
     case SET_BG_COLOR:
         Label->bgcolor=va_arg(list,Uint32);
         break;
+
+    case SET_VISIBLE:
+        Label->Visible=va_arg(list,int);
 
     }
     return 1;

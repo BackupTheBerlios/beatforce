@@ -57,6 +57,7 @@ typedef struct SDL_Slider
     void (*OnSliderChanged)(void*);
     void (*OnSliderChangedData)(void*);
 
+    int Visible;
     SDL_Rect rect;  //dimensions of the widget area
 }SDL_Slider;
 

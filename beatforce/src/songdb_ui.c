@@ -45,7 +45,6 @@
 #define MODULE_ID SONGDB_UI
 #include "debug.h"
 
-extern SongDBGroup *MainGroup;
 
 /* Prototypes for functions for buttosn below */
 static void SONGDBUI_ChangeGroupClicked(void *data);
@@ -95,14 +94,18 @@ void SONGDBUI_CreateWindow(ThemeSongdb *ts)
         SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION,songdbstring);
         SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,eventhandler,table);
         SDL_WidgetProperties(SET_IMAGE,THEME_DIR"/beatforce/tablescrollbar.bmp");
+
+        /* Craete the tab section below the table*/
+        tabwidget=SDL_WidgetCreate(SDL_TAB,ts->Table->Rect.x,ts->Table->Rect.y + ts->Table->Rect.h,
+                                           ts->Table->Rect.w,20);
+        SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
+        SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
+        SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,SONGDBUI_ChangeDatabase,NULL);
+
     }
 
 
-    /* Craete the tab section below the table*/
-    tabwidget=SDL_WidgetCreate(SDL_TAB,30,580,500,20);
-    SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
-    SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
-    SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,SONGDBUI_ChangeDatabase,NULL);
+
 
 
     /* Create buttons which change the tabs */

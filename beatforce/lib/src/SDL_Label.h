@@ -30,6 +30,7 @@ typedef struct SDL_Label
     Uint32  bgcolor;
     Uint32  fgcolor;
 
+    int Visible;
     int offset;
     int increase;
 

@@ -32,8 +32,6 @@
 #include "audio_output.h" 
 #include "theme.h"
 
-extern int mixer_dB (int ch, float dB);
-
 /* Local callback functions */
 void mixerui_AutoFadeButtonClicked(void *data);
 static void MIXERUI_FaderChanged(void *data);

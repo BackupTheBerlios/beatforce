@@ -26,8 +26,12 @@ typedef struct SDL_Panel
 {
     SDL_Rect rect;
     SDL_Surface *image;
+
     int redraw;
+    int Visible;
+
     Uint32  color;
+
 
 }SDL_Panel;
 

@@ -39,51 +39,75 @@
 #define MODULE_ID THEME
 #include "debug.h"
 
+/* Widget Parser */
+ThemeImage  *XML_ParseImage(ThemeImage *image,xmlDocPtr doc, xmlNodePtr cur);
+ThemeFont   *XML_ParseFont(xmlDocPtr doc, xmlNodePtr cur);
+ThemeText   *XML_ParseText(ThemeText *text,xmlDocPtr doc, xmlNodePtr cur);
+ThemeButton *XML_ParseButton(ThemeButton *button,xmlDocPtr doc, xmlNodePtr cur);
+ThemeTable  *XML_ParseTable(ThemeTable *pp,xmlDocPtr doc, xmlNodePtr cur);
+
+
 /* Window parsers */
 ThemeMainWindow *XML_ParseMainwindow(xmlDocPtr doc, xmlNodePtr cur);
 ThemeSearchWindow *XML_ParseSearchwindow(xmlDocPtr doc, xmlNodePtr cur);
 ThemeFileWindow *XML_ParseFilewindow(xmlDocPtr doc, xmlNodePtr cur);
 
 /* Mainwindow group parser */
-ThemePlayer *XML_ParsePlayer(xmlDocPtr doc, xmlNodePtr cur);
+ThemePlayer   *XML_ParsePlayer(xmlDocPtr doc, xmlNodePtr cur);
 ThemePlaylist *XML_ParsePlaylist(xmlDocPtr doc, xmlNodePtr cur);
-ThemeClock *XML_ParseClock(xmlDocPtr doc, xmlNodePtr cur);
-ThemeMixer *XML_ParseMixer(xmlDocPtr doc, xmlNodePtr cur);
-ThemeSongdb *XML_ParseSongdb(xmlDocPtr doc, xmlNodePtr cur);
-
-/* Widget Parser */
-ThemeImage *XML_ParseImage(ThemeImage *image,xmlDocPtr doc, xmlNodePtr cur);
-ThemeFont *XML_ParseFont(xmlDocPtr doc, xmlNodePtr cur);
-ThemeText *XML_ParseText(ThemeText *text,xmlDocPtr doc, xmlNodePtr cur);
-ThemeButton *XML_ParseButton(ThemeButton *button,xmlDocPtr doc, xmlNodePtr cur);
-ThemeTable *XML_ParseTable(ThemeTable *pp,xmlDocPtr doc, xmlNodePtr cur);
+ThemeClock    *XML_ParseClock(xmlDocPtr doc, xmlNodePtr cur);
+ThemeMixer    *XML_ParseMixer(xmlDocPtr doc, xmlNodePtr cur);
+ThemeSongdb   *XML_ParseSongdb(xmlDocPtr doc, xmlNodePtr cur);
 
 static ThemeConfig *active;
+
+ThemeImage *XML_ParseImage(ThemeImage *image,xmlDocPtr doc, xmlNodePtr cur)
+{
+    ThemeImage *pImage;
+
+    if(image == NULL)
+    {
+        pImage=malloc(sizeof(ThemeImage));
+        memset(pImage,0,sizeof(ThemeImage));
+                    
+        StorePropertyAsString(cur,"filename",&pImage->filename);
+        RebuildFilename(&pImage->filename);
+        
+        StorePropertyAsShort(cur,"x",&pImage->Rect.x);
+        StorePropertyAsShort(cur,"y",&pImage->Rect.y);
+        StorePropertyAsShort(cur,"w",&pImage->Rect.w);
+        StorePropertyAsShort(cur,"h",&pImage->Rect.h);
+        return pImage;
+    }
+    else
+    {
+        ThemeImage *last;
+        last=image;
+        while(last->next)
+            last=last->next;
+
+        last->next=malloc(sizeof(ThemeImage));
+        memset(last->next,0,sizeof(ThemeImage));
+        
+        StorePropertyAsString(cur,"filename",&last->next->filename);
+        RebuildFilename(&last->next->filename);
+        StorePropertyAsShort(cur,"x",&last->next->Rect.x);
+        StorePropertyAsShort(cur,"y",&last->next->Rect.y);
+        StorePropertyAsShort(cur,"w",&last->next->Rect.w);
+        StorePropertyAsShort(cur,"h",&last->next->Rect.h);
+        return image;    
+    }
+    
+}
 
 int THEME_Init()
 {
     BFList *dir;
     int NoOfThemes;
     ThemeConfig *current;
-//    ConfigFile *themecfg;
-//  char themepath[255];
     xmlNodePtr cur;
-//    long size;
     xmlDocPtr doc=NULL;
-//    FILE *fp;
-//    char *buffer;
     xmlChar *key;
-
-#if 0
-    fp=fopen("c:\\skin.xml","rb");
-    fseek(fp,0,SEEK_END);
-    size=ftell(fp);
-    fseek(fp,0,SEEK_SET);
-    buffer=malloc(sizeof(char)*(size+1));
-    memset(buffer,0,size+1);
-    fread(buffer,1,size,fp);
-    fclose(fp);
-#endif
 
     current=(ThemeConfig*)malloc(sizeof(ThemeConfig));
     memset(current,0,sizeof(ThemeConfig));
@@ -97,11 +121,11 @@ int THEME_Init()
     {
         /* use it */
         LIBXML_TEST_VERSION
-        xmlKeepBlanksDefault(0);
+            xmlKeepBlanksDefault(0);
 
-         /*
-          * build an XML tree from a the file;
-          */
+        /*
+         * build an XML tree from a the file;
+         */
         doc = xmlParseFile(THEME_DIR"/beatforce/skin.xml");
         if (doc == NULL) 
             return 0;
@@ -110,21 +134,21 @@ int THEME_Init()
         if (cur == NULL) 
         {
             fprintf(stderr,"empty document\n");
-	        xmlFreeDoc(doc);
-	        return 0;
+            xmlFreeDoc(doc);
+            return 0;
         }
         
         /* CHeck the root node */
         if (xmlStrcmp(cur->name, (const xmlChar *) "Beatforce")) 
         {
             fprintf(stderr,"document of the wrong type, root node != Helping");
-	        xmlFreeDoc(doc);
-	        return 0;
+            xmlFreeDoc(doc);
+            return 0;
         }
 
         current->Screen=malloc(sizeof(ThemeScreen));
         /* Check for aditional parameters */
-	    key = xmlGetProp(cur, "fullscreen");
+        key = xmlGetProp(cur, "fullscreen");
         if(key)
         {
             current->Screen->FullScreen=atoi(key);
@@ -163,20 +187,20 @@ int THEME_Init()
             {
                 current->Font=XML_ParseFont(doc,cur);
             }
-	        if ((!xmlStrcmp(cur->name, (const xmlChar *)"mainwindow"))) 
+            if ((!xmlStrcmp(cur->name, (const xmlChar *)"mainwindow"))) 
             {
                 current->MainWindow=XML_ParseMainwindow(doc,cur);
- 	        }
+            }
             if ((!xmlStrcmp(cur->name, (const xmlChar *)"filewindow"))) 
             {
                 current->FileWindow=XML_ParseFilewindow(doc,cur);
- 	        }
+            }
             if ((!xmlStrcmp(cur->name, (const xmlChar *)"searchwindow"))) 
             {
                 current->SearchWindow=XML_ParseSearchwindow(doc,cur);
             }
-	        cur = cur->next;
-	    }
+            cur = cur->next;
+        }
         active=current;
 
     }
@@ -308,7 +332,7 @@ ThemeSearchWindow *XML_ParseSearchwindow(xmlDocPtr doc, xmlNodePtr cur)
 
 ThemeMainWindow *XML_ParseMainwindow(xmlDocPtr doc, xmlNodePtr cur)
 {
-	ThemeMainWindow *mainwindow;
+    ThemeMainWindow *mainwindow;
 
     mainwindow=NULL;
     cur = cur->xmlChildrenNode;
@@ -420,44 +444,7 @@ ThemeClock *XML_ParseClock(xmlDocPtr doc, xmlNodePtr cur)
     return clock;
 }
 
-ThemeImage *XML_ParseImage(ThemeImage *image,xmlDocPtr doc, xmlNodePtr cur)
-{
-    ThemeImage *pImage;
 
-    if(image == NULL)
-    {
-        pImage=malloc(sizeof(ThemeImage));
-        memset(pImage,0,sizeof(ThemeImage));
-                    
-        StorePropertyAsString(cur,"filename",&pImage->filename);
-        RebuildFilename(&pImage->filename);
-        
-        StorePropertyAsShort(cur,"x",&pImage->Rect.x);
-        StorePropertyAsShort(cur,"y",&pImage->Rect.y);
-        StorePropertyAsShort(cur,"w",&pImage->Rect.w);
-        StorePropertyAsShort(cur,"h",&pImage->Rect.h);
-        return pImage;
-    }
-    else
-    {
-        ThemeImage *last;
-        last=image;
-        while(last->next)
-            last=last->next;
-
-        last->next=malloc(sizeof(ThemeImage));
-        memset(last->next,0,sizeof(ThemeImage));
-        
-        StorePropertyAsString(cur,"filename",&last->next->filename);
-        RebuildFilename(&last->next->filename);
-        StorePropertyAsShort(cur,"x",&last->next->Rect.x);
-        StorePropertyAsShort(cur,"y",&last->next->Rect.y);
-        StorePropertyAsShort(cur,"w",&last->next->Rect.w);
-        StorePropertyAsShort(cur,"h",&last->next->Rect.h);
-        return image;    
-    }
-    
-}
 
 ThemeEdit *XML_ParseEdit(ThemeEdit *edit,xmlDocPtr doc, xmlNodePtr cur)
 {

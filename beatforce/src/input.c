@@ -185,7 +185,7 @@ int INPUT_LoadFile (int player_nr,struct SongDBEntry *e)
     PLAYER_GetData(player_nr)->current_plugin = l;
     if(PLAYER_GetData(player_nr)->songdb_id == SONGDB_ID_UNKNOWN)
         PLAYER_GetData(player_nr)->songdb_id = e->id;
-
+    
     return l->ip->load_file (l->priv, e->filename);
 }
 

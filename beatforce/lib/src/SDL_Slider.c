@@ -75,6 +75,7 @@ void* SDL_SliderCreate(SDL_Rect* rect)
     // initialize eventhandler
     slider->OnSliderChanged      = NULL;
     slider->OnSliderChangedData  = NULL;
+    slider->Visible = 1;
 
     return slider;
 }
@@ -87,6 +88,9 @@ void SDL_SliderDraw(void *slider,SDL_Surface *dest)
     SDL_Rect   button;
     int x_offset=0;
     int y_offset=0;
+
+    if(Slider->Visible == 0)
+        return;
 
     if(Slider->SliderButton == NULL)
         return;
@@ -225,6 +229,10 @@ int SDL_SliderProperties(void *slider,int feature,va_list list)
     case STOREBACKGROUND:
         Slider->StoreBackground=va_arg(list,int);
         break;
+    case SET_VISIBLE:
+        Slider->Visible = va_arg(list,int);
+        break;
+
     default:
         break;
 

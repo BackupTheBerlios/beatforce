@@ -184,7 +184,7 @@ void searchwindow_PlayClicked(void *data)
         }
         
         PLAYLIST_AddEntry(player,e);
-        player_set_song(player,0);  // when set_entry is excecuted we only have 1 item thus 0
+        PLAYER_SetSong(player,0);  // when set_entry is excecuted we only have 1 item thus 0
         
         if(autofade == 1)
             MIXER_DoFade(1,0);
@@ -194,15 +194,7 @@ void searchwindow_PlayClicked(void *data)
         SONGDBUI_Play(player);
         /* and the search results */
         SONGDB_FindEntry("");
-
-                
-
     }
-    else
-    {
-        printf("Can;t find search entry\n");
-    }    
-
 }
 
 void searchwindow_Play(void *data)

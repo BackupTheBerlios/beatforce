@@ -33,6 +33,7 @@ typedef struct SDL_ProgressBar
     Uint32  color4;
     
     int Redraw;
+    int Visible;
     int State;
 
     int Orientation;
