@@ -78,7 +78,7 @@ SDL_CONFIG = /usr/bin/sdl-config
 SDL_LIBS = -L/usr/lib -lSDL -lpthread
 STRIP = strip
 THEME_DIR = /usr/share/beatforce/themes
-VERSION = 0.0.1
+VERSION = 0.2.0
 
 lib_LTLIBRARIES = libbeatforcemp3mad.la
 
@@ -86,7 +86,7 @@ libdir = /usr/share/beatforce/plugins/input
 
 libbeatforcemp3mad_la_LDFLAGS = -module -avoid-version
 
-libbeatforcemp3mad_la_SOURCES = mp3.c osa.c llist.c debug.c
+libbeatforcemp3mad_la_SOURCES = mp3.c mp3.h osa.c llist.c debug.c 
 
 INCLUDES = -I../../../src -I$(top_builddir)/src $(MADDIR)
 LIBS = -lmad -lid3tag 

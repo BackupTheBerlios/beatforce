@@ -17,7 +17,7 @@
 #define PACKAGE "beatforce"
 
 /* Version number of package */
-#define VERSION "0.0.1"
+#define VERSION "0.2.0"
 
 /* Plugin dir */
 #define PLUGIN_DIR "/usr/share/beatforce/plugins"

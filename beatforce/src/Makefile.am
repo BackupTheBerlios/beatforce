@@ -16,9 +16,9 @@ playlist.c      playlist.h      \
 songdb.c        songdb.h        \
 ringbuffer.c    ringbuffer.h    \
 audio_output.c  audio_output.h  \
-audiocd.c                       \
+audiocd.c       audiocd.h       \
 player.c        player.h        \
-sampler.c       sample.h        \
+sampler.c       sampler.h       \
 debug.c         debug.h         \
 theme.c         theme.h         \
 types.h                         \
@@ -27,6 +27,7 @@ output_plugin.h                 \
 effect_plugin.h                 \
 err.h                           \
 interface.h                     \
+ladspa.h                        \
                                 \
 wndmgr.c        wndmgr.h        \
 player_ui.c     player_ui.h     \

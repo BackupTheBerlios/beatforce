@@ -79,7 +79,7 @@ SDL_CONFIG = /usr/bin/sdl-config
 SDL_LIBS = -L/usr/lib -lSDL -lpthread
 STRIP = strip
 THEME_DIR = /usr/share/beatforce/themes
-VERSION = 0.0.1
+VERSION = 0.2.0
 
 SUBDIRS = oss raw
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs

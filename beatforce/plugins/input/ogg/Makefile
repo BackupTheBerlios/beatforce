@@ -78,7 +78,7 @@ SDL_CONFIG = /usr/bin/sdl-config
 SDL_LIBS = -L/usr/lib -lSDL -lpthread
 STRIP = strip
 THEME_DIR = /usr/share/beatforce/themes
-VERSION = 0.0.1
+VERSION = 0.2.0
 
 lib_LTLIBRARIES = libbeatforceogg.la
 
@@ -86,7 +86,7 @@ libdir = /usr/share/beatforce/plugins/input
 
 libbeatforceogg_la_LDFLAGS = -module -avoid-version
 
-libbeatforceogg_la_SOURCES = ogg.c llist.c debug.c osa.c
+libbeatforceogg_la_SOURCES = ogg.c ogg.h llist.c debug.c osa.c
 
 INCLUDES = -I../../../src -I$(top_builddir)/src $(MADDIR)
 LIBS = -lvorbis -lvorbisfile
