@@ -83,6 +83,7 @@ void WNDMGR_Init()
         exit(1);
     }
 
+    SDL_WM_SetCaption("Beatforce",NULL);
     MAINWINDOW_Init();
     SEARCHWINDOW_Init();
     FILEWINDOW_Init();

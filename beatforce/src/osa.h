@@ -47,3 +47,6 @@ void OSA_RemoveThread(int thread);
 
 //File functions (string)
 char *OSA_SearchFilename(char *filepath);
+
+//time function
+int OSA_GetTime(int *hours,int *minutes);

@@ -419,7 +419,10 @@ player_load (int player_nr)
     {
         p->play = 0;
         e   =  SONGDB_GetEntry (p->playing_id);
-        err =  INPUT_LoadFile (player_nr, e);
+        if(e)
+            err =  INPUT_LoadFile (player_nr, e);
+        else
+            ERROR("No such entry");
         if (err)
         {
             fprintf (stderr, "Error 0x%x(%d) loading song id %ld: %s\n", err, err,

@@ -26,6 +26,7 @@
 #include <dirent.h>
 #include <string.h>
 #include <dlfcn.h>
+#include <time.h>
 
 #include "osa.h"
 
@@ -252,4 +253,21 @@ char *OSA_SearchFilename(char *filepath)
     else
         return p;
     
+}
+
+int OSA_GetTime(int *hours,int *minutes)
+{
+  time_t rawtime;
+  struct tm * timeinfo;
+
+  time ( &rawtime );
+  timeinfo = localtime ( &rawtime );
+  if(hours)
+      *hours=timeinfo->tm_hour;
+  if(minutes)
+      *minutes=timeinfo->tm_min;
+  
+  return 0;
+
+
 }

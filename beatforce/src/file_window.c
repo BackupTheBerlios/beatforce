@@ -30,7 +30,7 @@
 #include "songdb_ui.h"
 
 
-
+void *fileedit;
 void *ttable;
 void *wLabel1;
 void *wLabel2;
@@ -52,7 +52,7 @@ void FileWindow_DirSelectClicked(void *data);
 
 void dirselect(SDL_Table *table);
 void dirstring(long row,int column,char *dest);
-
+void filewindow_Search(void *data);
 Window FILEWINDOW={ FILEWINDOW_EventHandler };
 
 SDL_Surface *FileWindow;
@@ -93,7 +93,8 @@ SDL_Surface *Window_CreateFileWindow()
 
     SDL_WidgetCreate(SDL_PANEL,0,0,1024,685);
     SDL_WidgetProperties(SET_NORMAL_IMAGE,THEME_DIR"/beatforce/sbackground.bmp");
-
+    
+    sprintf(directory,"/mnt/d");
     
     change=0;
     dirs=OSA_FindDirectories("/mnt/d/");
@@ -112,8 +113,13 @@ SDL_Surface *Window_CreateFileWindow()
     localsongs=OSA_FindFiles("/mnt/d/",".mp3",0);
     localcount=LLIST_NoOfEntries(localsongs);
     
+    fileedit=SDL_WidgetCreate(SDL_EDIT,10,5,500,25);
+    SDL_WidgetProperties(SET_FONT,LargeBoldFont);
+    SDL_WidgetProperties(SET_ALWAYS_FOCUS,1);
+    SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_RETURN,filewindow_Search,NULL);
+    SDL_WidgetProperties(SET_CAPTION,directory);
 
-    ttable=SDL_WidgetCreate(SDL_TABLE,10,10,980,400);
+    ttable=SDL_WidgetCreate(SDL_TABLE,10,30,980,400);
     SDL_WidgetProperties(SET_VISIBLE_COLUMNS, 1);
     SDL_WidgetProperties(SET_VISIBLE_ROWS, 27);
     SDL_WidgetProperties(ROWS,count);
@@ -140,6 +146,13 @@ SDL_Surface *Window_CreateFileWindow()
 
     return FileWindow;
 }
+
+void filewindow_Search(void *data)
+{
+    
+
+}
+
 
 int FILEWINDOW_EventHandler(SDL_Event event)
 {

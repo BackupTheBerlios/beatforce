@@ -36,6 +36,9 @@
 #include "wndmgr.h"
 #include "search_window.h"
 
+extern SDL_Font *DigitsFont;
+extern SDL_Font *LargeBoldFont;
+
 void songend_callback(int player_nr)
 {
 
@@ -47,6 +50,7 @@ int mainwindow_NotifyHandler();
 SDL_Surface *mainwindow_CreateWindow();
 
 SDL_Surface *MainWindow;
+void *timewidget;
 
 Window MAINWINDOW={ mainwindow_EventHandler , mainwindow_NotifyHandler };
 
@@ -78,6 +82,17 @@ SDL_Surface *mainwindow_CreateWindow()
 
     SDL_WidgetCreate(SDL_PANEL,0,0,1024,685);
     SDL_WidgetProperties(SET_NORMAL_IMAGE,THEME_DIR"/beatforce/sbackground.bmp");
+
+    timewidget=SDL_WidgetCreate(SDL_LABEL,4,4,65,22);
+    SDL_WidgetProperties(SET_BG_COLOR,BLACK);
+    SDL_WidgetProperties(SET_FG_COLOR,0x00e1ff);
+    SDL_WidgetProperties(SET_FONT,DigitsFont);
+
+    SDL_WidgetCreate(SDL_LABEL,80,5,65,17);
+    SDL_WidgetProperties(SET_FG_COLOR,0x00e1ff);
+    SDL_WidgetProperties(SET_FONT,LargeBoldFont);
+    SDL_WidgetProperties(SET_CAPTION,"Beatforce");
+
 
     SONGDBUI_CreateWindow();
     PLAYLISTUI_CreateWindow();
@@ -168,6 +183,11 @@ int mainwindow_EventHandler(SDL_Event event)
 
 int mainwindow_NotifyHandler()
 {
+    char time[6];
+    int min=0,hour=0;
+    OSA_GetTime(&hour,&min);
+    sprintf(time,"%02d:%02d",hour,min);
+    SDL_WidgetPropertiesOf(timewidget,SET_CAPTION,time);
     PLAYERUI_Redraw();
     return 1;
 }
