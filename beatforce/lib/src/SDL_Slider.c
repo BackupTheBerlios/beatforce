@@ -68,6 +68,7 @@ void* SDL_SliderCreate(SDL_Rect* rect)
     slider->CurrentValue      = 0.0;
     slider->CurrentPercentage = 0.0;
     slider->ValueLocked       = 0;
+    slider->StoreBackground   = 1;
 
     slider->NormalStepSize    = 1.0;
 
@@ -90,22 +91,22 @@ void SDL_SliderDraw(void *slider,SDL_Surface *dest)
     if(Slider->SliderButton == NULL)
         return;
 
-    /*
-     * If there is no line image loaded use the current background as a line
-     */
-    if(Slider->background == NULL)
-    {
-        Slider->background=SDL_WidgetGetBackground(dest,&Slider->rect);
-    }
-
-    if(SDL_BlitSurface(Slider->background,NULL,dest,&Slider->rect)<0)
-        fprintf(stderr, "BlitSurface error: %s\n", SDL_GetError());
     
-    //free(Slider->background);
-//    Slider->background=0;
-
-
+    if(Slider->StoreBackground || Slider->state == SLIDER_DRAG)
+    {
+        /*
+         * If there is no line image loaded use the current background as a line
+         */
+        if(Slider->background == NULL)
+        {
+            Slider->background=SDL_WidgetGetBackground(dest,&Slider->rect);
+        }
         
+        if(SDL_BlitSurface(Slider->background,NULL,dest,&Slider->rect)<0)
+            fprintf(stderr, "BlitSurface error: %s\n", SDL_GetError());
+        
+    }
+       
 
     if(Slider->line)
     {
@@ -218,9 +219,11 @@ int SDL_SliderProperties(void *slider,int feature,va_list list)
             Slider->OnSliderChanged=va_arg(list,void*);
             Slider->OnSliderChangedData=va_arg(list,void*);
         }
-
+        break;
     }
-
+    case STOREBACKGROUND:
+        Slider->StoreBackground=va_arg(list,int);
+        break;
     default:
         break;
 

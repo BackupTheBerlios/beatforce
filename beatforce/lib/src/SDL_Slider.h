@@ -41,6 +41,7 @@ typedef struct SDL_Slider
     
     int state;      // states of the widget, used for eventhandler
     int changed;    // if changed is true a redraw is performed
+    int StoreBackground;
 
 
     // Slider range (Can be queried by event callback functions

@@ -395,13 +395,11 @@ void SDL_TableEventHandler(void *table,SDL_Event *event)
         {
             if(event->button.button == 1)
             {
-#if 0
                 if(event->motion.x > (Table->rect.x + Table->rect.w - Table->ScrollbarWidth))
                 {
                     break;
                 }
                 else
-#endif
                 {
                     Table->CurrentRow = Table->FirstVisibleRow + 
                         (event->motion.y - Table->rect.y) / Table->RowHeight;
@@ -475,6 +473,8 @@ static void SDL_TableAttachScrollbar(SDL_Table *Table)
                 SDL_WidgetProperties(SET_BUTTON_IMAGE,Table->ScrollbarImage);
             SDL_WidgetProperties(SET_MAX_VALUE,(int)(Table->Rows - Table->VisibleRows));
             SDL_WidgetProperties(SET_MIN_VALUE,0);
+            /* Use the background of the table */
+            SDL_WidgetProperties(STOREBACKGROUND,0);
 //            SDL_WidgetProperties(SET_CUR_VALUE,(double)(Table->Rows - Table->VisibleRows));
         }
    }

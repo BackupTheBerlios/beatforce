@@ -70,7 +70,6 @@ typedef enum E_Widget_Properties
     SET_LINE_IMAGE,
     SET_BUTTON_IMAGE,
     SET_NORMAL_STEP_SIZE,
-
     SET_ALWAYS_FOCUS,
     
     FORCE_REDRAW,
@@ -82,7 +81,8 @@ typedef enum E_Widget_Properties
     SET_STATE_EDIT,
     SET_VISIBLE,
     SET_HIGHLIGHTED,
-    SET_IMAGE
+    SET_IMAGE,
+    STOREBACKGROUND
     
 }E_Widget_Properties;
 
