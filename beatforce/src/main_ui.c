@@ -50,6 +50,11 @@ SDL_Font *SmallFont;
 SDL_Font *LargeBoldFont;
 SDL_Font *DigitsFont;
 
+
+/* global variables */
+int gEventsAllowed;
+
+
 /* Local prototypes */
 int mainui_Redraw(void *data);
 
@@ -110,7 +115,8 @@ int MAINUI_Main(void * data)
     {
         while(SDL_PollEvent(&test_event)) 
         {
-            retval=CurWindow->EventHandler(test_event);
+            if(gEventsAllowed)
+                retval=CurWindow->EventHandler(test_event);
 
             switch(test_event.type) 
             {
@@ -145,7 +151,15 @@ int mainui_Redraw(void *data)
     return 50; //redraw every 50ms 
 }
 
+void MAINUI_DisableEventhandler()
+{
+    gEventsAllowed=0;
+}
 
+void MAINUI_EnableEventhandler()
+{
+    gEventsAllowed=1;
+}
 
 
 

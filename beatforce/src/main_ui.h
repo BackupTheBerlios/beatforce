@@ -34,4 +34,7 @@ int  MAINUI_Main();
 void MAINUI_CloseWindow();
 void MAINUI_Exit();
 
+void MAINUI_DisableEventhandler();
+void MAINUI_EnableEventhandler();
+
 #endif __MAIN_UI_H__
