@@ -89,7 +89,7 @@ int EFFECT_Play()
 //    int max_bytes=20000;
 
     return 0;
-    printf("EFFECT_Play\n");
+    TRACE("EFFECT_Play");
 
     if(run)
     {
@@ -171,6 +171,10 @@ int EFFECT_Play()
 
 int EFFECT_Cleanup()
 {
+    TRACE("EFFECT_Cleanup");
+    if(dc == NULL)
+        return 0;
+
     dc->cleanup(m->handle);
     return 1;
 }
