@@ -103,12 +103,6 @@ void SDL_VolumeBarDraw(void *volumebar,SDL_Surface *dest)
                 }
             }
         }
-        SDL_UpdateRect(dest,
-                       VolumeBar->rect.x,
-                       VolumeBar->rect.y,
-                       VolumeBar->rect.w,
-                       VolumeBar->rect.h);
-
         VolumeBar->Redraw = 0;
     }
 }

@@ -207,7 +207,7 @@ static void SONGDBUI_ChangeGroupClicked(void *data)
 void songdbstring(long row,int column,char *dest)
 {
     struct SongDBEntry *e = NULL;
-    
+
     if(row < 0)
         return;
     

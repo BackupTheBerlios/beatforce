@@ -668,7 +668,6 @@ mp3_play_loop (void *param)
     if(private->magic != MP3MAD_MAGIC)
         return (void *) ERROR_INVALID_ARG;
   
-    
     while (private->going)
     {
 	if (private->eof)

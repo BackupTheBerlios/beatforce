@@ -702,7 +702,7 @@ static int AUDIOOUTPUT_Loop(void *arg)
         
         }
         /* for( channel <N_CHANNELS ) */
-
+        SDL_Delay(5);
 
 // do the crossfading
 #if 1

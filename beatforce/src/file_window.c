@@ -587,6 +587,7 @@ SDL_Surface *Window_CreateFileWindow()
     {
         switch(Table->contents)
         {
+
         case CONTENTS_SUBGROUPS:
             /* table with the names of the subgroups */
             TableSubgroup=SDL_WidgetCreateR(SDL_TABLE,Table->Rect);

@@ -83,6 +83,7 @@ SDL_Surface *mainwindow_CreateWindow()
     ThemeConfig       *tc = THEME_GetActive();
     ThemeMainWindow   *mw = NULL;
     ThemeImage        *Image = NULL;
+    ThemeScreen       *s=tc->Screen;
     
     if(tc == NULL)
         return NULL;
@@ -96,9 +97,10 @@ SDL_Surface *mainwindow_CreateWindow()
 
 
     control_state=0;
-    MainWindow = SDL_CreateRGBSurface(SDL_SWSURFACE,1024,685,32,0xff0000,0x00ff00,0x0000ff,0x000000);
+    MainWindow = SDL_CreateRGBSurface(SDL_SWSURFACE,s->Width,s->Height,s->BPP,
+                                      0xff0000,0x00ff00,0x0000ff,0x000000);
     SDL_SetColorKey(MainWindow,0,0); // disable transparancy
-
+    
     SDL_WidgetUseSurface(MainWindow);
 
     while(Image)

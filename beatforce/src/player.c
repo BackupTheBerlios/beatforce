@@ -83,7 +83,6 @@ int PLAYER_Init(int player_nr, PlayerConfig * cfg)
     player->ip_plugins=INPUT_Init (player_nr, PLUGIN_GetList(PLUGIN_TYPE_INPUT));
     
     PLAYLIST_Init (player_nr);
-  
     return 0;
 }
 

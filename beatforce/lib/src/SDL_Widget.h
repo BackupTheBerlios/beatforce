@@ -168,6 +168,7 @@ static const struct S_Widget_FunctionList * const WidgetTable[] =
     &SDL_ProgressBar_FunctionList  //SDL_PROGRESSBAR
 };
 
+int SDL_WidgetInit();
 int   SDL_WidgetUseSurface(SDL_Surface *surface);
 SDL_Surface *SDL_WidgetGetActiveSurface();
 

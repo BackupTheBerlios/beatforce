@@ -68,6 +68,7 @@ int main(int argc, char *argv[])
     SEARCHWINDOW_Init();
     FILEWINDOW_Init();
 
+    SDL_WidgetInit();
     WNDMGR_Init(); 
 
     PLUGIN_Init (PLUGIN_TYPE_INPUT);

@@ -79,7 +79,6 @@ void  SDL_EditDraw(void *edit,SDL_Surface *dest)
     
     if(Edit->Font == NULL)
     {
-        printf("SDL_Edit ERROR: Can't draw edit without Font set\n");
         return;
     }
 

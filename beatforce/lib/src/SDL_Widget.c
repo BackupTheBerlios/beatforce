@@ -30,6 +30,7 @@ int forceredraw;
 int StackLock;
 SDL_Surface *last_surface = NULL;
 SDL_Surface *previous;
+SDL_Surface *target_surface;
 int fadex;
 int fadey;
 int fadew;
@@ -45,16 +46,22 @@ void EnableFade()
     fadeon=0;
 
 }
+
+int SDL_WidgetInit()
+{
+    target_surface = NULL;
+    StackLock = 0;
+    return 1;
+}
+
 int SDL_WidgetUseSurface(SDL_Surface *surface)
 {
     int retval;
-    SDL_WidgetLOCK();
     retval=SDL_SurfaceStack(surface);
     if(retval == 0)//surface was already present so force a redraw
     {
         forceredraw=1;
     }
-    SDL_WidgetUNLOCK();
     return 1;
 }
 
@@ -90,7 +97,6 @@ void* SDL_WidgetCreateR(E_Widget_Type widget,SDL_Rect dest)
 
     if(WidgetTable[widget])
     {
-        SDL_WidgetLOCK();
         create=WidgetTable[widget]->create;
         
         widgetdata=create(&dest);
@@ -101,7 +107,6 @@ void* SDL_WidgetCreateR(E_Widget_Type widget,SDL_Rect dest)
             SDL_Quit();
         }
         SDL_AddToStack(widget,&dest,widgetdata);
-        SDL_WidgetUNLOCK();
         return widgetdata;
     }
     else
@@ -116,14 +121,12 @@ int SDL_WidgetProperties(int feature,...)
     T_Widget_Properties properties;
     Stack* current_widget;
 
-    SDL_WidgetLOCK();
     va_start(ap,feature);
     current_widget=SDL_StackGetLastItem();
 
     properties=WidgetTable[current_widget->type]->properties;
     properties(current_widget->data,feature,ap);
     current_widget=current_widget->next;
-    SDL_WidgetUNLOCK();
     return 1;
 }
 
@@ -134,7 +137,6 @@ int SDL_WidgetPropertiesOf(void *widget,int feature,...)
     Stack* current_widget;
     int retval=0;
 
-    SDL_WidgetLOCK();
     va_start(ap,feature);
 
     current_widget=SDL_StackGetStack();
@@ -154,7 +156,6 @@ int SDL_WidgetPropertiesOf(void *widget,int feature,...)
     {
 //        printf("SDL_WidgetPropertiesOf not found\n");
     }
-    SDL_WidgetUNLOCK();
     return retval;
 }
 
@@ -168,7 +169,6 @@ int SDL_WidgetClose(void *widget)
     prev=NULL;
     printf("SDL_WidgetClose\n");
 
-    SDL_WidgetLOCK();
     while(current_widget)
     {
         if(current_widget->data == widget)
@@ -181,7 +181,6 @@ int SDL_WidgetClose(void *widget)
     }
     
 
-    SDL_WidgetUNLOCK();
     return 1;
 }
 
@@ -192,16 +191,16 @@ int SDL_WidgetClose(void *widget)
 int SDL_DrawAllWidgets(SDL_Surface *screen)
 {
     T_Widget_Draw draw;
-    //T_Widget_Properties properties;
     Stack* current_widget;
     SDL_Surface *active_surface = NULL;
-    
+
 
     SDL_Rect dest;
     SDL_Rect src;
 
-    if(StackLock)
-        return 0;
+
+    if(target_surface == NULL && screen)
+        target_surface = screen;
 
     active_surface=SDL_GetSurfaceStack();
     if(active_surface == NULL)
@@ -237,21 +236,26 @@ int SDL_DrawAllWidgets(SDL_Surface *screen)
     while(current_widget)
     {
         draw=WidgetTable[current_widget->type]->draw;
-        draw(current_widget->data,active_surface);
+//        draw(current_widget->data,active_surface);
+        if(previous != active_surface)
+            forceredraw=1;
+        draw(current_widget->data,screen);
 
         current_widget=current_widget->next;
     }
 
+        
+    //   SDL_BlitSurface(active_surface,NULL,screen,NULL);
+///    SDL_BlitSurface(last_surface,&src,screen,&dest);
+        
+    SDL_UpdateRect(screen,0,0,00,0);
+    
     if(forceredraw)
         forceredraw=0;
-
     
-    SDL_BlitSurface(active_surface,NULL,screen,NULL);
-//    SDL_BlitSurface(last_surface,&src,screen,&dest);
-        
-    SDL_UpdateRect(screen,0,0,0,0);
     if(previous!=active_surface)
         previous=active_surface;
+
     SDL_WidgetUNLOCK();
 
     return 1;
@@ -263,7 +267,6 @@ void  SDL_WidgetEvent(SDL_Event *event)
     Stack* current_widget;
     Stack* focus_widget=NULL;
 
-    SDL_WidgetLOCK();
     switch(event->type)
     {
     case SDL_MOUSEBUTTONDOWN:
@@ -298,7 +301,6 @@ void  SDL_WidgetEvent(SDL_Event *event)
         current_widget=current_widget->next;
     }
     
-    SDL_WidgetUNLOCK();
 }
 
 
@@ -341,3 +343,7 @@ int SDL_WidgetUNLOCK()
 
     return 1;
 }
+
+
+
+
