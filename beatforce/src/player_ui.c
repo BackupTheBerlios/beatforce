@@ -42,7 +42,7 @@
 PlayerDisplay UI_Players[2];
 
 /* local prototypes */
-void playerui_SetSpeed(void *data);
+static void PLAYERUI_SetSpeed(void *data);
 static void PLAYERUI_PlayButton(void *data);
 void UI_PlayerUpdateTimeLabel(void *data);
 void UI_ProgressBarClicked(void *data);
@@ -187,7 +187,7 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
         SDL_WidgetProperties(SET_MIN_VALUE,0);
         SDL_WidgetProperties(SET_CUR_VALUE,1.0);    
         SDL_WidgetProperties(SET_NORMAL_STEP_SIZE,0.1);
-        SDL_WidgetProperties(SET_CALLBACK,SDL_CHANGED,playerui_SetSpeed,&UI_Players[nr]);
+        SDL_WidgetProperties(SET_CALLBACK,SDL_CHANGED,PLAYERUI_SetSpeed,&UI_Players[nr]);
     }
     
     if(pt->Edit)
@@ -434,6 +434,7 @@ static void PLAYERUI_PlayButton(void *data)
     PLAYER_GetTitle(current->PlayerNr,title);
     
     SDL_WidgetPropertiesOf(UI_Players[current->PlayerNr].EditTitle,SET_CAPTION,title);
+
     TRACE("playerui_PlayButton %d",current->PlayerNr);    
 
     if(PLAYER_IsPlaying(current->PlayerNr))
@@ -454,7 +455,7 @@ void UI_ProgressBarClicked(void *playerdata)
 
 
 /* Callback function for pitch slider */
-void playerui_SetSpeed(void *data)
+static void PLAYERUI_SetSpeed(void *data)
 {
     double curval;
     PlayerDisplay *active=(PlayerDisplay*)data;

@@ -428,6 +428,7 @@ int AUDIOOUTPUT_SetSpeed(int channel, float speed)
   
     output_magic_check (ch[channel], ERROR_INVALID_ARG);
     
+    printf("Setting speed %f\n",speed);
     ch[channel]->speed = speed;
 
     return 0;

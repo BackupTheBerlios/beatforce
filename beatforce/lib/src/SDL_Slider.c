@@ -316,6 +316,7 @@ void SDL_SliderEventHandler(void * slider,SDL_Event *event)
             }
             SDL_SliderCurrentValue(Slider);
             Slider->changed=1;
+            break;
         }
     default:
         break;
@@ -326,6 +327,7 @@ void SDL_SliderEventHandler(void * slider,SDL_Event *event)
         // Run event handler if available (SDL_CHANGED event)
         if(Slider->OnSliderChanged != NULL)
             Slider->OnSliderChanged(Slider->OnSliderChangedData);
+        Slider->changed=0;
     }
 }
 

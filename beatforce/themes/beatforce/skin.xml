@@ -66,7 +66,7 @@
      <progressbar x="16" y="34" w="250" h="13"/>
 
      <slider x="320" y="60" w="45" h="100" action="SPEED" button="slibut.bmp"/>
-	
+     <edit x="200" y="240" w="100" h="20"/>	
 
    </player>
 
@@ -95,6 +95,7 @@
      <progressbar x="616" y="34" w="250" h="13"/>
 
      <slider x="920" y="60" w="45" h="100" action="SPEED" button="slibut.bmp"/>
+     <edit x="900" y="240" w="100" h="20"/>	
 
    </player>
 
@@ -105,7 +106,7 @@
      <table x="220" y="20" w="360" h="550" contents="FILESINDIRECTORY"/>
      <button x="320" y="562" normal="addselected.bmp" pressed="addselected_p.bmp" action="ADDSELECTED"/>
      <button x="420" y="562" normal="addall.bmp" pressed="addall.bmp" action="ADDALL"/>
-
+     
      <table x="600" y="250" w="300" h="300" contents="FILESINSUBGROUP"/>
      <button x="680" y="553" normal="removeselected.bmp" pressed="removeselected_p.bmp" action="DELETESELECTED"/>
 

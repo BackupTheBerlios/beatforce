@@ -83,47 +83,45 @@ void  SDL_EditDraw(void *edit,SDL_Surface *dest)
         return;
     }
 
-    if(Edit->Redraw || SDL_WidgetNeedsRedraw())
+
+    SDL_FontSetColor(Edit->Font,Edit->fgcolor);
+    
+    SDL_FillRect(dest,&Edit->rect,Edit->bgcolor);
+    
+    StringPos.y = Edit->rect.y + ((Edit->rect.h - Edit->Font->height)/2);
+    StringPos.x = Edit->rect.x;
+    StringPos.w = Edit->rect.w;
+    StringPos.h = Edit->rect.h;
+    
+    StringWidth=SDL_FontGetStringWidth(Edit->Font,Edit->Caption);
+    
+    if(StringWidth <= Edit->rect.w )
     {
-        SDL_FontSetColor(Edit->Font,Edit->fgcolor);
-        
-        SDL_FillRect(dest,&Edit->rect,Edit->bgcolor);
-
-        StringPos.y = Edit->rect.y + ((Edit->rect.h - Edit->Font->height)/2);
-        StringPos.x = Edit->rect.x;
-        StringPos.w = Edit->rect.w;
-        StringPos.h = Edit->rect.h;
-
+        SDL_FontDrawStringRect(dest,Edit->Font,Edit->Caption,&StringPos);
+    }
+    else
+    {
+        caption=Edit->Caption;
+        while(SDL_FontGetStringWidth(Edit->Font,caption) > Edit->rect.w)
+            caption++;
+        SDL_FontDrawString(dest,Edit->Font,caption,Edit->rect.x,StringPos.y);
+    }
+    
+    /* draw cursor */
+    
+    if(SDL_WidgetHasFocus(edit) || Edit->Focus)
+    {
         StringWidth=SDL_FontGetStringWidth(Edit->Font,Edit->Caption);
-
-        if(StringWidth <= Edit->rect.w )
-        {
-            SDL_FontDrawStringRect(dest,Edit->Font,Edit->Caption,&StringPos);
-        }
+        if(StringWidth > Edit->rect.w)
+            cursor.x = Edit->rect.x + Edit->rect.w - 2;
         else
-        {
-            caption=Edit->Caption;
-            while(SDL_FontGetStringWidth(Edit->Font,caption) > Edit->rect.w)
-                caption++;
-            SDL_FontDrawString(dest,Edit->Font,caption,Edit->rect.x,StringPos.y);
-        }
-
-        /* draw cursor */
-
-        if(SDL_WidgetHasFocus(edit) || Edit->Focus)
-        {
-            StringWidth=SDL_FontGetStringWidth(Edit->Font,Edit->Caption);
-            if(StringWidth > Edit->rect.w)
-                cursor.x = Edit->rect.x + Edit->rect.w - 2;
-            else
-                cursor.x = Edit->rect.x + SDL_FontGetStringWidth(Edit->Font,Edit->Caption)+2;
-            cursor.y = StringPos.y;
-            cursor.w = 1;
+            cursor.x = Edit->rect.x + SDL_FontGetStringWidth(Edit->Font,Edit->Caption)+2;
+        cursor.y = StringPos.y;
+        cursor.w = 1;
             cursor.h = Edit->Font->height;
             SDL_FillRect(dest,&cursor,0x000007);
-        }
-        Edit->Redraw = 0;
     }
+    
 }
 
 int SDL_EditProperties(void *edit,int feature,va_list list)

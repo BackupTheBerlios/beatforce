@@ -54,8 +54,8 @@ struct SongDBEntry
     long index;			/* index */
     
     char *artist; 		/* artist */
-    char *title;			/* song title */
-    char *album;			/* album */
+    char *title;		/* song title */
+    char *album;		/* album */
     char *comment;		/* comment */
     char *year;			/* year */
     char *genre;			/* genre */
