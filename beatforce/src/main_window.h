@@ -22,7 +22,11 @@
 #ifndef __MAIN_WINDOW_H__
 #define __MAIN_WINDOW_H__
 
+void MAINWINDOW_Init();
+void MAINWINDOW_Open();
 SDL_Surface *MAINWINDOW_CreateWindow();
 int MAINWINDOW_EventHandler(SDL_Event event);
+
+
 
 #endif /* __MAIN_WINDOW_H__ */

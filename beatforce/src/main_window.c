@@ -33,6 +33,7 @@
 
 #include "config.h"
 
+#include "main_ui.h"
 #include "search_window.h"
 
 void songend_callback(int player_nr)
@@ -40,11 +41,30 @@ void songend_callback(int player_nr)
 
 }
 
+extern void MAINUI_Open(Window *window);
 int control_state;
+int MAINWINDOW_EventHandler(SDL_Event event);
 
+SDL_Surface *MainWindow;
 
+Window MAINWINDOW={ MAINWINDOW_EventHandler };
 
+void MAINWINDOW_Init()
+{
+    MainWindow = NULL;
+}
 
+SDL_Surface *MAINWINDOW_CreateWindow();
+
+void MAINWINDOW_Open()
+{
+    if(MainWindow == NULL)
+    {
+        MainWindow=MAINWINDOW_CreateWindow();
+    }
+    SDL_WidgetUseSurface(MainWindow);
+    MAINUI_Open(&MAINWINDOW);
+}
 
 SDL_Surface *MAINWINDOW_CreateWindow()
 {
@@ -55,7 +75,7 @@ SDL_Surface *MAINWINDOW_CreateWindow()
     SDL_SetColorKey(MainWindow,0,0); // disable transparancy
 
     SDL_WidgetUseSurface(MainWindow);
-    SDL_WidgetCreate(SDL_PANEL,0,0,1000,600);
+    SDL_WidgetCreate(SDL_PANEL,0,0,1000,650);
     SDL_WidgetProperties(SET_NORMAL_IMAGE,THEME_DIR"/beatforce/background.jpg");
 
     SONGDBUI_CreateWindow();
@@ -87,7 +107,7 @@ int MAINWINDOW_EventHandler(SDL_Event event)
             break;
 
         case SDLK_j:
-            if(control_state == 0)
+            if(control_state == 0)// && !SONGDBUI_IsRenaming())
             {
                 SEARCHWINDOW_Open();
                 return 1; //Don't give this event to widgets
@@ -116,6 +136,12 @@ int MAINWINDOW_EventHandler(SDL_Event event)
                 PLAYER_Pause (1);
             }
             break;
+
+        case SDLK_ESCAPE:
+            MAINUI_Exit();
+            break;
+                
+        
         default:
             break;
             

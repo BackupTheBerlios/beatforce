@@ -18,10 +18,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
-
 #include <stdlib.h>
 
 
@@ -35,6 +32,7 @@
 
 #include <SDL_Table.h>
 
+#include "main_ui.h"
 #include "osa.h"
 
 #include "main_window.h"
@@ -45,8 +43,10 @@
 #include "debug.h" 
 
 SDL_Surface *screen;
-SDL_Surface *MainWindow;
+Window *CurWindow;
+int MAINUI_Running;
 
+SDL_Font *SmallFont;
 SDL_Font *LargeBoldFont;
 SDL_Font *DigitsFont;
 
@@ -54,9 +54,9 @@ SDL_Font *DigitsFont;
 int mainui_Redraw(void *data);
 
 
-void MAINUI_CloseWindow(SDL_Surface *surface)
+void MAINUI_CloseWindow()
 {
-    SDL_WidgetUseSurface(MainWindow);
+    MAINWINDOW_Open();//Always go back to main window
 }
 
 void MAINUI_Init()
@@ -78,59 +78,44 @@ void MAINUI_Init()
         exit(1);
     }
 
-    MainWindow   = NULL;
+    MAINWINDOW_Init();
     SEARCHWINDOW_Init();
     FILEWINDOW_Init();
 
     LargeBoldFont=SDL_FontInit(THEME_DIR"/beatforce/digital.fnt");
+    SmallFont=SDL_FontInit(THEME_DIR"/beatforce/yysmallfont.fnt");
 //  LargeBoldFont=SDL_FontInit(THEME_DIR"/beatforce/arial12.bdf");
 //    LargeBoldFont=SDL_FontInit("./res/cour10.bdf");
     DigitsFont=SDL_FontInit(THEME_DIR"/beatforce/digits.fnt");
-
+    
 }
 
-void MAINUI_CreateWindow()
+void MAINUI_Open(Window *window)
 {
-    MainWindow=MAINWINDOW_CreateWindow();
+    CurWindow=window;
 }
 
 
 int MAINUI_Main(void * data)
 {
-    int quit = 0;
     SDL_Event test_event;
     int timer;
     int retval=0;
-
+    
+    MAINUI_Running = 1;
+    MAINWINDOW_Open();
     timer=OSA_StartTimer(50,mainui_Redraw,NULL);
 
-    while(!quit)
+    while(MAINUI_Running)
     {
         while(SDL_PollEvent(&test_event)) 
         {
-            if(SDL_WidgetGetActiveSurface() == MainWindow)
-                retval=MAINWINDOW_EventHandler(test_event);
+            retval=CurWindow->EventHandler(test_event);
 
             switch(test_event.type) 
             {
-
-            case SDL_KEYDOWN:
-                switch( test_event.key.keysym.sym ) 
-                {
-                case SDLK_ESCAPE:
-                    if(SDL_WidgetGetActiveSurface() == MainWindow)
-                        quit=1;
-                    else
-                        SDL_WidgetUseSurface(MainWindow);
-                    break;
-                
-                default:
-                    ;
-                }
-                break;
-
-            case SDL_QUIT:
-                quit=1;
+               case SDL_QUIT:
+                MAINUI_Running=0;
                 break;
             default:
                 break;
@@ -148,7 +133,10 @@ int MAINUI_Main(void * data)
     return 1;
 }
 
-
+void MAINUI_Exit()
+{
+    MAINUI_Running=0;
+}
 
 int mainui_Redraw(void *data)
 {

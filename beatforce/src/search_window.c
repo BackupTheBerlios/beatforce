@@ -47,7 +47,9 @@ void searchwindow_Search(void *data);
 void searchwindow_PlayClicked(void *data);
 void searchwindow_Play(void *data);
 void songdb_searchstring(long row,int column,char *dest);
+int SEARCHWINDOW_EventHandler(SDL_Event event);
 
+Window SEARCHWINDOW={ SEARCHWINDOW_EventHandler };
 SDL_Surface *SearchWindow;
 
 void SEARCHWINDOW_Init()
@@ -62,13 +64,16 @@ void SEARCHWINDOW_Open()
         SDL_WidgetLOCK();
         SONGDB_FindEntry("");
         SearchWindow=SEARCHWINDOW_Create();
+
         SDL_WidgetUNLOCK();
     }
     else
     {
         SDL_WidgetUseSurface(SearchWindow);
     }
+    MAINUI_Open(&SEARCHWINDOW);                
 }
+
 
 SDL_Surface *SEARCHWINDOW_Create()
 {
@@ -98,6 +103,28 @@ SDL_Surface *SEARCHWINDOW_Create()
     SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_RETURN,searchwindow_Play);
 
     return SearchWindow;
+}
+
+
+int SEARCHWINDOW_EventHandler(SDL_Event event)
+{
+    switch(event.type)
+    {
+    case SDL_KEYDOWN:
+        switch( event.key.keysym.sym ) 
+        {
+        case SDLK_ESCAPE:
+            MAINUI_CloseWindow();
+            break;
+      
+        default:
+            break;
+            
+        }
+        break;
+
+    }
+    return 0;
 }
 
 

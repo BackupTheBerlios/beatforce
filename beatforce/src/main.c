@@ -71,7 +71,6 @@ main(int argc, char *argv[])
     PLAYER_Init (1, playercfg1);
 
     /*beatforce UI*/
-    MAINUI_CreateWindow();
     MAINUI_Main(NULL);
 
 

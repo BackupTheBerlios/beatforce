@@ -28,7 +28,7 @@ main_ui.o: main_ui.c ../config.h /usr/include/stdlib.h \
  /usr/include/linux/byteorder/little_endian.h \
  /usr/include/linux/byteorder/swab.h \
  /usr/include/linux/byteorder/generic.h ../lib/src/SDL_Widget.h \
- ../lib/src/SDL_Font.h ../lib/src/SDL_Table.h osa.h llist.h \
+ ../lib/src/SDL_Font.h ../lib/src/SDL_Table.h main_ui.h osa.h llist.h \
  main_window.h file_window.h search_window.h debug.h
 main_ui.c :
 ../config.h :
@@ -91,6 +91,7 @@ main_ui.c :
 ../lib/src/SDL_Widget.h :
 ../lib/src/SDL_Font.h :
 ../lib/src/SDL_Table.h :
+main_ui.h :
 osa.h :
 llist.h :
 main_window.h :

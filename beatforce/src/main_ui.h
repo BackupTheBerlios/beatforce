@@ -23,9 +23,15 @@
 #ifndef __MAIN_UI_H__
 #define __MAIN_UI_H__
 
+typedef struct Window
+{
+    int (*EventHandler)(SDL_Event event);
+}Window;
+
 void MAINUI_Init();
-void MAINUI_CreateWindow();
+void MAINUI_Open(Window *window);
 int  MAINUI_Main();
-void MAINUI_CloseWindow(SDL_Surface *surface);
+void MAINUI_CloseWindow();
+void MAINUI_Exit();
 
 #endif __MAIN_UI_H__
