@@ -62,7 +62,7 @@ int EFFECT_Init()
                 dc = (LADSPA_Descriptor*) m->dis(i);
                 if(dc == NULL)
                     break;
-                printf("dc %s\n",dc->Label);
+//                printf("dc %s\n",dc->Label);
             }
         }
         effects=effects->next;

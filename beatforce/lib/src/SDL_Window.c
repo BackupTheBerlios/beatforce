@@ -283,7 +283,6 @@ void SDL_WindowClose()
     WindowList *l;
 
     l=WindowManager;
-    printf("SDL_WindowClose()\n");
 
     if(l->Next)
     {
@@ -296,7 +295,6 @@ void SDL_WindowClose()
         free(WindowManager);
         WindowManager=NULL;
         CurWindow=NULL;
-        printf("Closing beatforce\n");
     }
     if(CurWindow && CurWindow->Surface)
         SDL_WidgetUseSurface(CurWindow->Surface);

@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <signal.h>
 
 #include "configfile.h"
 #include "plugin.h"
@@ -34,8 +35,16 @@
 #include "effect.h"
 #include "ui.h"
 
+void MAIN_ParseArgs(int argc,char **argv);
+void MAIN_SegfaultHandler(int sig);
+
 int main(int argc, char *argv[])
 {
+
+    MAIN_ParseArgs(argc,argv);
+
+    signal(SIGSEGV, MAIN_SegfaultHandler);
+
     OSA_Init();
     
     CONFIGFILE_OpenDefaultFile();
@@ -74,5 +83,25 @@ int main(int argc, char *argv[])
     PLUGIN_Cleanup();
 
     return 1;
+
+}
+
+void MAIN_SegfaultHandler(int sig)
+{
+    printf("\nSegmentation fault\n\n");
+    printf("You've probably found a bug in beatforce\n");
+    printf("Please send a mail to john.beuving@beatforce.org\n\n");
+    exit(1);
+}
+
+
+void MAIN_ParseArgs(int argc,char **argv)
+{
+    int i;
+
+    for(i=1;i<argc;i++)
+    {
+        
+    }
 
 }
