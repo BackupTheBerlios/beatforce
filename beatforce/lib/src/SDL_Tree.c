@@ -36,6 +36,9 @@ const struct S_Widget_FunctionList SDL_Tree_FunctionList =
     NULL,
 };
 
+static TreeNode* SDL_TreeGetItem(TreeNode *Tree,int *number);
+static void SDL_TreeCollapse(TreeNode *Tree,int number);
+
 
 void* SDL_TreeCreate(SDL_Rect* rect)
 {
@@ -48,6 +51,9 @@ void* SDL_TreeCreate(SDL_Rect* rect)
     tree->rect.w  = rect->w;
     tree->rect.h  = rect->h;
 
+    tree->nItems  = 0;
+    tree->Selected = -1;
+
     tree->Font    = NULL;
 
     tree->fgcolor = 0x000000;
@@ -55,6 +61,7 @@ void* SDL_TreeCreate(SDL_Rect* rect)
 
     tree->Redraw     = 1;
     tree->Background = NULL;
+    
 
     tree->Visible    = 1;
     tree->Tree       = NULL;
@@ -64,12 +71,12 @@ void* SDL_TreeCreate(SDL_Rect* rect)
 void SDL_TreeDraw(void *tree,SDL_Surface *dest)
 {
     SDL_Tree *Tree=(SDL_Tree*)tree;
-    char string[255];
-    
+    TreeNode *Item;
+    int w;
+    SDL_Rect r;
+
     if(Tree->Visible == 0)
         return;
-
-    memset(string ,0,255);
 
     SDL_FontSetColor(Tree->Font,Tree->fgcolor);
     
@@ -86,7 +93,40 @@ void SDL_TreeDraw(void *tree,SDL_Surface *dest)
     {
         SDL_FillRect(dest,&Tree->rect,Tree->bgcolor);
     }
-   
+    
+    for(w=0;w<Tree->nItems;w++)
+    {
+        int j=w;
+        char string[255];
+        Item=SDL_TreeGetItem(Tree->Tree,&j);
+        
+        if(Item)
+        {
+            if(Tree->Font)
+            {
+                int i;
+                string[0]=0;
+                for(i=0;i<Item->Level;i++)
+                    sprintf(string,"%s ",string);
+
+                if(Item->collapsed == 1)
+                    sprintf(string,"%s+%s",string,Item->label);
+                else if(Item->collapsed == 2)
+                    sprintf(string,"%s %s",string,Item->label);
+                else
+                    sprintf(string,"%s-%s",string,Item->label);
+
+                r.x = Tree->rect.x;
+                r.h = SDL_FontGetHeight(Tree->Font);
+                r.y = w * r.h + Tree->rect.y;
+                r.w = Tree->rect.w;
+                
+                SDL_FontDrawStringRect(dest,Tree->Font,string,&r);
+            }
+        }
+    }
+
+    
 }
 
 int SDL_TreeProperties(void *tree,int feature,va_list list)
@@ -96,8 +136,17 @@ int SDL_TreeProperties(void *tree,int feature,va_list list)
     switch(feature)
     {
     case SET_FONT:
+    {
+        int h;
         Tree->Font=va_arg(list,SDL_Font*);
-        break;
+        h=SDL_FontGetHeight(Tree->Font);
+        if(h)
+        {
+            Tree->nItems=Tree->rect.h / h;
+        }
+    }
+    break;
+    
     case SET_FG_COLOR:
         Tree->fgcolor=va_arg(list,Uint32);
         break;
@@ -108,23 +157,64 @@ int SDL_TreeProperties(void *tree,int feature,va_list list)
 
     case SET_VISIBLE:
         Tree->Visible=va_arg(list,int);
+        break;
 
+    case SET_CALLBACK:
+    {
+        int t=va_arg(list,int);
+        Tree->Clicked=va_arg(list,void*);
+        Tree->ClickedData=va_arg(list,void*);
+    }
+    break;
     }
     return 1;
 }
 
 void SDL_TreeEventHandler(void *tree,SDL_Event *event)
 {
-
+    SDL_Tree *Tree=(SDL_Tree*)tree;
+    
+    switch(event->type)
+    {
+    case SDL_MOUSEBUTTONDOWN:
+        if(SDL_WidgetIsInside(&Tree->rect,event->motion.x,event->motion.y))
+        {
+            if(event->button.button == 1)
+            {
+                int row=SDL_FontGetHeight(Tree->Font);
+                int y=event->motion.y - Tree->rect.y;
+                
+                row=y/row;
+                SDL_TreeCollapse(Tree->Tree,row);
+                Tree->Selected=row;
+                if(Tree->Clicked)
+                    Tree->Clicked(Tree->ClickedData);
+            }
+            
+        }
+        break;
+    }
+    
 
 }
 
+
+int SDL_TreeGetSelectedItem(void *tree)
+{
+    SDL_Tree *Tree=(SDL_Tree*)tree;
+    
+    if(Tree)
+        return Tree->Selected;
+    else
+        return -1;
+
+}
 
 void *SDL_TreeInsertItem(void *tree,void *root,char *string)
 {
     SDL_Tree *Tree=(SDL_Tree*)tree;
     TreeNode *temp=NULL;
-    
+
     if(string == NULL)
         return NULL;
     
@@ -136,6 +226,8 @@ void *SDL_TreeInsertItem(void *tree,void *root,char *string)
             memset(Tree->Tree,0,sizeof(TreeNode));
             Tree->Tree->label = strdup(string);
             Tree->Tree->collapsed = 1;
+            Tree->Tree->Level = 0;
+            return Tree->Tree;
         }
         else 
         {
@@ -147,7 +239,8 @@ void *SDL_TreeInsertItem(void *tree,void *root,char *string)
             memset(temp->next,0,sizeof(TreeNode));
 
             temp->next->collapsed = 1;
-            temp->next->label=strdup(string);
+            temp->next->label = strdup(string);
+            temp->next->Level = 0;
             temp=temp->next;
         }
         return temp;
@@ -158,16 +251,20 @@ void *SDL_TreeInsertItem(void *tree,void *root,char *string)
         
         if(temp->child == NULL)
         {
+            int level=temp->Level;
             temp->child=(TreeNode*)malloc(sizeof(TreeNode));
             memset(temp->child,0,sizeof(TreeNode));
 
             temp=temp->child;
             temp->collapsed=1;
             temp->label=strdup(string);
+            temp->Level=level+1;
+
             return temp;
         }
         else
         {
+            int level=temp->Level;
             temp=temp->child;
             while(temp->next)
                 temp=temp->next;
@@ -177,8 +274,61 @@ void *SDL_TreeInsertItem(void *tree,void *root,char *string)
 
             temp->next->collapsed=1;
             temp->next->label=strdup(string);
+            temp->next->Level=level+1;
             return temp->next;
         }
     }
 
+}
+
+
+
+
+
+static TreeNode* SDL_TreeGetItem(TreeNode *Tree,int *number)
+{
+    TreeNode *b;
+
+    while(Tree)
+    {
+        if((*number) == 0)
+            return Tree;
+
+        if((*number)>0)
+            (*number)--;
+
+        if(Tree->child && Tree->collapsed == 0)
+        {
+            b=SDL_TreeGetItem(Tree->child,number);
+            if(b)
+                return b;
+        }
+        Tree=Tree->next;
+    }
+    return NULL;
+}
+
+
+static void SDL_TreeCollapse(TreeNode *Tree,int number)
+{
+    TreeNode *node;
+    node=SDL_TreeGetItem(Tree,&number);
+    if(node)
+    {
+        if(node->collapsed == 1)
+        {
+            if(node->child || node->Level == 0)
+            {
+                node->collapsed=0;
+            }
+            else
+            {
+                node->collapsed=2;
+            }
+        }
+        else if(node->collapsed == 0)
+        {
+            node->collapsed=1;
+        }
+    }
 }

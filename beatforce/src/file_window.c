@@ -79,7 +79,6 @@ static void FILEWINDOW_SubgroupClicked(void *data);
 static void FILEWINDOW_RenameSubgroupFinished();
 
 /* local data retreival functions for tables */
-static void FILEWINDOW_GetDirectories(int row,int column,char *string);
 static void FILEWINDOW_GetFilesInSubgroup(int row,int column,char *string);
 
 static void FILEWINDOW_GetSelectedSubgroup(struct SongDBSubgroup **sel_sg);
@@ -130,6 +129,11 @@ static void FILEWINDOW_RenameSubgroupFinished()
         SONGDB_RenameSubgroup(sg,newlabel);
     }
 } 
+
+static void FILEWINDOW_DirectoryClicked(void *data)
+{
+    printf("DirectoryClicked %d\n",SDL_TreeGetSelectedItem(data));
+}
 
 static void FILEWINDOW_RenameSubgroup(void *data)
 {
@@ -334,34 +338,6 @@ int GetSubDir(int count,char *string)
     return entrycount;
 }
 
-/*
- * Table callback for directories */
-static void FILEWINDOW_GetDirectories(int row,int column,char *string)
-{
-    char dir[255];
-    int wordcount=0; /* directory level */
-    int count=0;
-
-    memset(dir,0,255);
-    wordcount = GetDir(row,dir);
-
-    if(row < wordcount)
-    {
-        memset(string,' ',10);
-        sprintf(string+row,"%s",dir);
-    }
-    else
-    {
-        count = GetSubDir(row-wordcount,dir);
-        if(count)
-        {
-            memset(string,' ',10);
-            sprintf(string+(row-(row-wordcount)),"%s",dir);
-        }
-        
-    }
-}
-
 /* 
  *  Table callback function for the subgroups of th active 
  *  group. 
@@ -408,66 +384,6 @@ static void FILEWINDOW_SubgroupClicked(void *data)
         SDL_WidgetPropertiesOf(TableFilesInSubgroup,ROWS,sg->Songcount);
 }
 
-static void FILEWINDOW_DirectoryClicked(void *data)
-{
-    char str[255];
-    char newdir[255];
-    int i;
-    SDL_Table *t=TableDirectories;
-    int c;
-    int nw=0;
-    int nw2=0;
-
-    memset(newdir,0,255);
-    memset(str,0,255);
-    /* Get the rownumber which is clicked */
-    c=t->CurrentRow;
-
-//    printf("str %s %d\n",str,__LINE__);
-    nw=GetDir(0,str);
-
-    if(c == 0)
-    {
-        if(!strcmp(directory,"/"))
-            sprintf(directory,"%s",str);
-        else
-            sprintf(directory,"/");
-        nw2=GetSubDir(0,str);
-    }
-    else if(c < nw)
-    {
-        for(i=1;i<=c;i++)
-        {
-            GetDir(i,str);
-            sprintf(newdir,"%s%s",newdir,str);
-        }
-        sprintf(directory,"%s",newdir);
-    }
-    else
-    {
-        for(i=1;i<nw;i++)
-        {
-            GetDir(i,str);
-            sprintf(newdir,"%s%s",newdir,str);
-//            printf("newdir %s\n",newdir);
-        }
-        nw2=GetSubDir(c-nw,str);
-        if(strlen(str))
-            sprintf(directory,"%s%s",newdir,str);
-//        printf("directory %s\n",directory);
-//        printf("nw2 %d\n",nw2);
-    }
-    files=OSA_FindFiles(directory,".mp3",0);
-    files2=OSA_FindFiles(directory,".ogg",0);
-    
-    files=LLIST_Combine(files,files2);
-
-    TableDirs=OSA_FindDirectories(directory);
-    SDL_WidgetPropertiesOf(t,ROWS,LLIST_NoOfEntries(TableDirs));
-    /* Correct the rowcount for the files in directory table (for scrollbar) */
-    SDL_WidgetPropertiesOf(TableFilesInDirectory,ROWS,LLIST_NoOfEntries(files));
-    
-}
 
 void FILEWINDOW_DeleteSelected(void *data)
 {
@@ -657,6 +573,23 @@ SDL_Surface *Window_CreateFileWindow()
             SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
             SDL_WidgetProperties(SET_IMAGE,IMG_Load(THEME_DIR"/beatforce/tablescrollbar.jpg"));
             break;
+
+        }
+        Table=Table->next;
+    }
+
+
+    timewidget=CLOCK_Create(fw->Clock);
+    
+    sprintf(directory,"/");
+    
+    files=OSA_FindFiles(directory,".mp3",0);
+
+    {
+        void *w;
+        BFList *l;
+        char *r;
+#if 0
         case CONTENTS_DIRECTORIES:
             TableDirectories=SDL_WidgetCreateR(SDL_TABLE,Table->Rect);
             SDL_WidgetProperties(SET_VISIBLE_COLUMNS, 1);
@@ -668,20 +601,26 @@ SDL_Surface *Window_CreateFileWindow()
             SDL_WidgetProperties(SET_IMAGE,IMG_Load(THEME_DIR"/beatforce/tablescrollbar.jpg"));
 
             break;
-        }
-        Table=Table->next;
+#endif
+
+            l=OSA_FindDirectories(directory);
+
+            TableDirectories=SDL_WidgetCreate(SDL_TREE,10,200,200,170);
+            SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
+            SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
+            SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,FILEWINDOW_DirectoryClicked,TableDirectories);
+        
+            while(l)
+            {
+                r=(char*)l->data;
+                if(r[0] != '.')
+                    SDL_TreeInsertItem(TableDirectories,NULL,(char*)l->data);
+                l=l->next;
+            }
+
+
     }
 
-    timewidget=CLOCK_Create(fw->Clock);
-    
-    sprintf(directory,"/");
-    
-    files=OSA_FindFiles(directory,".mp3",0);
-    TableDirs=NULL;
-
-    TableDirs=OSA_FindDirectories(directory);
-    if(TableDirectories)
-        SDL_WidgetPropertiesOf(TableDirectories,ROWS,LLIST_NoOfEntries(TableDirs));
     return FileWindow;
 
 }

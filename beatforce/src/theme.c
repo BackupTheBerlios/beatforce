@@ -108,7 +108,7 @@ ThemeImage *XML_ParseImage(ThemeImage *image,xmlDocPtr doc, xmlNodePtr cur)
 int THEME_Init()
 {
     BFList *dir=NULL;
-//    int NoOfThemes;
+    int NoOfThemes;
     ThemeConfig *current;
     xmlNodePtr cur;
     xmlDocPtr doc=NULL;
@@ -130,11 +130,12 @@ int THEME_Init()
     LIBXML_TEST_VERSION
     xmlKeepBlanksDefault(0);
 
-    while(dir)
+//    while(dir)
     {
         char path[255];
         FILE *fd;
 //        sprintf(path,"%s/skin.xml",(char*)dir->data);
+
         sprintf(path,"/usr/share/beatforce/themes/beatforce/skin.xml");
         if((fd=fopen(path,"rb")))
         {  
@@ -143,7 +144,7 @@ int THEME_Init()
             if (doc)
             {
                 DEBUG("Document %s parsed succesfully",path);
-                break;
+//                break;
             }
             else
                 ERROR("xmlParsefile failed while the file exists and can be opened %s",path);

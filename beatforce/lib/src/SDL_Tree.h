@@ -30,6 +30,7 @@ typedef struct TreeNode
     struct TreeNode *child;
     int collapsed;
     char *label;
+    int Level;
 }TreeNode;
 
 typedef struct SDL_Tree
@@ -40,11 +41,17 @@ typedef struct SDL_Tree
     Uint32  bgcolor;
     Uint32  fgcolor;
 
+    int nItems;
+    int Selected;
+
     int Visible;
     int Redraw;
 
     TreeNode *Tree;
     SDL_Surface *Background;
+    
+    void (*Clicked)(void *data);
+    void *ClickedData;
 
 }SDL_Tree;
 

@@ -94,7 +94,10 @@ BFList *OSA_FindDirectories(char *dir)
     }
     while(dent)
     {
-        sprintf(dirname,"%s/%s",dir,dent->d_name);
+        if(!strcmp(dir,"/"))
+            sprintf(dirname,"%s",dent->d_name);
+        else
+            sprintf(dirname,"%s/%s",dir,dent->d_name);
         stat(dirname,&buf);
         if(S_ISDIR(buf.st_mode))
         {
