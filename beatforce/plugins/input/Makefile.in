@@ -81,7 +81,7 @@ STRIP = @STRIP@
 THEME_DIR = @THEME_DIR@
 VERSION = @VERSION@
 
-SUBDIRS = mp3-mad
+SUBDIRS = mp3-mad cdda
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../../config.h
 CONFIG_CLEAN_FILES = 

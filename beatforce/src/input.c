@@ -104,6 +104,7 @@ INPUT_WhoseFile(BFList *input_plugins, char *filename)
         ipd = (InputPluginData *) next->data;
         if(ipd->ip->is_our_file)
         {
+            printf("desc %s\n",ipd->ip->description);
             if (ipd->ip->is_our_file(ipd->priv, filename) == TRUE)
             {
                 return next->data;

@@ -61,7 +61,7 @@ void WNDMGR_Init()
 
     TRACE("UI_Init enter");
 
-    if ( SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_TIMER) < 0 ) 
+    if ( SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_TIMER|SDL_INIT_CDROM) < 0 ) 
     {
         ERROR("Unable to init SDL: %s\n", SDL_GetError());
         exit(1);

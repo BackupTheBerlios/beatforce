@@ -20,10 +20,7 @@
 
  */
 
-#ifdef HAVE_CONFIG_H
-#  include <config.h>
-#endif
-
+#include <config.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
@@ -58,6 +55,7 @@ rb_init (struct OutRingBuffer **rb, int size)
   if(rb==NULL || size <= 1024)
       return ERROR_INVALID_ARG;
 
+  printf("rb_init %d\n",size);
   rb_mutex = 0;
 
   ring = malloc (sizeof (struct OutRingBuffer));

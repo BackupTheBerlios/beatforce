@@ -1,2 +1,2 @@
 
-SUBDIRS = mp3-mad
+SUBDIRS = mp3-mad cdda

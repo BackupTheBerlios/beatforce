@@ -78,7 +78,10 @@ int main(int argc, char *argv[])
     PLAYER_Init (0, playercfg0);
     PLAYER_Init (1, playercfg1);
     SONGDB_Init (songdbcfg);
-   
+
+    
+    OSACDROM_Init();
+
     MAINWINDOW_Open();
     /*beatforce UI*/
     WNDMGR_Main(); /* main loop */

@@ -354,6 +354,7 @@ int output_write (int c, void* buf, int len)
     int written;
     int newlen;
 
+//    TRACE("OUTPUT_WRITE");
     if (c >= OUTPUT_N_CHANNELS || c < 0)
         return ERROR_UNKNOWN_CHANNEL;
     if (ch[c] == NULL)

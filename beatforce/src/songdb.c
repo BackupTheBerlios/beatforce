@@ -132,7 +132,7 @@ int SONGDB_Init (SongDBConfig * our_cfg)
 
 int SONGDB_Exit()
 {
-    return SONGDB_SaveXMLDatabase();
+//    return SONGDB_SaveXMLDatabase();
 }
 
 
