@@ -179,7 +179,7 @@ int INPUT_LoadFile (int player_nr,struct SongDBEntry *e)
     if (l == NULL)
     {
         printf("Impossible\n");
-        return -10;
+        return 0;
     }
     if(e->AddInfo && e->AddInfo->SampleRate != 44100)
     {
@@ -193,8 +193,13 @@ int INPUT_LoadFile (int player_nr,struct SongDBEntry *e)
 int
 INPUT_CloseFile(InputPluginData *current_plugin)
 {
+    TRACE("INPUT_CloseFile");
+
     if (current_plugin == NULL)
+    {
+        ERROR("Invalid parameter");
         return 0;
+    }
 
     return current_plugin->ip->close_file (current_plugin->priv);
 }

@@ -70,6 +70,7 @@ int PLAYER_Init(int player_nr, PlayerConfig * cfg)
 {
     struct PlayerPrivate *player;
 
+    TRACE("PLAYER_Init %d",player_nr);
     player = malloc (PLAYER_PRIVATE_LEN);
     memset (player, 0, PLAYER_PRIVATE_LEN);
 
@@ -80,7 +81,8 @@ int PLAYER_Init(int player_nr, PlayerConfig * cfg)
     PLAYER_StorePlayerData(player_nr,player);
 
     player->ip_plugins=INPUT_Init (player_nr, PLUGIN_GetList(PLUGIN_TYPE_INPUT));
-    
+
+    printf("PL %p\n",player->ip_plugins);
     PLAYLIST_Init (player_nr);
     return 0;
 }
@@ -273,19 +275,17 @@ int PLAYER_SetSong (int player_nr, int no)
 /* loads a song set by playing_id */
 int player_load (int player_nr)
 {
-    int cerr = 0;
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
 
     TRACE("player_load enter");
-    if(p==NULL)
-        return 0;
     
-    if (p->playlist_id == 0 && p->e == NULL)
+    if (p == NULL || ( p->playlist_id == 0 && p->e == NULL))
     {
+        ERROR("Invalid parameters");
         return 0;
     }
 
-    if (! (cerr = INPUT_CloseFile(p->current_plugin)) )
+    if(p->current_plugin == NULL ||INPUT_CloseFile(p->current_plugin))
     {
         p->State = PLAYER_PAUSE;
         if(p->e)
@@ -304,11 +304,8 @@ int player_load (int player_nr)
     }
     else
     {
-                
-
         fprintf (stderr,
-                 "Error stopping and closing currently playing song: 0x%x!\n",
-                 -cerr);
+                 "Error stopping and closing currently playing song\n");
         return 0;
     }
     TRACE("player_load leave");

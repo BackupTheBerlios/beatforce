@@ -80,8 +80,8 @@ void printid(char *id,int line,char *message);
 #if MODULE_ID == INPUT
 #undef TRACE
 #undef DEBUG
-#define TRACE TRACE_OFF
-#define DEBUG DEBUG_OFF
+#define TRACE TRACE_ON
+#define DEBUG DEBUG_ON
 #endif
 
 #if MODULE_ID == WNDMGR
@@ -111,8 +111,8 @@ void printid(char *id,int line,char *message);
 #if MODULE_ID == PLAYER
 #undef TRACE
 #undef DEBUG
-#define TRACE TRACE_OFF
-#define DEBUG DEBUG_OFF
+#define TRACE TRACE_ON
+#define DEBUG DEBUG_ON
 #endif
 
 #if MODULE_ID == PLAYER_UI
@@ -131,8 +131,8 @@ void printid(char *id,int line,char *message);
 #endif
 
 #if MODULE_ID == PLUGIN
-#define TRACE TRACE_OFF
-#define DEBUG DEBUG_OFF
+#define TRACE TRACE_ON
+#define DEBUG DEBUG_ON
 #endif
 
 #if MODULE_ID == RINGBUFFER

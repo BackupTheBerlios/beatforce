@@ -638,6 +638,7 @@ mp3_close_file (Private * h)
 {
     mp3Private *private = (mp3Private *) h;
 
+    TRACE("mp3_close_file");
     if( h == NULL || private->magic != MP3MAD_MAGIC)
     {
         ERROR("Invalid arguments");
@@ -647,9 +648,9 @@ mp3_close_file (Private * h)
 
     if (private->going && private->fd != NULL)
     {
+        DEBUG("Stopping thread");
 	private->going = 0;
         OSA_RemoveThread(private->decode_thread);
-	//pthread_join (private->decode_thread, NULL);
 	mp3_if.output_close (private->ch_id);
 	fclose (private->fd);
 	private->fd = NULL;
@@ -661,11 +662,9 @@ mp3_close_file (Private * h)
 	free (private->synth);
 	free (private->stream);
 	free (private->frame);
-
-	return 1;
     }
 
-    return 0;
+    return 1;
 }
 
 
