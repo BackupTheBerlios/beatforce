@@ -109,26 +109,6 @@ int PLAYER_GetPlayingID(int player_nr,long *songid)
     return 1;
 }
 
-int
-player_do_songchange (int player_nr)
-{
-    if (MIXER_FadeInProgress())
-    {
-        player_next_track (player_nr);
-    }
-    else if (MIXER_GetAutofade)
-    {
-        /* we're already at eof, fade instantly !! */
-        MIXER_DoFade(1,0);
-    }
-    else
-    {
-        player_next_track (player_nr);
-        PLAYER_Play(player_nr);
-    }
-    return 0;
-}
-
 int PLAYER_EOF(int player_nr)
 {
     struct PlayerPrivate *p = PLAYER_GetData(player_nr);
@@ -139,40 +119,6 @@ int PLAYER_EOF(int player_nr)
    
     return 0;
     
-}
-
-unsigned int
-player_timeout (unsigned int interval,void *data)
-{
-    struct PlayerPrivate *p = data;
-    long songtime;
-
-    if (p != NULL && p->current_plugin)
-    {
-        struct SongDBEntry *e = SONGDB_GetEntryID(p->songdb_id);
-        songtime = INPUT_GetTime (p->current_plugin);
-        if (songtime >= 0 || songtime == ERROR_EOF)
-        {
-            if (e != NULL)
-            {
-                if (songtime == ERROR_EOF || songtime >= e->time || p->eof)
-                {
-                    p->eof = 0;
-                    player_do_songchange (p->ch_id);
-                    p->eof = 0;
-                    return 1;
-                }
-
-                if (((e->time - songtime) <= (MIXER_GetFadeTime()))
-                    && (MIXER_GetAutofade()) && !MIXER_FadeInProgress ())
-                {
-                    MIXER_DoFade(1,0);
-                }
-            }
-        }
-
-    }
-    return interval;
 }
 
 void
