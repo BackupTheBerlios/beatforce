@@ -35,7 +35,7 @@ int FONT_BDF_DrawChar(SDL_Surface *dest,SDL_Font *font,
 //local protypes
 void readbdf(FILE *fp,SDL_Font *f);
 void readline(FILE *fp,char *buffer);
-void drawbdfchar(SDL_Surface *screen,struct BDF_Char *ch,int x, int y,Uint32 color);
+int  drawbdfchar(SDL_Surface *screen,struct BDF_Char *ch,int x, int y,Uint32 color);
 
 //extern prototypes
 extern void DrawPixel(SDL_Surface *screen, int x, int y,unsigned int color2);
@@ -78,7 +78,7 @@ void FONT_BDF_Read(char *filename,SDL_Font *font)
     }
     readbdf(fp,font);
     font->type=BDF_FONT;
-//    fclose(fp);
+    fclose(fp);
 }
 
 void FONT_BDF_DrawString(SDL_Surface *screen,SDL_Font *font,char *string,int x, int y)
@@ -91,13 +91,13 @@ int FONT_BDF_DrawChar(SDL_Surface *dest,SDL_Font *font,
 {
 
     BDF_Font *fnt=(BDF_Font*)font->fontdata;
-    drawbdfchar(dest,fnt->bdffont[(int)character],pos->x,pos->y,font->color);
-    return 10;
+    return drawbdfchar(dest,fnt->bdffont[(int)character],pos->x,pos->y,font->color);
 }
 
 void readbdf(FILE *fp,SDL_Font *f)
 {
     char buffer[255];
+    register char  *aux;
 
     BDF_Font *font;
     BDF_Char *current;
@@ -144,15 +144,24 @@ void readbdf(FILE *fp,SDL_Font *f)
         {
             int i;
             unsigned char *bits;
-            current->data=malloc(12*2*sizeof(char));
+            /* wbytes is the width of the char in bytes. */
+            current->wbytes = (current->bbx_x + 7) / 8;
+            current->data=malloc(current->wbytes * current->bbx_y);
             memset(current->data,0,24);
             bits=current->data;
-
-            for(i=0;i<current->bbx_y;i++)
+					
+            /* Read all pixels from file. */
+			for (i = current->bbx_y, bits = current->data; i != 0; i--) 
             {
-                readline(fp,buffer);
-                *bits++=XVAL(buffer[0])*16+XVAL(buffer[1]);
+			    readline(fp,buffer);
+                aux = buffer;
+				while (aux[0] != '\0' && aux[1] != '\0') 
+                {
+				    *bits++ = XVAL(aux[0]) * 16 + XVAL(aux[1]);
+					aux += 2;
+                }
             }
+
 
         }
         else if(!strncmp(buffer,"ENDCHAR",7))
@@ -185,22 +194,26 @@ void readline(FILE *fp,char *buffer)
 }
 
 
-/* Draws a char on the surface. */
-void drawbdfchar(SDL_Surface *screen,struct BDF_Char *ch,int x, int y,Uint32 color)
+/* Draws a char on the surface.     */
+/* and return thw width of the font */
+int drawbdfchar(SDL_Surface *screen,struct BDF_Char *ch,int x, int y,Uint32 color)
 {
     int           xx;
     unsigned char *bits, *endfont, *endline;
     
-    y+=12;
+    if(ch == NULL)
+        return 0;
+
+    y+=15;
     /* Calculate the position of the first pixel. */
     x += ch->bbx_xo;
     y -= (ch->bbx_yo + ch->bbx_y);
     bits = ch->data;
  
     /* Put them! */
-    for (endfont = bits + /*chr->wbytes*/ 1 * ch->bbx_y; bits < endfont; y++)
+    for (endfont = bits + ch->wbytes * ch->bbx_y; bits < endfont; y++)
     {
-        for (endline = bits + /*chr->wbytes*/ 1, xx = x; bits < endline; xx += 8, bits++) 
+        for (endline = bits + ch->wbytes, xx = x; bits < endline; xx += 8, bits++) 
         {
             if ((*bits) & 0x80) 
                 DrawPixel(screen, xx    , y, color);
@@ -220,50 +233,8 @@ void drawbdfchar(SDL_Surface *screen,struct BDF_Char *ch,int x, int y,Uint32 col
                 DrawPixel(screen, xx + 7, y, color);
         }
     }
+    return (ch->bbx_xo  + ch->bbx_x) + 1;
 }
 
 
-#if 0
-void drawbdfchar(SDL_Surface *screen,struct BDF_Char *ch,int x, int y,Uint32 color)
-{
-        int i;
-        int bit=0;
-        unsigned char *dat=ch->data;
 
-        int xo = ch->bbx_xo;
-        int yo = ch->bbx_yo;
-
-
-        xo+=x;
-        yo+=y;
-
-        if(ch->encoding == 53 || ch->encoding == 65)
-        {
-            printf("x %d y %d\n",x,y);
-        }
-
-        dat+=ch->bbx_y;
-        for(i=0;i<ch->bbx_y;i++)
-        {
-            if(dat[0]&0x80)
-                DrawPixel(screen,xo+0, yo+i, color);
-            if(dat[0]&0x40)
-                DrawPixel(screen,xo+1, yo+i, color);
-            if(dat[0]&0x20)
-                DrawPixel(screen,xo+2, yo+i, color);
-            if(dat[0]&0x10)
-                DrawPixel(screen,xo+3, yo+i, color);
-            if(dat[0]&0x08)
-                DrawPixel(screen,xo+4, yo+i, color);
-            if(dat[0]&0x04)
-                DrawPixel(screen,xo+5, yo+i, color);
-            if(dat[0]&0x02)
-                DrawPixel(screen,xo+6, yo+i, color);
-            if(dat[0]&0x01)
-                DrawPixel(screen,xo+7, yo+i, color);
-                
-            dat--;
-        }
-
-}
-#endif

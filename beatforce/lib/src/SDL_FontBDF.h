@@ -26,6 +26,7 @@ typedef struct BDF_Char
     int bbx_y;
     int bbx_xo;
     int bbx_yo;
+    int wbytes;
     char *data;
 
 }BDF_Char;
