@@ -78,11 +78,10 @@ main(int argc, char *argv[])
     PLUGIN_Init (PLUGIN_TYPE_OUTPUT);
 
     AUDIOOUTPUT_Init (audiocfg);
-    SONGDB_Init (songdbcfg);
     MIXER_Init  ();
     PLAYER_Init (0, playercfg0);
     PLAYER_Init (1, playercfg1);
-    
+    SONGDB_Init (songdbcfg);
    
     MAINWINDOW_Open();
     /*beatforce UI*/
@@ -90,6 +89,8 @@ main(int argc, char *argv[])
 
 
     AUDIOOUTPUT_Cleanup();
+
+    SONGDB_Exit();
 
     // save everything on exit
     cfgfile = bf_cfg_open_default_file ();
