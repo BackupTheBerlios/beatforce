@@ -478,7 +478,7 @@ void SONGDB_FindEntry(char *search_string)
                 for(ptr= e->filename,i=0 ; ptr && *ptr && i < 254; i++, ptr++)
                     song[i]=tolower(*ptr);
                 song[i] = '\0';
-                match=songdb_JumpToFileMatch(song,words,nw);
+                match=SONGDB_JumpToFileMatch(song,words,nw);
             }
 
         if(match)

@@ -51,11 +51,11 @@ void UI_ProgressBarClicked(void *data);
 
 /* Prototypes for redraw functions */
 static void PLAYERUI_UpdateArtist(int player);  /* Redraw of the artist label */
-void playerui_UpdateTime(int player);
-void playerui_UpdateTitle(int player);
-void playerui_UpdateFileInfo(int player);
-void playerui_UpdateVolume(int player);
-void playerui_UpdateState(int player);
+static void PLAYERUI_UpdateTime(int player);
+static void PLAYERUI_UpdateTitle(int player);
+static void PLAYERUI_UpdateFileInfo(int player);
+static void PLAYERUI_UpdateVolume(int player);
+static void PLAYERUI_UpdateState(int player);
 
 /* Callback for edit title */
 static void PLAYERUI_EditTitleReturn(void *data);
@@ -217,20 +217,20 @@ void PLAYERUI_Redraw()
     PLAYERUI_UpdateArtist(0);
     PLAYERUI_UpdateArtist(1);
 
-    playerui_UpdateTitle(0);
-    playerui_UpdateTitle(1);
+    PLAYERUI_UpdateTitle(0);
+    PLAYERUI_UpdateTitle(1);
 
-    playerui_UpdateTime(0);
-    playerui_UpdateTime(1);
+    PLAYERUI_UpdateTime(0);
+    PLAYERUI_UpdateTime(1);
 
-    playerui_UpdateFileInfo(0);
-    playerui_UpdateFileInfo(1);
+    PLAYERUI_UpdateFileInfo(0);
+    PLAYERUI_UpdateFileInfo(1);
 
-    playerui_UpdateVolume(0);
-    playerui_UpdateVolume(1);
+    PLAYERUI_UpdateVolume(0);
+    PLAYERUI_UpdateVolume(1);
 
-    playerui_UpdateState(0);
-    playerui_UpdateState(1);
+    PLAYERUI_UpdateState(0);
+    PLAYERUI_UpdateState(1);
 
     if(SDL_WidgetHasFocus(UI_Players[0].EditTitle) ||
        SDL_WidgetHasFocus(UI_Players[0].EditTitle))
@@ -265,7 +265,7 @@ static void PLAYERUI_UpdateArtist(int player)
 }
 
 
-void playerui_UpdateTitle(int player)
+static void PLAYERUI_UpdateTitle(int player)
 {
     char title[255];
 
@@ -277,7 +277,7 @@ void playerui_UpdateTitle(int player)
 
 }
 
-void playerui_UpdateTime(int player)
+static void PLAYERUI_UpdateTime(int player)
 {
     char string[255];
     long time,timeleft,totaltime;
@@ -389,19 +389,19 @@ void playerui_UpdateTime(int player)
     }
 }
 
-void playerui_UpdateVolume(int player)
+static void PLAYERUI_UpdateVolume(int player)
 {
     int left=0,right=0;
     double vol;
     
-    output_get_volume_level(player,&left,&right);
+    AUDIOOUTPUT_GetVolumeLevel(player,&left,&right);
     vol=(double)left;
     SDL_WidgetPropertiesOf(UI_Players[player].VolumeLeft,SET_CUR_VALUE,vol);
     vol=(double)right;
     SDL_WidgetPropertiesOf(UI_Players[player].VolumeRight,SET_CUR_VALUE,vol);
 }
 
-void playerui_UpdateFileInfo(int player)
+static void PLAYERUI_UpdateFileInfo(int player)
 {
     char label[255];
     sprintf(label,"%d Smpls",PLAYER_GetSamplerate(player));
@@ -420,7 +420,7 @@ static void PLAYERUI_EditTitleReturn(void *data)
     PLAYER_SetTitle(cur->PlayerNr,caption);
 }        
   
-void playerui_UpdateState(int player)
+static void PLAYERUI_UpdateState(int player)
 {
     char label[255];
     int state;
@@ -436,6 +436,9 @@ void playerui_UpdateState(int player)
         break;
     case PLAYER_PAUSE:
         sprintf(label,"PAUSE");
+        break;
+    case PLAYER_PAUSE_EOF:
+        sprintf(label,"PAUSE (END OF FILE)");
         break;
     default:
         sprintf(label,"INTERNAL ERROR");
@@ -481,5 +484,5 @@ static void PLAYERUI_SetSpeed(void *data)
    
     SDL_WidgetPropertiesOf(active->Pitch,GET_CUR_VALUE,&curval);
     curval=2.0-curval;
-    AUDIOOUTPUT_SetSpeed(active->PlayerNr,(float)curval);
+    PLAYER_SetSpeed(active->PlayerNr,curval);
 }

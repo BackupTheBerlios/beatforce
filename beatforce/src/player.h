@@ -2,7 +2,7 @@
    BeatForce
    player.h  - player
    
-   Copyright (c) 2001, Patrick Prasse (patrick.prasse@gmx.net)
+   Copyright (c) 2003, John Beuving (john.beuving@home.nl)
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public Licensse as published by
@@ -34,7 +34,8 @@ typedef enum ePlayerState
 {
     PLAYER_IDLE = 1,
     PLAYER_PAUSE,
-    PLAYER_PLAY
+    PLAYER_PLAY,
+    PLAYER_PAUSE_EOF,
 }ePlayerState;
 
 
@@ -79,9 +80,7 @@ int PLAYER_EOF(int);
 
 int player_set_callback(void*);
 
-void player_next_track (int);
 
-void player_track_rf (int,int);
 void player_rev  (int, int);
 void player_forw (int, int);
 
@@ -93,7 +92,7 @@ int PLAYER_GetPlayingID(int player_nr,long *songid);
 void player_set_song (int player_nr, int no);
 
 int PLAYER_SetTimePlayed(int player_nr,long seconds);
-int PLAYER_SetSpeed(double speed);
+int PLAYER_SetSpeed(int player_nr,double speed);
 
 /* Functions for user interface information */
 int PLAYER_GetArtist(int player_nr,char *artist);

@@ -189,6 +189,10 @@ int mainwindow_HandleKeys(unsigned int key)
             player_set_song(0,0);
             MIXER_DoFade(1,0);
         }
+        else
+        {
+            printf("No next song inplaylist\n");
+        }
         break;
 
     }

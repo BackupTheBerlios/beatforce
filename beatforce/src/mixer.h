@@ -1,8 +1,8 @@
 /*
    BeatForce
-   mixer.h  - mixer gui
+   mixer.h  - mixer interface
    
-   Copyright (c) 2001, Patrick Prasse (patrick.prasse@gmx.net)
+   Copyright (c) 2003, John Beuving (john.beuving@home.nl)
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public Licensse as published by
@@ -42,7 +42,6 @@ typedef struct
 
     int in_progress;
     int timer;
-//  float position;
     float inc;
     int from_player;
     int to_player;

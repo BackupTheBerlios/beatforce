@@ -139,10 +139,9 @@ int MIXER_MuteGroup (int group, int mute)
     return 0;
 }
 
-int
-mixer_dB (int ch, float dB)
+int mixer_dB (int ch, float dB)
 {
-    return output_set_volume (ch, dB);
+    return AUDIOOUTPUT_SetVolume(ch, dB);
 }
 
 int MIXER_DoFade(int autofade, int instant)
@@ -181,8 +180,6 @@ int MIXER_DoFade(int autofade, int instant)
     if (instant)
     {
         PLAYER_Pause (from);
-        player_next_track (from);
-//	  player_track_rf (win, 1);
         if (!MIXER_FadeInProgress())
         {
             PLAYER_Play (to);
@@ -233,13 +230,6 @@ int mixer_FadeTimeout (void* ptr)
     if (end)
     {
         PLAYER_Pause (cfader->from_player);
-        if( !cfader->autofade )
-        {
-            /* fade has ended and was not autofade */
-            if( mixercfg->TForwAfterFadeNow )
-                player_next_track(cfader->from_player );
-        }
-
         cfader->timer = 0;
         cfader->in_progress = FALSE;
         cfader->from_player = 0;
@@ -259,13 +249,6 @@ int mixer_FadeTimeout (void* ptr)
     if (end)
     {
         PLAYER_Pause (cfader->from_player);
-        if( !cfader->autofade )
-        {
-            /* fade has ended and was not autofade */
-            if( mixercfg->TForwAfterFadeNow )
-                player_next_track(cfader->from_player );
-        }
-
         cfader->timer = 0;
         cfader->in_progress = FALSE;
         cfader->from_player = 0;
@@ -339,13 +322,13 @@ int MIXER_GetFaderValue (double *val)
     if (cfader == NULL)
     {
         mutex_unlock (fader_mutex);
-        return 0.50;
+        return 0;
     }
 
     if (&cfader->value == NULL)
     {
         mutex_unlock (fader_mutex);
-        return 0.50;
+        return 0;
     }
 
     mutex_unlock (fader_mutex);
@@ -354,13 +337,14 @@ int MIXER_GetFaderValue (double *val)
     {
         *val=0.000000;
         cfader->value = *val;
-        return 0;
+        return 1;
     }
 
 
     if(val)
     {
         *val = cfader->value;
+        return 1;
     }
     else
     {

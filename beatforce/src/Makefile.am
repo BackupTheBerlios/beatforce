@@ -6,6 +6,7 @@ main.c                          \
 configfile.c    configfile.h    \
 plugin.c        plugin.h        \
 osa.c           osa.h           \
+osa_cdrom.c     osa_cdrom.h     \
 llist.c         llist.h         \
 mixer.c         mixer.h         \
 input.c         input.h         \

@@ -171,7 +171,7 @@ long output_get_time (int);
 
 
 /* interface to mixer */
-int output_set_volume (int, float);
+int AUDIOOUTPUT_SetVolume(int, float);
 
 int AUDIOOUTPUT_SetMainVolume(int value);
 int AUDIOOUTPUT_GetMainVolume(int *value);
@@ -182,11 +182,9 @@ int output_set_beatcount (int, int);
 
 /* to player + mixer */
 double output_get_bpm (int);
-int output_get_volume_level(int channel,int *left,int *right);
+int AUDIOOUTPUT_GetVolumeLevel(int channel,int *left,int *right);
 
 
-/* main thread */
-int output_loop (void *);
 
 int do_fft (int, output_word *);
 

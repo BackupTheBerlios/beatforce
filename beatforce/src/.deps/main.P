@@ -14,19 +14,20 @@ main.o: main.c /usr/include/stdio.h /usr/include/features.h \
  /usr/include/sys/sysmacros.h /usr/include/alloca.h configfile.h \
  llist.h plugin.h ../config.h songdb.h input.h input_plugin.h player.h \
  output.h audio_output.h types.h ringbuffer.h /usr/include/vrb.h \
- output_plugin.h mixer.h osa.h theme.h /usr/include/SDL/SDL.h \
- /usr/include/SDL/SDL_main.h /usr/include/SDL/SDL_types.h \
- /usr/include/SDL/SDL_getenv.h /usr/include/SDL/SDL_error.h \
- /usr/include/SDL/begin_code.h /usr/include/SDL/close_code.h \
- /usr/include/SDL/SDL_rwops.h /usr/include/SDL/SDL_timer.h \
- /usr/include/SDL/SDL_audio.h /usr/include/SDL/SDL_byteorder.h \
- /usr/include/SDL/SDL_cdrom.h /usr/include/SDL/SDL_joystick.h \
- /usr/include/SDL/SDL_events.h /usr/include/SDL/SDL_active.h \
- /usr/include/SDL/SDL_keyboard.h /usr/include/SDL/SDL_keysym.h \
- /usr/include/SDL/SDL_mouse.h /usr/include/SDL/SDL_video.h \
- /usr/include/SDL/SDL_mutex.h /usr/include/SDL/SDL_quit.h \
- /usr/include/SDL/SDL_version.h ../lib/src/SDL_Font.h main_window.h \
- search_window.h file_window.h wndmgr.h
+ output_plugin.h mixer.h osa.h osa_cdrom.h theme.h \
+ /usr/include/SDL/SDL.h /usr/include/SDL/SDL_main.h \
+ /usr/include/SDL/SDL_types.h /usr/include/SDL/SDL_getenv.h \
+ /usr/include/SDL/SDL_error.h /usr/include/SDL/begin_code.h \
+ /usr/include/SDL/close_code.h /usr/include/SDL/SDL_rwops.h \
+ /usr/include/SDL/SDL_timer.h /usr/include/SDL/SDL_audio.h \
+ /usr/include/SDL/SDL_byteorder.h /usr/include/SDL/SDL_cdrom.h \
+ /usr/include/SDL/SDL_joystick.h /usr/include/SDL/SDL_events.h \
+ /usr/include/SDL/SDL_active.h /usr/include/SDL/SDL_keyboard.h \
+ /usr/include/SDL/SDL_keysym.h /usr/include/SDL/SDL_mouse.h \
+ /usr/include/SDL/SDL_video.h /usr/include/SDL/SDL_mutex.h \
+ /usr/include/SDL/SDL_quit.h /usr/include/SDL/SDL_version.h \
+ ../lib/src/SDL_Font.h main_window.h search_window.h file_window.h \
+ wndmgr.h
 main.c :
 /usr/include/stdio.h :
 /usr/include/features.h :
@@ -71,6 +72,7 @@ ringbuffer.h :
 output_plugin.h :
 mixer.h :
 osa.h :
+osa_cdrom.h :
 theme.h :
 /usr/include/SDL/SDL.h :
 /usr/include/SDL/SDL_main.h :

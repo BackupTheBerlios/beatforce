@@ -29,6 +29,7 @@
 #include "output.h"
 #include "mixer.h"
 #include "osa.h"
+#include "osa_cdrom.h"
 #include "theme.h"
 #include "main_window.h"
 #include "search_window.h"

@@ -32,12 +32,11 @@
 #include "audio_output.h" 
 #include "theme.h"
 
-
 extern int mixer_dB (int ch, float dB);
 
 /* Local callback functions */
 void mixerui_AutoFadeButtonClicked(void *data);
-void mixerui_FaderChanged(void *data);
+static void MIXERUI_FaderChanged(void *data);
 void MIXERUI_MainVolumeChanged(void *data);
 
 void *slideroffader;
@@ -60,7 +59,6 @@ void MIXERUI_CreateWindow(ThemeMixer *tm)
     Slider    = tm->Slider;
     Button    = tm->Button;
 
-
     while(Image)
     {
         SDL_WidgetCreateR(SDL_PANEL,Image->Rect);
@@ -79,6 +77,7 @@ void MIXERUI_CreateWindow(ThemeMixer *tm)
         VolumeBar=VolumeBar->next;
     }
 
+
     while(Slider)
     {
         switch(Slider->action)
@@ -95,7 +94,7 @@ void MIXERUI_CreateWindow(ThemeMixer *tm)
         case SLIDER_FADER:
             /* fade slider */
             slideroffader=SDL_WidgetCreateR(SDL_SLIDER,Slider->Rect);
-            SDL_WidgetProperties(SET_CALLBACK,SDL_CHANGED,mixerui_FaderChanged,slideroffader);
+            SDL_WidgetProperties(SET_CALLBACK,SDL_CHANGED,MIXERUI_FaderChanged,slideroffader);
             SDL_WidgetProperties(SET_BUTTON_IMAGE,Slider->button);
             MIXER_SetFaderValue(0.0);
             MIXER_GetFaderValue (&val);
@@ -124,15 +123,23 @@ int MIXERUI_Redraw()
 {
     int volume;
     double value=0.0;
-
+    int state;
     AUDIOOUTPUT_GetMainVolume(&volume);    
 
     SDL_WidgetPropertiesOf(mainvolumeind,SET_CUR_VALUE,(double) volume);
     volume= 100.0 - volume;
     SDL_WidgetPropertiesOf(mainslider   ,SET_CUR_VALUE,(double) volume);
 
-    MIXER_GetFaderValue(&value);
-    SDL_WidgetPropertiesOf(slideroffader,SET_CUR_VALUE,value);    
+
+    
+    SDL_WidgetPropertiesOf(slideroffader,GET_STATE,&state);    
+    if(state != SLIDER_DRAG)
+    {
+        if(MIXER_GetFaderValue(&value))
+        {
+            SDL_WidgetPropertiesOf(slideroffader,SET_CUR_VALUE,value);    
+        }
+    }
     
     return 1;
 }
@@ -145,7 +152,7 @@ void mixerui_AutoFadeButtonClicked(void *data)
         MIXER_DoFade(1,0);  //param 1 is autofade param2 is instant
 }
 
-void mixerui_FaderChanged(void *data)
+static void MIXERUI_FaderChanged(void *data)
 {
     SDL_Slider *slider=(SDL_Slider *)data;
     MIXER_SetFaderValue(slider->CurrentValue);

@@ -69,6 +69,9 @@ AudioConfig *audiocfg;
 
 #define _TO_ATT( _dB )		( (_dB > -31) ? ( pow( 10, 0.05 * _dB ) ) : (0) )
 
+/* main thread */
+static int AUDIOOUTPUT_Loop (void *);
+
 
 void __inline ADD_TO_OUTPUT_BUFFER (output_word *, float);
 
@@ -194,7 +197,7 @@ int AUDIOOUTPUT_Init (AudioConfig * audio_cfg)
 /* Init output thread */
     output_thread_stop = 0;
     n_open = 0;
-    output_thread=i=OSA_CreateThread(output_loop,NULL);
+    output_thread=i=OSA_CreateThread(AUDIOOUTPUT_Loop,NULL);
    
 
     return 0;
@@ -437,23 +440,30 @@ output_get_time (int c)
     return (long) time;
 }
 
-int 
-output_get_volume_level(int channel,int *left,int *right)
+int AUDIOOUTPUT_GetVolumeLevel(int channel,int *left,int *right)
 {
-    *left  = ch[channel]->volumeleft;
-    *right = ch[channel]->volumeright;
+    if(ch[channel]->paused)
+    {
+        *left=0;
+        *right=0;
+    }
+    else
+    {
+        *left  = ch[channel]->volumeleft;
+        *right = ch[channel]->volumeright;
+    }
     return 1;
 }
 
 /* interface to mixer */
-int output_set_volume (int c, float db)
+int AUDIOOUTPUT_SetVolume(int c, float db)
 {
     if (c >= OUTPUT_N_CHANNELS || c < 0)
         return ERROR_UNKNOWN_CHANNEL;
- 
+    
     if(ch[c] == NULL)
         return ERROR_INVALID_ARG;
-
+    
     output_magic_check (ch[c], ERROR_INVALID_ARG);
     ch[c]->fader_dB = db;
     return 0;
@@ -577,8 +587,7 @@ static void AUDIOOUTPUT_CalculateVolume(struct OutChannel *ch)
 }
 
 /* main thread */
-int
-output_loop (void *arg)
+static int AUDIOOUTPUT_Loop(void *arg)
 {
     int channel=0, i=0, sample=0;
 
@@ -643,8 +652,9 @@ output_loop (void *arg)
 
             if (ch[channel]->fader_dB > -31)
             {
-                AUDIOOUTPUT_CalculateVolume(ch[channel]);
 
+                AUDIOOUTPUT_CalculateVolume(ch[channel]);
+                                
                 /* attenuate or amplify by db */
                 for (sample = 0; sample < OUTPUT_BUFFER_SIZE_SAMPLES (audiocfg); sample++)
                 {

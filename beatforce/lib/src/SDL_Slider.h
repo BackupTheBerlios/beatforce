@@ -48,6 +48,7 @@ typedef struct SDL_Slider
     int    MinValue;        // minimum valie (percentage = 0%)
     double CurrentValue;    // value of current position
     double CurrentPercentage;
+    int ValueLocked;
     
     double NormalStepSize;
     

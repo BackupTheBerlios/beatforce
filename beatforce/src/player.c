@@ -116,9 +116,9 @@ int PLAYER_EOF(int player_nr)
         return -1;
 
     p->eof = 1;
-   
+    p->State = PLAYER_PAUSE_EOF;
     return 0;
-    
+  
 }
 
 void
@@ -132,69 +132,6 @@ player_next_track (int player_nr)
 
     new_no = p->playlist_id + 1;
     player_set_song (player_nr, new_no);
-}
-
-void
-player_track_rf (int player_nr, int rev_forw)
-{
-    struct PlayerPrivate *p = PLAYER_GetData(player_nr);
-    int new_no = 0;
-
-    if(p==NULL)
-        return;
-
-    if (rev_forw)
-    {
-        if (PLAYER_IsPlaying(player_nr))
-        {
-            new_no = p->playlist_id + 1;
-            player_set_song (player_nr, new_no);
-            PLAYER_Play(p->ch_id);
-            return;
-        }
-        else
-        {
-            new_no = p->playlist_id + 1;
-        }
-    }
-    else
-    {
-        if (PLAYER_IsPlaying(player_nr))
-        {
-            long songtime = INPUT_GetTime (p->current_plugin);
-
-            if (songtime <= 1000)
-            {
-                /* go to previous song */
-                new_no = p->playlist_id - 1;
-                if (new_no <= 0)
-                {
-                    new_no = p->playlist_id;
-                }
-                player_set_song (p->ch_id, new_no);
-                PLAYER_Play(p->ch_id);
-                return;
-            }
-            else
-            {
-                /* just restart song from beginning */
-                player_set_song (p->ch_id, p->playlist_id);
-                PLAYER_Play(p->ch_id);
-                return;
-            }
-
-        }
-        else
-        {
-            new_no = p->playlist_id - 1;
-            if (new_no <= 0)
-            {
-                new_no = p->playlist_id;
-            }
-        }
-    }
-
-    player_set_song (p->ch_id, new_no);
 }
 
 int PLAYER_Play(int player_nr)
@@ -547,9 +484,10 @@ int PLAYER_GetSamplerate(int player_nr)
     return t;
 }
 
-int PLAYER_SetSpeed(double speed)
+int PLAYER_SetSpeed(int player_nr,double speed)
 {
-    return 0;
+    AUDIOOUTPUT_SetSpeed(player_nr,(float)speed);
+    return 1;
 }
 
 

@@ -67,6 +67,7 @@ void* SDL_SliderCreate(SDL_Rect* rect)
     slider->MaxValue          = 100;
     slider->CurrentValue      = 0.0;
     slider->CurrentPercentage = 0.0;
+    slider->ValueLocked       = 0;
 
     slider->NormalStepSize    = 1.0;
 
@@ -266,7 +267,7 @@ void SDL_SliderEventHandler(void * slider,SDL_Event *event)
                     SDL_SliderStep(Slider,LEFT,NORMAL_STEP);
                 }
             }
-            else
+            else /* Vertical orientation */
             {
                 motion=event->motion.y;
                 
@@ -301,8 +302,8 @@ void SDL_SliderEventHandler(void * slider,SDL_Event *event)
         if(Slider->state == SLIDER_DRAG)
         {
             Slider->state=SLIDER_IDLE;
-            break;
         }
+        break;
     case SDL_MOUSEMOTION:
         if(Slider->state == SLIDER_DRAG)
         {
@@ -316,8 +317,8 @@ void SDL_SliderEventHandler(void * slider,SDL_Event *event)
             }
             SDL_SliderCurrentValue(Slider);
             Slider->changed=1;
-            break;
         }
+        break;
     default:
         break;
     }
@@ -398,8 +399,8 @@ static void SDL_SliderCurrentValue(SDL_Slider *Slider)
             if(Slider->pixeloffset > (Slider->rect.w - Slider->SliderButton->w))
                 Slider->pixeloffset = (Slider->rect.w - Slider->SliderButton->w);
 
-            Slider->CurrentValue = ((Slider->MaxValue -Slider->MinValue)* Slider->pixeloffset) 
-                /(Slider->rect.w - Slider->SliderButton->w);
+            Slider->CurrentValue = (double)((Slider->MaxValue -Slider->MinValue)* Slider->pixeloffset) 
+                /(double)(Slider->rect.w - Slider->SliderButton->w);
         }
         else
         {
