@@ -113,7 +113,7 @@ int WNDMGR_Main(void * data)
     gEventsAllowed = 1;
 
 
-    MAINWINDOW_Open();
+
     timer=OSA_StartTimer(50,wndmgr_Redraw,NULL);
 
     while(WNDMGR_Running)

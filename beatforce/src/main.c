@@ -29,6 +29,7 @@
 #include "output.h"
 #include "mixer.h"
 #include "osa.h"
+//#include "main_window.h"
 
 // user interface include
 #include "wndmgr.h"
@@ -69,6 +70,8 @@ main(int argc, char *argv[])
     MIXER_Init  ();
     PLAYER_Init (0, playercfg0);
     PLAYER_Init (1, playercfg1);
+
+    MAINWINDOW_Open();
 
     /*beatforce UI*/
     WNDMGR_Main(NULL);
