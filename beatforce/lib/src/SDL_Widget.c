@@ -209,7 +209,7 @@ int SDL_DrawAllWidgets(SDL_Surface *screen)
     if(previous != active_surface)
     {
         last_surface=previous;
-        fadeon=1;
+        //fadeon=1;
     }
 
     if(fadeon)
@@ -267,7 +267,8 @@ int SDL_DrawAllWidgets(SDL_Surface *screen)
 
     
     SDL_BlitSurface(active_surface,NULL,screen,NULL);
-    SDL_BlitSurface(last_surface,&src,screen,&dest);
+    
+    //SDL_BlitSurface(last_surface,&src,screen,&dest);
         
     SDL_UpdateRect(screen,0,0,0,0);
     if(previous!=active_surface)
