@@ -78,7 +78,7 @@ BFList *OSA_FindDirectories(char *dir)
     d=opendir(dir);
     if(d==NULL)
     {
-        ERROR("Can't open directory %s",dir);
+//        ERROR("Can't open directory %s",dir);
         return NULL;
     }
     dent=readdir(d);

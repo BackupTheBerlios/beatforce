@@ -66,12 +66,12 @@ int THEME_Init()
     int NoOfThemes;
     ThemeConfig *current;
 //    ConfigFile *themecfg;
-    char themepath[255];
+//  char themepath[255];
     xmlNodePtr cur;
 //    long size;
     xmlDocPtr doc=NULL;
 //    FILE *fp;
-    char *buffer;
+//    char *buffer;
     xmlChar *key;
 
 #if 0
@@ -943,6 +943,8 @@ ThemeTable *XML_ParseTable(ThemeTable *table,xmlDocPtr doc, xmlNodePtr cur)
                 table->contents=CONTENTS_FILESINDIRECTORY;
             if(!strcmp(contents,"FILESINSUBGROUP"))
                 table->contents=CONTENTS_FILESINSUBGROUP;
+            if(!strcmp(contents,"DIRECTORIES"))
+                table->contents=CONTENTS_DIRECTORIES;
             free(contents);
         }
     }
@@ -973,6 +975,8 @@ ThemeTable *XML_ParseTable(ThemeTable *table,xmlDocPtr doc, xmlNodePtr cur)
                 last->next->contents=CONTENTS_FILESINDIRECTORY;
             if(!strcmp(contents,"FILESINSUBGROUP"))
                 last->next->contents=CONTENTS_FILESINSUBGROUP;
+            if(!strcmp(contents,"DIRECTORIES"))
+                last->next->contents=CONTENTS_DIRECTORIES;
             free(contents);
         }
     }
