@@ -2,9 +2,6 @@
    BeatForce
    theme.c  - theme manager
 
-   Thanks to the people from XMMS (xmms.org) from which this code was taken.
-	   (Peter Alm, Mikael Alm, Olle Hallnas, Thomas Nilsson and 4Front Technologies)
-
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public Licensse as published by
    the Free Software Foundation; either version 2 of the License, or
@@ -140,6 +137,8 @@ int THEME_Init()
             doc = xmlParseFile(path);
             if (doc)
                 break;
+            else
+                printf("xmlParsefile failes while the file exists and can be opened\n");
         }
         dir=dir->next;
     }

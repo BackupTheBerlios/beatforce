@@ -28,6 +28,7 @@
 #include "input_plugin.h"
 #include "output_plugin.h"
 #include "osa.h"
+#include "ladspa.h"
 
 
 #define MODULE_ID PLUGIN
@@ -100,6 +101,7 @@ PLUGIN_AddPlugin(char * filename, int type, BFList ** plugins)
     void *h;
     void *(*gpi) (void);
     void *(*gpo) (void);
+    LADSPA_Descriptor_Function dis;
 
     TRACE("PLUGIN_AddPlugin %s",filename);
     if ((h = OSA_LoadLibrary(filename)) != NULL)
@@ -134,7 +136,22 @@ PLUGIN_AddPlugin(char * filename, int type, BFList ** plugins)
             }
             break;
         case PLUGIN_TYPE_EFFECT:
-            OSA_CloseLibrary(h);
+            if ((dis = OSA_GetFunctionAddress (h, "ladspa_descriptor")) != NULL)
+            {
+                unsigned long i;
+                const LADSPA_Descriptor *dc;
+                
+                for(i=0;;i++)
+                {
+                    dc=dis(i);
+                    if(dc==NULL)
+                        break;
+                    printf("Effect: %s\n",dc->Label);
+
+                }
+
+//                *plugins = LLIST_Append (*plugins, (void*) h);
+            }
             break;
         default:
             OSA_CloseLibrary(h);
