@@ -227,11 +227,34 @@ int
 ogg_get_tag (Private * h, char *path, struct SongDBEntry *e)
 { 
     oggPrivate *private = (oggPrivate *) h;
-    double time;
+    OggVorbis_File *vobf;
+    vorbis_comment *comments;
 
-    time=ov_time_total(&private->vf,-1);
-    printf("Total time %g\n",time);
-    e->time=-time*100;
+    double time;
+    FILE *fp;
+
+    {
+        vobf=malloc(sizeof(OggVorbis_File));
+        printf("get tag %s\n",path);
+        fp=fopen("/home/beuving/test.ogg","rb");
+        if(fp == NULL)
+            return 0;
+        
+        memset(vobf,0,sizeof(OggVorbis_File));
+        
+        ov_open(fp,vobf, NULL, 0);
+
+        comments=ov_comment(vobf,-1);
+        
+        e->title=strdup(*comments->user_comments);
+        time=ov_time_total(vobf,-1);
+        
+       
+        e->time=(long)(time*1000);
+        
+        free(vobf);
+        fclose(fp);
+    }
     return 1;
 
 }
@@ -315,6 +338,7 @@ ogg_load_file (Private * h, char *filename)
       fprintf(stderr,"\nDecoded length: %ld samples\n",
               (long)ov_pcm_total(&private->vf,-1));
       fprintf(stderr,"Encoded by: %s\n\n",ov_comment(&private->vf,-1)->vendor);
+      fprintf(stderr,"Total file time %g\n",ov_time_total(&private->vf,-1));
   }
   
 
@@ -338,8 +362,8 @@ ogg_load_file (Private * h, char *filename)
     }
 
     private->going    = 1;
-    private->decode_thread=OSA_CreateThread(ogg_play_loop, (void *)private);
     private->position = 0;
+    private->decode_thread=OSA_CreateThread(ogg_play_loop, (void *)private);
     return 1;
 }
 
@@ -405,7 +429,6 @@ ogg_play_loop (void *param)
             } 
             else if (ret < 0) 
             {
-                printf("Error in ogg stream\n");
                 /* error in the stream.  Not a problem, just reporting it in
                    case we (the app) cares.  In this case, we don't. */
             } 
@@ -419,7 +442,8 @@ ogg_play_loop (void *param)
                 /* we don't bother dealing with sample rate changes, etc, but
                    you'll have to*/
                 ogg_if.output_write (private->ch_id, pcmout,ret);
-                private->position=(int)time;
+                private->position=(long)(time);
+                private->position*=10;
             }
         }
     }
