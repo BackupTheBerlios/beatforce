@@ -201,17 +201,23 @@ ogg_cleanup (Private * p)
 
     if (NULL != ogg_priv)
     {
+        if (NULL != ogg_priv->fd)
+            fclose(ogg_priv->fd);
+
         if (NULL != ogg_priv->input_buffer)
 	    free (ogg_priv->input_buffer);
         if (NULL != ogg_priv->output_buffer)
-	    free (ogg_priv->output_buffer);
+            free (ogg_priv->output_buffer);
         if (NULL != ogg_priv->vorbis_buffer)
-	    free (ogg_priv->vorbis_buffer);
-         free (ogg_priv);
+            free (ogg_priv->vorbis_buffer);
+        free (ogg_priv);
+        ogg_priv = NULL;
     }	
     if (NULL != cfg)
+    {
         free (cfg);
-
+        cfg = NULL;
+    }
     return 0;
 }
 
@@ -239,7 +245,7 @@ ogg_get_tag (Private * h, char *path, struct SongDBEntry *e)
     oggPrivate *private = (oggPrivate *) h;
     OggVorbis_File *vobf;
     vorbis_comment *comments;
-
+    char *title, *tmp_title;
     double time;
     FILE *fp;
 
@@ -255,13 +261,22 @@ ogg_get_tag (Private * h, char *path, struct SongDBEntry *e)
 
         comments=ov_comment(vobf,-1);
         
-        e->title=strdup(*comments->user_comments);
+        title=strdup(*comments->user_comments);
+        tmp_title = title;          /* use tmp_title so title can be free'd */
+        /* strip "title=" from tmp_title */
+        while (*tmp_title)
+        {
+            if ('=' == *tmp_title++)
+                break;
+        }
+        e->title=strdup(tmp_title);
+
         time=ov_time_total(vobf,-1);
-        
-       
-        e->time=(long)(time*1000);
+        /* ToDo oggs never reach eof? */       
+        e->time=(long)(time * 1000);
         
         free(vobf);
+        free(title);
         fclose(fp);
     }
     return 1;
@@ -283,6 +298,7 @@ ogg_load_file (Private * h, char *filename)
 {
     oggPrivate *private = (oggPrivate *) h;
     int length=private->length;
+    vorbis_info *vi;
 
     
     TRACE("ogg_load_file %s\n",filename);
@@ -309,32 +325,21 @@ ogg_load_file (Private * h, char *filename)
     if (private->fd == NULL)
     {
         ERROR("Opening file");
-	return 0;
-    }
+        return 0;
+    }    
+    fseek(private->fd,0,SEEK_END);
+    private->size=ftell(private->fd);
+    fseek(private->fd,0,SEEK_SET);
     
     if(ov_open(private->fd, &private->vf, NULL, 0) < 0) 
     {
         fprintf(stderr,"Input does not appear to be an Ogg bitstream.\n");
     }
 
-    
-    fseek(private->fd,0,SEEK_END);
-    private->size=ftell(private->fd);
-    fseek(private->fd,0,SEEK_SET);
-
-    if(length == 0)
-    {
-#if 0
-        fseek (private->fd, 0, SEEK_SET);
-        scan_file (private->fd, &length, NULL);
-        fseek (private->fd, 0, SEEK_SET);
-#endif
-    }
-
 
     length=(unsigned long)ov_pcm_total(&private->vf,-1);
+    vi=ov_info(&private->vf,-1);
 
-  {
 #if 0
       char **ptr=ov_comment(&private->vf,-1)->user_comments;
       vorbis_info *vi=ov_info(&private->vf,-1);
@@ -349,16 +354,14 @@ ogg_load_file (Private * h, char *filename)
       fprintf(stderr,"Encoded by: %s\n\n",ov_comment(&private->vf,-1)->vendor);
       fprintf(stderr,"Total file time %g\n",ov_time_total(&private->vf,-1));
 #endif
-  }
-  
 
     private->length  = length;
     private->bitrate = 0;
     private->seek    = -1;
     private->eof     = 0;
 
-    private->channels = 2;
-    private->rate = 44100;
+    private->channels = vi->channels;
+    private->rate = vi->rate;
 
     if (!private->ogg_if.output_open(private->ch_id,FMT_S16_NE, private->rate, private->channels, 
                                      &private->max_bytes))
@@ -382,7 +385,6 @@ ogg_close_file (Private * h)
     oggPrivate *private = (oggPrivate *) h;
 
     TRACE("ogg_close_file");
-    fprintf(stderr, "Closing File??... ");
     if( h == NULL)
     {
         ERROR("Invalid arguments");
@@ -393,13 +395,11 @@ ogg_close_file (Private * h)
     if (private->going && private->fd != NULL)
     {
         DEBUG("Stopping thread");
-fprintf(stderr, "Closed!\n");
 	private->going = 0;
         OSA_RemoveThread(private->decode_thread);
 	private->ogg_if.output_close (private->ch_id);
 	fclose (private->fd);
 	private->fd = NULL;
-
     }
 
     return 1;
