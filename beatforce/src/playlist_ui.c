@@ -38,14 +38,16 @@
 #define MODULE_ID PLAYLIST_UI
 #include "debug.h"
 
-
+#if 0
 static void PLAYLISTUI_GetEntry(long row,int column,char *dest);
 static void PLAYLISTUI_EntryClicked(SDL_Table *table,SDL_Event *event);
+#endif
 
 SDL_Widget* PLAYLISTUI_CreateWindow(ThemePlaylist *pl)
 {
     SDL_Widget *pui = NULL;
 
+    TRACE("PLAYLISTUI_CreateWindow");
     if(pl == NULL)
         return pui;
 
@@ -67,6 +69,7 @@ void PLAYLISTUI_Redraw(void *widget)
 
 }
 
+#if 0
 static void PLAYLISTUI_GetEntry(long row,int column,char *dest)
 {
     struct PlEntry *pe;
@@ -101,6 +104,7 @@ static void PLAYLISTUI_GetEntry(long row,int column,char *dest)
     }
 }
 
+
 static void PLAYLISTUI_EntryClicked(SDL_Table *table,SDL_Event *event)
 {
     int player=0;// is playing ?
@@ -112,7 +116,7 @@ static void PLAYLISTUI_EntryClicked(SDL_Table *table,SDL_Event *event)
         if(pl && pl->e)
         {
             PLAYLIST_Remove(PLAYER1,pl->e);
-            SDL_TableDeleteRow(table,table->CurrentRow);
+            SDL_TableDeleteRow((SDL_Widget*)table,table->CurrentRow);
         }
         return;
     }
@@ -138,7 +142,7 @@ static void PLAYLISTUI_EntryClicked(SDL_Table *table,SDL_Event *event)
         }
     }
 }
-
+#endif
 
 
 

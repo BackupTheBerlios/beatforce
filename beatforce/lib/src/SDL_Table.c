@@ -918,10 +918,11 @@ void SDL_TableSetStyle(SDL_Widget *widget,int row,Uint32 color)
     SDL_TableRow *tmp;
     
     tmp=Table->RowData;
-    while(row--)
+    while(row-- && tmp)
         tmp=tmp->Next;
 
-    tmp->fgcolor=color;
+    if(tmp)
+        tmp->fgcolor=color;
 }
 
 int SDL_TableIsVisible(SDL_Widget *widget,int row)

@@ -534,7 +534,11 @@ ThemeClock *XML_ParseClock(xmlDocPtr doc, xmlNodePtr cur)
 ThemeTree *XML_ParseTree(xmlDocPtr doc, xmlNodePtr cur)
 {
     ThemeTree *tree;
+#if 0
     char *color;
+#endif
+
+    TRACE("XML_ParseTree");
     tree=malloc(sizeof(ThemeTree));
     memset(tree,0,sizeof(ThemeTree));
 

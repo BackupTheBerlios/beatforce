@@ -92,8 +92,9 @@ int MIXER_Init ()
     return 0;
 }
 
-int mixer_finalize ()
+int MIXER_Finalize ()
 {
+    TRACE("MIXER_Finalize");
     mutex_unlock (fader_mutex);
     return 0;
 }
@@ -113,8 +114,9 @@ int MIXER_MuteGroup (int group, int mute)
     return 1;
 }
 
-int mixer_dB (int ch, float dB)
+int MIXER_dB (int ch, float dB)
 {
+    TRACE("MIXER_dB");
     return AUDIOOUTPUT_SetVolume(ch, dB);
 }
 
@@ -122,7 +124,8 @@ int MIXER_DoFade(int autofade, int instant)
 {
     int from = -1;
     int to   = -1;
-    
+
+    TRACE("MIXER_DoFade");
     if (PLAYER_IsPlaying (0))
         from = 0;
     
@@ -191,6 +194,7 @@ int MIXER_DoFade(int autofade, int instant)
 static int MIXER_FadeTimeout ()
 {
     int end = 0;
+    TRACE("MIXER_FadeTimeout");
 
 //    printf("%d %d \n",cfader->inc,cfader->value);
     if (cfader->inc < 0 && cfader->value <= 0)
@@ -234,12 +238,13 @@ static int MIXER_FadeTimeout ()
 
 int MIXER_FadeInProgress (void)
 {
+    TRACE("MIXER_FadeInProgress");
     return cfader->in_progress;
 }
 
 int MIXER_GetAutofade(void)
 {
-
+    TRACE("MIXER_GetAutofade");
     mutex_lock (fader_mutex);
 
     if (cfader == NULL)
@@ -261,12 +266,13 @@ int MIXER_GetAutofade(void)
 
 int MIXER_GetFadeTime(void)
 {
+    TRACE("MIXER_GetFadeTime");
     return cfader->fade_time;
 }
 
 int MIXER_SetAutofade(int autofade)
 {
-
+    TRACE("MIXER_SetAutofade");
     mutex_lock (fader_mutex);
 
     if (cfader == NULL)
@@ -287,7 +293,7 @@ int MIXER_SetAutofade(int autofade)
 
 int MIXER_GetFaderValue (unsigned int *val)
 {
-
+    TRACE("MIXER_GetFaderValue");
     mutex_lock (fader_mutex);
 
     if (cfader == NULL)
@@ -326,6 +332,7 @@ int MIXER_GetFaderValue (unsigned int *val)
 
 int MIXER_SetFaderValue (unsigned int value)
 {
+    TRACE("MIXER_SetFaderValue");
     mutex_lock (fader_mutex);
 
     if (cfader == NULL)
@@ -348,6 +355,8 @@ int MIXER_SetFaderValue (unsigned int value)
 int MIXER_DecreaseMainVolume()
 {
     int db=0;
+    TRACE("MIXER_DecreaseMainVolume");
+
     AUDIOOUTPUT_GetMainVolume(&db);
     db-=5;
     if(db < 0)
@@ -359,6 +368,7 @@ int MIXER_DecreaseMainVolume()
 int MIXER_IncreaseMainVolume()
 {
     int db=0;
+    TRACE("MIXER_IncreaseMainVolume");
     AUDIOOUTPUT_GetMainVolume(&db);
     db+=5;
     if(db > 100)

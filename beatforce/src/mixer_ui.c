@@ -21,11 +21,9 @@
 #include <config.h>
 #include <stdio.h>
 #include <string.h>
-#include "SDL_Widget.h"
-#include "SDL_Slider.h"
-#include "SDL_Font.h"
-#include "SDL_Signal.h"
-#include "songdb.h"
+
+#include <SDLTk.h>
+
 #include "playlist.h"
 
 #include "effect.h"

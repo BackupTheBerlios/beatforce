@@ -76,12 +76,16 @@ static void FILEWINDOW_AddSelected(void *data);
 
 /* for table */
 static void FILEWINDOW_DirectoryClicked(void *data);
+#if 0
 static void FILEWINDOW_SubgroupClicked(void *data);
+#endif
 static void FILEWINDOW_RenameSubgroupFinished();
 
 /* local data retreival functions for tables */
 static void FILEWINDOW_LoadSubgroups(SDL_Widget *widget);
+#if 0
 static void FILEWINDOW_GetFilesInSubgroup(int row,int column,char *string);
+#endif
 static void FILEWINDOW_GetSelectedSubgroup(struct SongDBSubgroup **sel_sg);
 
 SDL_Window gFILEWINDOW={ FILEWINDOW_EventHandler , FILEWINDOW_NotifyHandler, NULL, NULL };
@@ -103,6 +107,7 @@ void FILEWINDOW_Open()
 }
 static int FILEWINDOW_NotifyHandler(SDL_Window *Win)
 {
+    TRACE("FILEWINDOW_NotifyHandler");
     CLOCK_Redraw(timewidget);
     return 1;
 }
@@ -114,6 +119,8 @@ static void FILEWINDOW_RenameSubgroupFinished()
     int *row;
     SDL_TableCell *tbc;
 
+    TRACE("FILEWINDOW_RenameSubgroupFinished");
+
     FILEWINDOW_GetSelectedSubgroup(&sg);
     if(sg)
     {
@@ -121,9 +128,9 @@ static void FILEWINDOW_RenameSubgroupFinished()
         if(row)
         {
             tbc=SDL_TableGetCell(TableSubgroup,row[0],0);
-        }        
-        sprintf(newlabel,"%s",tbc->String);
-        SONGDB_RenameSubgroup(sg,newlabel);
+            sprintf(newlabel,"%s",tbc->String);
+            SONGDB_RenameSubgroup(sg,newlabel);
+        }
     }
 } 
 
@@ -345,6 +352,8 @@ void FILEWINDOW_GetFilesInDirectory(int row,int column,char *string)
     }
   
 }
+
+#if 0 /* Not used */
 static void FILEWINDOW_SubgroupClicked(void *data)
 {
     struct SongDBSubgroup *sg;
@@ -359,6 +368,7 @@ static void FILEWINDOW_SubgroupClicked(void *data)
 //    if(sg)
 //        SDL_WidgetPropertiesOf(TableFilesInSubgroup,ROWS,sg->Songcount);
 }
+#endif
 
 
 void FILEWINDOW_DeleteSelected(void *data)
@@ -396,6 +406,7 @@ void FILEWINDOW_DeleteSelected(void *data)
     }
 }
 
+#if 0
 void FILEWINDOW_GetFilesInSubgroup(int row,int column,char *string)
 {
     struct SongDBSubgroup *list;
@@ -417,9 +428,8 @@ void FILEWINDOW_GetFilesInSubgroup(int row,int column,char *string)
             count++;
         }
     }
-  
-  
 }
+#endif
 
 
 SDL_Surface *Window_CreateFileWindow()

@@ -6,7 +6,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <unistd.h>
-
+#include <malloc.h>
 #include <SDL/SDL.h>
 
 #include "songdb.h"
@@ -23,6 +23,7 @@ typedef struct TOC {	/* structure of table of contents (cdrom) */
 TOC *g_toc;
 int cdtracks;
 
+#if 0
 static char * cddb_generate_offset_string()
 {
 	char *buffer;
@@ -38,6 +39,7 @@ static char * cddb_generate_offset_string()
 
 	return buffer;
 }
+#endif
 
 int OSACDROM_TestDrive(char *dev);
 void DisplayToc ( );
@@ -98,7 +100,7 @@ int OSACDROM_TestDrive(char *dev)
     struct SongDBSubgroup *sg;
     int i=0,j,err,tracks;
     TOC toc[90];
-    int id;
+    /*int id;*/
     
 
     if (stat(dev, &statstruct)) 

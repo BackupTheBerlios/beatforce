@@ -346,7 +346,7 @@ int AUDIOOUTPUT_Write (int c, void* buf, int len)
     int written;
     int newlen;
 
-//    TRACE("OUTPUT_WRITE");
+    TRACE("AUDIOOUTPUT_Write");
     if (c >= OUTPUT_N_CHANNELS || c < 0)
         return 0;
     if (ch[c] == NULL)
@@ -376,7 +376,8 @@ int AUDIOOUTPUT_Write (int c, void* buf, int len)
 long AUDIOOUTPUT_BufferFree(int c)
 {
     long free = -1;
-
+    
+    TRACE("AUDIOOUTPUT_BufferFree");
     if (c >= OUTPUT_N_CHANNELS || c < 0)
         return 0;
     if(ch[c] == NULL)
@@ -392,6 +393,7 @@ long AUDIOOUTPUT_BufferFree(int c)
 
 int AUDIOOUTPUT_Pause (int c, int pause)
 {
+    TRACE("AUDIOOUTPUT_Pause");
     if (c >= OUTPUT_N_CHANNELS || c < 0)
         return 0;
 
@@ -456,7 +458,7 @@ int AUDIOOUTPUT_GetVolumeLevel(int channel,int *left,int *right)
 /* interface to mixer */
 int AUDIOOUTPUT_SetVolume(int c, float db)
 {
-    printf("TRACE(AUDIOOUTPUT_SetVolume); %f\n",db);
+    TRACE("AUDIOOUTPUT_SetVolume"); 
     if (c >= OUTPUT_N_CHANNELS || c < 0)
         return 0;
     
@@ -470,6 +472,7 @@ int AUDIOOUTPUT_SetVolume(int c, float db)
 
 int AUDIOOUTPUT_SetMainVolume(int value)
 {
+    TRACE("AUDIOOUTPUT_SetMainVolume");
     group[0]->mainvolume = value;
     OUTPUT_PluginSetVolume(group[0]);
     return 1;

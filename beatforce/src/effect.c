@@ -2,7 +2,7 @@
   Beatforce/ Effect
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003 John Beuving (john.beuving@home.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -45,10 +45,11 @@ int EFFECT_Init()
     int i;
     LADSPA_Descriptor *dc;
     EffectPlugin *m;
-
-    return 0;
-    run = 0;
+    
     TRACE("EFFECT_Init");
+    
+    run = 0;
+    
     effects=PLUGIN_GetList (PLUGIN_TYPE_EFFECT);
     
     while(effects)
@@ -58,7 +59,7 @@ int EFFECT_Init()
         {
             if(m->dis)
             {
-                dc=m->dis(i);
+                dc = (LADSPA_Descriptor*) m->dis(i);
                 if(dc == NULL)
                     break;
                 printf("dc %s\n",dc->Label);
@@ -66,12 +67,15 @@ int EFFECT_Init()
         }
         effects=effects->next;
     }
+    return 1;
 }
 
 int EFFECT_Run(int size)
 {
     if(run && dc)
         dc->run(m->handle,size);
+
+    return 1;
 }
 
 int EFFECT_Play()
@@ -82,7 +86,7 @@ int EFFECT_Play()
     LADSPA_PortRangeHintDescriptor hint;
     LADSPA_Data amplitude;
 
-    int max_bytes=20000;
+//    int max_bytes=20000;
 
     return 0;
     printf("EFFECT_Play\n");
@@ -108,12 +112,12 @@ int EFFECT_Play()
     
     printf("Found %s\n",m->filename);
 
-    dc=m->dis(0);
+    dc = (LADSPA_Descriptor*)m->dis(0);
 
     printf("%s\n",dc->Name);
     printf("%s\n",dc->Label);
     
-    printf("PortCount %d\n",dc->PortCount);
+    printf("PortCount %ld\n",dc->PortCount);
     
     for(i=0;i<dc->PortCount;i++)
     {
@@ -151,7 +155,7 @@ int EFFECT_Play()
         /* Connect an audio output port */
         if(LADSPA_IS_PORT_OUTPUT(dc->PortDescriptors[i]) && LADSPA_IS_PORT_AUDIO(dc->PortDescriptors[i]))
         {
-            dc->connect_port(m->handle,i,ch[0]->buffer);
+            dc->connect_port(m->handle,i,(LADSPA_Data*)ch[0]->buffer);
         }
         
         
@@ -162,11 +166,11 @@ int EFFECT_Play()
 
     run =1;
 
-    
+    return 1;
 }
 
 int EFFECT_Cleanup()
 {
-    return 0;
     dc->cleanup(m->handle);
+    return 1;
 }

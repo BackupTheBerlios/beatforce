@@ -2,7 +2,7 @@
   Beatforce/ Plugin 
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003 John Beuving (john.beuving@home.nl)
+  Copyright (C) 2003-2004 John Beuving (john.beuving@wanadoo.nl)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -183,7 +183,7 @@ PLUGIN_AddPlugin(char * filename, int type, BFList ** plugins)
     }
     else
     {
-        ERROR("Error loading plugin %s",dlerror());
+        ERROR("Error loading plugin");
     }
 
 }

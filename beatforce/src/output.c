@@ -214,7 +214,7 @@ OUTPUT_PluginPause (struct OutGroup *grp, int pause)
 
 int OUTPUT_PluginGetVolume (struct OutGroup *grp)
 {
-    int err=1;
+    /*int err=1;*/
     float volume;
 
     TRACE("OUTPUT_PluginGetVolume");

@@ -2,7 +2,7 @@
   BeatForce
   sampler.c Sampler implementation
    
-  Copyright (c) 2004, John Beuving (john.beuving@home.nl)
+  Copyright (c) 2004, John Beuving (john.beuving@wanadoo.nl)
   
 
   This program is free software; you can redistribute it and/or modify
@@ -58,7 +58,7 @@ InputInterface sampler_if =
 int SAMPLER_Init()
 {
     int i=0;
-
+    TRACE("SAMPLER_Init");
 #if 0
     samples[0].filename=strdup("/home/beuving/test.mp3");
     samples[1].filename=strdup("/home/beuving/test.ogg");

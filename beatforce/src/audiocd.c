@@ -2,7 +2,7 @@
   Beatforce/ Audio CD tests
 
   one line to give the program's name and an idea of what it does.
-  Copyright (C) 2003 John Beuving (john.beuving@home.nl)
+  Copyright (C) 2004 John Beuving (john.beuving@wanadoo.nl)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -22,13 +22,16 @@
 #include "audiocd.h"
 #include "osa_cdrom.h"
 
-static CDDrives *AudioDiscs;
+#define MODULE_ID AUDIOCD
+#include "debug.h"
+
+/*static CDDrives *AudioDiscs;*/
 
 int AUDIOCD_Init()
 {
-    
+    TRACE("AUDIOCD_Init");
 
-
+    return 0;
 }
 
 

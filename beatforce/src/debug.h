@@ -2,7 +2,7 @@
    BeatForce
    debug.h	- debugging stuff
    
-   Copyright (c) 2003, John Beuving (john.beuving@home.nl)
+   Copyright (c) 2003-2004, John Beuving (john.beuving@wanadoo.nl)
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public Licensse as published by
@@ -24,27 +24,29 @@
 #define __DEBUG_H__
 
 #define AUDIO_OUTPUT 1
-#define CLOCK        2
-#define CONFIGFILE   3
-#define CONFIGWINDOW 4
-#define EFFECT       5
-#define FILEWINDOW   6
-#define INPUT        7
-#define MP3          8
-#define OGG          9
-#define OSA          10
-#define OUTPUT       11
-#define PLAYER       12
-#define PLAYER_UI    13
-#define PLAYLIST     14
-#define PLAYLIST_UI  15
-#define PLUGIN       16
-#define RINGBUFFER   17
-#define SAMPLER      18
-#define SONGDB       19
-#define SONGDB_UI    20
-#define THEME        21
-#define WNDMGR       22
+#define AUDIOCD      2
+#define CLOCK        3
+#define CONFIGFILE   4
+#define CONFIGWINDOW 5
+#define EFFECT       6
+#define FILEWINDOW   7
+#define INPUT        8
+#define MIXER        9 
+#define MP3          10
+#define OGG          11
+#define OSA          12
+#define OUTPUT       13
+#define PLAYER       14
+#define PLAYER_UI    15
+#define PLAYLIST     16
+#define PLAYLIST_UI  17
+#define PLUGIN       18
+#define RINGBUFFER   19
+#define SAMPLER      20
+#define SONGDB       21
+#define SONGDB_UI    22
+#define THEME        23
+#define WNDMGR       24
 
 #define name(x) x
 #define module( x ) ( #x )
@@ -68,6 +70,11 @@ void printid(char *id,int line,char *message);
 #define DEBUG_OFF noprint
 
 #if MODULE_ID == AUDIO_OUTPUT
+#define TRACE TRACE_OFF
+#define DEBUG DEBUG_OFF
+#endif
+
+#if MODULE_ID == AUDIOCD
 #define TRACE TRACE_OFF
 #define DEBUG DEBUG_OFF
 #endif
@@ -105,15 +112,16 @@ void printid(char *id,int line,char *message);
 #endif
 
 #if MODULE_ID == WNDMGR
-#undef TRACE
-#undef DEBUG
+#define TRACE TRACE_OFF
+#define DEBUG DEBUG_OFF
+#endif
+
+#if MODULE_ID == MIXER
 #define TRACE TRACE_OFF
 #define DEBUG DEBUG_OFF
 #endif
 
 #if MODULE_ID == MP3
-#undef TRACE
-#undef DEBUG
 #define TRACE TRACE_OFF
 #define DEBUG DEBUG_OFF
 #endif

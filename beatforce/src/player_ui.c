@@ -242,6 +242,7 @@ void PLAYERUI_CreateWindow(int nr,ThemePlayer *pt)
                                    SET_MIN_VALUE,0);
             break;
         case VOLUMEBAR_VOLUME_RIGHT:
+            /* Create the volume bar widget */
             UI_Players[nr].Normal.VolumeRight=SDL_WidgetCreateR(SDL_VOLUMEBAR,VolumeBar->Rect);
             SDL_WidgetPropertiesOf(UI_Players[nr].Normal.VolumeRight,
                                    SET_MAX_VALUE,127);
