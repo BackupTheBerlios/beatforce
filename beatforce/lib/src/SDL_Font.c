@@ -142,6 +142,10 @@ int SDL_FontDrawChar(SDL_Surface *dest,SDL_Font *font,
 int SDL_FontGetCharWidth(SDL_Font* font,char character)
 {
     int width;
+
+    if(font == NULL || font->fontdata == NULL)
+        return 0;
+
     if(font->type ==FNT_FONT)
     {
         FNT_Font *fnt=(FNT_Font*)font->fontdata;

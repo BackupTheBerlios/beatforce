@@ -269,7 +269,7 @@ output_plugin_cleanup(struct OutGroup *grp)
 {
     int err;
 
-    if(grp == NULL)
+    if(grp == NULL || grp->dev == NULL)
         return ERROR_INVALID_ARG;
     
     if (grp->dev->device && (strcmp (grp->dev->shortname, "none") == 0))

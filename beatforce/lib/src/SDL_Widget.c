@@ -181,9 +181,11 @@ int SDL_DrawAllWidgets(SDL_Surface *screen)
     SDL_Surface *active_surface;
 
     if(StackLock)
-        return -1;
+        return 0;
 
     active_surface=SDL_GetSurfaceStack();
+    if(active_surface == NULL)
+        return 0;
 
     SDL_WidgetLOCK();
     
