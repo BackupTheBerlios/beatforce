@@ -52,15 +52,15 @@ void* PLAYLISTUI_CreateWindow(ThemePlaylist *pl)
     if(pl)
     {
         pui=SDL_WidgetCreateR(SDL_TABLE,pl->Table->Rect);
-        SDL_WidgetProperties(SET_VISIBLE_ROWS,    16);
-        SDL_WidgetProperties(SET_VISIBLE_COLUMNS, 1);
+        SDL_WidgetPropertiesOf(pui,SET_VISIBLE_ROWS,    16);
+        SDL_WidgetPropertiesOf(pui,SET_VISIBLE_COLUMNS, 1);
 //        SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
-        SDL_WidgetProperties(SET_BG_COLOR,TRANSPARANT);
-        SDL_WidgetProperties(SET_FG_COLOR,WHITE);
-        SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
-        SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION, PLAYLISTUI_GetEntry);
-        SDL_WidgetProperties(SET_IMAGE,IMG_Load(THEME_DIR"/beatforce/tablescrollbar.bmp"));
-        SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,PLAYLISTUI_EntryClicked,NULL);
+        SDL_WidgetPropertiesOf(pui,SET_BG_COLOR,TRANSPARANT);
+        SDL_WidgetPropertiesOf(pui,SET_FG_COLOR,WHITE);
+        SDL_WidgetPropertiesOf(pui,SET_FONT,THEME_Font("normal"));
+        SDL_WidgetPropertiesOf(pui,SET_DATA_RETREIVAL_FUNCTION, PLAYLISTUI_GetEntry);
+        SDL_WidgetPropertiesOf(pui,SET_IMAGE,IMG_Load(THEME_DIR"/beatforce/tablescrollbar.bmp"));
+        SDL_WidgetPropertiesOf(pui,SET_CALLBACK,SDL_CLICKED,PLAYLISTUI_EntryClicked,NULL);
     }
     return pui;
 }
@@ -69,7 +69,7 @@ void* PLAYLISTUI_CreateWindow(ThemePlaylist *pl)
 
 void PLAYLISTUI_Redraw(void *widget)
 {
-    SDL_WidgetPropertiesOf(widget,ROWS,PLAYLIST_GetNoOfEntries(PLAYER1));
+
 }
 
 static void PLAYLISTUI_GetEntry(long row,int column,char *dest)

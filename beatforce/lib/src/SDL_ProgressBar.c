@@ -84,7 +84,7 @@ SDL_Widget* SDL_ProgressBarCreate(SDL_Rect* rect)
     return (SDL_Widget*)progressbar;
 }
 
-void SDL_ProgressBarDraw(SDL_Widget *widget,SDL_Surface *dest)
+void SDL_ProgressBarDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
 {
     SDL_ProgressBar *ProgressBar=(SDL_ProgressBar*)widget;
     int line;

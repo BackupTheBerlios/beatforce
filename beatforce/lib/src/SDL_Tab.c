@@ -99,7 +99,7 @@ SDL_Widget *SDL_TabCreate(SDL_Rect *rect)
 
 }
 
-void SDL_TabDraw(SDL_Widget *widget,SDL_Surface *dest)
+void SDL_TabDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
 {
     SDL_Tab     *Tab=(SDL_Tab*)widget;
     SDL_TabList *tablist;
@@ -179,23 +179,6 @@ int SDL_TabProperties(SDL_Widget *widget,int feature,va_list list)
         break;
         
     }
-    case SET_STATE_EDIT:
-    {
-        if(Tab->edit == NULL)
-        {
-            Tab->edit=(SDL_Edit*)SDL_WidgetCreate(SDL_EDIT,widget->Rect.x + Tab->hl->rect->x,
-                                                  widget->Rect.y + Tab->hl->rect->y,
-                                                  Tab->hl->rect->w,Tab->hl->rect->h);
-            SDL_WidgetProperties(SET_FONT,Tab->font);
-            SDL_WidgetProperties(SET_BG_COLOR,Tab->bgcolor);
-            SDL_WidgetProperties(SET_FG_COLOR,Tab->fgcolor);
-            SDL_WidgetProperties(SET_CAPTION,Tab->hl->caption);
-            SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_ANY    , Tab_EditAnyKeyPressed    , Tab);
-            SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_RETURN , Tab_EditReturnKeyPressed , Tab);
-        }
-        break;
-    }
-    
     }
     return retval;
 }
@@ -215,10 +198,10 @@ int SDL_TabEventHandler(SDL_Widget* widget,SDL_Event *event)
             if(event->button.button == 1)
             {
                 /* Don't handle events when clicked on one of the arrows */
-                if(Tab->ArrowLeft && SDL_WidgetIsInside(&Tab->ArrowLeft->Widget,event->motion.x,event->motion.y))
+                if(Tab->ArrowLeft && SDL_WidgetIsInside(Tab->ArrowLeft,event->motion.x,event->motion.y))
                     return 0;
             
-                if(Tab->ArrowRight && SDL_WidgetIsInside(&Tab->ArrowRight->Widget,event->motion.x,event->motion.y))
+                if(Tab->ArrowRight && SDL_WidgetIsInside(Tab->ArrowRight,event->motion.x,event->motion.y))
                     return 0;
 
                 while(tl && event->motion.x > (tl->rect->x + widget->Rect.x - Tab->startx) && 
@@ -266,18 +249,18 @@ void Tab_AddArrows(SDL_Tab *tab)
     LeftArrow.w = widget->Rect.h - 2;
     LeftArrow.h = widget->Rect.h - 2;
 
-    tab->ArrowLeft=(SDL_Button*)SDL_WidgetCreate(SDL_BUTTON,LeftArrow.x,LeftArrow.y,
-                                                 LeftArrow.w,LeftArrow.h);
-    SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,Tab_ArrowLeftPressed, tab);
+    tab->ArrowLeft=SDL_WidgetCreate(SDL_BUTTON,LeftArrow.x,LeftArrow.y,
+                                    LeftArrow.w,LeftArrow.h);
+    SDL_WidgetPropertiesOf(tab->ArrowLeft,SET_CALLBACK,SDL_CLICKED,Tab_ArrowLeftPressed, tab);
 
     RightArrow.x = widget->Rect.x + widget->Rect.w - widget->Rect.h - 2;
     RightArrow.y = widget->Rect.y + 1;
     RightArrow.w = widget->Rect.h - 2;
     RightArrow.h = widget->Rect.h - 2;
 
-    tab->ArrowRight=(SDL_Button*)SDL_WidgetCreate(SDL_BUTTON,RightArrow.x,RightArrow.y,
-                                                  RightArrow.w,RightArrow.h);
-    SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,Tab_ArrowRightPressed, tab);
+    tab->ArrowRight=SDL_WidgetCreate(SDL_BUTTON,RightArrow.x,RightArrow.y,
+                                     RightArrow.w,RightArrow.h);
+    SDL_WidgetPropertiesOf(tab->ArrowRight,SET_CALLBACK,SDL_CLICKED,Tab_ArrowRightPressed, tab);
     
 }
 

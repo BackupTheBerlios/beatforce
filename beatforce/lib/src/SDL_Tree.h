@@ -45,15 +45,12 @@ typedef struct SDL_Tree
 
     int nItems;
 
-    int Visible;
-    int Redraw;
     int FirstVisible;
 
     TreeNode *Tree;
     TreeNode *Selected;
 
-    SDL_Surface *Background;
-    
+   
     void (*Clicked)(void *data);
     void *ClickedData;
 
@@ -63,11 +60,11 @@ typedef struct SDL_Tree
 
 
 SDL_Widget* SDL_TreeCreate(SDL_Rect *rect);
-void        SDL_TreeDraw(SDL_Widget *widget,SDL_Surface *dest);
+void        SDL_TreeDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area);
 int         SDL_TreeProperties(SDL_Widget *widget,int feature,va_list list);
 int         SDL_TreeEventHandler(SDL_Widget *widget,SDL_Event *event);
 
-void *SDL_TreeInsertItem(void *tree,void *root,char *string);
+TreeNode *SDL_TreeInsertItem(SDL_Widget *widget,TreeNode *root,char *string);
 TreeNode *SDL_TreeGetSelectedItem(void *tree);
 
 #endif /* __SDL_TREE_H__ */

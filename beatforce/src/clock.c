@@ -34,9 +34,9 @@ void *CLOCK_Create(ThemeClock *Clock)
     if(Clock && Clock->font)
     {
         widget=SDL_WidgetCreateR(SDL_LABEL,Clock->Rect);
-        SDL_WidgetProperties(SET_BG_COLOR,Clock->bgcolor);
-        SDL_WidgetProperties(SET_FG_COLOR,Clock->fgcolor);
-        SDL_WidgetProperties(SET_FONT,THEME_Font(Clock->font));
+        SDL_WidgetPropertiesOf(widget,SET_BG_COLOR,Clock->bgcolor);
+        SDL_WidgetPropertiesOf(widget,SET_FG_COLOR,Clock->fgcolor);
+        SDL_WidgetPropertiesOf(widget,SET_FONT,THEME_Font(Clock->font));
     }
     return widget;
 }

@@ -98,7 +98,7 @@ void FILEWINDOW_Open()
     {
         gFILEWINDOW.Surface=Window_CreateFileWindow();
     }
-    SDL_WidgetPropertiesOf(TableSubgroup,ROWS, SONGDB_GetSubgroupCount());
+//    SDL_WidgetPropertiesOf(TableSubgroup,ROWS, SONGDB_GetSubgroupCount());
     SDL_WindowOpen(&gFILEWINDOW);
 }
 static int FILEWINDOW_NotifyHandler(SDL_Window *Win)
@@ -130,7 +130,6 @@ static void FILEWINDOW_DirectoryClicked(void *data)
     t = SDL_TreeGetSelectedItem(data);
     if(t)
     {
-//        printf("DirectoryClicked %s\n",t->Label);
         if(t->Child == NULL)
         {
             TreeNode *a=t;
@@ -174,7 +173,7 @@ static void FILEWINDOW_AddSubgroup(void *data)
 
     TRACE("FILEWINDOW_RemoveSubgroup");
     SONGDB_AddSubgroup(SONGDB_GetActiveGroup(),"<new>");
-    SDL_WidgetPropertiesOf(TableSubgroup,ROWS, SONGDB_GetSubgroupCount());
+//    SDL_WidgetPropertiesOf(TableSubgroup,ROWS, SONGDB_GetSubgroupCount());
 }
 
 static void FILEWINDOW_RemoveSubgroup(void *data)
@@ -196,7 +195,7 @@ static void FILEWINDOW_RemoveSubgroup(void *data)
             {
                 SONGDB_RemoveSubgroup(list);
                 SDL_WidgetPropertiesOf(TableSubgroup,CLEAR_SELECTED,0);
-                SDL_WidgetPropertiesOf(TableSubgroup,ROWS,SONGDB_GetSubgroupCount());
+//                SDL_WidgetPropertiesOf(TableSubgroup,ROWS,SONGDB_GetSubgroupCount());
                 return;
             }
             list=list->next;
@@ -256,7 +255,7 @@ static void FILEWINDOW_AddSelected(void *data)
             }
         }
         SDL_WidgetPropertiesOf(TableFilesInDirectory,CLEAR_SELECTED,0);
-        SDL_WidgetPropertiesOf(TableFilesInSubgroup,ROWS,sg->Songcount);
+//        SDL_WidgetPropertiesOf(TableFilesInSubgroup,ROWS,sg->Songcount);
     }
     else
     {
@@ -324,8 +323,8 @@ static void FILEWINDOW_SubgroupClicked(void *data)
     struct SongDBSubgroup *sg;
 
     FILEWINDOW_GetSelectedSubgroup(&sg);
-    if(sg)
-        SDL_WidgetPropertiesOf(TableFilesInSubgroup,ROWS,sg->Songcount);
+//    if(sg)
+//        SDL_WidgetPropertiesOf(TableFilesInSubgroup,ROWS,sg->Songcount);
 }
 
 
@@ -393,6 +392,7 @@ void FILEWINDOW_GetFilesInSubgroup(int row,int column,char *string)
 SDL_Surface *Window_CreateFileWindow()
 {
     SDL_Surface *FileWindow;
+    SDL_Widget *w; /* Temporary widget */
     
     ThemeConfig *tc       = THEME_GetActive();
     ThemeFileWindow *fw   = NULL;
@@ -417,10 +417,11 @@ SDL_Surface *Window_CreateFileWindow()
 
     while(Image)
     {
-        SDL_WidgetCreateR(SDL_PANEL,Image->Rect);
-        SDL_WidgetProperties(SET_IMAGE,IMG_Load(Image->filename));
+        w=SDL_WidgetCreateR(SDL_PANEL,Image->Rect);
+        SDL_WidgetPropertiesOf(w,SET_IMAGE,IMG_Load(Image->filename));
         Image=Image->next;
     }
+
 
     while(Button)
     {
@@ -428,44 +429,44 @@ SDL_Surface *Window_CreateFileWindow()
         {
         case BUTTON_RENAME:
             //rename highlighted tab
-            SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
-            SDL_WidgetProperties(SET_NORMAL_IMAGE,IMG_Load(Button->normal));
-            SDL_WidgetProperties(SET_PRESSED_IMAGE,IMG_Load(Button->pressed));
-            SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,FILEWINDOW_RenameSubgroup,NULL);        
+            w=SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
+            SDL_WidgetPropertiesOf(w,SET_NORMAL_IMAGE,IMG_Load(Button->normal));
+            SDL_WidgetPropertiesOf(w,SET_PRESSED_IMAGE,IMG_Load(Button->pressed));
+            SDL_WidgetPropertiesOf(w,SET_CALLBACK,SDL_CLICKED,FILEWINDOW_RenameSubgroup,NULL);        
             break;
         case BUTTON_ADD:
             //add a empty tab button
-            SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
-            SDL_WidgetProperties(SET_NORMAL_IMAGE,IMG_Load(Button->normal));
-            SDL_WidgetProperties(SET_PRESSED_IMAGE,IMG_Load(Button->pressed));
-            SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,FILEWINDOW_AddSubgroup,NULL);        
+            w=SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
+            SDL_WidgetPropertiesOf(w,SET_NORMAL_IMAGE,IMG_Load(Button->normal));
+            SDL_WidgetPropertiesOf(w,SET_PRESSED_IMAGE,IMG_Load(Button->pressed));
+            SDL_WidgetPropertiesOf(w,SET_CALLBACK,SDL_CLICKED,FILEWINDOW_AddSubgroup,NULL);        
             break;
         case BUTTON_REMOVE:
             //remove the selected subgroup
-            SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
-            SDL_WidgetProperties(SET_NORMAL_IMAGE,IMG_Load(Button->normal));
-            SDL_WidgetProperties(SET_PRESSED_IMAGE,IMG_Load(Button->pressed));
-            SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,FILEWINDOW_RemoveSubgroup,NULL);        
+            w=SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
+            SDL_WidgetPropertiesOf(w,SET_NORMAL_IMAGE,IMG_Load(Button->normal));
+            SDL_WidgetPropertiesOf(w,SET_PRESSED_IMAGE,IMG_Load(Button->pressed));
+            SDL_WidgetPropertiesOf(w,SET_CALLBACK,SDL_CLICKED,FILEWINDOW_RemoveSubgroup,NULL);        
             break;
         case BUTTON_ADDSELECTED:
             /* add selected files to subgroup */
-            SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
-            SDL_WidgetProperties(SET_NORMAL_IMAGE,IMG_Load(Button->normal));
-            SDL_WidgetProperties(SET_PRESSED_IMAGE,IMG_Load(Button->pressed));
-            SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,FILEWINDOW_AddSelected,NULL);        
+            w=SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
+            SDL_WidgetPropertiesOf(w,SET_NORMAL_IMAGE,IMG_Load(Button->normal));
+            SDL_WidgetPropertiesOf(w,SET_PRESSED_IMAGE,IMG_Load(Button->pressed));
+            SDL_WidgetPropertiesOf(w,SET_CALLBACK,SDL_CLICKED,FILEWINDOW_AddSelected,NULL);        
             break;
         case BUTTON_ADDALL:
             /* add all displayed files to selected subgroup */
-            SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
-            SDL_WidgetProperties(SET_NORMAL_IMAGE,IMG_Load(Button->normal));
-            SDL_WidgetProperties(SET_PRESSED_IMAGE,IMG_Load(Button->pressed));
-            SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,FILEWINDOW_AddAll,NULL);        
+            w=SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
+            SDL_WidgetPropertiesOf(w,SET_NORMAL_IMAGE,IMG_Load(Button->normal));
+            SDL_WidgetPropertiesOf(w,SET_PRESSED_IMAGE,IMG_Load(Button->pressed));
+            SDL_WidgetPropertiesOf(w,SET_CALLBACK,SDL_CLICKED,FILEWINDOW_AddAll,NULL);        
             break;
         case BUTTON_DELETESELECTED:
-            SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
-            SDL_WidgetProperties(SET_NORMAL_IMAGE,IMG_Load(Button->normal));
-            SDL_WidgetProperties(SET_PRESSED_IMAGE,IMG_Load(Button->pressed));
-            SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,FILEWINDOW_DeleteSelected,NULL);
+            w=SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
+            SDL_WidgetPropertiesOf(w,SET_NORMAL_IMAGE,IMG_Load(Button->normal));
+            SDL_WidgetPropertiesOf(w,SET_PRESSED_IMAGE,IMG_Load(Button->pressed));
+            SDL_WidgetPropertiesOf(w,SET_CALLBACK,SDL_CLICKED,FILEWINDOW_DeleteSelected,NULL);
             break;
 
         }
@@ -480,40 +481,40 @@ SDL_Surface *Window_CreateFileWindow()
         case CONTENTS_SUBGROUPS:
             /* table with the names of the subgroups */
             TableSubgroup=SDL_WidgetCreateR(SDL_TABLE,Table->Rect);
-            SDL_WidgetProperties(SET_VISIBLE_COLUMNS, 1);
-            SDL_WidgetProperties(SET_VISIBLE_ROWS, 19);
-            SDL_WidgetProperties(COLUMN_WIDTH,1,Table->Rect.w);
-            SDL_WidgetProperties(SET_SELECTION_MODE,TABLE_MODE_BROWSE);
-            SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
-            SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
-            SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION,FILEWINDOW_GetSubgroup);
-            SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,FILEWINDOW_SubgroupClicked,NULL);
-            SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_RETURN,FILEWINDOW_RenameSubgroupFinished,NULL);
-            SDL_WidgetProperties(SET_IMAGE,IMG_Load(THEME_DIR"/beatforce/tablescrollbar.jpg"));
+            SDL_WidgetPropertiesOf(TableSubgroup,SET_VISIBLE_COLUMNS, 1);
+            SDL_WidgetPropertiesOf(TableSubgroup,SET_VISIBLE_ROWS, 19);
+            SDL_WidgetPropertiesOf(TableSubgroup,COLUMN_WIDTH,1,Table->Rect.w);
+            SDL_WidgetPropertiesOf(TableSubgroup,SET_SELECTION_MODE,TABLE_MODE_BROWSE);
+            SDL_WidgetPropertiesOf(TableSubgroup,SET_FONT,THEME_Font("normal"));
+            SDL_WidgetPropertiesOf(TableSubgroup,SET_BG_COLOR,0x93c0d5);
+            //SDL_WidgetPropertiesOf(SET_DATA_RETREIVAL_FUNCTION,FILEWINDOW_GetSubgroup);
+            SDL_WidgetPropertiesOf(TableSubgroup,SET_CALLBACK,SDL_CLICKED,FILEWINDOW_SubgroupClicked,NULL);
+            SDL_WidgetPropertiesOf(TableSubgroup,SET_CALLBACK,SDL_KEYDOWN_RETURN,FILEWINDOW_RenameSubgroupFinished,NULL);
+            SDL_WidgetPropertiesOf(TableSubgroup,SET_IMAGE,IMG_Load(THEME_DIR"/beatforce/tablescrollbar.jpg"));
             break;
         case CONTENTS_FILESINDIRECTORY:
             TableFilesInDirectory=SDL_WidgetCreateR(SDL_TABLE,Table->Rect);
-            SDL_WidgetProperties(SET_VISIBLE_COLUMNS, 1);
-            SDL_WidgetProperties(SET_VISIBLE_ROWS, 190);
-            SDL_WidgetProperties(COLUMN_WIDTH,1,Table->Rect.w);
-            SDL_WidgetProperties(ROWS,LLIST_NoOfEntries(files));
-            SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
-            SDL_WidgetProperties(SET_SELECTION_MODE,TABLE_MODE_MULTIPLE);
-            SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION,FILEWINDOW_GetFilesInDirectory);
-            SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
-            SDL_WidgetProperties(SET_IMAGE,IMG_Load(THEME_DIR"/beatforce/tablescrollbar.jpg"));
+            SDL_WidgetPropertiesOf(TableFilesInDirectory,SET_VISIBLE_COLUMNS, 1);
+            SDL_WidgetPropertiesOf(TableFilesInDirectory,SET_VISIBLE_ROWS, 190);
+            SDL_WidgetPropertiesOf(TableFilesInDirectory,COLUMN_WIDTH,1,Table->Rect.w);
+//            SDL_WidgetPropertiesOf(TableFilesInDirectory,ROWS,LLIST_NoOfEntries(files));
+            SDL_WidgetPropertiesOf(TableFilesInDirectory,SET_FONT,THEME_Font("normal"));
+            SDL_WidgetPropertiesOf(TableFilesInDirectory,SET_SELECTION_MODE,TABLE_MODE_MULTIPLE);
+            SDL_WidgetPropertiesOf(TableFilesInDirectory,SET_DATA_RETREIVAL_FUNCTION,FILEWINDOW_GetFilesInDirectory);
+            SDL_WidgetPropertiesOf(TableFilesInDirectory,SET_BG_COLOR,0x93c0d5);
+            SDL_WidgetPropertiesOf(TableFilesInDirectory,SET_IMAGE,IMG_Load(THEME_DIR"/beatforce/tablescrollbar.jpg"));
             break;
         case CONTENTS_FILESINSUBGROUP:
             TableFilesInSubgroup=SDL_WidgetCreateR(SDL_TABLE,Table->Rect);
-            SDL_WidgetProperties(SET_VISIBLE_COLUMNS, 1);
-            SDL_WidgetProperties(SET_VISIBLE_ROWS, 190);
-            SDL_WidgetProperties(COLUMN_WIDTH,1,Table->Rect.w);
-            SDL_WidgetProperties(ROWS, 10);
-            SDL_WidgetProperties(SET_SELECTION_MODE,TABLE_MODE_MULTIPLE);
-            SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
-            SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION,FILEWINDOW_GetFilesInSubgroup);
-            SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
-            SDL_WidgetProperties(SET_IMAGE,IMG_Load(THEME_DIR"/beatforce/tablescrollbar.jpg"));
+            SDL_WidgetPropertiesOf(TableFilesInSubgroup,SET_VISIBLE_COLUMNS, 1);
+            SDL_WidgetPropertiesOf(TableFilesInSubgroup,SET_VISIBLE_ROWS, 190);
+            SDL_WidgetPropertiesOf(TableFilesInSubgroup,COLUMN_WIDTH,1,Table->Rect.w);
+//            SDL_WidgetPropertiesOf(TableFilesInSubgroup,ROWS, 10);
+            SDL_WidgetPropertiesOf(TableFilesInSubgroup,SET_SELECTION_MODE,TABLE_MODE_MULTIPLE);
+            SDL_WidgetPropertiesOf(TableFilesInSubgroup,SET_FONT,THEME_Font("normal"));
+            SDL_WidgetPropertiesOf(TableFilesInSubgroup,SET_DATA_RETREIVAL_FUNCTION,FILEWINDOW_GetFilesInSubgroup);
+            SDL_WidgetPropertiesOf(TableFilesInSubgroup,SET_BG_COLOR,0x93c0d5);
+            SDL_WidgetPropertiesOf(TableFilesInSubgroup,SET_IMAGE,IMG_Load(THEME_DIR"/beatforce/tablescrollbar.jpg"));
             break;
 
         }
@@ -532,9 +533,9 @@ SDL_Surface *Window_CreateFileWindow()
         char *r;
 
         TableDirectories=SDL_WidgetCreate(SDL_TREE,10,200,200,170);
-        SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
-        SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
-        SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,FILEWINDOW_DirectoryClicked,TableDirectories);
+        SDL_WidgetPropertiesOf(TableDirectories,SET_FONT,THEME_Font("normal"));
+        SDL_WidgetPropertiesOf(TableDirectories,SET_BG_COLOR,0x93c0d5);
+        SDL_WidgetPropertiesOf(TableDirectories,SET_CALLBACK,SDL_CLICKED,FILEWINDOW_DirectoryClicked,TableDirectories);
         
         l=OSA_FindDirectories(directory);
         while(l)

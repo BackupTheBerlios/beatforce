@@ -66,7 +66,7 @@ static SDL_Surface *CONFIGWINDOW_CreateWindow()
     ConfigWindow = SDL_WidgetNewSurface(s->Width,s->Height,s->BPP);
     SDL_SetColorKey(ConfigWindow,0,0); // disable transparancy
    
-
+#if 0
     while(Image)
     {
         SDL_WidgetCreateR(SDL_PANEL,Image->Rect);
@@ -81,7 +81,7 @@ static SDL_Surface *CONFIGWINDOW_CreateWindow()
     SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
 
     ConfigWindowClock=CLOCK_Create(cw->Clock);
-
+#endif
     
     return ConfigWindow;
 }

@@ -137,26 +137,28 @@ void SDL_StoreWidget(SDL_Widget *widget)
         CreateOnStack->WidgetList=malloc(sizeof(SDL_WidgetList));
         memset(CreateOnStack->WidgetList,0,sizeof(SDL_WidgetList));
 
-        CreateOnStack->WidgetList->Widget=widget;
-        CreateOnStack->WidgetList->next=NULL;
+        CreateOnStack->WidgetList->Widget  = widget;
+        CreateOnStack->WidgetList->Next    = NULL;
+        CreateOnStack->WidgetList->Parent  = NULL;
 
         /* Set the focus to the new widget if edit widget */
         if(widget->Focusable && SDL_StackGetFocus() == NULL)
             SDL_StackSetFocus(widget);
+        
     }
     else
     {
         SDL_WidgetList *temp;
         temp=CreateOnStack->WidgetList;
         
-        while(temp->next)
-            temp=temp->next;
+        while(temp->Next)
+            temp=temp->Next;
 
-        temp->next=malloc(sizeof(SDL_WidgetList));
-        memset(temp->next,0,sizeof(SDL_WidgetList));
-        temp=temp->next;
+        temp->Next=malloc(sizeof(SDL_WidgetList));
+        memset(temp->Next,0,sizeof(SDL_WidgetList));
+        temp=temp->Next;
         temp->Widget=widget;
-        temp->next=NULL;
+        temp->Next=NULL;
 
         if(widget->Focusable && SDL_StackGetFocus() == NULL)
             SDL_StackSetFocus(widget);
@@ -168,8 +170,8 @@ void SDL_StoreWidget(SDL_Widget *widget)
 SDL_WidgetList *SDL_StackGetLastItem()
 {
     SDL_WidgetList *tmp=CreateOnStack->WidgetList;
-    while(tmp->next)
-        tmp=tmp->next;
+    while(tmp->Next)
+        tmp=tmp->Next;
     return tmp;
 }
 

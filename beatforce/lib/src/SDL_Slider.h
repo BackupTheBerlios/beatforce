@@ -37,7 +37,6 @@ typedef struct SDL_Slider
     SDL_Surface *normal;
     SDL_Surface *line;
     SDL_Surface *SliderButton;
-    SDL_Surface *background;
 
 
     int orientation;  // hor or vert
@@ -46,7 +45,6 @@ typedef struct SDL_Slider
     
     int state;      // states of the widget, used for eventhandler
     int changed;    // if changed is true a redraw is performed
-    int StoreBackground;
 
 
     // Slider range (Can be queried by event callback functions
@@ -68,7 +66,7 @@ typedef struct SDL_Slider
 
 /* prototypes */
 SDL_Widget* SDL_SliderCreate(SDL_Rect *rect);
-void        SDL_SliderDraw(SDL_Widget *widget,SDL_Surface *dest);
+void        SDL_SliderDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area);
 int         SDL_SliderEventHandler (SDL_Widget *widget,SDL_Event *event);
 int         SDL_SliderProperties(SDL_Widget *widget,int feature,va_list list);
 

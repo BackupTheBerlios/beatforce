@@ -22,10 +22,11 @@
 #include <malloc.h>
 #include <string.h>
 
+
 #include "SDL_Widget.h"
 #include "SDL_WidTool.h"
 #include "SDL_Tree.h"
-
+#include "SDL_Primitives.h"
 
 const struct S_Widget_FunctionList SDL_Tree_FunctionList =
 {
@@ -39,6 +40,13 @@ const struct S_Widget_FunctionList SDL_Tree_FunctionList =
 static TreeNode* SDL_TreeGetItem(TreeNode *Tree,int *number);
 static void SDL_TreeCollapse(TreeNode *Tree,int number);
 static int SDL_TreeCount(TreeNode *Tree,int *number);
+static void SDL_TreeDrawExpander(SDL_Surface *screen,
+                                 SDL_Tree *Tree,
+                                 TreeNode *Item,int row);
+
+static void SDL_TreeDrawLines(SDL_Surface *screen,
+                              SDL_Tree *Tree,
+                              TreeNode *Item,int row);
 
 SDL_Widget* SDL_TreeCreate(SDL_Rect* rect)
 {
@@ -64,18 +72,15 @@ SDL_Widget* SDL_TreeCreate(SDL_Rect* rect)
     Tree->fgcolor = 0x000000;
     Tree->bgcolor = TRANSPARANT;
 
-    
-    Tree->Redraw     = 1;
-    Tree->Background = NULL;
-
-    
     Tree->Scrollbar  = NULL;
-    Tree->Visible    = 1;
     Tree->Tree       = NULL;
+
+    Tree->Clicked     = NULL;
+    Tree->ClickedData = NULL;
     return (SDL_Widget*)Tree;
 }
 
-void SDL_TreeDraw(SDL_Widget *widget,SDL_Surface *dest)
+void SDL_TreeDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
 {
     SDL_Tree *Tree=(SDL_Tree*)widget;
     TreeNode *Item;
@@ -84,106 +89,151 @@ void SDL_TreeDraw(SDL_Widget *widget,SDL_Surface *dest)
     int row=0;
     int n=0;
 
-    if(Tree->Visible == 0)
-        return;
-
     SDL_FontSetColor(Tree->Font,Tree->fgcolor);
     
-    if(Tree->bgcolor == TRANSPARANT)
-    {
-        if(Tree->Background == NULL)
-        {
-            Tree->Background = SDL_WidgetGetBackground(dest,&widget->Rect);
-        }
-        if(SDL_BlitSurface(Tree->Background,NULL,dest,&widget->Rect)<0)
-            fprintf(stderr, "BlitSurface error: %s\n", SDL_GetError());
-    }
-    else
+    if(Tree->bgcolor != TRANSPARANT)
     {
         SDL_FillRect(dest,&widget->Rect,Tree->bgcolor);
     }
 
+    SDL_TreeCount(Tree->Tree,&n);
+
+    if(n > Tree->nItems)
     {
-
-
-        SDL_TreeCount(Tree->Tree,&n);
-
-        if(n > Tree->nItems)
+        n-=Tree->nItems;
+        if(Tree->Scrollbar == NULL)
         {
-            n-=Tree->nItems;
-            if(Tree->Scrollbar == NULL)
-            {
-                SDL_Rect SliderRect;
+            SDL_Rect SliderRect;
                 
-                /* 
-                 * Attach the Slider widget 
-                 */
-                SliderRect.x     = widget->Rect.x + widget->Rect.w - 45;
-                SliderRect.y     = widget->Rect.y;
-                SliderRect.h     = widget->Rect.h;
-                SliderRect.w     = 45;
+            /* 
+             * Attach the Slider widget 
+             */
+            SliderRect.x     = widget->Rect.x + widget->Rect.w - 45;
+            SliderRect.y     = widget->Rect.y;
+            SliderRect.h     = widget->Rect.h;
+            SliderRect.w     = 45;
                 
-                Tree->Scrollbar = SDL_WidgetCreateR(SDL_SLIDER,SliderRect);
+            Tree->Scrollbar = SDL_WidgetCreateR(SDL_SLIDER,SliderRect);
             
-                SDL_WidgetProperties(SET_MAX_VALUE,n);
-                SDL_WidgetProperties(SET_MIN_VALUE,0);
-                /* Use the background of the tree */
-                SDL_WidgetProperties(STOREBACKGROUND,0);
-
-            }
-            else
-            {
-                SDL_WidgetProperties(SET_MAX_VALUE,n);
-            }
+            SDL_WidgetPropertiesOf(Tree->Scrollbar,SET_MAX_VALUE,n);
+            SDL_WidgetPropertiesOf(Tree->Scrollbar,SET_MIN_VALUE,0);
         }
-        if(Tree->Scrollbar)
+        else
         {
-            double val;
-            SDL_WidgetPropertiesOf(Tree->Scrollbar,GET_CUR_VALUE,&val);
-            row=(int)val;
-            Tree->FirstVisible=row;
+            SDL_WidgetPropertiesOf(Tree->Scrollbar,SET_MAX_VALUE,n);
         }
-
     }
-
+    
+    if(Tree->Scrollbar)
+    {
+        double val;
+        SDL_WidgetPropertiesOf(Tree->Scrollbar,GET_CUR_VALUE,&val);
+        row=(int)val;
+        Tree->FirstVisible=row;
+    }
 
     for(w=row;w<Tree->nItems+row;w++)
     {
         int j=w;
-        char string[255];
+        int height= SDL_FontGetHeight(Tree->Font)+2;
+                
         Item=SDL_TreeGetItem(Tree->Tree,&j);
-        
+
         if(Item)
         {
+            SDL_TreeDrawExpander(dest,Tree,Item,w-row);
+            SDL_TreeDrawLines(dest,Tree,Item,w-row);
+
             if(Tree->Font)
             {
-                int i;
-                string[0]=0;
-                for(i=0;i<Item->Level;i++)
-                    sprintf(string,"%s ",string);
-
-                if(Item->collapsed == 1)
-                    sprintf(string,"%s+%s",string,Item->Label);
-                else if(Item->collapsed == 2)
-                    sprintf(string,"%s %s",string,Item->Label);
-                else
-                    sprintf(string,"%s-%s",string,Item->Label);
-
-                r.x = widget->Rect.x;
-                r.h = SDL_FontGetHeight(Tree->Font);
+                r.x = widget->Rect.x + 10*Item->Level +10;
+                r.h = height;
                 r.y = (w-row) * r.h + widget->Rect.y;
                 r.w = widget->Rect.w;
-                
+               
                 if(Item == Tree->Selected)
                     SDL_FontSetColor(Tree->Font,0xff0000);
                 else
                     SDL_FontSetColor(Tree->Font,Tree->fgcolor);
-                SDL_FontDrawStringRect(dest,Tree->Font,string,&r);
+
+                SDL_FontDrawStringRect(dest,Tree->Font,Item->Label,&r);
             }
         }
     }
+}
 
+static void SDL_TreeDrawExpander(SDL_Surface *screen,
+                                 SDL_Tree *Tree,
+                                 TreeNode *Item,
+                                 int row
+                                 )
+{
+
+    int height = SDL_FontGetHeight(Tree->Font) + 2;
+    int x = Tree->Widget.Rect.x + 10 * Item->Level;
+    int y = Tree->Widget.Rect.y + height*row;
+
+    if(Item->collapsed == 2)
+        return;
+
+    if(x > Tree->Widget.Rect.x + Tree->Widget.Rect.w + 8)
+        return;
     
+    if(y > Tree->Widget.Rect.y + Tree->Widget.Rect.h + 8)
+        return;
+
+    boxColor (screen,x,y, x+8, y+8,0xffffffff);
+	rectangleColor (screen,x,y, x+8, y+8,0x000000ff);
+    lineColor (screen,x + 2, y + 4, x + 6, y + 4,0x000000ff);
+    if(Item->collapsed == 1)
+        lineColor (screen,x + 4, y + 2, x + 4, y + 6,0x000000ff);
+
+}
+
+static void SDL_TreeDrawLines(SDL_Surface *screen,
+                              SDL_Tree *Tree,
+                              TreeNode *Item,int row)
+{
+    int height = SDL_FontGetHeight(Tree->Font)+2;
+    int x = Tree->Widget.Rect.x + 10 * Item->Level;
+    int y = Tree->Widget.Rect.y + height*row -2;
+    TreeNode *Parent = Item->Parent;
+
+    /* The small line on the bottom of the expander */
+    if(Item->collapsed == 0)
+        lineColor (screen,x + 4, y + height - 1, x + 4, y + height   ,0x000000ff);
+
+    if(Parent == NULL) /* return when it is the root node */
+        return;
+
+    /* draw point of the lines is 10 pixels in front of the expander */
+    x -= 10;
+
+    /* Vertical line */
+    if(Item->Next )
+        lineColor (screen,x + 4, y    , x + 4, y + height   ,0x000000ff);
+    else
+        lineColor (screen,x + 4, y    , x + 4, y + height/2,0x000000ff);
+    
+
+    /* Horizontal line */
+    if(Item->collapsed == 2) /*If there is no expander make the line a little longer */
+        lineColor (screen,x + 5, y + height/2, x + 15, y + height/2,0x000000ff);
+    else
+        lineColor (screen,x + 5, y + height/2, x + 9, y + height/2,0x000000ff);
+
+    /* Parent line */
+    while(Parent)
+    {
+        x-=10;
+        if(Parent->Parent && Parent->Parent->collapsed == 0)
+        {
+            if(Parent->Next) /* Parent vertical line */
+                lineColor (screen,x + 4, y    , x + 4, y + height ,0x000000ff);
+        }
+        Parent=Parent->Parent;
+    }
+
 }
 
 int SDL_TreeProperties(SDL_Widget *widget,int feature,va_list list)
@@ -196,7 +246,7 @@ int SDL_TreeProperties(SDL_Widget *widget,int feature,va_list list)
     {
         int h;
         Tree->Font=va_arg(list,SDL_Font*);
-        h=SDL_FontGetHeight(Tree->Font);
+        h=SDL_FontGetHeight(Tree->Font) + 2;
         if(h)
         {
             Tree->nItems=widget->Rect.h / h;
@@ -212,19 +262,12 @@ int SDL_TreeProperties(SDL_Widget *widget,int feature,va_list list)
         Tree->bgcolor=va_arg(list,Uint32);
         break;
 
-    case SET_VISIBLE:
-        Tree->Visible=va_arg(list,int);
-        break;
-
     case SET_CALLBACK:
     {
         int t=va_arg(list,int);
-        if(t >= 0)
-        {
-            Tree->Clicked=va_arg(list,void*);
-            Tree->ClickedData=va_arg(list,void*);
-        }
-    }
+        Tree->Clicked=va_arg(list,void*);
+        Tree->ClickedData=va_arg(list,void*);
+   }
     break;
     }
     return 1;
@@ -241,11 +284,11 @@ int SDL_TreeEventHandler(SDL_Widget *widget,SDL_Event *event)
         {
             if(event->button.button == 1)
             {
-                int row=SDL_FontGetHeight(Tree->Font);
+                int row=SDL_FontGetHeight(Tree->Font)+2;
                 int y=event->motion.y - widget->Rect.y;
                 
                 if(event->motion.x < widget->Rect.x + widget->Rect.w)
-                    if(event->motion.x > (widget->Rect.x + (widget->Rect.w -45)))
+                    if(event->motion.x > (widget->Rect.x + (widget->Rect.w -5)))
                         return 0;
                     
                 
@@ -298,12 +341,12 @@ TreeNode *SDL_TreeGetSelectedItem(void *tree)
 
 }
 
-void *SDL_TreeInsertItem(void *tree,void *root,char *string)
+TreeNode *SDL_TreeInsertItem(SDL_Widget *widget,TreeNode *root,char *string)
 {
-    SDL_Tree *Tree=(SDL_Tree*)tree;
+    SDL_Tree *Tree=(SDL_Tree*)widget;
     TreeNode *temp=NULL;
 
-    if(string == NULL)
+    if(Tree == NULL || string == NULL)
         return NULL;
     
     if(root == NULL)
@@ -349,7 +392,7 @@ void *SDL_TreeInsertItem(void *tree,void *root,char *string)
             temp->Child->collapsed = 1;
             temp->Child->Label     = strdup(string);
            
-            return temp;
+            return temp->Child;
         }
         else
         {

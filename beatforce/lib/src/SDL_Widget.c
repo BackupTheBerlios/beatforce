@@ -22,9 +22,11 @@
 #include <malloc.h>
 #include <stdarg.h>
 
+
 #include "SDL_Widget.h"
 #include "SDL_Window.h"
 #include "SDL_WidTool.h"
+#include "SDL_Panel.h"
 
 T_Widget_EventHandler user_eventhandler;
 int StackLock;
@@ -37,7 +39,6 @@ int fadew;
 int fadeh;
 int fadeon;
 static SDL_mutex *MyMutex;
-
 
 void EnableFade()
 {
@@ -119,23 +120,6 @@ SDL_Widget* SDL_WidgetCreateR(E_Widget_Type WidgetType,SDL_Rect dest)
     }
 }
 
-int SDL_WidgetProperties(int feature,...)
-{
-    va_list ap;
-    T_Widget_Properties properties;
-    SDL_WidgetList* List;
-    SDL_Widget *Widget;
-
-    va_start(ap,feature);
-    List=SDL_StackGetLastItem();
-
-    Widget=(SDL_Widget*)List->Widget;
-    properties=WidgetTable[Widget->Type]->properties;
-    properties(Widget,feature,ap);
-
-    return 1;
-}
-
 int SDL_WidgetPropertiesOf(SDL_Widget *widget,int feature,...)
 {
     va_list ap;
@@ -170,11 +154,11 @@ int SDL_WidgetClose(void *widget)
     {
         if(current_widget->Widget == widget)
         {
-            prev->next = current_widget->next;
+            prev->Next = current_widget->Next;
             break;
         }
         prev=current_widget;
-        current_widget=current_widget->next;
+        current_widget=current_widget->Next;
     }
     
 
@@ -232,9 +216,11 @@ int SDL_DrawAllWidgets(SDL_Surface *screen)
     {
         Widget=(SDL_Widget*)WidgetList->Widget;
         draw=WidgetTable[Widget->Type]->draw;
-        draw(Widget,screen);
-        WidgetList=WidgetList->next;
+        draw(Widget,screen,NULL);
+        WidgetList=WidgetList->Next;
     }
+    
+    
     SDL_Flip(screen);
 //    SDL_UpdateRect(screen,0,0,0,0);                
     SDL_mutexV(MyMutex);
@@ -279,7 +265,7 @@ int SDL_WidgetEvent(SDL_Event *event)
                 // Bug found when there are overlapping widgets the focus is set to the wrong widget
 //                break;
             }
-            focus_widget=focus_widget->next;
+            focus_widget=focus_widget->Next;
         }
 
     }   
@@ -322,7 +308,7 @@ int SDL_WidgetEvent(SDL_Event *event)
                         store=1;
 
                 }
-                WidgetList = WidgetList->next;
+                WidgetList = WidgetList->Next;
             
             }
             if(WidgetList == NULL)
@@ -342,7 +328,7 @@ int SDL_WidgetEvent(SDL_Event *event)
     while(WidgetList)
     {
         SDL_Widget *Widget=(SDL_Widget*)WidgetList->Widget;
-        eh=WidgetTable[Widget->Type]->eventhandler;
+        eh = WidgetTable[Widget->Type]->eventhandler;
         if(eh)
         {
             if(eh(Widget,event))
@@ -350,12 +336,21 @@ int SDL_WidgetEvent(SDL_Event *event)
                 retval=1;
             }
         }
-        WidgetList=WidgetList->next;
+        WidgetList=WidgetList->Next;
     }
 
     return retval;
 }
 
+int SDL_WidgetSetFocus(SDL_Widget *widget)
+{
+    if(widget && widget->Focusable)
+    {
+        SDL_StackSetFocus(widget);
+        return 1;
+    }
+    return 0;
+}
 
 int SDL_WidgetHasFocus(SDL_Widget *widget)
 {
@@ -389,7 +384,7 @@ int SDL_WidgetForceRedraw(SDL_Surface *surface)
         {
             properties(widget,FORCE_REDRAW,NULL);
         }
-        current_widget=current_widget->next;
+        current_widget=current_widget->Next;
     }
     return 1;
 }

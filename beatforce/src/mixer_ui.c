@@ -73,15 +73,16 @@ void* MIXERUI_CreateWindow(ThemeMixer *tm)
     
     while(Image)
     {
-        SDL_WidgetCreateR(SDL_PANEL,Image->Rect);
-        SDL_WidgetProperties(SET_IMAGE,IMG_Load(Image->filename));
+        SDL_Widget *ss;
+        ss=SDL_WidgetCreateR(SDL_PANEL,Image->Rect);
+        SDL_WidgetPropertiesOf(ss,SET_IMAGE,IMG_Load(Image->filename));
         Image=Image->next;
     }
 
     while(VolumeBar)
     {
         w->MainVolumeIndicator=SDL_WidgetCreateR(SDL_VOLUMEBAR,VolumeBar->Rect);
-        SDL_WidgetProperties(SET_CUR_VALUE,100.0);
+        SDL_WidgetPropertiesOf(w->MainVolumeIndicator,SET_CUR_VALUE,100.0);
         VolumeBar=VolumeBar->next;
     }
 
@@ -93,23 +94,23 @@ void* MIXERUI_CreateWindow(ThemeMixer *tm)
         case SLIDER_MAIN_VOLUME:
             // Main volume 
             w->MainVolume=SDL_WidgetCreateR(SDL_SLIDER,Slider->Rect);
-            SDL_WidgetProperties(SET_BUTTON_IMAGE,IMG_Load(Slider->button));
-            SDL_WidgetProperties(SET_MAX_VALUE,100);
-            SDL_WidgetProperties(SET_MIN_VALUE,0);
-            SDL_WidgetProperties(SET_NORMAL_STEP_SIZE,1.0);
-            SDL_WidgetProperties(SET_CALLBACK,SDL_CHANGED,MIXERUI_MainVolumeChanged,w);
+            SDL_WidgetPropertiesOf(w->MainVolume,SET_BUTTON_IMAGE,IMG_Load(Slider->button));
+            SDL_WidgetPropertiesOf(w->MainVolume,SET_MAX_VALUE,100);
+            SDL_WidgetPropertiesOf(w->MainVolume,SET_MIN_VALUE,0);
+            SDL_WidgetPropertiesOf(w->MainVolume,SET_NORMAL_STEP_SIZE,1.0);
+            SDL_WidgetPropertiesOf(w->MainVolume,SET_CALLBACK,SDL_CHANGED,MIXERUI_MainVolumeChanged,w);
             break;
         case SLIDER_FADER:
             /* fade slider */
             w->Fader=SDL_WidgetCreateR(SDL_SLIDER,Slider->Rect);
-            SDL_WidgetProperties(SET_CALLBACK,SDL_CHANGED,MIXERUI_FaderChanged,w->Fader);
-            SDL_WidgetProperties(SET_BUTTON_IMAGE,IMG_Load(Slider->button));
+            SDL_WidgetPropertiesOf(w->Fader,SET_CALLBACK,SDL_CHANGED,MIXERUI_FaderChanged,w->Fader);
+            SDL_WidgetPropertiesOf(w->Fader,SET_BUTTON_IMAGE,IMG_Load(Slider->button));
             MIXER_SetFaderValue(0.0);
             MIXER_GetFaderValue (&val);
-            SDL_WidgetProperties(SET_MAX_VALUE,1);
-            SDL_WidgetProperties(SET_MIN_VALUE,0);
-            SDL_WidgetProperties(SET_CUR_VALUE,val);
-            SDL_WidgetProperties(SET_NORMAL_STEP_SIZE,0.1);
+            SDL_WidgetPropertiesOf(w->Fader,SET_MAX_VALUE,1);
+            SDL_WidgetPropertiesOf(w->Fader,SET_MIN_VALUE,0);
+            SDL_WidgetPropertiesOf(w->Fader,SET_CUR_VALUE,val);
+            SDL_WidgetPropertiesOf(w->Fader,SET_NORMAL_STEP_SIZE,0.1);
             break;
         }
         Slider=Slider->next;
@@ -119,17 +120,20 @@ void* MIXERUI_CreateWindow(ThemeMixer *tm)
     {
         if(Button->action == BUTTON_RESET_FADER)
         {
-            SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
-            SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,MIXERUI_AutoFadeButtonClicked,NULL);
+            SDL_Widget *ss;
+            ss=SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
+            SDL_WidgetPropertiesOf(ss,SET_CALLBACK,SDL_CLICKED,MIXERUI_AutoFadeButtonClicked,NULL);
         }
         Button=Button->next;
     }
+    {
+        SDL_Widget *pp;
+        pp=SDL_WidgetCreate(SDL_BUTTON,390,34,20,20);
+        SDL_WidgetPropertiesOf(pp,SET_CALLBACK,SDL_CLICKED,playsample,NULL);
 
-    SDL_WidgetCreate(SDL_BUTTON,390,34,20,20);
-    SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,playsample,NULL);
-
-    SDL_WidgetCreate(SDL_BUTTON,415,34,20,20);
-    SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,playsample2,NULL);
+        pp=SDL_WidgetCreate(SDL_BUTTON,415,34,20,20);
+        SDL_WidgetPropertiesOf(pp,SET_CALLBACK,SDL_CLICKED,playsample2,NULL);
+    }
     return w;
 }
 

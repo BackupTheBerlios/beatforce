@@ -38,7 +38,8 @@ typedef struct SDL_Window
 typedef struct SDL_WidgetList
 {
     SDL_Widget *Widget;
-    struct SDL_WidgetList *next;
+    struct SDL_WidgetList *Parent;
+    struct SDL_WidgetList *Next;
 }SDL_WidgetList;
 
 

@@ -62,7 +62,7 @@ typedef struct SDL_ProgressBar
 
 // prototypes
 SDL_Widget* SDL_ProgressBarCreate(SDL_Rect *rect);
-void        SDL_ProgressBarDraw(SDL_Widget *widget,SDL_Surface *dest);
+void        SDL_ProgressBarDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area);
 int         SDL_ProgressBarEventHandler(SDL_Widget *widget,SDL_Event *event);
 int         SDL_ProgressBarProperties(SDL_Widget *widget,int feature,va_list list);
 

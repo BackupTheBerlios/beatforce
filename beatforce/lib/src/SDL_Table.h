@@ -36,6 +36,25 @@ typedef enum
     TABLE_MODE_MULTIPLE    /* Multiple entries can be selected  */
 }E_TableMode;
 
+
+typedef struct SDL_TableCell
+{
+    char *String;
+}SDL_TableCell;
+
+typedef struct SDL_TableRow
+{
+    SDL_TableCell *Cell;
+    struct SDL_TableRow *Next;
+}SDL_TableRow;
+
+typedef struct SDL_TableColumn
+{
+    int Width;
+    char *Title;
+    SDL_Widget *Button;
+}SDL_TableColumn;
+
 typedef struct SDL_Table
 {
     SDL_Widget          Widget;
@@ -54,11 +73,13 @@ typedef struct SDL_Table
     int Rows;
     int Columns;
 
+
+    SDL_TableColumn   *Column;
+    SDL_TableRow      *RowData;
+
     int RowHeight;
-    int *ColumnWidths;
 
     int VisibleRows;
-    int VisibleColumns;
     int FirstVisibleRow;
     int HighlightedRow; // Where the mouse is on
     int ActiveEntry;
@@ -71,7 +92,6 @@ typedef struct SDL_Table
     //helper variables
     int TablePreviousHighlightedRow;
     int TableSelectionChanged;
-    int TableInitialDraw;
 
     //event handler functions
     void (*Clicked)(void* data,SDL_Event *event);
@@ -83,7 +103,7 @@ typedef struct SDL_Table
 
     SDL_Surface *Background;
 
-    SDL_Edit *edit;
+    SDL_Widget *edit;
 
     char *editcaption;
 
@@ -98,7 +118,7 @@ typedef struct SDL_Table
 
 
 SDL_Widget* SDL_TableCreate(SDL_Rect* rect);
-void        SDL_TableDraw (SDL_Widget *widget,SDL_Surface *dest);
+void        SDL_TableDraw (SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area);
 int         SDL_TableProperties(SDL_Widget *widget,int feature,va_list list);
 
 /*
@@ -135,5 +155,8 @@ int         SDL_TableProperties(SDL_Widget *widget,int feature,va_list list);
 
 int  SDL_TableEventHandler(SDL_Widget *widget,SDL_Event *event);
 
+
+/* Modification functions */
+void SDL_TableAddRow(SDL_Widget *Table,char *Titles[]);
 
 #endif /* __SDL_TABLE_H__ */

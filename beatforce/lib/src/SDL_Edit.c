@@ -72,7 +72,7 @@ SDL_Widget *SDL_EditCreate(SDL_Rect* rect)
     return (SDL_Widget*)Edit;
 }
 
-void  SDL_EditDraw(SDL_Widget *widget,SDL_Surface *dest)
+void  SDL_EditDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
 {
     SDL_Edit *Edit=(SDL_Edit*)widget;
     SDL_Rect cursor;
@@ -191,8 +191,8 @@ int SDL_EditEventHandler(SDL_Widget *widget,SDL_Event *event)
 
             break;
         case SDLK_ESCAPE:
-            SDL_WidgetLoseFocus();
-            retval=1;
+//            SDL_WidgetLoseFocus();
+//            retval=1;
             break;
         case SDLK_LSHIFT:
         case SDLK_RSHIFT:

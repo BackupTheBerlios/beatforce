@@ -53,6 +53,6 @@ enum LabelPattern
 
 // prototypes
 SDL_Widget* SDL_LabelCreate(SDL_Rect *rect);
-void        SDL_LabelDraw(SDL_Widget *widget,SDL_Surface *dest);
+void        SDL_LabelDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area);
 int         SDL_LabelProperties(SDL_Widget *widget,int feature,va_list list);
 

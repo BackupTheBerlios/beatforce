@@ -57,7 +57,7 @@ typedef enum E_Widget_Properties
 
     SET_VISIBLE_ROWS,    // int table specific
     SET_VISIBLE_COLUMNS, // int 
-    ROWS,                // int
+
     COLUMN_WIDTH,        // int
     GET_SELECTED,         // void *
     CLEAR_SELECTED,
@@ -81,7 +81,6 @@ typedef enum E_Widget_Properties
     SET_VISIBLE,
     SET_HIGHLIGHTED,
     SET_IMAGE,
-    STOREBACKGROUND
     
 }E_Widget_Properties;
 
@@ -127,7 +126,7 @@ typedef struct SDL_Widget
  *  Converter function pointer types
  */
 typedef SDL_Widget*       (*T_Widget_Create)       (SDL_Rect*);
-typedef void              (*T_Widget_Draw)         (SDL_Widget*,SDL_Surface *);
+typedef void              (*T_Widget_Draw)         (SDL_Widget*,SDL_Surface *,SDL_Rect*);
 typedef int               (*T_Widget_Properties)   (SDL_Widget*,int,va_list ap);
 typedef int               (*T_Widget_EventHandler) (SDL_Widget*,SDL_Event*);
 typedef void              (*T_Widget_Close)        (SDL_Widget*);
@@ -190,14 +189,16 @@ int SDL_WidgetForceRedraw(SDL_Surface *surface);
 SDL_Widget* SDL_WidgetCreate(E_Widget_Type widget,int x,int y, int w, int h);
 SDL_Widget* SDL_WidgetCreateR(E_Widget_Type widget,SDL_Rect dest);
 int SDL_WidgetMain();
-int   SDL_WidgetProperties(int feature,...);
+
 int   SDL_WidgetPropertiesOf(SDL_Widget* widget, int feature,...);
 
 int   SDL_DrawAllWidgets(SDL_Surface *screen);
 int   SDL_WidgetEventCallback(void *function,E_Widget_Event event);
 int   SDL_WidgetEvent(SDL_Event *event);
+
 int   SDL_WidgetHasFocus(SDL_Widget *widget);
 int   SDL_WidgetLoseFocus();
+int SDL_WidgetSetFocus(SDL_Widget *widget);
 
 int SDL_WidgetNeedsRedraw();
 int SDL_WidgetClose(void *widget);

@@ -74,7 +74,7 @@ SDL_Widget* SDL_VolumeBarCreate(SDL_Rect* rect)
     return (SDL_Widget*)volumebar;
 }
 
-void SDL_VolumeBarDraw(SDL_Widget *widget,SDL_Surface *dest)
+void SDL_VolumeBarDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
 {
     SDL_VolumeBar *VolumeBar=(SDL_VolumeBar*)widget;
     int line;

@@ -60,7 +60,7 @@ SDL_Widget* SDL_SliderCreate(SDL_Rect* rect)
 
     slider->normal=NULL;
     slider->line  =NULL;
-    slider->background   = NULL;
+    
     slider->percentage   = 0;  // Slider is in start position
     slider->SliderButton = NULL;
     slider->pixeloffset  = 0;
@@ -73,7 +73,6 @@ SDL_Widget* SDL_SliderCreate(SDL_Rect* rect)
     slider->CurrentValue       = 0.0;
     slider->CurrentPercentage  = 0.0;
     slider->ValueLocked        = 0;
-    slider->StoreBackground    = 1;
 
     slider->NormalStepSize    = 1.0;
 
@@ -86,9 +85,9 @@ SDL_Widget* SDL_SliderCreate(SDL_Rect* rect)
 }
 
 
-void SDL_SliderDraw(SDL_Widget *widget,SDL_Surface *dest)
+void SDL_SliderDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
 {
-// drawing order is always background, line , button
+    // drawing order is always background, line , button
     SDL_Slider *Slider=(SDL_Slider*)widget;
     SDL_Rect   button;
     int x_offset=0;
@@ -100,22 +99,6 @@ void SDL_SliderDraw(SDL_Widget *widget,SDL_Surface *dest)
     if(Slider->SliderButton == NULL)
         return;
     
-    if(Slider->StoreBackground || Slider->state == SLIDER_DRAG)
-    {
-        /*
-         * If there is no line image loaded use the current background as a line
-         */
-        if(Slider->background == NULL)
-        {
-            Slider->background=SDL_WidgetGetBackground(dest,&widget->Rect);
-        }
-        
-        if(SDL_BlitSurface(Slider->background,NULL,dest,&widget->Rect)<0)
-            fprintf(stderr, "BlitSurface error: %s\n", SDL_GetError());
-        
-    }
-       
-
     if(Slider->line)
     {
         if(SDL_BlitSurface(Slider->line,NULL,dest,&widget->Rect)<0)
@@ -240,9 +223,6 @@ int SDL_SliderProperties(SDL_Widget *widget,int feature,va_list list)
         }
         break;
     }
-    case STOREBACKGROUND:
-        Slider->StoreBackground=va_arg(list,int);
-        break;
     case SET_VISIBLE:
         Slider->Visible = va_arg(list,int);
         break;

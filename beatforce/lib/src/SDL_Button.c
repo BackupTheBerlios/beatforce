@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
+static void SDL_ButtonPaint(SDL_Widget *Widget,SDL_Surface *screen);
 
 const struct S_Widget_FunctionList SDL_Button_FunctionList =
 {
@@ -64,7 +65,7 @@ SDL_Widget* SDL_ButtonCreate(SDL_Rect* rect)
     return (SDL_Widget*)newbutton;
 }
 
-void SDL_ButtonDraw(SDL_Widget *widget,SDL_Surface *dest)
+void SDL_ButtonDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
 {
     SDL_Button  *button=(SDL_Button*)widget;
     SDL_Surface *drawbutton=NULL;
@@ -76,13 +77,7 @@ void SDL_ButtonDraw(SDL_Widget *widget,SDL_Surface *dest)
     if(button->normal==NULL)
     {
         /* Draw a default button with no text inside */
-        SDL_Rect new;
-        new.x = widget->Rect.x+2;
-        new.y = widget->Rect.y+2;
-        new.w = widget->Rect.w-4;
-        new.h = widget->Rect.h-4;
-        SDL_FillRect(dest,&widget->Rect,0x000000);
-        SDL_FillRect(dest,&new,0xeeeeee);
+        SDL_ButtonPaint(widget,dest);
         return;
     }
     else
@@ -221,5 +216,66 @@ void SDL_ButtonClose(SDL_Widget *widget)
 
 
     free(Button);
+}
+
+void drawline(SDL_Surface *screen,Uint32 color,int x,int y,int x2, int y2)
+{
+    SDL_Rect r;
+    r.x = x;
+    r.y = y;
+    r.w = x2 - x + 1;
+    r.h = y2 - y + 1;
+    SDL_FillRect(screen,&r,color);
+}
+
+static void SDL_ButtonPaint(SDL_Widget *Widget,SDL_Surface *screen)
+{
+    SDL_Button *Button=(SDL_Button*)Widget;
+    SDL_Rect r;
+    int x,y,width,height;
+    r.x = Widget->Rect.x;
+    r.y = Widget->Rect.y; 
+    r.w = Widget->Rect.w;
+    r.h = Widget->Rect.h;
+    
+    SDL_FillRect(screen,&r,0xd4d0c8);
+
+    x=r.x;
+    y=r.y;
+    width=r.w;
+    height=r.h;
+     
+//    if(Button->state == SDL_BUTTON_UP)
+    {
+        // normal
+        drawline (screen,0x404040,x, y + height - 1, x + width - 1, y + height - 1);
+        drawline (screen,0x404040,x + width - 1, y, x + width - 1, y + height - 1);
+
+        drawline (screen,0x808080,x + 1, y + height - 2, x + width - 2, y + height - 2);
+        drawline (screen,0x808080,x + width - 2, y + 1, x + width - 2, y + height - 2);
+
+        drawline (screen,0xffffff,x + 1, y + 1, x + width - 2, y + 1);
+        drawline (screen,0xffffff,x + 1, y + 1, x + 1, y + height - 2);
+
+        drawline (screen,0xd4d0c8,x, y, x + width - 1, y);
+        drawline (screen,0xd4d0c8,x, y, x, y + height - 1);       
+    }
+    
+    if(Button->state == SDL_BUTTON_DOWN)
+    {
+        // pressed
+        drawline (screen, 0xffffff,x, y + height - 1, x + width - 1, y + height - 1);
+        drawline (screen, 0xffffff,x + width - 1, y, x + width - 1, y + height - 1);
+
+        drawline (screen, 0xd4d0c8,x + 1, y + height - 2, x + width - 2, y + height - 2);
+        drawline (screen, 0xd4d0c8,x + width - 2, y + 1, x + width - 2, y + height - 2);
+      
+        drawline (screen, 0x808080,x + 1, y + 1, x + width - 2, y + 1);
+        drawline (screen, 0x808080,x + 1, y + 1, x + 1, y + height - 2);
+      
+        drawline (screen, 0x404040,x, y, x + width - 1, y);
+        drawline (screen, 0x404040,x, y, x, y + height - 1);
+
+    }
 }
 

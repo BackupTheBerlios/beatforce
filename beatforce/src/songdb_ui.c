@@ -94,25 +94,43 @@ void *SONGDBUI_CreateWindow(ThemeSongdb *ts)
     {
         /* Create the large table (songdb)*/
         sw->SongArchive=SDL_WidgetCreateR(SDL_TABLE,ts->Table->Rect);/*x y w h */
-        SDL_WidgetProperties(SET_FONT,THEME_Font("small"));
+        SDL_WidgetPropertiesOf(sw->SongArchive,
+                               SET_FONT,THEME_Font("small"));
 //        SDL_WidgetProperties(SET_VISIBLE_ROWS,    ts->Table->Rows);
-        SDL_WidgetProperties(SET_VISIBLE_COLUMNS, ts->Table->Columns);
-        SDL_WidgetProperties(COLUMN_WIDTH, 1, 30  );
-        SDL_WidgetProperties(COLUMN_WIDTH, 2, 290 );
-        SDL_WidgetProperties(COLUMN_WIDTH, 3, 60  );
-        SDL_WidgetProperties(SET_FG_COLOR,WHITE);
-        SDL_WidgetProperties(ROWS,SONGDB_GetNoOfEntries());
-        SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION,songdbstring);
-        SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,eventhandler,sw->SongArchive);
-        SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_RETURN,testplay,sw->SongArchive);
-        SDL_WidgetProperties(SET_IMAGE,IMG_Load(THEME_DIR"/beatforce/tablescrollbar.bmp"));
+        SDL_WidgetPropertiesOf(sw->SongArchive,SET_VISIBLE_COLUMNS, ts->Table->Columns);
+        SDL_WidgetPropertiesOf(sw->SongArchive,COLUMN_WIDTH, 1, 30  );
+        SDL_WidgetPropertiesOf(sw->SongArchive,COLUMN_WIDTH, 2, 290 );
+        SDL_WidgetPropertiesOf(sw->SongArchive,COLUMN_WIDTH, 3, 60  );
+        SDL_WidgetPropertiesOf(sw->SongArchive,SET_FG_COLOR,WHITE);
+        SDL_WidgetPropertiesOf(sw->SongArchive,SET_CALLBACK,SDL_CLICKED,eventhandler,sw->SongArchive);
+        SDL_WidgetPropertiesOf(sw->SongArchive,SET_CALLBACK,SDL_KEYDOWN_RETURN,testplay,sw->SongArchive);
+        SDL_WidgetPropertiesOf(sw->SongArchive,SET_IMAGE,IMG_Load(THEME_DIR"/beatforce/tablescrollbar.bmp"));
+
+        
+        {
+            char *titles[3];
+            int r=0,c=0;
+            for(c=0;c<3;c++)
+                titles[c]=malloc(255);
+
+            for(r=0;r< SONGDB_GetNoOfEntries();r++)
+            {
+                for(c=0;c<3;c++)
+                {
+                    songdbstring(r,c,titles[c]);
+                }
+                SDL_TableAddRow(sw->SongArchive,titles);
+            }
+            for(c=0;c<3;c++)
+                free(titles[c]);
+        }
 
         /* Craete the tab section below the table*/
         sw->Tabs=SDL_WidgetCreate(SDL_TAB,ts->Table->Rect.x,ts->Table->Rect.y + ts->Table->Rect.h,
                                            ts->Table->Rect.w,20);
-        SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
-        SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
-        SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,SONGDBUI_ChangeDatabase,NULL);
+        SDL_WidgetPropertiesOf(sw->Tabs,SET_FONT,THEME_Font("normal"));
+        SDL_WidgetPropertiesOf(sw->Tabs,SET_BG_COLOR,0x93c0d5);
+        SDL_WidgetPropertiesOf(sw->Tabs,SET_CALLBACK,SDL_CLICKED,SONGDBUI_ChangeDatabase,NULL);
 
     }
     /* Create buttons which change the tabs */
@@ -120,12 +138,13 @@ void *SONGDBUI_CreateWindow(ThemeSongdb *ts)
     {
         switch(Button->action)
         {
+            SDL_Widget *w;
         case BUTTON_CHANGE_DIR:
             //add dir to highlighted tab
-            SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
-            SDL_WidgetProperties(SET_NORMAL_IMAGE,IMG_Load(Button->normal));
-            SDL_WidgetProperties(SET_PRESSED_IMAGE,IMG_Load(Button->pressed));
-            SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,SONGDBUI_ChangeGroupClicked,NULL);        
+            w=SDL_WidgetCreateR(SDL_BUTTON,Button->Rect);
+            SDL_WidgetPropertiesOf(w,SET_NORMAL_IMAGE,IMG_Load(Button->normal));
+            SDL_WidgetPropertiesOf(w,SET_PRESSED_IMAGE,IMG_Load(Button->pressed));
+            SDL_WidgetPropertiesOf(w,SET_CALLBACK,SDL_CLICKED,SONGDBUI_ChangeGroupClicked,NULL);        
             break;
         }
         Button=Button->next;
@@ -158,8 +177,6 @@ static void SONGDBUI_ChangeDatabase(void *table,void *tabwidget)
         }
         SONGDB_SetActiveSubgroup(sg);
     }
-    SDL_WidgetPropertiesOf(table,ROWS,SONGDB_GetNoOfEntries());
-    
 }
 
 void SONGDBUI_Redraw(void *w)

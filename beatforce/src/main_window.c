@@ -105,21 +105,22 @@ static SDL_Surface *MAINWINDOW_CreateWindow(MainwindowWidgets *w)
 
     while(Image)
     {
-        SDL_WidgetCreateR(SDL_PANEL,Image->Rect);
-        SDL_WidgetProperties(SET_IMAGE,IMG_Load(Image->filename));
+        SDL_Widget *image;
+        image=SDL_WidgetCreateR(SDL_PANEL,Image->Rect);
+        SDL_WidgetPropertiesOf(image,SET_IMAGE,IMG_Load(Image->filename));
         Image=Image->next;
     }
 
     w->Clock=CLOCK_Create(mw->Clock);
 
     w->Songdb=SONGDBUI_CreateWindow(mw->Songdb);
-    w->Playlist=PLAYLISTUI_CreateWindow(mw->Playlist);
+//    w->Playlist=PLAYLISTUI_CreateWindow(mw->Playlist);
     PLAYERUI_CreateWindow(0,mw->Player[0]);
     PLAYERUI_CreateWindow(1,mw->Player[1]);
     w->Mixer=MIXERUI_CreateWindow(mw->Mixer);
     
-    SDL_WidgetCreate(SDL_BUTTON,450,100,20,20);
-    SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,configopen,NULL);
+//    SDL_WidgetCreate(SDL_BUTTON,450,100,20,20);
+//    SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,configopen,NULL);
 
     return MainWindow;
 }

@@ -53,9 +53,9 @@ typedef struct SDL_Tab
     SDL_TabList       *tabs;
     SDL_TabList       *hl;
 
-    SDL_Edit          *edit;
-    SDL_Button        *ArrowLeft;
-    SDL_Button        *ArrowRight;
+    SDL_Widget        *edit;
+    SDL_Widget        *ArrowLeft;
+    SDL_Widget        *ArrowRight;
     SDL_Font          *font;
     int NoOfTabs;
 
@@ -77,7 +77,7 @@ typedef struct SDL_Tab
 
 
 SDL_Widget *SDL_TabCreate(SDL_Rect *rect);
-void SDL_TabDraw(SDL_Widget *data,SDL_Surface *dest);
+void SDL_TabDraw(SDL_Widget *data,SDL_Surface *dest,SDL_Rect *Area);
 int SDL_TabProperties(SDL_Widget *tab,int feature,va_list list);
 int SDL_TabEventHandler(SDL_Widget* tab,SDL_Event *event);
 

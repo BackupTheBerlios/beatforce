@@ -69,7 +69,7 @@ SDL_Widget* SDL_LabelCreate(SDL_Rect* rect)
     return (SDL_Widget*)Label;
 }
 
-void SDL_LabelDraw(SDL_Widget *widget,SDL_Surface *dest)
+void SDL_LabelDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area)
 {
     SDL_Label *Label=(SDL_Label*)widget;
     char string[255];

@@ -686,12 +686,15 @@ static int SONGDB_SaveXMLDatabase()
             
             while(Playlist)
             {
-                file=xmlNewChild(subgroup,NULL,"song",NULL);
-                xmlNewProp(file, BAD_CAST "filename", BAD_CAST Playlist->filename);
-                if(Playlist->time)
+                if(Playlist->filename)
                 {
-                    sprintf(time,"%ld",Playlist->time);
-                    xmlNewProp(file, BAD_CAST "time", BAD_CAST time);
+                    file=xmlNewChild(subgroup,NULL,"song",NULL);
+                    xmlNewProp(file, BAD_CAST "filename", BAD_CAST Playlist->filename);
+                    if(Playlist->time)
+                    {
+                        sprintf(time,"%ld",Playlist->time);
+                        xmlNewProp(file, BAD_CAST "time", BAD_CAST time);
+                    }
                 }
                 Playlist=Playlist->next;
             }

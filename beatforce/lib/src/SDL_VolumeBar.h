@@ -49,6 +49,6 @@ typedef struct SDL_VolumeBar
 
 // prototypes
 SDL_Widget* SDL_VolumeBarCreate(SDL_Rect *rect);
-void        SDL_VolumeBarDraw(SDL_Widget *widget,SDL_Surface *dest);
+void        SDL_VolumeBarDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area);
 int         SDL_VolumeBarProperties(SDL_Widget *widget,int feature,va_list list);
 

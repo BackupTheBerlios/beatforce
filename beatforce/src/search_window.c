@@ -70,6 +70,7 @@ void SEARCHWINDOW_Open()
 static SDL_Surface *SEARCHWINDOW_Create()
 {
     SDL_Surface *SearchWindow;
+    SDL_Widget  *w;
     ThemeConfig *tc=THEME_GetActive();
     ThemeSearchWindow *sw =NULL;
     ThemeImage    *Image = NULL;
@@ -87,25 +88,27 @@ static SDL_Surface *SEARCHWINDOW_Create()
 
     while(Image)
     {
-        SDL_WidgetCreateR(SDL_PANEL,Image->Rect);
-        SDL_WidgetProperties(SET_IMAGE,IMG_Load(Image->filename));
+        w=SDL_WidgetCreateR(SDL_PANEL,Image->Rect);
+        SDL_WidgetPropertiesOf(w,SET_IMAGE,IMG_Load(Image->filename));
         Image=Image->next;
     }
 
     tablewidget=SDL_WidgetCreate(SDL_TABLE,12,50,1000,540);
-    SDL_WidgetProperties(SET_VISIBLE_ROWS,    36);
-    SDL_WidgetProperties(SET_VISIBLE_COLUMNS, 1);
-    SDL_WidgetProperties(SET_BG_COLOR,0x93c0d5);
-    SDL_WidgetProperties(ROWS,SONGDB_GetNoOfEntries());
-    SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
-    SDL_WidgetProperties(SET_DATA_RETREIVAL_FUNCTION,songdb_searchstring);
-    SDL_WidgetProperties(SET_CALLBACK,SDL_CLICKED,searchwindow_PlayClicked,NULL);
-    SDL_WidgetProperties(SET_IMAGE,IMG_Load(THEME_DIR"/beatforce/tablescrollbar.jpg"));
+    SDL_WidgetPropertiesOf(tablewidget,SET_VISIBLE_ROWS,    36);
+    SDL_WidgetPropertiesOf(tablewidget,SET_VISIBLE_COLUMNS, 1);
+    SDL_WidgetPropertiesOf(tablewidget,SET_BG_COLOR,0x93c0d5);
+//    SDL_WidgetProperties(ROWS,SONGDB_GetNoOfEntries());
+    SDL_WidgetPropertiesOf(tablewidget,SET_FONT,THEME_Font("normal"));
+    SDL_WidgetPropertiesOf(tablewidget,SET_DATA_RETREIVAL_FUNCTION,songdb_searchstring);
+    SDL_WidgetPropertiesOf(tablewidget,SET_CALLBACK,SDL_CLICKED,searchwindow_PlayClicked,NULL);
+    SDL_WidgetPropertiesOf(tablewidget,SET_IMAGE,IMG_Load(THEME_DIR"/beatforce/tablescrollbar.jpg"));
 
     editwidget=SDL_WidgetCreate(SDL_EDIT,312,20,400,25);
-    SDL_WidgetProperties(SET_FONT,THEME_Font("normal"));
-    SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_ANY,SEARCHWINDOW_Search);
-    SDL_WidgetProperties(SET_CALLBACK,SDL_KEYDOWN_RETURN,searchwindow_Play);
+    SDL_WidgetPropertiesOf(editwidget,SET_FONT,THEME_Font("normal"));
+    SDL_WidgetPropertiesOf(editwidget,SET_CALLBACK,SDL_KEYDOWN_ANY,SEARCHWINDOW_Search);
+    SDL_WidgetPropertiesOf(editwidget,SET_CALLBACK,SDL_KEYDOWN_RETURN,searchwindow_Play);
+    
+    SDL_WidgetSetFocus(editwidget);
 
     return SearchWindow;
 }
@@ -119,7 +122,11 @@ int SEARCHWINDOW_EventHandler(SDL_Event event)
         switch( event.key.keysym.sym ) 
         {
         case SDLK_ESCAPE:
+            SDL_WidgetPropertiesOf(editwidget,SET_CAPTION,"");
+            SONGDB_FindEntry("");
+            //SDL_WidgetPropertiesOf(tablewidget,ROWS,SONGDB_GetNoOfSearchResults());
             SDL_WindowClose();
+
             break;
             
         default:
@@ -139,7 +146,7 @@ static void SEARCHWINDOW_Search(void *data)
     char buffer[255];
     SDL_WidgetPropertiesOf(editwidget,GET_CAPTION,&buffer);
     SONGDB_FindEntry(buffer);
-    SDL_WidgetPropertiesOf(tablewidget,ROWS,SONGDB_GetNoOfSearchResults());
+    //SDL_WidgetPropertiesOf(tablewidget,ROWS,SONGDB_GetNoOfSearchResults());
 }
 
 void searchwindow_PlayClicked(void *data)

@@ -27,7 +27,6 @@ typedef struct SDL_Panel
     SDL_Widget Widget;
     SDL_Surface *Image;
 
-    int Redraw;
     int Visible;
 
     Uint32  color;
@@ -38,6 +37,6 @@ typedef struct SDL_Panel
 
 // prototypes
 SDL_Widget*  SDL_PanelCreate(SDL_Rect *rect);
-void         SDL_PanelDraw(SDL_Widget *widget,SDL_Surface *dest);
+void         SDL_PanelDraw(SDL_Widget *widget,SDL_Surface *dest,SDL_Rect *Area);
 int          SDL_PanelProperties(SDL_Widget *widget,int feature,va_list list);
 
